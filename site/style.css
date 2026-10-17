@@ -54,7 +54,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .air{fill:var(--air);stroke:var(--night);stroke-width:1;vector-effect:non-scaling-stroke}
 .cla{fill:none;stroke:var(--cla);stroke-width:2;vector-effect:non-scaling-stroke}
 .cla-dot{fill:var(--cla)}
-.pulse{fill:none;stroke:var(--cla);stroke-opacity:.35;stroke-width:1;vector-effect:non-scaling-stroke}
+.pulse{fill:none;stroke:var(--cla);vector-effect:non-scaling-stroke;animation:pulse 2.2s ease-out infinite;transform-box:fill-box;transform-origin:center}
 @keyframes pulse{from{opacity:.9;transform:scale(.6)}to{opacity:0;transform:scale(2.6)}}
 
 .where{position:absolute;top:var(--head,96px);left:max(20px,env(safe-area-inset-left,0px));display:flex;gap:10px;align-items:center;z-index:2}

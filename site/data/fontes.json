@@ -85,7 +85,7 @@
    "ministerio": "portaer",
    "nivel": "base",
    "fonte": "Natural Earth, lista incompleta",
-   "ligada": true,
+   "ligada": false,
    "cor": "--port"
   },
   {
@@ -106,7 +106,7 @@
    "ministerio": "def",
    "nivel": "calculado",
    "fonte": "Posição aproximada, referência pública",
-   "ligada": true,
+   "ligada": false,
    "cor": "--cla",
    "ponto": [
     -44.396,
