@@ -107,8 +107,6 @@ function quintis(vals) {
           tiles: ["https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg"] },
         dem: { type: "raster-dem", encoding: "terrarium", tileSize: 256, maxzoom: 13,
           tiles: ["https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png"] },
-        demh: { type: "raster-dem", encoding: "terrarium", tileSize: 256, maxzoom: 11,
-          tiles: ["https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png"] },
         estados: { type: "geojson", data: estados, promoteId: "sigla" },
         mundo: { type: "geojson", data: mundo || fc([]) },
         zee: { type: "geojson", data: DATA.zee || fc([]) },
@@ -132,8 +130,6 @@ function quintis(vals) {
         { id: "estados-fill", type: "fill", source: "estados",
           paint: { "fill-color": cor("--land"),
             "fill-opacity": ["case", ["boolean", ["feature-state", "fade"], false], 0.18, ["boolean", ["feature-state", "hover"], false], 0.95, 0.82] } },
-        { id: "relevo", type: "hillshade", source: "demh",
-          paint: { "hillshade-exaggeration": 0.5, "hillshade-shadow-color": "#04100a", "hillshade-highlight-color": "rgba(255,255,240,.55)", "hillshade-accent-color": "#0c2a18" } },
         { id: "zee-line", type: "line", source: "zee", paint: { "line-color": cor("--sea-line"), "line-width": 1.4, "line-dasharray": [3, 2] } },
         { id: "mt-line", type: "line", source: "mt", paint: { "line-color": cor("--mt"), "line-width": 0.7, "line-opacity": 0.6 } },
         { id: "estados-line", type: "line", source: "estados", paint: { "line-color": "rgba(220,240,225,.55)", "line-width": 0.8 } },
@@ -172,7 +168,8 @@ function quintis(vals) {
           paint: { "text-color": "#f4f1e6", ...halo } }
       ]
     },
-    center: [-50, -14], zoom: 2.6, maxPitch: 75
+    center: [-50, -14], zoom: 2.6, maxPitch: 75,
+    pixelRatio: Math.min(devicePixelRatio || 1, innerWidth < 900 ? 1.5 : 2)
   });
   let falhouNasa = false;
   map.on("error", e => {
@@ -205,7 +202,7 @@ function quintis(vals) {
   const largo = () => innerWidth > 900;
   const espacoPainel = () => largo() && !dock.hidden ? dock.offsetWidth + 40 : 0;
   const topo = () => largo() ? document.getElementById("top").offsetHeight : 0;
-  const folga = () => ({ top: topo() + 50, bottom: 50, left: 50, right: espacoPainel() + 30 });
+  const folga = () => largo() ? { top: topo() + 40, bottom: 40, left: 10, right: espacoPainel() + 110 } : { top: 20, bottom: 20, left: 12, right: 12 };
   function ajustarCabecalho() { stage.style.setProperty("--head", (topo() + 4) + "px"); stage.style.setProperty("--dock-w", espacoPainel() + "px"); }
   const BRASIL = caixa({ coordinates: estados.features.map(f => f.geometry.coordinates) });
   function verBrasil(dur = 1400) {
@@ -215,14 +212,36 @@ function quintis(vals) {
     const f = estados.features.find(x => x.properties.sigla === s);
     map.fitBounds(caixa(f.geometry), { padding: folga(), pitch: modo3d ? 55 : 0, bearing: 0, maxZoom: 8, duration: reduce ? 0 : dur });
   }
+  const fold = document.getElementById("fold");
+  function alinharBotoes() {
+    /* "Mostrar painel" ocupa o mesmo lugar do "Recolher": dá para clicar duas vezes sem mover o mouse */
+    if (dock.hidden) return;
+    const r = fold.getBoundingClientRect(), s = stage.getBoundingClientRect();
+    unfold.style.top = (r.top - s.top) + "px";
+    unfold.style.right = (s.right - r.right) + "px";
+    unfold.style.minWidth = r.width + "px"; unfold.style.height = r.height + "px";
+  }
   function mostrarPainel(abrir) {
+    if (!abrir) alinharBotoes();
     dock.hidden = !abrir; unfold.hidden = abrir;
     try { localStorage.setItem("bec-painel", abrir ? "aberto" : "recolhido"); } catch (e) {}
     ajustarCabecalho(); sel ? verEstado(sel, 600) : verBrasil(600);
   }
   document.getElementById("fold").onclick = () => mostrarPainel(false);
   unfold.onclick = () => mostrarPainel(true);
-  try { if (largo() && localStorage.getItem("bec-painel") === "recolhido") { dock.hidden = true; unfold.hidden = false; } } catch (e) {}
+  try { if (largo() && localStorage.getItem("bec-painel") === "recolhido") { alinharBotoes(); dock.hidden = true; unfold.hidden = false; } } catch (e) {}
+  /* tamanho das letras do painel (A− / A+), lembrado entre visitas */
+  const ESC = [0.85, 1, 1.12, 1.25, 1.4], conteudo = document.getElementById("conteudo");
+  let ie = 1; try { const v = +localStorage.getItem("bec-letra"); if (ESC.includes(v)) ie = ESC.indexOf(v); } catch (e) {}
+  function letra(d) {
+    ie = Math.max(0, Math.min(ESC.length - 1, ie + d));
+    conteudo.style.zoom = ESC[ie];
+    document.getElementById("menos").disabled = ie === 0; document.getElementById("mais").disabled = ie === ESC.length - 1;
+    try { localStorage.setItem("bec-letra", ESC[ie]); } catch (e) {}
+  }
+  document.getElementById("menos").onclick = () => letra(-1);
+  document.getElementById("mais").onclick = () => letra(1);
+  letra(0);
 
   function selecionar(s) {
     if (sel) { map.setFeatureState({ source: "estados", id: sel }, { sel: false }); }
@@ -306,7 +325,7 @@ function quintis(vals) {
   /* ---------- desenho ---------- */
   function render() {
     controls();
-    if (map.isStyleLoaded() || map.loaded()) {
+    if (map.getLayer("estados-fill")) {
       LAYERS.forEach(l => (G[l.id] || []).forEach(id => map.getLayer(id) && map.setLayoutProperty(id, "visibility", l.on ? "visible" : "none")));
       const lc = LAYERS.find(l => l.id === "cla");
       if (mkCla) { if (lc && lc.on) mkCla.addTo(map); else mkCla.remove(); }
@@ -373,13 +392,22 @@ function quintis(vals) {
 
   /* ---------- abertura ---------- */
   ajustarCabecalho(); controls(); ficha();
+  verBrasil(0);
+  /* aplica cores e camadas ligadas assim que o estilo é lido, antes das imagens chegarem */
+  map.once("style.load", () => render());
+  const aviso = document.getElementById("carregando");
   map.on("load", () => {
     render();
-    /* chega ao Brasil vindo do espaço */
-    map.jumpTo({ center: [-30, -5], zoom: 1.2 });
-    verBrasil(reduce ? 0 : 2600);
     window.MAPA_PRONTO = true;
   });
-  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { ajustarCabecalho(); map.resize(); }, 150); });
+  map.once("idle", () => {
+    aviso.classList.add("fim"); setTimeout(() => aviso.remove(), 700);
+    /* o relevo sombreado chega depois da primeira imagem, em ladrilhos maiores (menos pedidos) */
+    map.addSource("demh", { type: "raster-dem", encoding: "terrarium", tileSize: 512, maxzoom: 10,
+      tiles: ["https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png"] });
+    map.addLayer({ id: "relevo", type: "hillshade", source: "demh",
+      paint: { "hillshade-exaggeration": 0.5, "hillshade-shadow-color": "#04100a", "hillshade-highlight-color": "rgba(255,255,240,.55)", "hillshade-accent-color": "#0c2a18" } }, "zee-line");
+  });
+  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { ajustarCabecalho(); map.resize(); if (!dock.hidden) alinharBotoes(); }, 150); });
   window.__mapa = map;
 })();
