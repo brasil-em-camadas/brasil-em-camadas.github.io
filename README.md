@@ -6,6 +6,7 @@ Mapa interativo do Brasil por estado. Cada dado mostra de onde veio, de quando �
 
 ```
 site/                 o site em si (é isto que vai para o ar)
+  3d/                 página de teste do mapa em globo 3D (MapLibre); usa os mesmos dados
   index.html          a página
   style.css           o visual
   app.js              o funcionamento do mapa
@@ -48,6 +49,8 @@ Para rodar na hora: aba **Actions** → **Atualizar dados e publicar** → **Run
 - IBGE (população, agricultura, contornos dos estados): dados públicos oficiais.
 - Natural Earth (ferrovias, portos, aeroportos, contorno dos países e imagens de relevo): domínio público.
 - Eletropostos: números da ABVE citados por veículos de imprensa, com a fonte indicada em cada estado.
+
+- Página 3D: imagem do planeta NASA Blue Marble via GIBS (domínio público); altitude do terreno Terrain Tiles na AWS (dados abertos); motor MapLibre GL JS 5.24.0 (licença BSD, cópia em `site/3d/vendor/`); letras Open Sans (licença Apache 2.0), do projeto openmaptiles/fonts.
 
 ## Licença
 

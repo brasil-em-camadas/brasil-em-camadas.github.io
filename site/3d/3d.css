@@ -1,0 +1,19 @@
+/* Ajustes da página 3D sobre o style.css da versão padrão */
+#map{background:radial-gradient(circle at 40% 45%,#0d2a38 0%,#06121c 55%,#03080d 100%)}
+.maplibregl-canvas:focus{outline:none}
+.maplibregl-ctrl-attrib{background:rgba(6,16,12,.7)!important;color:var(--muted)!important;font:11px var(--f-body)}
+.maplibregl-ctrl-attrib a{color:var(--muted)!important}
+.maplibregl-ctrl-bottom-right{right:calc(var(--dock-w,0px));}
+.maplibregl-popup-content{background:var(--glass);color:var(--ink);font:13px var(--f-body);border-radius:8px;padding:8px 12px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.maplibregl-popup-tip{border-top-color:rgba(10,18,20,.8)!important;border-bottom-color:rgba(10,18,20,.8)!important}
+.back[aria-pressed="true"]{color:var(--night);background:var(--accent);border-color:var(--accent)}
+/* Centro de Lançamento de Alcântara: marcador que pisca */
+.mk-cla{position:relative;width:16px;height:16px;cursor:pointer}
+.mk-cla i{position:absolute;inset:0;border:2px solid var(--cla);border-radius:50%}
+.mk-cla b{position:absolute;inset:5px;background:var(--cla);border-radius:50%}
+.mk-cla i.p{animation:cla 2.2s ease-out infinite}
+@keyframes cla{from{opacity:.9;transform:scale(.6)}to{opacity:0;transform:scale(2.8)}}
+.sem3d{position:absolute;inset:40% 20% auto;z-index:5;text-align:center;background:var(--glass);padding:20px;border-radius:12px}
+.sem3d a{color:var(--accent)}
+.foot a{color:var(--accent)}
+@media (prefers-reduced-motion:reduce){.mk-cla i.p{animation:none}}

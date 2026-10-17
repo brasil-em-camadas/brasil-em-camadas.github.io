@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brasil em Camadas · teste 3D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Página de teste: o Brasil em Camadas num globo 3D com relevo.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="vendor/maplibre-gl.css?v=5.24.0">
+<link rel="stylesheet" href="../style.css?v=11">
+<link rel="stylesheet" href="3d.css?v=1">
+</head>
+<body>
+<main class="stage" id="stage">
+  <header class="top" id="top">
+    <div class="brand"><h1>Brasil em Camadas</h1><span class="eyebrow">Teste 3D</span></div>
+    <nav class="mins" id="mins" aria-label="Filtrar por ministério"><span class="lbl">Ministério</span></nav>
+  </header>
+  <div class="where">
+    <span id="where">Brasil · 27 UFs</span>
+    <span class="ctl">
+      <button class="back" id="center" title="Volta o mapa para a posição inicial">Centralizar</button>
+      <button class="back" id="modo3d" aria-pressed="false" title="Liga o relevo em altura e inclina a câmera">Relevo 3D</button>
+      <button class="back" id="back" hidden>Voltar ao Brasil</button>
+    </span>
+  </div>
+  <div id="map" role="region" aria-label="Globo com o mapa do Brasil e camadas"></div>
+  <div class="legend" id="legend"></div>
+  <button class="unfold" id="unfold" hidden title="Mostrar o painel de informações"><span aria-hidden="true">‹</span> Mostrar painel</button>
+  <aside class="dock" aria-label="Ficha e camadas">
+    <button class="fold" id="fold" title="Recolher o painel para ver só o mapa">Recolher <span aria-hidden="true">›</span></button>
+    <section class="blk" id="ficha"></section>
+    <section class="blk">
+      <h2>Pintar estados por</h2>
+      <div class="paint" id="paint" role="group" aria-label="Pintar estados por"></div>
+      <h2 style="margin-top:14px">Camadas</h2>
+      <div id="layers"></div>
+    </section>
+  </aside>
+  <p class="sem3d" id="sem3d" hidden>Seu navegador não conseguiu abrir o mapa 3D. <a href="../">Abra a versão padrão</a>.</p>
+</main>
+
+<footer class="foot">
+  <div>
+    <h2>Níveis de confiança</h2>
+    <div class="tiers" id="tiers"></div>
+  </div>
+  <div>
+    <h2>Sobre esta página</h2>
+    <p>Esta é a versão de teste do mapa em 3D. A versão padrão continua em <a href="../">brasil-em-camadas.github.io</a>. Arraste para girar o globo, role para aproximar e segure o botão direito do mouse (ou use dois dedos) para inclinar.</p>
+    <p>Imagem do planeta: NASA, Blue Marble com relevo e fundo do oceano, de domínio público. Altitude do terreno: Terrain Tiles, dados abertos hospedados pela Amazon. Ferrovias, portos, aeroportos, rodovias, países e relevo de reserva: Natural Earth, de domínio público. Contornos dos estados: IBGE. Motor do mapa: MapLibre, de código aberto.</p>
+    <p>A ZEE e o mar territorial são faixas calculadas a partir da costa e das ilhas; os limites laterais com Uruguai e Guiana Francesa ainda são aproximados.</p>
+  </div>
+</footer>
+
+<script src="vendor/maplibre-gl.js?v=5.24.0"></script>
+<script src="app3d.js?v=1"></script>
+</body>
+</html>
