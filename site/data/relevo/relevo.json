@@ -1,0 +1,19 @@
+{
+ "gerado_em": "2026-10-17",
+ "cor": {
+  "arquivo": "cor.webp",
+  "oeste": -120,
+  "leste": 30,
+  "sul": -58,
+  "norte": 34,
+  "fonte": "Natural Earth II com relevo sombreado, escala 1:50 milhões"
+ },
+ "sombra": {
+  "arquivo": "sombra.webp",
+  "oeste": -75,
+  "leste": -28,
+  "sul": -34.5,
+  "norte": 6,
+  "fonte": "Natural Earth, relevo sombreado, escala 1:10 milhões"
+ }
+}
