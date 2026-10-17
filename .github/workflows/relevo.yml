@@ -17,7 +17,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Instalar bibliotecas de imagem
-        run: pip install numpy pillow
+        run: pip install numpy pillow scipy
       - name: Baixar, recortar e reprojetar o relevo
         run: python scripts/gerar_relevo.py
       - name: Salvar as imagens

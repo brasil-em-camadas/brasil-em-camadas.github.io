@@ -4,6 +4,7 @@ Roda no GitHub Actions (.github/workflows/relevo.yml), só quando acionado à m�
 Não precisa rodar de novo, a não ser para mudar a região ou a resolução.
 
 Saídas em site/data/relevo/:
+  mundo.webp   relevo colorido do mundo todo, em baixa resolução (fica por baixo)
   cor.webp     relevo colorido (Natural Earth II, 1:50m) para a região em volta do Brasil
   sombra.webp  relevo sombreado em cinza (1:10m), só a área do Brasil, mais detalhado
   relevo.json  os limites geográficos de cada imagem, para o site posicioná-las
@@ -20,10 +21,12 @@ from datetime import date
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFilter
+from scipy import ndimage
 
 Image.MAX_IMAGE_PIXELS = None
 SAIDA = Path(__file__).resolve().parent.parent / "site" / "data" / "relevo"
+GEO = SAIDA.parent / "geo"
 ESPELHOS = [
     "https://naciscdn.org/naturalearth/{p}",
     "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/{p}",
@@ -83,13 +86,51 @@ def para_mercator(img, oeste, leste, sul, norte, px_grau):
     return Image.fromarray(out[..., 0] if out.shape[2] == 1 else out)
 
 
-def oceano_transparente(img):
+def oceano_transparente(img, ilha_min=0):
     """No Natural Earth II sem água, o oceano e os lagos são quase brancos (252,251,252).
-    Viram transparentes, com borda suave, para o fundo escuro do site aparecer."""
+    Viram transparentes, com borda suave, para o fundo escuro do site aparecer.
+    Ilhas menores que `ilha_min` pixels também somem: nessa resolução elas viram quadradinhos,
+    e o contorno vetorial dos países continua mostrando onde estão."""
     a = np.asarray(img.convert("RGB"), dtype=np.float32)
     soma = a.sum(2)
     alfa = np.clip((752 - soma) / 30, 0, 1) * 255
+    if ilha_min:
+        rot, n = ndimage.label(alfa > 127)
+        areas = ndimage.sum(np.ones_like(rot), rot, index=np.arange(1, n + 1))
+        pequenas = np.isin(rot, np.nonzero(areas < ilha_min)[0] + 1)
+        alfa[ndimage.binary_dilation(pequenas, iterations=2)] = 0
     return Image.fromarray(np.dstack([a, alfa]).astype(np.uint8), "RGBA")
+
+
+def molde_terra(tamanho, oeste, leste, sul, norte):
+    """Desenha, na mesma grade da imagem, a terra firme dos contornos vetoriais do site
+    (países e estados). Serve de molde: o relevo só aparece onde o mapa vetorial tem terra.
+    Isso apaga as ilhas que a imagem do Natural Earth desenha infladas, em blocos."""
+    ow, oh = tamanho
+    yN, yS = merc(norte), merc(sul)
+    def px(pt):
+        lon, lat = pt[0], max(min(pt[1], 85), -85)
+        return ((lon - oeste) / (leste - oeste) * ow, (yN - merc(lat)) / (yN - yS) * oh)
+    m = Image.new("L", (ow, oh), 0)
+    d = ImageDraw.Draw(m)
+    for arq in ("mundo.json", "estados.json"):
+        for f in json.loads((GEO / arq).read_text(encoding="utf-8"))["features"]:
+            g = f["geometry"]
+            if not g:
+                continue
+            polis = [g["coordinates"]] if g["type"] == "Polygon" else g["coordinates"]
+            for anel_ext, *buracos in polis:
+                d.polygon([px(p) for p in anel_ext], fill=255)
+                for b in buracos:
+                    d.polygon([px(p) for p in b], fill=0)
+    return m.filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.GaussianBlur(1))
+
+
+def aplicar_molde(img, caixa):
+    m = np.asarray(molde_terra(img.size, **caixa), dtype=np.float32) / 255
+    a = np.asarray(img, dtype=np.float32)
+    a[..., 3] *= m
+    return Image.fromarray(a.astype(np.uint8), "RGBA")
 
 
 def realcar_sombra(img):
@@ -105,16 +146,24 @@ def main():
     SAIDA.mkdir(parents=True, exist_ok=True)
     info = {"gerado_em": date.today().isoformat()}
 
-    # 1) relevo colorido da região (América do Sul, parte das Américas e costa da África)
     cor = abrir_tif(baixar("50m/raster/NE2_50M_SR.zip")).convert("RGB")
+
+    # 1) relevo colorido do mundo todo, leve, para quem arrasta o mapa para longe do Brasil
+    caixa = dict(oeste=-180, leste=180, sul=-60, norte=84)
+    img = aplicar_molde(oceano_transparente(para_mercator(cor, px_grau=10, **caixa), ilha_min=50), caixa)
+    img.save(SAIDA / "mundo.webp", "WEBP", quality=72, alpha_quality=80, method=6)
+    info["mundo"] = {"arquivo": "mundo.webp", **caixa, "fonte": "Natural Earth II com relevo sombreado, escala 1:50 milhões"}
+    print("mundo.webp", img.size, f"{(SAIDA / 'mundo.webp').stat().st_size / 1e6:.2f} MB")
+
+    # 2) relevo colorido detalhado da região (América do Sul, parte das Américas e costa da África)
     caixa = dict(oeste=-120, leste=30, sul=-58, norte=34)
-    img = oceano_transparente(para_mercator(cor, px_grau=26, **caixa))
+    img = aplicar_molde(oceano_transparente(para_mercator(cor, px_grau=26, **caixa), ilha_min=320), caixa)
     img.save(SAIDA / "cor.webp", "WEBP", quality=74, alpha_quality=80, method=6)
     info["cor"] = {"arquivo": "cor.webp", **caixa, "fonte": "Natural Earth II com relevo sombreado, escala 1:50 milhões"}
     print("cor.webp", img.size, f"{(SAIDA / 'cor.webp').stat().st_size / 1e6:.2f} MB")
     del cor, img
 
-    # 2) relevo sombreado, mais detalhado, só no Brasil
+    # 3) relevo sombreado, mais detalhado, só no Brasil
     sombra = abrir_tif(baixar("10m/raster/SR_HR.zip")).convert("L")
     caixa = dict(oeste=-75, leste=-28, sul=-34.5, norte=6)
     img = realcar_sombra(para_mercator(sombra, px_grau=60, **caixa))

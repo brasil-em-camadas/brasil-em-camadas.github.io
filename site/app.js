@@ -87,6 +87,7 @@ function rewind(f) {
   const vizP = root.append("g").selectAll("path").data(viz ? viz.features : []).join("path").attr("class", "viz");
   /* relevo: imagem colorida da região (oceano transparente) e sombra detalhada só no Brasil */
   const REL = await getJSON("data/relevo/relevo.json");
+  const imgMundo = REL && REL.mundo ? root.append("image").attr("class", "relevo-cor").attr("href", "data/relevo/" + REL.mundo.arquivo).attr("preserveAspectRatio", "none") : null;
   const imgCor = REL && REL.cor ? root.append("image").attr("class", "relevo-cor").attr("href", "data/relevo/" + REL.cor.arquivo).attr("preserveAspectRatio", "none") : null;
   const vizB = root.append("g").selectAll("path").data(viz ? viz.features : []).join("path").attr("class", "viz-borda");
   const ROTULOS = ["Argentina", "Uruguai", "Paraguai", "Bolívia", "Peru", "Colômbia", "Venezuela", "Guiana", "Suriname", "Chile", "Equador"];
@@ -126,12 +127,26 @@ function rewind(f) {
   });
   svg.call(zoom).on("dblclick.zoom", null);
 
+  /* painel lateral: pode ser recolhido no computador para ver só o mapa */
+  const dock = document.querySelector(".dock"), unfold = document.getElementById("unfold");
+  const espacoPainel = () => innerWidth > 900 && !dock.hidden ? dock.offsetWidth + 40 : 0;
+  function mostrarPainel(abrir, refazer = true) {
+    dock.hidden = !abrir; unfold.hidden = abrir;
+    try { localStorage.setItem("atlas-painel", abrir ? "aberto" : "recolhido"); } catch (e) {}
+    if (refazer) layout();
+    (abrir ? document.getElementById("fold") : unfold).focus({ preventScroll: true });
+  }
+  document.getElementById("fold").onclick = () => mostrarPainel(false);
+  unfold.onclick = () => mostrarPainel(true);
+  try { if (innerWidth > 900 && localStorage.getItem("atlas-painel") === "recolhido") { dock.hidden = true; unfold.hidden = false; } } catch (e) {}
+
   function layout() {
     const r = svg.node().getBoundingClientRect();
     W = Math.max(320, r.width); H = Math.max(320, r.height);
     svg.attr("viewBox", `0 0 ${W} ${H}`);
     const wide = innerWidth > 900;
-    const dockW = wide ? document.querySelector(".dock").offsetWidth + 40 : 0;
+    if (!wide && dock.hidden) mostrarPainel(true, false);
+    const dockW = espacoPainel();
     const pad = wide ? 30 : 12;
     head = wide ? document.getElementById("top").offsetHeight : 0;
     stage.style.setProperty("--head", (head + 4) + "px");
@@ -145,7 +160,7 @@ function rewind(f) {
     clipBr.attr("d", path(estados));
     const encaixa = (img, r) => { if (!img) return; const [x0, y0] = proj([r.oeste, r.norte]), [x1, y1] = proj([r.leste, r.sul]);
       img.attr("x", x0).attr("y", y0).attr("width", x1 - x0).attr("height", y1 - y0); };
-    if (REL) { encaixa(imgCor, REL.cor); encaixa(imgSombra, REL.sombra); }
+    if (REL) { encaixa(imgMundo, REL.mundo); encaixa(imgCor, REL.cor); encaixa(imgSombra, REL.sombra); }
     /* trava: não dá para arrastar além do mapa-múndi */
     const [[wx0, wy0], [wx1, wy1]] = path.bounds({ type: "FeatureCollection", features: [...(viz ? viz.features : []), ...estados.features] });
     zoom.translateExtent([[wx0 - 60, wy0 - 60], [wx1 + 60, wy1 + 60]]).extent([[0, 0], [W, H]]);
@@ -177,7 +192,7 @@ function rewind(f) {
   }
   function zoomTo(feature, dur = 1100) {
     const [[x0, y0], [x1, y1]] = path.bounds(feature);
-    const wide = innerWidth > 900, usableW = W - (wide ? document.querySelector(".dock").offsetWidth + 40 : 0);
+    const usableW = W - espacoPainel();
     const s = Math.min(10, 0.8 / Math.max((x1 - x0) / usableW, (y1 - y0) / (H - head)));
     const t = d3.zoomIdentity.translate(usableW / 2, (H + head) / 2).scale(s).translate(-(x0 + x1) / 2, -(y0 + y1) / 2);
     svg.transition().duration(reduce ? 0 : dur).ease(d3.easeCubicInOut).call(zoom.transform, t);
