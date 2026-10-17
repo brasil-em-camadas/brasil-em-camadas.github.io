@@ -23,7 +23,7 @@ UF = {"11": "RO", "12": "AC", "13": "AM", "14": "RR", "15": "PA", "16": "AP", "1
       "50": "MS", "51": "MT", "52": "GO", "53": "DF"}
 
 # Cada camada: consulta SIDRA + texto que aparece no site.
-# As consultas seguem o formato documentado em apisidra.ibge.gov.br; confira na primeira execução.
+# Códigos conferidos na API em 2026-10-17. Na tabela 5457, a classificação 782 com código 0 é o "Total" das lavouras.
 CAMADAS = [
     {
         "arquivo": "populacao.json",
@@ -34,7 +34,7 @@ CAMADAS = [
     },
     {
         "arquivo": "agricultura.json",
-        "consulta": "/t/5457/n3/all/v/215/p/last%201/c782/40129",
+        "consulta": "/t/5457/n3/all/v/215/p/last%201/c782/0",
         "titulo": "Valor da produção agrícola",
         "unidade": "mil R$",
         "fonte": "IBGE, Produção Agrícola Municipal (tabela SIDRA 5457, total das lavouras)",
