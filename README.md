@@ -12,8 +12,10 @@ site/                 o site em si (é isto que vai para o ar)
   data/fontes.json    o registro de todas as camadas: nome, ministério, fonte, nível de confiança
   data/*.json         os dados de cada camada
   data/geo/*.json     contornos, ferrovias, portos, aeroportos, ZEE
+  data/relevo/        imagens de relevo do fundo (geradas por scripts/gerar_relevo.py)
 scripts/
   atualizar_ibge.py   robô que busca dados novos na API do IBGE
+  gerar_relevo.py     gera as imagens de relevo (roda só quando acionado à mão)
 .github/workflows/
   site.yml            agenda do robô e publicação automática no GitHub Pages
 ```
@@ -44,7 +46,7 @@ Para rodar na hora: aba **Actions** → **Atualizar dados e publicar** → **Run
 ## Fontes e licenças dos dados
 
 - IBGE (população, agricultura, contornos dos estados): dados públicos oficiais.
-- Natural Earth (ferrovias, portos, aeroportos): domínio público.
+- Natural Earth (ferrovias, portos, aeroportos, contorno dos países e imagens de relevo): domínio público.
 - Eletropostos: números da ABVE citados por veículos de imprensa, com a fonte indicada em cada estado.
 
 ## Licença

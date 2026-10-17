@@ -14,6 +14,8 @@ const RAMP = ["--q1", "--q2", "--q3", "--q4", "--q5"];
 const fmt = n => n.toLocaleString("pt-BR");
 const fmt1 = n => n.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* valores em mil R$ (padrão do IBGE) viram "R$ 71,3 bi" ou "R$ 251 mi" */
+const reais = mil => mil >= 1e6 ? `R$ ${fmt1(mil / 1e6)} bi` : `R$ ${fmt(Math.round(mil / 1e3))} mi`;
 const pill = n => `<span class="pill ${NIVEL[n][0]}">${NIVEL[n][1]}</span>`;
 
 async function getJSON(p) {
@@ -83,6 +85,10 @@ function rewind(f) {
   const flowP = root.append("path").attr("class", "flow");
   const gGrat = root.append("path").attr("class", "grat");
   const vizP = root.append("g").selectAll("path").data(viz ? viz.features : []).join("path").attr("class", "viz");
+  /* relevo: imagem colorida da região (oceano transparente) e sombra detalhada só no Brasil */
+  const REL = await getJSON("data/relevo/relevo.json");
+  const imgCor = REL && REL.cor ? root.append("image").attr("class", "relevo-cor").attr("href", "data/relevo/" + REL.cor.arquivo).attr("preserveAspectRatio", "none") : null;
+  const vizB = root.append("g").selectAll("path").data(viz ? viz.features : []).join("path").attr("class", "viz-borda");
   const ROTULOS = ["Argentina", "Uruguai", "Paraguai", "Bolívia", "Peru", "Colômbia", "Venezuela", "Guiana", "Suriname", "Chile", "Equador"];
   const lbls = root.append("g").selectAll("text")
     .data(viz ? viz.features.filter(f => ROTULOS.includes(f.properties.NAME_PT)) : []).join("text")
@@ -93,6 +99,9 @@ function rewind(f) {
     .attr("class", "st").attr("tabindex", 0).attr("aria-label", d => d.properties.name)
     .on("click", (e, d) => { e.stopPropagation(); select(d.properties.sigla); })
     .on("keydown", (e, d) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(d.properties.sigla); } });
+  const clipBr = defs.append("clipPath").attr("id", "clip-br").attr("clipPathUnits", "userSpaceOnUse").append("path");
+  const imgSombra = REL && REL.sombra ? root.append("image").attr("class", "relevo-sombra").attr("href", "data/relevo/" + REL.sombra.arquivo)
+    .attr("preserveAspectRatio", "none").attr("clip-path", "url(#clip-br)") : null;
   states.append("title").text(d => d.properties.name);
   const RAIL = DATA.rail ? DATA.rail.trechos : [];
   const gRail = root.append("g");
@@ -122,7 +131,7 @@ function rewind(f) {
     W = Math.max(320, r.width); H = Math.max(320, r.height);
     svg.attr("viewBox", `0 0 ${W} ${H}`);
     const wide = innerWidth > 900;
-    const dockW = wide ? 370 + 40 : 0;
+    const dockW = wide ? document.querySelector(".dock").offsetWidth + 40 : 0;
     const pad = wide ? 30 : 12;
     head = wide ? document.getElementById("top").offsetHeight : 0;
     stage.style.setProperty("--head", (head + 4) + "px");
@@ -132,7 +141,11 @@ function rewind(f) {
     gGrat.datum(d3.geoGraticule().step([5, 5])()).attr("d", path);
     if (zeeP) zeeP.attr("d", path);
     states.attr("d", path);
-    vizP.attr("d", path);
+    vizP.attr("d", path); vizB.attr("d", path);
+    clipBr.attr("d", path(estados));
+    const encaixa = (img, r) => { if (!img) return; const [x0, y0] = proj([r.oeste, r.norte]), [x1, y1] = proj([r.leste, r.sul]);
+      img.attr("x", x0).attr("y", y0).attr("width", x1 - x0).attr("height", y1 - y0); };
+    if (REL) { encaixa(imgCor, REL.cor); encaixa(imgSombra, REL.sombra); }
     /* trava: não dá para arrastar além do mapa-múndi */
     const [[wx0, wy0], [wx1, wy1]] = path.bounds({ type: "FeatureCollection", features: [...(viz ? viz.features : []), ...estados.features] });
     zoom.translateExtent([[wx0 - 60, wy0 - 60], [wx1 + 60, wy1 + 60]]).extent([[0, 0], [W, H]]);
@@ -164,7 +177,7 @@ function rewind(f) {
   }
   function zoomTo(feature, dur = 1100) {
     const [[x0, y0], [x1, y1]] = path.bounds(feature);
-    const wide = innerWidth > 900, usableW = W - (wide ? 410 : 0);
+    const wide = innerWidth > 900, usableW = W - (wide ? document.querySelector(".dock").offsetWidth + 40 : 0);
     const s = Math.min(10, 0.8 / Math.max((x1 - x0) / usableW, (y1 - y0) / (H - head)));
     const t = d3.zoomIdentity.translate(usableW / 2, (H + head) / 2).scale(s).translate(-(x0 + x1) / 2, -(y0 + y1) / 2);
     svg.transition().duration(reduce ? 0 : dur).ease(d3.easeCubicInOut).call(zoom.transform, t);
@@ -273,7 +286,7 @@ function rewind(f) {
         <div class="kv"><span>Habitantes</span><span class="v">${POP[s] ? fmt(POP[s]) : "—"}</span></div>
         <div class="kv"><span>Posição no país</span><span class="v">${rk}º · ${fmt1(POP[s] / popTot * 100)}%</span></div>${popInfo}</div>
       <div class="sec"><h3>Agricultura</h3>
-        ${ag != null ? `<div class="kv"><span>${DATA.agro.titulo}</span><span class="v">R$ ${fmt(Math.round(ag / 1000))} mi</span></div>
+        ${ag != null ? `<div class="kv"><span>${DATA.agro.titulo}</span><span class="v">${reais(ag)}</span></div>
           ${pill(DATA.agro.nivel)} <span class="note">${DATA.agro.fonte}, ref. ${DATA.agro.referencia} · atualizado em ${DATA.agro.atualizado_em}</span>`
         : `${pill("pendente")} <span class="note">O robô de atualização ainda não rodou.</span>`}</div>
       <div class="sec"><h3>Logística</h3>

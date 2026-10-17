@@ -83,6 +83,24 @@ def para_mercator(img, oeste, leste, sul, norte, px_grau):
     return Image.fromarray(out[..., 0] if out.shape[2] == 1 else out)
 
 
+def oceano_transparente(img):
+    """No Natural Earth II sem água, o oceano e os lagos são quase brancos (252,251,252).
+    Viram transparentes, com borda suave, para o fundo escuro do site aparecer."""
+    a = np.asarray(img.convert("RGB"), dtype=np.float32)
+    soma = a.sum(2)
+    alfa = np.clip((752 - soma) / 30, 0, 1) * 255
+    return Image.fromarray(np.dstack([a, alfa]).astype(np.uint8), "RGBA")
+
+
+def realcar_sombra(img):
+    """O relevo do Brasil é suave. Põe o terreno plano em cinza médio (128) e aumenta o contraste,
+    para a imagem funcionar como camada de 'luz e sombra' sobre as cores do mapa."""
+    a = np.asarray(img.convert("L"), dtype=np.float32)
+    v, n = np.unique(a.astype(int), return_counts=True)
+    plano = v[n.argmax()]
+    return Image.fromarray(np.clip(128 + (a - plano) * 2.6, 0, 255).astype(np.uint8), "L")
+
+
 def main():
     SAIDA.mkdir(parents=True, exist_ok=True)
     info = {"gerado_em": date.today().isoformat()}
@@ -90,8 +108,8 @@ def main():
     # 1) relevo colorido da região (América do Sul, parte das Américas e costa da África)
     cor = abrir_tif(baixar("50m/raster/NE2_50M_SR.zip")).convert("RGB")
     caixa = dict(oeste=-120, leste=30, sul=-58, norte=34)
-    img = para_mercator(cor, px_grau=26, **caixa)
-    img.save(SAIDA / "cor.webp", "WEBP", quality=74, method=6)
+    img = oceano_transparente(para_mercator(cor, px_grau=26, **caixa))
+    img.save(SAIDA / "cor.webp", "WEBP", quality=74, alpha_quality=80, method=6)
     info["cor"] = {"arquivo": "cor.webp", **caixa, "fonte": "Natural Earth II com relevo sombreado, escala 1:50 milhões"}
     print("cor.webp", img.size, f"{(SAIDA / 'cor.webp').stat().st_size / 1e6:.2f} MB")
     del cor, img
@@ -99,7 +117,7 @@ def main():
     # 2) relevo sombreado, mais detalhado, só no Brasil
     sombra = abrir_tif(baixar("10m/raster/SR_HR.zip")).convert("L")
     caixa = dict(oeste=-75, leste=-28, sul=-34.5, norte=6)
-    img = para_mercator(sombra, px_grau=60, **caixa)
+    img = realcar_sombra(para_mercator(sombra, px_grau=60, **caixa))
     img.save(SAIDA / "sombra.webp", "WEBP", quality=70, method=6)
     info["sombra"] = {"arquivo": "sombra.webp", **caixa, "fonte": "Natural Earth, relevo sombreado, escala 1:10 milhões"}
     print("sombra.webp", img.size, f"{(SAIDA / 'sombra.webp').stat().st_size / 1e6:.2f} MB")
