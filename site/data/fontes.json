@@ -32,6 +32,26 @@
    "por": "per_capita"
   }
  ],
+ "luzes": [
+  {
+   "id": "pop",
+   "nome": "População",
+   "titulo": "Onde vive a população",
+   "arquivo": "luzes/municipios.json",
+   "ministerio": "plan",
+   "explica": "Cada ponto de luz é um município: quanto mais gente, mais forte o brilho. O brilho fica na sede do município, então quem mora na zona rural aparece junto da cidade."
+  },
+  {
+   "id": "noite",
+   "nome": "Iluminação noturna",
+   "titulo": "Iluminação noturna vista do espaço",
+   "ministerio": "mme",
+   "nivel": "base",
+   "fonte": "NASA, Black Marble (satélite VIIRS), imagem anual de 2016, a mais recente publicada pela NASA nesse formato",
+   "explica": "Luz artificial vista do espaço à noite: cidades, estradas, indústria, mineração e plataformas de petróleo. Mostra desenvolvimento e infraestrutura, não quantas pessoas vivem em cada lugar.",
+   "ladrilhos": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_Black_Marble/default/2016-01-01/GoogleMapsCompatible_Level8/{z}/{y}/{x}.png"
+  }
+ ],
  "camadas": [
   {
    "id": "zee",
@@ -163,5 +183,10 @@
    "nivel": "pendente",
    "fonte": "EPE, Webmap"
   }
- ]
+ ],
+ "apoio": {
+  "texto": "Apoie este projeto",
+  "nota": "Gratuito e sem anúncios",
+  "link": ""
+ }
 }

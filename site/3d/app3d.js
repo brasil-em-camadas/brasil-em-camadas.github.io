@@ -75,7 +75,8 @@ function quintis(vals) {
   }))];
   const LAYERS = F.camadas.map(l => ({ ...l, on: !!l.ligada && l.nivel !== "pendente" }));
   const CLA = F.camadas.find(l => l.id === "cla");
-  let paint = "pop", sel = null, minF = "todos", modo3d = false;
+  const LUZ = (F.luzes || []).map(l => ({ ...l }));
+  let paint = "pop", sel = null, minF = "todos", modo3d = false, luz = "off", luzPop = null, guardadas = null;
 
   /* ---------- dados no formato do mapa ---------- */
   const ROTULOS = ["Argentina", "Uruguai", "Paraguai", "Bolívia", "Peru", "Colômbia", "Venezuela", "Chile", "Equador"];
@@ -248,7 +249,7 @@ function quintis(vals) {
     sel = (sel === s) ? null : s;
     estados.features.forEach(f => map.setFeatureState({ source: "estados", id: f.properties.sigla }, { fade: !!sel && f.properties.sigla !== sel }));
     map.setFilter("estado-sel", ["==", ["get", "sigla"], sel || ""]);
-    map.setPaintProperty("ferrovias", "line-opacity", sel ? ["case", ["==", ["get", "uf"], sel], 1, 0.15] : 0.9);
+    linhasTrem();
     sel ? verEstado(sel) : verBrasil(1000);
     render(); ficha();
   }
@@ -270,6 +271,15 @@ function quintis(vals) {
   });
   map.on("mouseleave", "estados-fill", () => { map.getCanvas().style.cursor = ""; if (hover) map.setFeatureState({ source: "estados", id: hover }, { hover: false }); hover = null; });
   map.on("click", e => {
+    if (luz === "pop" && map.getLayer("luz-pop-ponto") && map.getZoom() >= 5) {
+      const { x, y } = e.point, m = map.queryRenderedFeatures([[x - 5, y - 5], [x + 5, y + 5]], { layers: ["luz-pop-ponto"] });
+      if (m.length) {
+        const f = m.reduce((a, b) => b.properties.p > a.properties.p ? b : a);
+        new maplibregl.Popup({ closeButton: false, offset: 8 }).setLngLat(f.geometry.coordinates)
+          .setHTML(`<b>${f.properties.n} · ${f.properties.u}</b><br>${fmt(f.properties.p)} habitantes<br><span class="pop-fonte">IBGE, Censo 2022</span>`).addTo(map);
+        return;
+      }
+    }
     const pts = map.queryRenderedFeatures(e.point, { layers: ["portos", "aeroportos", "capitais"].filter(l => map.getLayoutProperty(l, "visibility") !== "none") });
     if (pts.length) {
       const f = pts[0], tipo = f.layer.id === "portos" ? "Porto" : f.layer.id === "aeroportos" ? "Aeroporto" : "Capital";
@@ -300,18 +310,37 @@ function quintis(vals) {
   mins.insertAdjacentHTML("beforeend", [["todos", "Todos"], ...Object.entries(F.ministerios)]
     .map(([k, v]) => `<button class="tab" data-m="${k}" aria-pressed="${k === "todos"}">${v}</button>`).join(""));
   mins.querySelectorAll(".tab").forEach(b => b.onclick = () => {
-    minF = b.dataset.m;
+    minF = b.dataset.m; guardadas = null;
     mins.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-pressed", x === b));
     LAYERS.forEach(l => { if (l.nivel !== "pendente") l.on = minF === "todos" ? !!l.ligada : l.ministerio === minF; });
     const p = PAINT.find(p => p.ministerio === minF && p.ok);
     paint = minF === "todos" ? "pop" : (p ? p.id : "none");
-    render();
+    const lz = LUZ.find(l => l.id === luz);
+    if (lz && minF !== "todos" && lz.ministerio !== minF) definirLuz("off"); else render();
   });
   function controls() {
     const pv = PAINT.filter(p => p.id === "none" || minF === "todos" || p.ministerio === minF);
     document.getElementById("paint").innerHTML = pv.map(p =>
       `<button class="chip" data-p="${p.id}" aria-pressed="${paint === p.id}" ${p.id !== "none" && !p.ok ? "disabled title=\"Em apuração\"" : ""}>${p.nome}</button>`).join("");
-    document.querySelectorAll("#paint .chip:not([disabled])").forEach(b => b.onclick = () => { paint = b.dataset.p; render(); });
+    document.querySelectorAll("#paint .chip:not([disabled])").forEach(b => b.onclick = () => {
+      paint = b.dataset.p;
+      if (luz !== "off" && paint !== "none") definirLuz("off"); else render();
+    });
+    document.getElementById("paint").classList.toggle("apagado", luz !== "off");
+    /* luzes à noite: uma de cada vez, para não misturar as duas imagens */
+    const zv = LUZ.filter(l => minF === "todos" || l.ministerio === minF);
+    document.getElementById("luzes").innerHTML = [{ id: "off", nome: "Desligadas" }, ...zv].map(l =>
+      `<button class="chip" data-l="${l.id}" aria-pressed="${luz === l.id}" ${l.falhou ? "disabled title=\"Não foi possível carregar\"" : ""}>${l.nome}</button>`).join("");
+    document.querySelectorAll("#luzes .chip:not([disabled])").forEach(b => b.onclick = () => definirLuz(b.dataset.l));
+    const L = LUZ.find(l => l.id === luz), info = document.getElementById("luz-info");
+    if (!L) info.innerHTML = "";
+    else {
+      const dd = L.id === "pop" ? luzPop : null;
+      info.innerHTML = `<div class="luz-info"><p class="note"><b>${L.titulo}.</b> ${L.explica}</p>
+        <div>${dd ? `${pill(dd.nivel)} <span class="note">${dd.fonte} · atualizado em ${dd.atualizado_em}. Posição: ${dd.posicao}.</span>`
+             : `${pill(L.nivel)} <span class="note">${L.fonte}.</span>`}</div>
+        <p class="note">Com as luzes acesas, os estados ficam sem cor e as rodovias e ferrovias se apagam, para não se confundirem com as luzes (dá para religar em Camadas). Escolha uma pintura acima para voltar às cores.</p></div>`;
+    }
     const lv = LAYERS.filter(l => minF === "todos" || l.ministerio === minF);
     document.getElementById("layers").innerHTML = lv.length ? lv.map(l => `
       <label class="layer ${l.nivel === "pendente" ? "pend" : ""}">
@@ -332,7 +361,13 @@ function quintis(vals) {
     }
     const P = PAINT.find(p => p.id === paint);
     let leg = "";
-    if (P && P.val) {
+    const L = LUZ.find(l => l.id === luz);
+    if (L) {
+      if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", ["case", ["boolean", ["feature-state", "hover"], false], "#ffffff", "#01050a"]);
+      const cores = L.id === "pop" ? COR_POP_LEG : COR_NOITE_LEG;
+      leg = `<span>${L.titulo}</span><span>${L.id === "pop" ? "menos gente" : "escuro"}</span>
+        <span class="ramp">${cores.map(c => `<i style="background:${c}"></i>`).join("")}</span><span>${L.id === "pop" ? "mais gente" : "mais luz"}</span>`;
+    } else if (P && P.val) {
       const vals = Object.keys(NAME).map(P.val).filter(v => v != null);
       const q = quintis(vals), cores = RAMP.map(cor);
       const m = ["match", ["get", "sigla"]];
@@ -348,6 +383,67 @@ function quintis(vals) {
     document.getElementById("legend").innerHTML = leg;
     document.getElementById("back").hidden = !sel;
     document.getElementById("where").textContent = sel ? `${NAME[sel]} · ${sel}` : "Brasil · 27 UFs";
+  }
+
+  /* ---------- luzes à noite ---------- */
+  const FADE = ["boolean", ["feature-state", "fade"], false], HOVER = ["boolean", ["feature-state", "hover"], false];
+  const COR_POP_LEG = ["#6e370a", "#d77d23", "#ffbe50", "#ffe8aa", "#fffceb"];
+  const COR_NOITE_LEG = ["#0a0c1c", "#2c2a44", "#a8823f", "#f2d083", "#fffbe8"];
+  function linhasTrem() {
+    const n = luz !== "off";
+    map.setPaintProperty("ferrovias", "line-opacity", sel ? ["case", ["==", ["get", "uf"], sel], n ? 0.6 : 1, n ? 0.06 : 0.15] : (n ? 0.35 : 0.9));
+  }
+  function aplicarNoite() {
+    if (!map.getLayer("estados-fill")) return;
+    const n = luz !== "off";
+    map.setPaintProperty("nasa", "raster-brightness-max", n ? 0.2 : 0.62);
+    map.setPaintProperty("nasa", "raster-saturation", n ? -0.55 : -0.15);
+    for (const id of ["rel-mundo", "rel-cor"]) if (map.getLayer(id)) map.setPaintProperty(id, "raster-brightness-max", n ? 0.2 : 0.55);
+    if (map.getLayer("relevo")) map.setLayoutProperty("relevo", "visibility", n ? "none" : "visible");
+    map.setPaintProperty("estados-fill", "fill-opacity", n ? ["case", FADE, 0.6, HOVER, 0.07, 0] : ["case", FADE, 0.18, HOVER, 0.95, 0.82]);
+    map.setPaintProperty("estados-line", "line-opacity", n ? 0.55 : 1);
+    map.setPaintProperty("rodovias", "line-opacity", ["*", n ? 0.35 : 1, ["case", ["==", ["get", "type"], "Major Highway"], 0.6, 0.38]]);
+    linhasTrem();
+  }
+  function prepararLuzes() {
+    if (luz === "noite" && !map.getSource("luz-noite")) {
+      map.addSource("luz-noite", { type: "raster", tileSize: 256, maxzoom: 8, tiles: [LUZ.find(l => l.id === "noite").ladrilhos], attribution: "NASA Black Marble" });
+      map.addLayer({ id: "luz-noite", type: "raster", source: "luz-noite", paint: { "raster-fade-duration": 300 } }, "paises-borda");
+    }
+    if (luz === "pop" && !map.getSource("luz-pop")) {
+      map.addSource("luz-pop", { type: "geojson", data: fc(luzPop.municipios.map(m => ponto([m[0], m[1]], { p: m[2], n: m[3], u: m[4] }))) });
+      /* brilho espalhado: soma os municípios vizinhos (escala em logaritmo, para as cidades pequenas também aparecerem) */
+      map.addLayer({ id: "luz-pop-calor", type: "heatmap", source: "luz-pop", paint: {
+        "heatmap-weight": ["interpolate", ["linear"], ["ln", ["+", ["get", "p"], 1]], 7.6, 0, 9.9, 0.12, 12.2, 0.45, 14.5, 0.85, 16.3, 1],
+        "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 3, 1.4, 5, 1.5, 8, 2.6],
+        "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 3, 6, 5, 11, 8, 28],
+        "heatmap-color": ["interpolate", ["linear"], ["heatmap-density"], 0, "rgba(0,0,0,0)", 0.08, "rgba(110,55,10,0.35)",
+          0.25, "rgba(215,125,35,0.7)", 0.5, "rgba(255,190,80,0.9)", 0.8, "rgba(255,232,170,1)", 1, "rgba(255,252,235,1)"],
+        "heatmap-opacity": 0.95 } }, "paises-borda");
+      /* um ponto de luz por município, do tamanho da população (raiz quadrada: área do ponto proporcional às pessoas) */
+      const RAIO = ["interpolate", ["linear"], ["sqrt", ["get", "p"]], 0, 0.6, 100, 1.1, 300, 1.8, 1000, 3.4, 3500, 6.5];
+      map.addLayer({ id: "luz-pop-ponto", type: "circle", source: "luz-pop", paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, ["*", 0.6, RAIO], 5, ["*", 0.9, RAIO], 8, ["*", 1.6, RAIO]],
+        "circle-color": "#ffe4a8", "circle-blur": 0.6, "circle-opacity": 0.9 } }, "paises-borda");
+    }
+    const vis = (id, on) => map.getLayer(id) && map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
+    vis("luz-noite", luz === "noite"); vis("luz-pop-calor", luz === "pop"); vis("luz-pop-ponto", luz === "pop");
+  }
+  async function definirLuz(id) {
+    const L = LUZ.find(l => l.id === id);
+    if (L && L.id === "pop" && !luzPop) {
+      document.getElementById("luz-info").innerHTML = `<p class="note">Carregando os 5.570 municípios…</p>`;
+      luzPop = await getJSON(D + L.arquivo);
+      if (!luzPop) { L.falhou = true; luz = "off"; render(); return; }
+    }
+    const antes = luz;
+    luz = L ? id : "off";
+    /* rodovias e ferrovias se apagam com as luzes (parecem estradas iluminadas) e voltam como estavam depois */
+    const linhas = LAYERS.filter(l => (l.id === "rod" || l.id === "rail") && l.nivel !== "pendente");
+    if (antes === "off" && luz !== "off") { guardadas = {}; linhas.forEach(l => { guardadas[l.id] = l.on; l.on = false; }); }
+    if (antes !== "off" && luz === "off" && guardadas) { linhas.forEach(l => { if (l.id in guardadas) l.on = guardadas[l.id]; }); guardadas = null; }
+    if (map.getLayer("estados-fill")) { prepararLuzes(); aplicarNoite(); }
+    render();
   }
 
   function ficha() {
@@ -387,6 +483,12 @@ function quintis(vals) {
         ${ev ? `${pill("entidade")} <span class="note">${ev.fonte}, ref. ${ev.referencia}</span>` : `${pill("pendente")} <span class="note">Nenhum número publicado encontrado.</span>`}</div>`;
   }
 
+  const AP = F.apoio, apoio = document.getElementById("apoio");
+  if (AP && AP.link) {
+    apoio.innerHTML = `<a class="apoiar" href="${AP.link}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg>${AP.texto}</a>
+      ${AP.nota ? `<span class="note">${AP.nota}</span>` : ""}`;
+    apoio.hidden = false;
+  }
   document.getElementById("tiers").innerHTML = Object.values(NIVEL)
     .map(([c, t, d]) => `<div><span><span class="pill ${c}">${t}</span></span><span>${d}</span></div>`).join("");
 
@@ -407,6 +509,7 @@ function quintis(vals) {
       tiles: ["https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png"] });
     map.addLayer({ id: "relevo", type: "hillshade", source: "demh",
       paint: { "hillshade-exaggeration": 0.5, "hillshade-shadow-color": "#04100a", "hillshade-highlight-color": "rgba(255,255,240,.55)", "hillshade-accent-color": "#0c2a18" } }, "zee-line");
+    if (luz !== "off") map.setLayoutProperty("relevo", "visibility", "none");
   });
   let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { ajustarCabecalho(); map.resize(); if (!dock.hidden) alinharBotoes(); }, 150); });
   window.__mapa = map;

@@ -37,3 +37,19 @@
 @keyframes gira{to{transform:rotate(360deg)}}
 /* celular: A− / A+ na mesma linha do título da ficha, sem empurrar o texto para baixo */
 @media (max-width:900px){.dock{width:auto}.letra{clear:none;margin:-7px -4px 4px 12px}}
+/* luzes à noite */
+.paint.apagado{opacity:.5}
+.luz-info{display:grid;gap:6px;margin:2px 0 4px}
+.luz-info p{margin:0}
+.pop-fonte{font-size:11px;color:var(--muted)}
+/* apoio ao projeto: discreto, no rodapé, à direita (embaixo do painel) */
+.apoio{display:flex;flex-direction:column;align-items:flex-end;gap:6px;align-self:start;padding-top:2px}
+.apoio[hidden]{display:none}
+.apoiar{display:inline-flex;align-items:center;gap:8px;font:500 .88rem var(--f-body);color:var(--muted);text-decoration:none;
+  border:1px solid var(--hair);border-radius:999px;padding:7px 15px;transition:color .2s,border-color .2s;white-space:nowrap}
+.apoiar svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.foot .apoiar{color:var(--muted)}
+.foot .apoiar:hover,.foot .apoiar:focus-visible{color:var(--ink);border-color:var(--accent)}
+.apoio .note{font-size:.78rem;opacity:.8}
+@media (min-width:901px){.foot{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto}}
+@media (max-width:900px){.apoio{align-items:flex-start}}

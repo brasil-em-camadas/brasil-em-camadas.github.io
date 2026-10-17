@@ -11,7 +11,7 @@
 <link rel="preload" href="vendor/maplibre-gl.js?v=5.24.0" as="script">
 <link rel="stylesheet" href="vendor/maplibre-gl.css?v=5.24.0">
 <link rel="stylesheet" href="../style.css?v=12">
-<link rel="stylesheet" href="3d.css?v=4">
+<link rel="stylesheet" href="3d.css?v=6">
 </head>
 <body>
 <main class="stage" id="stage">
@@ -42,6 +42,9 @@
     <section class="blk">
       <h2>Pintar estados por</h2>
       <div class="paint" id="paint" role="group" aria-label="Pintar estados por"></div>
+      <h2 style="margin-top:14px">Luzes à noite</h2>
+      <div class="paint" id="luzes" role="group" aria-label="Luzes à noite"></div>
+      <div id="luz-info"></div>
       <h2 style="margin-top:14px">Camadas</h2>
       <div id="layers"></div>
     </section>
@@ -57,13 +60,14 @@
   </div>
   <div>
     <h2>Sobre esta página</h2>
-    <p>Esta é a versão de teste do mapa em 3D. A versão padrão continua em <a href="../">brasil-em-camadas.github.io</a>. Arraste para girar o globo, role para aproximar e segure o botão direito do mouse (ou use dois dedos) para inclinar.</p>
-    <p>Imagem do planeta: NASA, Blue Marble com relevo e fundo do oceano, de domínio público. Altitude do terreno: Terrain Tiles, dados abertos hospedados pela Amazon. Ferrovias, portos, aeroportos, rodovias, países e relevo de reserva: Natural Earth, de domínio público. Contornos dos estados: IBGE. Motor do mapa: MapLibre, de código aberto.</p>
+    <p>Esta é a versão de teste do mapa em 3D. A versão padrão continua na <a href="../">página principal</a>. Arraste para girar o globo, role para aproximar e segure o botão direito do mouse (ou use dois dedos) para inclinar.</p>
+    <p>Imagem do planeta: NASA, Blue Marble com relevo e fundo do oceano, de domínio público. Altitude do terreno: Terrain Tiles, dados abertos hospedados pela Amazon. Ferrovias, portos, aeroportos, rodovias, países e relevo de reserva: Natural Earth, de domínio público. Contornos dos estados e população dos municípios: IBGE. Luzes à noite: NASA Black Marble, de domínio público; posição das sedes municipais: base aberta municipios-brasileiros (licença MIT). Motor do mapa: MapLibre, de código aberto.</p>
     <p>A ZEE e o mar territorial são faixas calculadas a partir da costa e das ilhas; os limites laterais com Uruguai e Guiana Francesa ainda são aproximados.</p>
   </div>
+  <div class="apoio" id="apoio" hidden></div>
 </footer>
 
 <script src="vendor/maplibre-gl.js?v=5.24.0"></script>
-<script src="app3d.js?v=3"></script>
+<script src="app3d.js?v=5"></script>
 </body>
 </html>

@@ -7,6 +7,7 @@ Regra de segurança: se a API falhar ou devolver algo estranho (menos de 27 esta
 o arquivo antigo NÃO é apagado. O site continua com o último dado bom e a data dele.
 Só usa a biblioteca padrão do Python, sem instalar nada.
 """
+import csv
 import json
 import sys
 import urllib.request
@@ -90,7 +91,46 @@ def atualizar(c):
     return True
 
 
+# População de cada município, para a camada "Luzes à noite · População" da página 3D.
+# A posição de cada município é a sede (a cidade). As coordenadas ficam em scripts/dados/sedes_municipais.csv
+# (base aberta "municipios-brasileiros", licença MIT); a população vem da API do IBGE.
+MUNICIPIOS = {
+    "arquivo": "luzes/municipios.json",
+    "consulta": "/t/4709/n6/all/v/93/p/2022",
+    "fonte": "IBGE, Censo Demográfico 2022 (tabela SIDRA 4709), população de cada município",
+    "posicao": "sede de cada município (base aberta municipios-brasileiros, derivada de dados do IBGE)",
+}
+SEDES = Path(__file__).resolve().parent / "dados" / "sedes_municipais.csv"
+
+
+def atualizar_municipios(c=MUNICIPIOS):
+    destino = DADOS / c["arquivo"]
+    try:
+        linhas = baixar(c["consulta"])
+        cab = linhas[0]
+        col = next(k for k, v in cab.items() if v.startswith("Município (Código)"))
+        pop = {l[col]: int(l["V"]) for l in linhas[1:] if l.get("V", "").isdigit()}
+    except Exception as e:
+        print(f"[{c['arquivo']}] falhou, mantendo o anterior: {e}")
+        return False
+    sedes = {r["codigo_ibge"]: r for r in csv.DictReader(SEDES.open(encoding="utf-8"))}
+    m = [[round(float(sedes[k]["longitude"]), 4), round(float(sedes[k]["latitude"]), 4), v, sedes[k]["nome"], k[:2]]
+         for k, v in pop.items() if k in sedes]
+    if len(m) < 5500:  # o Brasil tem 5.570 municípios; bem menos que isso = algo errado
+        print(f"[{c['arquivo']}] só {len(m)} municípios, mantendo o anterior")
+        return False
+    m.sort(key=lambda x: x[2])  # os maiores por último: ficam desenhados por cima
+    novo = {"titulo": "População por município", "referencia": "2022", "fonte": c["fonte"], "posicao": c["posicao"],
+            "nivel": "api", "atualizado_em": date.today().isoformat(), "consulta": SIDRA + c["consulta"],
+            "total": sum(x[2] for x in m), "campos": ["lon", "lat", "populacao", "nome", "uf"],
+            "municipios": [x[:4] + [UF.get(x[4], "")] for x in m]}
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    destino.write_text(json.dumps(novo, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    print(f"[{c['arquivo']}] ok: {len(m)} municípios, total {novo['total']}")
+    return True
+
+
 if __name__ == "__main__":
-    ok = [atualizar(c) for c in CAMADAS]
+    ok = [atualizar(c) for c in CAMADAS] + [atualizar_municipios()]
     # Só falha o robô se NADA atualizou, para alguém ser avisado por e-mail pelo GitHub.
     sys.exit(0 if any(ok) else 1)
