@@ -38,7 +38,7 @@ def baixar(caminho):
     for base in ESPELHOS:
         url = base.format(p=caminho)
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "atlas-brasil-aberto"})
+            req = urllib.request.Request(url, headers={"User-Agent": "brasil-em-camadas"})
             with urllib.request.urlopen(req, timeout=600) as r:
                 dados = r.read()
             print(f"baixado {url} ({len(dados) / 1e6:.1f} MB)")

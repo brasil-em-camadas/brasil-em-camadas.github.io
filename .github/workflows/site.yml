@@ -1,4 +1,4 @@
-# Robô do Atlas Brasil Aberto
+# Robô do Brasil em Camadas
 # - Todo dia 3 de cada mês (e quando você clicar em "Run workflow"): busca dados novos do IBGE e salva no repositório.
 # - Depois de cada mudança: publica o site no GitHub Pages.
 name: Atualizar dados e publicar
@@ -32,8 +32,8 @@ jobs:
         run: python scripts/atualizar_ibge.py
       - name: Salvar se algo mudou
         run: |
-          git config user.name "atlas-robo"
-          git config user.email "atlas-robo@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add site/data
           git diff --cached --quiet || (git commit -m "Atualiza dados do IBGE" && git push)
 

@@ -56,21 +56,6 @@
    "cor": "--mt"
   },
   {
-   "id": "cla",
-   "nome": "Centro de Lançamento de Alcântara",
-   "tipo": "marco",
-   "ministerio": "def",
-   "nivel": "calculado",
-   "fonte": "Posição aproximada, referência pública",
-   "ligada": true,
-   "cor": "--cla",
-   "ponto": [
-    -44.396,
-    -2.373
-   ],
-   "uf": "MA"
-  },
-  {
    "id": "rod",
    "nome": "Rodovias principais",
    "tipo": "linhas",
@@ -113,6 +98,21 @@
    "fonte": "Natural Earth, só os maiores",
    "ligada": false,
    "cor": "--air"
+  },
+  {
+   "id": "cla",
+   "nome": "Centro de Lançamento de Alcântara",
+   "tipo": "marco",
+   "ministerio": "def",
+   "nivel": "calculado",
+   "fonte": "Posição aproximada, referência pública",
+   "ligada": true,
+   "cor": "--cla",
+   "ponto": [
+    -44.396,
+    -2.373
+   ],
+   "uf": "MA"
   },
   {
    "id": "p-pce",

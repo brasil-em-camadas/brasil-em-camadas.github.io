@@ -44,7 +44,7 @@ CAMADAS = [
 
 def baixar(consulta):
     req = urllib.request.Request(SIDRA + consulta + "?formato=json",
-                                 headers={"User-Agent": "atlas-brasil-aberto (dados abertos)"})
+                                 headers={"User-Agent": "brasil-em-camadas (dados abertos)"})
     with urllib.request.urlopen(req, timeout=120) as r:
         return json.loads(r.read().decode("utf-8"))
 

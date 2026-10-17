@@ -1,4 +1,4 @@
-/* Atlas Brasil Aberto — app.js
+/* Brasil em Camadas — app.js
    Lê o registro data/fontes.json e os arquivos de cada camada. Nada de dado escrito aqui dentro. */
 "use strict";
 
@@ -155,13 +155,13 @@ function rewind(f) {
   const espacoPainel = () => innerWidth > 900 && !dock.hidden ? dock.offsetWidth + 40 : 0;
   function mostrarPainel(abrir, refazer = true) {
     dock.hidden = !abrir; unfold.hidden = abrir;
-    try { localStorage.setItem("atlas-painel", abrir ? "aberto" : "recolhido"); } catch (e) {}
+    try { localStorage.setItem("bec-painel", abrir ? "aberto" : "recolhido"); } catch (e) {}
     if (refazer) layout();
     (abrir ? document.getElementById("fold") : unfold).focus({ preventScroll: true });
   }
   document.getElementById("fold").onclick = () => mostrarPainel(false);
   unfold.onclick = () => mostrarPainel(true);
-  try { if (innerWidth > 900 && localStorage.getItem("atlas-painel") === "recolhido") { dock.hidden = true; unfold.hidden = false; } } catch (e) {}
+  try { if (innerWidth > 900 && localStorage.getItem("bec-painel") === "recolhido") { dock.hidden = true; unfold.hidden = false; } } catch (e) {}
 
   function layout() {
     const r = svg.node().getBoundingClientRect();

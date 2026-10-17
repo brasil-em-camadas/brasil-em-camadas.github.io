@@ -1,4 +1,4 @@
-# Atlas Brasil Aberto
+# Brasil em Camadas
 
 Mapa interativo do Brasil por estado. Cada dado mostra de onde veio, de quando é e seu nível de confiança. O que falta aparece como falta, nunca como estimativa disfarçada.
 
