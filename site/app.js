@@ -90,12 +90,24 @@ function rewind(f) {
   const imgMundo = REL && REL.mundo ? root.append("image").attr("class", "relevo-cor").attr("href", "data/relevo/" + REL.mundo.arquivo).attr("preserveAspectRatio", "none") : null;
   const imgCor = REL && REL.cor ? root.append("image").attr("class", "relevo-cor").attr("href", "data/relevo/" + REL.cor.arquivo).attr("preserveAspectRatio", "none") : null;
   const vizB = root.append("g").selectAll("path").data(viz ? viz.features : []).join("path").attr("class", "viz-borda");
-  const ROTULOS = ["Argentina", "Uruguai", "Paraguai", "Bolívia", "Peru", "Colômbia", "Venezuela", "Guiana", "Suriname", "Chile", "Equador"];
+  const ROTULOS = ["Argentina", "Uruguai", "Paraguai", "Bolívia", "Peru", "Colômbia", "Venezuela", "Chile", "Equador"];
+  /* países pequenos do norte com posição ajustada à mão (a Guiana Francesa faz parte da França na base mundial); oceanos */
+  const EXTRAS = [{ n: "Guiana", c: [-58.9, 5.7], peq: true }, { n: "Suriname", c: [-55.8, 4.4], peq: true }, { n: "Guiana\nFrancesa", c: [-53.1, 4.3], peq: true },
+    { n: "Oceano Atlântico", c: [-26, -30], mar: true }, { n: "Oceano Pacífico", c: [-92, -12], mar: true }];
   const lbls = root.append("g").selectAll("text")
-    .data(viz ? viz.features.filter(f => ROTULOS.includes(f.properties.NAME_PT)) : []).join("text")
-    .attr("class", "viz-lbl").text(d => d.properties.NAME_PT);
+    .data([...(viz ? viz.features.filter(f => ROTULOS.includes(f.properties.NAME_PT)).map(f => ({ n: f.properties.NAME_PT, c: d3.geoCentroid(f) })) : []), ...EXTRAS])
+    .join("text").attr("class", d => "viz-lbl" + (d.mar ? " mar" : "") + (d.peq ? " peq" : ""))
+    .each(function (d) { const p = d.n.split("\n"); d3.select(this).selectAll("tspan").data(p).join("tspan").attr("x", 0).attr("dy", (_, i) => i ? "1.15em" : (p.length > 1 ? "-0.3em" : 0)).text(s => s); });
+  const ROT = await getJSON("data/geo/rotulos.json") || { capitais: [], estados: [], ilhas: [] };
   const gZee = root.append("g");
   const zeeP = DATA.zee ? gZee.append("path").datum(DATA.zee).attr("class", "zee") : null;
+  const zeeTxt = gZee.append("text").attr("class", "zee-lbl").text("Zona Econômica Exclusiva · 200 milhas");
+  const ilhas = gZee.append("g").selectAll("g").data(ROT.ilhas || []).join("g").attr("class", "ilha");
+  ilhas.append("circle").attr("r", 2.4);
+  ilhas.append("text").attr("x", d => d.dx).attr("y", d => d.dy).attr("text-anchor", d => d.a).text(d => d.n);
+  ilhas.append("title").text(d => d.nome_completo);
+  const gMt = root.append("g");
+  const mtP = DATA.mt ? gMt.append("path").datum(DATA.mt).attr("class", "mt") : null;
   const states = root.append("g").selectAll("path").data(estados.features).join("path")
     .attr("class", "st").attr("tabindex", 0).attr("aria-label", d => d.properties.name)
     .on("click", (e, d) => { e.stopPropagation(); select(d.properties.sigla); })
@@ -104,6 +116,9 @@ function rewind(f) {
   const imgSombra = REL && REL.sombra ? root.append("image").attr("class", "relevo-sombra").attr("href", "data/relevo/" + REL.sombra.arquivo)
     .attr("preserveAspectRatio", "none").attr("clip-path", "url(#clip-br)") : null;
   states.append("title").text(d => d.properties.name);
+  const gRod = root.append("g");
+  const roads = gRod.selectAll("path").data(DATA.rod ? DATA.rod.features : []).join("path")
+    .attr("class", d => d.properties.type === "Major Highway" ? "road major" : "road");
   const RAIL = DATA.rail ? DATA.rail.trechos : [];
   const gRail = root.append("g");
   const rails = gRail.selectAll("path").data(RAIL).join("path").attr("class", "rail");
@@ -119,7 +134,15 @@ function rewind(f) {
   gCla.append("circle").attr("class", "cla").attr("r", 7);
   gCla.append("circle").attr("class", "cla-dot").attr("r", 2.5);
   gCla.append("title").text(CLA ? CLA.nome : "");
-  const G = { zee: gZee, rail: gRail, ports: gPorts, air: gAir, cla: gCla };
+  /* nomes: sigla dos estados (nome completo com zoom) e capitais (nome com zoom) */
+  const gNomes = root.append("g").attr("class", "nomes");
+  const ufLbl = gNomes.selectAll("text.uf").data(ROT.estados).join("text").attr("class", d => "uf uf-" + d.s);
+  ufLbl.append("tspan").attr("class", "s").text(d => d.s);
+  ufLbl.append("tspan").attr("class", "n").text(d => d.n);
+  const caps = gNomes.selectAll("g.cap").data(ROT.capitais).join("g").attr("class", d => d.pais ? "cap pais" : "cap");
+  caps.append("circle").attr("r", d => d.pais ? 3.6 : 2.6);
+  caps.append("text").attr("x", 6).attr("y", 4).text(d => d.n);
+  const G = { zee: gZee, mt: gMt, rod: gRod, rail: gRail, ports: gPorts, air: gAir, cla: gCla };
 
   let proj, path, W, H, head = 0, k = 1;
   const zoom = d3.zoom().scaleExtent([0.55, 12]).on("zoom", e => {
@@ -155,6 +178,8 @@ function rewind(f) {
     path = d3.geoPath(proj);
     gGrat.datum(d3.geoGraticule().step([5, 5])()).attr("d", path);
     if (zeeP) zeeP.attr("d", path);
+    if (mtP) mtP.attr("d", path);
+    roads.attr("d", path);
     states.attr("d", path);
     vizP.attr("d", path); vizB.attr("d", path);
     clipBr.attr("d", path(estados));
@@ -185,7 +210,13 @@ function rewind(f) {
   /* pontos mantêm tamanho legível em qualquer zoom */
   function place() {
     const s = 1 / Math.sqrt(k);
-    lbls.attr("transform", d => `translate(${proj(d3.geoCentroid(d))}) scale(${1 / k})`);
+    lbls.attr("transform", d => `translate(${proj(d.c)}) scale(${1 / k})`);
+    const z = `scale(${1 / k})`;
+    zeeTxt.attr("transform", `translate(${proj([-31.2, -15.5])}) rotate(-62) ${z}`);
+    ilhas.attr("transform", d => `translate(${proj(d.c)}) ${z}`);
+    ufLbl.attr("transform", d => `translate(${proj(d.c)}) ${z}`);
+    caps.attr("transform", d => `translate(${proj(d.c)}) ${z}`);
+    gNomes.classed("z-cap", k >= 1.9).classed("z-nome", k >= 3.2);
     ports.attr("r", 3.6 * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     airs.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
     if (CLA) { const p = proj(CLA.ponto); gCla.selectAll("circle").attr("cx", 0).attr("cy", 0); gCla.attr("transform", `translate(${p}) scale(${s})`); }

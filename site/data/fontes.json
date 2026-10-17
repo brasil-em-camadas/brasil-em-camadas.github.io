@@ -40,9 +40,20 @@
    "arquivo": "geo/zee.json",
    "ministerio": "def",
    "nivel": "calculado",
-   "fonte": "Faixa de 200 milhas náuticas calculada a partir da costa",
+   "fonte": "Faixa de 200 milhas náuticas a partir da costa e das ilhas oceânicas, calculada; área ≈ 3,62 milhões de km² (oficial: cerca de 3,6 milhões)",
    "ligada": true,
    "cor": "--sea-line"
+  },
+  {
+   "id": "mt",
+   "nome": "Mar territorial",
+   "tipo": "area",
+   "arquivo": "geo/mar_territorial.json",
+   "ministerio": "def",
+   "nivel": "calculado",
+   "fonte": "Faixa de 12 milhas náuticas a partir da costa e das ilhas, calculada",
+   "ligada": true,
+   "cor": "--mt"
   },
   {
    "id": "cla",
@@ -58,6 +69,17 @@
     -2.373
    ],
    "uf": "MA"
+  },
+  {
+   "id": "rod",
+   "nome": "Rodovias principais",
+   "tipo": "linhas",
+   "arquivo": "geo/rodovias.json",
+   "ministerio": "trans",
+   "nivel": "base",
+   "fonte": "Natural Earth, traçado sem número da BR; a versão oficial virá do DNIT",
+   "ligada": true,
+   "cor": "--road"
   },
   {
    "id": "rail",
@@ -91,6 +113,13 @@
    "fonte": "Natural Earth, só os maiores",
    "ligada": false,
    "cor": "--air"
+  },
+  {
+   "id": "p-pce",
+   "nome": "Plataforma continental estendida",
+   "ministerio": "def",
+   "nivel": "pendente",
+   "fonte": "ONU/CLPC e Marinha (LEPLAC): Sul (2019) e Margem Equatorial (2025) reconhecidas; Oriental/Meridional em análise"
   },
   {
    "id": "p-oil",
