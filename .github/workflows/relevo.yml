@@ -1,0 +1,28 @@
+# Gera as imagens de relevo do fundo do mapa (Natural Earth, domínio público).
+# Só roda quando acionado à mão: aba Ações → "Gerar relevo do mapa" → Executar fluxo de trabalho.
+name: Gerar relevo do mapa
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  gerar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar bibliotecas de imagem
+        run: pip install numpy pillow
+      - name: Baixar, recortar e reprojetar o relevo
+        run: python scripts/gerar_relevo.py
+      - name: Salvar as imagens
+        run: |
+          git config user.name "atlas-robo"
+          git config user.email "atlas-robo@users.noreply.github.com"
+          git add site/data/relevo
+          git diff --cached --quiet || (git commit -m "Gera imagens de relevo do mapa" && git push)
