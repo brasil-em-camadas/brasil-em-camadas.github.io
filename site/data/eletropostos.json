@@ -1,0 +1,53 @@
+{
+ "titulo": "Eletropostos públicos e semipúblicos",
+ "nivel": "entidade",
+ "atualizado_em": "2026-10-16",
+ "obs": "Só entram números publicados com fonte. Estados sem número ficam em branco.",
+ "valores": {
+  "SP": {
+   "valor": 7864,
+   "referencia": "ago/2026",
+   "fonte": "ABVE, via Canal VE"
+  },
+  "PR": {
+   "valor": 2513,
+   "referencia": "ago/2026",
+   "fonte": "ABVE, via Canal VE"
+  },
+  "RS": {
+   "valor": 2422,
+   "referencia": "ago/2026",
+   "fonte": "ABVE, via Canal VE"
+  },
+  "SC": {
+   "valor": 2333,
+   "referencia": "ago/2026",
+   "fonte": "ABVE, via Canal VE"
+  },
+  "MG": {
+   "valor": 2295,
+   "referencia": "ago/2026",
+   "fonte": "ABVE, via Canal VE"
+  },
+  "BA": {
+   "valor": 640,
+   "referencia": "2025",
+   "fonte": "ABVE, via Movimento Econômico"
+  },
+  "CE": {
+   "valor": 592,
+   "referencia": "2025",
+   "fonte": "ABVE, via Movimento Econômico"
+  },
+  "PE": {
+   "valor": 483,
+   "referencia": "2025",
+   "fonte": "ABVE, via Movimento Econômico"
+  },
+  "MA": {
+   "valor": 188,
+   "referencia": "2025",
+   "fonte": "levantamento citado por consultadeplaca.net"
+  }
+ }
+}

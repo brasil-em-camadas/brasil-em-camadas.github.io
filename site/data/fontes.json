@@ -1,0 +1,138 @@
+{
+ "ministerios": {
+  "plan": "Planejamento (IBGE)",
+  "def": "Defesa",
+  "trans": "Transportes",
+  "portaer": "Portos e Aeroportos",
+  "mme": "Minas e Energia",
+  "com": "Comunicações",
+  "agri": "Agricultura",
+  "setor": "Entidades do setor"
+ },
+ "pintura": [
+  {
+   "id": "pop",
+   "nome": "População",
+   "arquivo": "populacao.json",
+   "ministerio": "plan",
+   "por": "total"
+  },
+  {
+   "id": "agro",
+   "nome": "Produção agrícola",
+   "arquivo": "agricultura.json",
+   "ministerio": "agri",
+   "por": "total"
+  },
+  {
+   "id": "evpc",
+   "nome": "Eletropostos / 100 mil hab.",
+   "arquivo": "eletropostos.json",
+   "ministerio": "setor",
+   "por": "per_capita"
+  }
+ ],
+ "camadas": [
+  {
+   "id": "zee",
+   "nome": "Zona Econômica Exclusiva",
+   "tipo": "area",
+   "arquivo": "geo/zee.json",
+   "ministerio": "def",
+   "nivel": "calculado",
+   "fonte": "Faixa de 200 milhas náuticas calculada a partir da costa",
+   "ligada": true,
+   "cor": "--sea-line"
+  },
+  {
+   "id": "cla",
+   "nome": "Centro de Lançamento de Alcântara",
+   "tipo": "marco",
+   "ministerio": "def",
+   "nivel": "calculado",
+   "fonte": "Posição aproximada, referência pública",
+   "ligada": true,
+   "cor": "--cla",
+   "ponto": [
+    -44.396,
+    -2.373
+   ],
+   "uf": "MA"
+  },
+  {
+   "id": "rail",
+   "nome": "Ferrovias",
+   "tipo": "linhas",
+   "arquivo": "geo/ferrovias.json",
+   "ministerio": "trans",
+   "nivel": "base",
+   "fonte": "Natural Earth, traçado de 2012",
+   "ligada": true,
+   "cor": "--rail"
+  },
+  {
+   "id": "ports",
+   "nome": "Portos",
+   "tipo": "pontos",
+   "arquivo": "geo/portos.json",
+   "ministerio": "portaer",
+   "nivel": "base",
+   "fonte": "Natural Earth, lista incompleta",
+   "ligada": true,
+   "cor": "--port"
+  },
+  {
+   "id": "air",
+   "nome": "Aeroportos",
+   "tipo": "triangulos",
+   "arquivo": "geo/aeroportos.json",
+   "ministerio": "portaer",
+   "nivel": "base",
+   "fonte": "Natural Earth, só os maiores",
+   "ligada": false,
+   "cor": "--air"
+  },
+  {
+   "id": "p-oil",
+   "nome": "Poços de petróleo e gás",
+   "ministerio": "mme",
+   "nivel": "pendente",
+   "fonte": "ANP, produção por poço (dados abertos)"
+  },
+  {
+   "id": "p-def",
+   "nome": "Indústria de defesa",
+   "ministerio": "def",
+   "nivel": "pendente",
+   "fonte": "Ministério da Defesa, lista pública a confirmar"
+  },
+  {
+   "id": "p-cel",
+   "nome": "Cobertura 3G/4G/5G",
+   "ministerio": "com",
+   "nivel": "pendente",
+   "fonte": "Anatel, dados abertos a confirmar"
+  },
+  {
+   "id": "p-pec",
+   "nome": "Rebanhos e aquicultura",
+   "ministerio": "agri",
+   "nivel": "pendente",
+   "fonte": "IBGE PPM, API SIDRA"
+  },
+  {
+   "id": "p-rod",
+   "nome": "Rodovias de carga e fluxo",
+   "ministerio": "trans",
+   "nivel": "pendente",
+   "fonte": "DNIT, Plano Nacional de Contagem de Tráfego"
+  },
+  {
+   "id": "p-ene",
+   "nome": "Usinas e linhas de transmissão",
+   "ministerio": "mme",
+   "nivel": "pendente",
+   "fonte": "EPE, Webmap"
+  }
+ ]
+}
