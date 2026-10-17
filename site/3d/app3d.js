@@ -1,5 +1,5 @@
-/* Brasil em Camadas — página de teste 3D (MapLibre GL)
-   Usa os mesmos dados e o mesmo registro de camadas da versão padrão (../data). */
+/* Brasil em Camadas — mapa em globo 3D (MapLibre GL), página principal do site.
+   Usa os mesmos dados e o mesmo registro de camadas da versão leve em 2D (data/fontes.json). */
 "use strict";
 
 const NIVEL = {
@@ -17,8 +17,10 @@ const reais = mil => mil >= 1e6 ? `R$ ${fmt1(mil / 1e6)} bi` : `R$ ${fmt(Math.ro
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const pill = n => `<span class="pill ${NIVEL[n][0]}">${NIVEL[n][1]}</span>`;
 const cor = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-const D = "../data/";
-const BASE = location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, "");
+/* caminhos contados a partir deste arquivo (pasta 3d/), não da página: o site pode mudar de endereço ou de domínio */
+const AQUI = new URL(".", document.currentScript.src).href;
+const D = new URL("../data/", AQUI).href;
+const FONTES = new URL("fontes/", AQUI).href;
 
 async function getJSON(p) {
   try { const r = await fetch(p); if (!r.ok) return null; return await r.json(); } catch { return null; }
@@ -101,7 +103,7 @@ function quintis(vals) {
     style: {
       version: 8,
       projection: { type: "globe" },
-      glyphs: BASE + "fontes/{fontstack}/{range}.pbf",
+      glyphs: FONTES + "{fontstack}/{range}.pbf",
       sky: { "sky-color": "#06121c", "horizon-color": "#1d4b5e", "fog-color": "#0b2233", "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 1, 7, 0] },
       sources: {
         nasa: { type: "raster", tileSize: 256, maxzoom: 8,

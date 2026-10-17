@@ -6,10 +6,11 @@ Mapa interativo do Brasil por estado. Cada dado mostra de onde veio, de quando �
 
 ```
 site/                 o site em si (é isto que vai para o ar)
-  3d/                 página de teste do mapa em globo 3D (MapLibre); usa os mesmos dados
-  index.html          a página
-  style.css           o visual
-  app.js              o funcionamento do mapa
+  index.html          a página principal: o mapa em globo 3D
+  style.css           o visual básico (usado pelas duas versões)
+  3d/                 o motor do mapa 3D: app3d.js (funcionamento), 3d.css, MapLibre (vendor/) e letras do mapa (fontes/)
+                      (3d/index.html só redireciona quem tinha o endereço antigo da página de teste)
+  2d/                 versão leve em 2D (D3), para aparelhos que não abrem o globo
   data/fontes.json    o registro de todas as camadas: nome, ministério, fonte, nível de confiança
   data/*.json         os dados de cada camada
   data/geo/*.json     contornos, ferrovias, portos, aeroportos, ZEE
@@ -53,7 +54,7 @@ Para rodar na hora: aba **Actions** → **Atualizar dados e publicar** → **Run
 - Eletropostos: números da ABVE citados por veículos de imprensa, com a fonte indicada em cada estado.
 - Luzes à noite: população de cada município pela API SIDRA do IBGE (Censo 2022); posição das sedes municipais da base aberta [municipios-brasileiros](https://github.com/kelvins/municipios-brasileiros) (licença MIT), cópia em `scripts/dados/`; iluminação noturna NASA Black Marble via GIBS (domínio público).
 
-- Página 3D: imagem do planeta NASA Blue Marble via GIBS (domínio público); altitude do terreno Terrain Tiles na AWS (dados abertos); motor MapLibre GL JS 5.24.0 (licença BSD, cópia em `site/3d/vendor/`); letras Open Sans (licença Apache 2.0), do projeto openmaptiles/fonts.
+- Mapa 3D: imagem do planeta NASA Blue Marble via GIBS (domínio público); altitude do terreno Terrain Tiles na AWS (dados abertos); motor MapLibre GL JS 5.24.0 (licença BSD, cópia em `site/3d/vendor/`); letras Open Sans (licença Apache 2.0), do projeto openmaptiles/fonts.
 
 ## Domínio próprio (para o futuro)
 

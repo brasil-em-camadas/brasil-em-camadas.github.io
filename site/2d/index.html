@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brasil em Camadas · versão leve</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Versão leve, em 2D, do Brasil em Camadas, para aparelhos que não abrem o globo 3D.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../style.css?v=12">
+</head>
+<body>
+<main class="stage" id="stage">
+  <header class="top" id="top">
+    <div class="brand"><h1>Brasil em Camadas</h1><span class="eyebrow">Versão leve</span></div>
+    <nav class="mins" id="mins" aria-label="Filtrar por ministério"><span class="lbl">Ministério</span></nav>
+  </header>
+  <div class="where"><span id="where">Brasil · 27 UFs</span><span class="ctl"><button class="back" id="center" title="Volta o mapa para a posição inicial">Centralizar</button><button class="back" id="back" hidden>Voltar ao Brasil</button></span></div>
+  <svg id="map" role="img" aria-label="Mapa do Brasil com camadas"></svg>
+  <div class="legend" id="legend"></div>
+  <button class="unfold" id="unfold" hidden title="Mostrar o painel de informações"><span aria-hidden="true">‹</span> Mostrar painel</button>
+  <aside class="dock" aria-label="Ficha e camadas">
+    <button class="fold" id="fold" title="Recolher o painel para ver só o mapa">Recolher <span aria-hidden="true">›</span></button>
+    <section class="blk" id="ficha"></section>
+    <section class="blk">
+      <h2>Pintar estados por</h2>
+      <div class="paint" id="paint" role="group" aria-label="Pintar estados por"></div>
+      <h2 style="margin-top:14px">Camadas</h2>
+      <div id="layers"></div>
+    </section>
+  </aside>
+</main>
+
+<footer class="foot">
+  <div>
+    <h2>Níveis de confiança</h2>
+    <div class="tiers" id="tiers"></div>
+  </div>
+  <div>
+    <h2>Sobre os dados</h2>
+    <p>Esta é a versão leve, em 2D, para aparelhos que não conseguem abrir o globo. A versão completa, com relevo 3D e luzes à noite, está na <a href="../">página principal</a>.</p>
+    <p>Ferrovias, portos e aeroportos vêm do Natural Earth, base mundial aberta em escala 1:10 milhões. O traçado é real, mas as ferrovias são de 2012 e faltam trechos novos, como a Norte-Sul no Tocantins. Os quilômetros por estado são aproximados.</p>
+    <p>A ZEE foi calculada como faixa de 200 milhas náuticas a partir da costa e não segue os limites laterais oficiais com Uruguai e Guiana Francesa.</p>
+    <p>Relevo do fundo: Natural Earth II com relevo sombreado (1:50 milhões) e relevo sombreado 1:10 milhões no Brasil, ambos de domínio público. É uma imagem ilustrativa e perde nitidez em zoom muito próximo.</p>
+    <p>Contornos dos estados: IBGE, via projeto Click That Hood. Nada aqui é inventado; o que falta aparece como falta.</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="app.js?v=11"></script>
+</body>
+</html>

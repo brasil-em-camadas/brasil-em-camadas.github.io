@@ -32,21 +32,21 @@ function rewind(f) {
 }
 
 (async function main() {
-  const F = await getJSON("data/fontes.json");
-  const estados = await getJSON("data/geo/estados.json");
+  const F = await getJSON("../data/fontes.json");
+  const estados = await getJSON("../data/geo/estados.json");
   if (!F || !estados) {
     document.getElementById("ficha").innerHTML = `<p class="note">Não foi possível carregar os dados do mapa. Recarregue a página.</p>`;
     return;
   }
   estados.features.forEach(rewind);
-  const viz = await getJSON("data/geo/mundo.json");
+  const viz = await getJSON("../data/geo/mundo.json");
   if (viz) viz.features.forEach(rewind);
   const NAME = {}; estados.features.forEach(f => NAME[f.properties.sigla] = f.properties.name);
 
   /* carrega cada camada; arquivo ausente vira "em apuração" */
   const DATA = {};
   await Promise.all([...F.pintura, ...F.camadas].filter(l => l.arquivo).map(async l => {
-    DATA[l.id] = await getJSON("data/" + l.arquivo);
+    DATA[l.id] = await getJSON("../data/" + l.arquivo);
     if (!DATA[l.id] && l.nivel) l.nivel = "pendente";
   }));
   if (DATA.zee) rewind(DATA.zee);
@@ -86,9 +86,9 @@ function rewind(f) {
   const gGrat = root.append("path").attr("class", "grat");
   const vizP = root.append("g").selectAll("path").data(viz ? viz.features : []).join("path").attr("class", "viz");
   /* relevo: imagem colorida da região (oceano transparente) e sombra detalhada só no Brasil */
-  const REL = await getJSON("data/relevo/relevo.json");
-  const imgMundo = REL && REL.mundo ? root.append("image").attr("class", "relevo-cor").attr("href", "data/relevo/" + REL.mundo.arquivo).attr("preserveAspectRatio", "none") : null;
-  const imgCor = REL && REL.cor ? root.append("image").attr("class", "relevo-cor").attr("href", "data/relevo/" + REL.cor.arquivo).attr("preserveAspectRatio", "none") : null;
+  const REL = await getJSON("../data/relevo/relevo.json");
+  const imgMundo = REL && REL.mundo ? root.append("image").attr("class", "relevo-cor").attr("href", "../data/relevo/" + REL.mundo.arquivo).attr("preserveAspectRatio", "none") : null;
+  const imgCor = REL && REL.cor ? root.append("image").attr("class", "relevo-cor").attr("href", "../data/relevo/" + REL.cor.arquivo).attr("preserveAspectRatio", "none") : null;
   const vizB = root.append("g").selectAll("path").data(viz ? viz.features : []).join("path").attr("class", "viz-borda");
   const ROTULOS = ["Argentina", "Uruguai", "Paraguai", "Bolívia", "Peru", "Colômbia", "Venezuela", "Chile", "Equador"];
   /* países pequenos do norte com posição ajustada à mão (a Guiana Francesa faz parte da França na base mundial); oceanos */
@@ -98,7 +98,7 @@ function rewind(f) {
     .data([...(viz ? viz.features.filter(f => ROTULOS.includes(f.properties.NAME_PT)).map(f => ({ n: f.properties.NAME_PT, c: d3.geoCentroid(f) })) : []), ...EXTRAS])
     .join("text").attr("class", d => "viz-lbl" + (d.mar ? " mar" : "") + (d.peq ? " peq" : ""))
     .each(function (d) { const p = d.n.split("\n"); d3.select(this).selectAll("tspan").data(p).join("tspan").attr("x", 0).attr("dy", (_, i) => i ? "1.15em" : (p.length > 1 ? "-0.3em" : 0)).text(s => s); });
-  const ROT = await getJSON("data/geo/rotulos.json") || { capitais: [], estados: [], ilhas: [] };
+  const ROT = await getJSON("../data/geo/rotulos.json") || { capitais: [], estados: [], ilhas: [] };
   const gZee = root.append("g");
   const zeeP = DATA.zee ? gZee.append("path").datum(DATA.zee).attr("class", "zee") : null;
   const zeeTxt = gZee.append("text").attr("class", "zee-lbl").text("Zona Econômica Exclusiva · 200 milhas");
@@ -113,7 +113,7 @@ function rewind(f) {
     .on("click", (e, d) => { e.stopPropagation(); select(d.properties.sigla); })
     .on("keydown", (e, d) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(d.properties.sigla); } });
   const clipBr = defs.append("clipPath").attr("id", "clip-br").attr("clipPathUnits", "userSpaceOnUse").append("path");
-  const imgSombra = REL && REL.sombra ? root.append("image").attr("class", "relevo-sombra").attr("href", "data/relevo/" + REL.sombra.arquivo)
+  const imgSombra = REL && REL.sombra ? root.append("image").attr("class", "relevo-sombra").attr("href", "../data/relevo/" + REL.sombra.arquivo)
     .attr("preserveAspectRatio", "none").attr("clip-path", "url(#clip-br)") : null;
   states.append("title").text(d => d.properties.name);
   const gRod = root.append("g");

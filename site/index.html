@@ -5,30 +5,51 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Brasil em Camadas</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Mapa interativo do Brasil por estado, com a fonte, a data e o nível de confiança de cada dado.">
+<meta name="description" content="Mapa interativo do Brasil por estado, num globo 3D, com a fonte, a data e o nível de confiança de cada dado.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=11">
+<link rel="preload" href="3d/vendor/maplibre-gl.js?v=5.24.0" as="script">
+<link rel="stylesheet" href="3d/vendor/maplibre-gl.css?v=5.24.0">
+<link rel="stylesheet" href="style.css?v=12">
+<link rel="stylesheet" href="3d/3d.css?v=7">
 </head>
 <body>
 <main class="stage" id="stage">
   <header class="top" id="top">
-    <div class="brand"><h1>Brasil em Camadas</h1><span class="eyebrow">Protótipo v10</span></div>
+    <div class="brand"><h1>Brasil em Camadas</h1></div>
     <nav class="mins" id="mins" aria-label="Filtrar por ministério"><span class="lbl">Ministério</span></nav>
   </header>
-  <div class="where"><span id="where">Brasil · 27 UFs</span><span class="ctl"><button class="back" id="center" title="Volta o mapa para a posição inicial">Centralizar</button><button class="back" id="back" hidden>Voltar ao Brasil</button></span></div>
-  <svg id="map" role="img" aria-label="Mapa do Brasil com camadas"></svg>
+  <div class="where">
+    <span id="where">Brasil · 27 UFs</span>
+    <span class="ctl">
+      <button class="back" id="center" title="Volta o mapa para a posição inicial">Centralizar</button>
+      <button class="back" id="modo3d" aria-pressed="false" title="Liga o relevo em altura e inclina a câmera">Relevo 3D</button>
+      <button class="back" id="back" hidden>Voltar ao Brasil</button>
+    </span>
+  </div>
+  <div id="map" role="region" aria-label="Globo com o mapa do Brasil e camadas">
+  <div class="carregando" id="carregando" role="status"><span></span>Carregando o globo…</div>
+  </div>
   <div class="legend" id="legend"></div>
   <button class="unfold" id="unfold" hidden title="Mostrar o painel de informações"><span aria-hidden="true">‹</span> Mostrar painel</button>
   <aside class="dock" aria-label="Ficha e camadas">
     <button class="fold" id="fold" title="Recolher o painel para ver só o mapa">Recolher <span aria-hidden="true">›</span></button>
+    <div class="letra" role="group" aria-label="Tamanho das letras do painel">
+      <button id="menos" title="Diminuir as letras">A−</button><button id="mais" title="Aumentar as letras">A+</button>
+    </div>
+    <div id="conteudo">
     <section class="blk" id="ficha"></section>
     <section class="blk">
       <h2>Pintar estados por</h2>
       <div class="paint" id="paint" role="group" aria-label="Pintar estados por"></div>
+      <h2 style="margin-top:14px">Luzes à noite</h2>
+      <div class="paint" id="luzes" role="group" aria-label="Luzes à noite"></div>
+      <div id="luz-info"></div>
       <h2 style="margin-top:14px">Camadas</h2>
       <div id="layers"></div>
     </section>
+    </div>
   </aside>
+  <p class="sem3d" id="sem3d" hidden>Seu navegador não conseguiu abrir o mapa 3D. <a href="2d/">Abra a versão leve</a>.</p>
 </main>
 
 <footer class="foot">
@@ -37,15 +58,16 @@
     <div class="tiers" id="tiers"></div>
   </div>
   <div>
-    <h2>Sobre os dados</h2>
-    <p>Ferrovias, portos e aeroportos vêm do Natural Earth, base mundial aberta em escala 1:10 milhões. O traçado é real, mas as ferrovias são de 2012 e faltam trechos novos, como a Norte-Sul no Tocantins. Os quilômetros por estado são aproximados.</p>
-    <p>A ZEE foi calculada como faixa de 200 milhas náuticas a partir da costa e não segue os limites laterais oficiais com Uruguai e Guiana Francesa.</p>
-    <p>Relevo do fundo: Natural Earth II com relevo sombreado (1:50 milhões) e relevo sombreado 1:10 milhões no Brasil, ambos de domínio público. É uma imagem ilustrativa e perde nitidez em zoom muito próximo.</p>
-    <p>Contornos dos estados: IBGE, via projeto Click That Hood. Nada aqui é inventado; o que falta aparece como falta.</p>
+    <h2>Sobre o mapa</h2>
+    <p>Arraste para girar o globo, role para aproximar e segure o botão direito do mouse (ou use dois dedos) para inclinar. Se o seu aparelho tiver dificuldade com o globo, use a <a href="2d/">versão leve</a>.</p>
+    <p>Imagem do planeta: NASA, Blue Marble com relevo e fundo do oceano, de domínio público. Altitude do terreno: Terrain Tiles, dados abertos hospedados pela Amazon. Ferrovias, portos, aeroportos, rodovias, países e relevo de reserva: Natural Earth, de domínio público. Contornos dos estados e população dos municípios: IBGE. Luzes à noite: NASA Black Marble, de domínio público; posição das sedes municipais: base aberta municipios-brasileiros (licença MIT). Motor do mapa: MapLibre, de código aberto.</p>
+    <p>Ferrovias, portos e aeroportos vêm de uma base mundial aberta em escala 1:10 milhões: o traçado é real, mas as ferrovias são de 2012 e faltam trechos novos, como a Norte-Sul no Tocantins. Os quilômetros por estado são aproximados.</p>
+    <p>A ZEE e o mar territorial são faixas calculadas a partir da costa e das ilhas; os limites laterais com Uruguai e Guiana Francesa ainda são aproximados. Nada aqui é inventado: o que falta aparece como falta.</p>
   </div>
+  <div class="apoio" id="apoio" hidden></div>
 </footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-<script src="app.js?v=10"></script>
+<script src="3d/vendor/maplibre-gl.js?v=5.24.0"></script>
+<script src="3d/app3d.js?v=6"></script>
 </body>
 </html>
