@@ -30,7 +30,7 @@
 .letra button:hover:not(:disabled){color:var(--ink)}
 .letra button:disabled{opacity:.35;cursor:default}
 /* aviso de carregamento */
-.carregando{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;display:flex;gap:12px;align-items:center;
+.carregando{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;display:flex;gap:12px;align-items:center;pointer-events:none;
   font:500 .95rem var(--f-body);color:var(--ink);background:var(--glass);padding:12px 20px;border-radius:999px;white-space:nowrap;transition:opacity .6s}
 .carregando span{width:16px;height:16px;border:2px solid var(--hair);border-top-color:var(--accent);border-radius:50%;animation:gira 1s linear infinite}
 .carregando.fim{opacity:0}
