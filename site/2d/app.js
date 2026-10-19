@@ -15,6 +15,7 @@ const fmt = n => n.toLocaleString("pt-BR");
 const fmt1 = n => n.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 /* valores em mil R$ (padrão do IBGE) viram "R$ 71,3 bi" ou "R$ 251 mi" */
+const kmTxt = a => a >= 1e6 ? `${(a / 1e6).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} milhão de km²` : `${fmt(Math.round(a / 1e3))} mil km²`;
 const reais = mil => mil >= 1e6 ? `R$ ${fmt1(mil / 1e6)} bi` : `R$ ${fmt(Math.round(mil / 1e3))} mi`;
 const pill = n => `<span class="pill ${NIVEL[n][0]}">${NIVEL[n][1]}</span>`;
 
@@ -49,7 +50,9 @@ function rewind(f) {
     DATA[l.id] = await getJSON("../data/" + l.arquivo);
     if (!DATA[l.id] && l.nivel) l.nivel = "pendente";
   }));
-  if (DATA.zee) rewind(DATA.zee);
+  /* camadas do mar: cada arquivo traz a área ("area"), as linhas de limite ("limite", "base") e os rótulos */
+  const parte = (id, p) => DATA[id] && DATA[id].features ? DATA[id].features.filter(f => f.properties.parte === p) : [];
+  ["zee", "mt", "zc", "pce"].forEach(id => parte(id, "area").forEach(rewind));
   const POP = DATA.pop ? DATA.pop.valores : {};
   const popTot = Object.values(POP).reduce((a, b) => a + b, 0);
 
@@ -82,6 +85,9 @@ function rewind(f) {
     defs.append("pattern").attr("id", "terra").attr("patternUnits", "userSpaceOnUse").attr("width", 160).attr("height", 160)
       .append("image").attr("href", c.toDataURL()).attr("width", 160).attr("height", 160);
   })();
+  /* hachura (listras diagonais) da plataforma continental ainda em análise na ONU */
+  defs.append("pattern").attr("id", "hachura").attr("patternUnits", "userSpaceOnUse").attr("width", 5).attr("height", 5)
+    .attr("patternTransform", "rotate(45)").append("line").attr("class", "hach-l").attr("x1", 0).attr("y1", 0).attr("x2", 0).attr("y2", 5);
   const flowP = root.append("path").attr("class", "flow");
   const gGrat = root.append("path").attr("class", "grat");
   const vizP = root.append("g").selectAll("path").data(viz ? viz.features : []).join("path").attr("class", "viz");
@@ -99,15 +105,29 @@ function rewind(f) {
     .join("text").attr("class", d => "viz-lbl" + (d.mar ? " mar" : "") + (d.peq ? " peq" : ""))
     .each(function (d) { const p = d.n.split("\n"); d3.select(this).selectAll("tspan").data(p).join("tspan").attr("x", 0).attr("dy", (_, i) => i ? "1.15em" : (p.length > 1 ? "-0.3em" : 0)).text(s => s); });
   const ROT = await getJSON("../data/geo/rotulos.json") || { capitais: [], estados: [], ilhas: [] };
+  const gPce = root.append("g");
+  const pceA = gPce.selectAll("path.pce-area").data(parte("pce", "area")).join("path").attr("class", d => "pce-area " + d.properties.status);
+  pceA.append("title").text(d => `Plataforma continental estendida · ${d.properties.nome}: ${d.properties.situacao}. ` +
+    `Área no desenho ≈ ${kmTxt(d.properties.area_km2)}; Marinha: ${d.properties.area_marinha}. ${d.properties.fonte_curta}. Sem valor legal.`);
+  const pceL = gPce.selectAll("path.pce-lim").data(parte("pce", "limite")).join("path").attr("class", d => "pce-lim " + d.properties.status);
+  const pceT = gPce.selectAll("text").data(parte("pce", "rotulo")).join("text").attr("class", "pce-lbl")
+    .each(function (d) { const p = d.properties.texto.split("\n"); d3.select(this).selectAll("tspan").data(p).join("tspan").attr("x", 0).attr("dy", (_, i) => i ? "1.25em" : "-0.3em").text(t => t); });
   const gZee = root.append("g");
-  const zeeP = DATA.zee ? gZee.append("path").datum(DATA.zee).attr("class", "zee") : null;
+  const zeeA = gZee.selectAll("path.zee-area").data(parte("zee", "area")).join("path").attr("class", "zee-area");
+  const zeeL = gZee.selectAll("path.zee-lim").data(parte("zee", "limite")).join("path").attr("class", "zee-lim");
   const zeeTxt = gZee.append("text").attr("class", "zee-lbl").text("Zona Econômica Exclusiva · 200 milhas");
   const ilhas = gZee.append("g").selectAll("g").data(ROT.ilhas || []).join("g").attr("class", "ilha");
   ilhas.append("circle").attr("r", 2.4);
   ilhas.append("text").attr("x", d => d.dx).attr("y", d => d.dy).attr("text-anchor", d => d.a).text(d => d.n);
   ilhas.append("title").text(d => d.nome_completo);
+  const gZc = root.append("g");
+  const zcA = gZc.selectAll("path.zc-area").data(parte("zc", "area")).join("path").attr("class", "zc-area");
+  const zcL = gZc.selectAll("path.zc-lim").data(parte("zc", "limite")).join("path").attr("class", "zc-lim");
   const gMt = root.append("g");
-  const mtP = DATA.mt ? gMt.append("path").datum(DATA.mt).attr("class", "mt") : null;
+  const mtA = gMt.selectAll("path.mt-area").data(parte("mt", "area")).join("path").attr("class", "mt-area");
+  const mtL = gMt.selectAll("path.mt-lim").data([...parte("mt", "limite"), ...parte("mt", "base")]).join("path")
+    .attr("class", d => d.properties.parte === "base" ? "mt-base" : "mt-lim");
+  const MAR = [pceA, pceL, zeeA, zeeL, zcA, zcL, mtA, mtL];
   const states = root.append("g").selectAll("path").data(estados.features).join("path")
     .attr("class", "st").attr("tabindex", 0).attr("aria-label", d => d.properties.name)
     .on("click", (e, d) => { e.stopPropagation(); select(d.properties.sigla); })
@@ -142,7 +162,7 @@ function rewind(f) {
   const caps = gNomes.selectAll("g.cap").data(ROT.capitais).join("g").attr("class", d => d.pais ? "cap pais" : "cap");
   caps.append("circle").attr("r", d => d.pais ? 3.6 : 2.6);
   caps.append("text").attr("x", 6).attr("y", 4).text(d => d.n);
-  const G = { zee: gZee, mt: gMt, rod: gRod, rail: gRail, ports: gPorts, air: gAir, cla: gCla };
+  const G = { zee: gZee, mt: gMt, zc: gZc, pce: gPce, rod: gRod, rail: gRail, ports: gPorts, air: gAir, cla: gCla };
 
   let proj, path, W, H, head = 0, k = 1;
   const zoom = d3.zoom().scaleExtent([0.55, 12]).on("zoom", e => {
@@ -173,12 +193,11 @@ function rewind(f) {
     const pad = wide ? 30 : 12;
     head = wide ? document.getElementById("top").offsetHeight : 0;
     stage.style.setProperty("--head", (head + 4) + "px");
-    const fc = { type: "FeatureCollection", features: [...estados.features, ...(DATA.zee ? [DATA.zee] : [])] };
+    const fc = { type: "FeatureCollection", features: [...estados.features, ...parte("zee", "area")] };
     proj = d3.geoMercator().fitExtent([[pad + (wide ? 40 : 0), head + (wide ? 44 : 24)], [W - dockW - pad, H - (wide ? 50 : 12)]], fc);
     path = d3.geoPath(proj);
     gGrat.datum(d3.geoGraticule().step([5, 5])()).attr("d", path);
-    if (zeeP) zeeP.attr("d", path);
-    if (mtP) mtP.attr("d", path);
+    MAR.forEach(sel => sel.attr("d", path));
     roads.attr("d", path);
     states.attr("d", path);
     vizP.attr("d", path); vizB.attr("d", path);
@@ -214,6 +233,7 @@ function rewind(f) {
     const z = `scale(${1 / k})`;
     zeeTxt.attr("transform", `translate(${proj([-31.2, -15.5])}) rotate(-62) ${z}`);
     ilhas.attr("transform", d => `translate(${proj(d.c)}) ${z}`);
+    pceT.attr("transform", d => `translate(${proj(d.geometry.coordinates)}) ${z}`);
     ufLbl.attr("transform", d => `translate(${proj(d.c)}) ${z}`);
     caps.attr("transform", d => `translate(${proj(d.c)}) ${z}`);
     gNomes.classed("z-cap", k >= 1.9).classed("z-nome", k >= 3.2);
@@ -246,6 +266,9 @@ function rewind(f) {
 
   const ICON = {
     zee: "M2 8c3-3 5 3 8 0s5 3 8 0M2 13c3-3 5 3 8 0s5 3 8 0M2 18c3-3 5 3 8 0s5 3 8 0",
+    mt: "M3 3v18M7 9c2-2 4 2 6 0s4 2 6 0M7 15c2-2 4 2 6 0s4 2 6 0",
+    zc: "M2 8c3-3 5 3 8 0s5 3 8 0M2 15h3M8 15h3M14 15h3M20 15h2",
+    pce: "M2 6h7l3 7 3 3h7M2 20h20",
     cla: "M12 2c3 3 4 7 3 12h-6C8 9 9 5 12 2zM9 14l-3 4h3M15 14l3 4h-3M11 18h2v3h-2z",
     rail: "M7 3h10v12H7zM7 9h10M9 15l-3 6M15 15l3 6M7 19h10",
     ports: "M12 3v12M8 7h8M4 13c0 4 4 7 8 7s8-3 8-7M4 13h3M17 13h3",
@@ -302,7 +325,8 @@ function rewind(f) {
         <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(d3.max(vals))}</span>
         ${vals.length < 27 ? "<span>sem cor = sem dado</span>" : ""}`;
     } else states.style("fill", null);
-    leg += LAYERS.filter(l => l.on && l.cor).map(l => `<span><i class="key" style="background:var(${l.cor})"></i>${l.nome}</span>`).join("");
+    leg += LAYERS.filter(l => l.on && l.cor).map(l => (l.legenda || [{ nome: l.nome }]).map(k =>
+      `<span><i class="key${k.hachura ? " hach" : ""}" style="${k.hachura ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`).join("")).join("");
     document.getElementById("legend").innerHTML = leg;
     states.classed("sel", d => d.properties.sigla === sel).classed("fade", d => sel && d.properties.sigla !== sel);
     states.filter(".sel").raise();
@@ -357,12 +381,12 @@ function rewind(f) {
   if (!reduce) {
     states.style("opacity", 0).transition().delay(d => 150 + path.centroid(d)[0] * 1.1).duration(700).style("opacity", 1)
       .on("end", function () { d3.select(this).style("opacity", null); });
-    if (zeeP) {
-      const L = zeeP.node().getTotalLength();
-      zeeP.style("stroke-dasharray", `${L} ${L}`).style("stroke-dashoffset", L)
+    zeeL.each(function () {
+      const el = d3.select(this), L = this.getTotalLength();
+      el.style("stroke-dasharray", `${L} ${L}`).style("stroke-dashoffset", L)
         .transition().delay(500).duration(2200).ease(d3.easeCubicOut).style("stroke-dashoffset", 0)
-        .on("end", () => zeeP.style("stroke-dasharray", null).style("stroke-dashoffset", null));
-    }
+        .on("end", () => el.style("stroke-dasharray", null).style("stroke-dashoffset", null));
+    });
     rails.style("opacity", 0).transition().delay(1400).duration(900).style("opacity", 0.85)
       .on("end", function () { d3.select(this).style("opacity", null); });
   }

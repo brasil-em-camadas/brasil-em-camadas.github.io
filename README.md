@@ -13,12 +13,14 @@ site/                 o site em si (é isto que vai para o ar)
   2d/                 versão leve em 2D (D3), para aparelhos que não abrem o globo
   data/fontes.json    o registro de todas as camadas: nome, ministério, fonte, nível de confiança
   data/*.json         os dados de cada camada
-  data/geo/*.json     contornos, ferrovias, portos, aeroportos, ZEE
+  data/geo/*.json     contornos, ferrovias, portos, aeroportos e limites do mar (ZEE, mar territorial,
+                      zona contígua, plataforma continental estendida)
   data/relevo/        imagens de relevo do fundo (geradas por scripts/gerar_relevo.py)
   data/luzes/         população de cada município, para as "Luzes à noite" da página 3D
 scripts/
   atualizar_ibge.py   robô que busca dados novos na API do IBGE
   gerar_relevo.py     gera as imagens de relevo (roda só quando acionado à mão)
+  gerar_limites_maritimos.py  gera os limites do mar a partir do Marine Regions (roda só à mão)
   dados/              arquivos de apoio dos robôs (ex.: posição da sede de cada município)
 .github/workflows/
   site.yml            agenda do robô e publicação automática no GitHub Pages
@@ -29,6 +31,8 @@ scripts/
 Todo dia 3 de cada mês o GitHub executa o robô. Ele busca população (por estado e por município) e produção agrícola na API SIDRA do IBGE. Se a busca der certo, os arquivos de dados são trocados e o site é republicado. Se der errado, o dado antigo fica, com a data antiga, e o GitHub avisa por e-mail.
 
 Para rodar na hora: aba **Actions** → **Atualizar dados e publicar** → **Run workflow**.
+
+Os limites do mar não entram no robô mensal, porque mudam raramente. Para refazer (versão nova do Marine Regions ou nova área aprovada pela ONU): `pip install shapely pyproj` e `python scripts/gerar_limites_maritimos.py`. O script confere a versão de cada camada e para sozinho se ela mudou, para lembrar de atualizar as citações e os textos em `site/data/fontes.json`. A Margem Equatorial usa o limite aprovado pela ONU em 2025, porque o Marine Regions ainda traz só o pedido de 2017: os 462 pontos da Tabela 4 do Anexo I do [resumo das recomendações da CLPC](https://static.un.org/Depts/los/clcs_new/submissions_files/bra02_rev17/20250227ComRecBrarev1summary.pdf) estão em `scripts/dados/clpc_margem_equatorial_2025.csv`, e o script confere cada ponto pela distância ao anterior que a própria tabela informa.
 
 ## Níveis de confiança
 
@@ -52,6 +56,7 @@ Para rodar na hora: aba **Actions** → **Atualizar dados e publicar** → **Run
 - IBGE (população, agricultura, contornos dos estados): dados públicos oficiais.
 - Natural Earth (ferrovias, portos, aeroportos, contorno dos países e imagens de relevo): domínio público.
 - Eletropostos: números da ABVE citados por veículos de imprensa, com a fonte indicada em cada estado.
+- Limites do mar: Marine Regions, do Flanders Marine Institute (VLIZ, Bélgica), licença CC-BY 4.0. ZEE versão 12 ([doi:10.14284/632](https://doi.org/10.14284/632)), mar territorial versão 4 ([doi:10.14284/633](https://doi.org/10.14284/633)), zona contígua versão 4 ([doi:10.14284/630](https://doi.org/10.14284/630)), águas interiores versão 4 ([doi:10.14284/631](https://doi.org/10.14284/631)), todas de 2023, e plataforma continental estendida versão 2, de 2024 ([doi:10.14284/697](https://doi.org/10.14284/697)). O site usa um derivado simplificado só do Brasil; o original fica no Marine Regions, que pede para não ser redistribuído em outros lugares. Os desenhos não têm valor legal. Margem Equatorial: pontos do limite publicados pela CLPC/ONU (documento público das Nações Unidas). Situação de cada área da plataforma na ONU (CLPC): página do LEPLAC da Marinha (SECIRM).
 - Luzes à noite: população de cada município pela API SIDRA do IBGE (Censo 2022); posição das sedes municipais da base aberta [municipios-brasileiros](https://github.com/kelvins/municipios-brasileiros) (licença MIT), cópia em `scripts/dados/`; iluminação noturna NASA Black Marble via GIBS (domínio público).
 
 - Mapa 3D: imagem do planeta NASA Blue Marble via GIBS (domínio público); altitude do terreno Terrain Tiles na AWS (dados abertos); motor MapLibre GL JS 5.24.0 (licença BSD, cópia em `site/3d/vendor/`); letras Open Sans (licença Apache 2.0), do projeto openmaptiles/fonts.

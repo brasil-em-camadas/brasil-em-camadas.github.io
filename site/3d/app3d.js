@@ -13,6 +13,7 @@ const NIVEL = {
 const RAMP = ["--q1", "--q2", "--q3", "--q4", "--q5"];
 const fmt = n => n.toLocaleString("pt-BR");
 const fmt1 = n => n.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
+const kmTxt = a => a >= 1e6 ? `${(a / 1e6).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} milhão de km²` : `${fmt(Math.round(a / 1e3))} mil km²`;
 const reais = mil => mil >= 1e6 ? `R$ ${fmt1(mil / 1e6)} bi` : `R$ ${fmt(Math.round(mil / 1e3))} mi`;
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const pill = n => `<span class="pill ${NIVEL[n][0]}">${NIVEL[n][1]}</span>`;
@@ -97,9 +98,10 @@ function quintis(vals) {
   const fonte = (estilo) => [estilo];
   const SEMI = "Open Sans Semibold", REG = "Open Sans Regular", ITA = "Open Sans Italic";
   const halo = { "text-halo-color": "rgba(6,14,10,.85)", "text-halo-width": 1.6 };
+  const AREA = ["==", ["get", "parte"], "area"], LIMITE = ["==", ["get", "parte"], "limite"];
   const map = new maplibregl.Map({
     container: "map",
-    attributionControl: { compact: true, customAttribution: "NASA Blue Marble · Terrain Tiles (AWS) · Natural Earth · IBGE" },
+    attributionControl: { compact: true, customAttribution: "NASA Blue Marble · Terrain Tiles (AWS) · Natural Earth · IBGE · Marine Regions" },
     style: {
       version: 8,
       projection: { type: "globe" },
@@ -114,6 +116,8 @@ function quintis(vals) {
         mundo: { type: "geojson", data: mundo || fc([]) },
         zee: { type: "geojson", data: DATA.zee || fc([]) },
         mt: { type: "geojson", data: DATA.mt || fc([]) },
+        zc: { type: "geojson", data: DATA.zc || fc([]) },
+        pce: { type: "geojson", data: DATA.pce || fc([]) },
         rod: { type: "geojson", data: DATA.rod || fc([]) },
         trilhos: { type: "geojson", data: trilhos },
         portos: { type: "geojson", data: portos },
@@ -128,13 +132,26 @@ function quintis(vals) {
         { id: "fundo", type: "background", paint: { "background-color": "#0a1d2a" } },
         { id: "nasa", type: "raster", source: "nasa", paint: { "raster-brightness-max": 0.62, "raster-saturation": -0.15, "raster-contrast": 0.08, "raster-fade-duration": 200 } },
         { id: "paises-borda", type: "line", source: "mundo", paint: { "line-color": "rgba(214,198,150,.35)", "line-width": 0.6 } },
-        { id: "zee-fill", type: "fill", source: "zee", paint: { "fill-color": "rgba(88,207,224,.10)" } },
-        { id: "mt-fill", type: "fill", source: "mt", paint: { "fill-color": "rgba(159,230,242,.16)" } },
+        /* mar: cada arquivo traz a área ("area") e as linhas de limite separadas ("limite", "base") */
+        { id: "pce-fill-rec", type: "fill", source: "pce", filter: ["all", AREA, ["==", ["get", "status"], "reconhecida"]],
+          paint: { "fill-color": "rgba(229,143,211,.17)" } },
+        { id: "pce-fill-ana", type: "fill", source: "pce", filter: ["all", AREA, ["==", ["get", "status"], "em_analise"]],
+          paint: { "fill-pattern": "hachura" } },
+        { id: "zee-fill", type: "fill", source: "zee", filter: AREA, paint: { "fill-color": "rgba(88,207,224,.10)" } },
+        { id: "zc-fill", type: "fill", source: "zc", filter: AREA, paint: { "fill-color": "rgba(95,208,168,.16)" } },
+        { id: "mt-fill", type: "fill", source: "mt", filter: AREA, paint: { "fill-color": "rgba(159,230,242,.2)" } },
         { id: "estados-fill", type: "fill", source: "estados",
           paint: { "fill-color": cor("--land"),
             "fill-opacity": ["case", ["boolean", ["feature-state", "fade"], false], 0.18, ["boolean", ["feature-state", "hover"], false], 0.95, 0.82] } },
-        { id: "zee-line", type: "line", source: "zee", paint: { "line-color": cor("--sea-line"), "line-width": 1.4, "line-dasharray": [3, 2] } },
-        { id: "mt-line", type: "line", source: "mt", paint: { "line-color": cor("--mt"), "line-width": 0.7, "line-opacity": 0.6 } },
+        { id: "zee-line", type: "line", source: "zee", filter: LIMITE, paint: { "line-color": cor("--sea-line"), "line-width": 1.4, "line-dasharray": [3, 2] } },
+        { id: "zc-line", type: "line", source: "zc", filter: LIMITE, paint: { "line-color": cor("--zc"), "line-width": 0.8, "line-opacity": 0.7 } },
+        { id: "mt-line", type: "line", source: "mt", filter: LIMITE, paint: { "line-color": cor("--mt"), "line-width": 0.8, "line-opacity": 0.7 } },
+        { id: "mt-base", type: "line", source: "mt", filter: ["==", ["get", "parte"], "base"],
+          layout: { "line-cap": "round" }, paint: { "line-color": cor("--mt"), "line-width": 1.2, "line-opacity": 0.85, "line-dasharray": [0.1, 2.2] } },
+        { id: "pce-line-rec", type: "line", source: "pce", filter: ["all", LIMITE, ["==", ["get", "status"], "reconhecida"]],
+          paint: { "line-color": cor("--pce"), "line-width": 1.3 } },
+        { id: "pce-line-ana", type: "line", source: "pce", filter: ["all", LIMITE, ["==", ["get", "status"], "em_analise"]],
+          paint: { "line-color": cor("--pce"), "line-width": 1.2, "line-opacity": 0.85, "line-dasharray": [3, 2] } },
         { id: "estados-line", type: "line", source: "estados", paint: { "line-color": "rgba(220,240,225,.55)", "line-width": 0.8 } },
         { id: "rodovias", type: "line", source: "rod",
           paint: { "line-color": cor("--road"), "line-opacity": ["case", ["==", ["get", "type"], "Major Highway"], 0.6, 0.38],
@@ -143,7 +160,10 @@ function quintis(vals) {
           paint: { "line-color": cor("--rail"), "line-opacity": 0.9, "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1, 8, 2.6] } },
         { id: "estado-sel", type: "line", source: "estados", filter: ["==", ["get", "sigla"], ""],
           paint: { "line-color": cor("--accent"), "line-width": 2.6 } },
-        { id: "zee-rotulo", type: "symbol", source: "zee",
+        { id: "pce-rotulo", type: "symbol", source: "pce", filter: ["==", ["get", "parte"], "rotulo"],
+          layout: { "text-field": ["get", "texto"], "text-font": fonte(SEMI), "text-size": 10, "text-letter-spacing": 0.12, "text-transform": "uppercase", "text-max-width": 14 },
+          paint: { "text-color": "rgba(244,196,235,.9)", ...halo } },
+        { id: "zee-rotulo", type: "symbol", source: "zee", filter: LIMITE,
           layout: { "symbol-placement": "line", "symbol-spacing": 900, "text-field": "ZONA ECONÔMICA EXCLUSIVA · 200 MILHAS", "text-font": fonte(SEMI), "text-size": 10, "text-letter-spacing": 0.2, "text-max-angle": 30 },
           paint: { "text-color": "rgba(159,230,242,.75)", ...halo } },
         { id: "portos", type: "circle", source: "portos",
@@ -174,6 +194,15 @@ function quintis(vals) {
     center: [-50, -14], zoom: 2.6, maxPitch: 75,
     pixelRatio: Math.min(devicePixelRatio || 1, innerWidth < 900 ? 1.5 : 2)
   });
+  /* hachura (listras diagonais) da plataforma continental ainda em análise na ONU */
+  map.on("styleimagemissing", e => {
+    if (e.id !== "hachura" || map.hasImage("hachura")) return;
+    const n = 16, c = document.createElement("canvas"); c.width = c.height = n;
+    const x = c.getContext("2d");
+    x.strokeStyle = cor("--pce"); x.globalAlpha = 0.6; x.lineWidth = 2.2;
+    x.beginPath(); x.moveTo(0, n); x.lineTo(n, 0); x.moveTo(-n / 2, n / 2); x.lineTo(n / 2, -n / 2); x.moveTo(n / 2, n * 1.5); x.lineTo(n * 1.5, n / 2); x.stroke();
+    map.addImage("hachura", x.getImageData(0, 0, n, n), { pixelRatio: 2 });
+  });
   let falhouNasa = false;
   map.on("error", e => {
     /* se a imagem da NASA não carregar, usa o relevo próprio do Natural Earth (já está no site) */
@@ -196,7 +225,8 @@ function quintis(vals) {
     mkCla = new maplibregl.Marker({ element: el }).setLngLat(CLA.ponto);
   }
 
-  const G = { zee: ["zee-fill", "zee-line", "zee-rotulo", "ilhas-ponto", "ilhas-rotulo"], mt: ["mt-fill", "mt-line"], rod: ["rodovias"],
+  const G = { zee: ["zee-fill", "zee-line", "zee-rotulo", "ilhas-ponto", "ilhas-rotulo"], mt: ["mt-fill", "mt-line", "mt-base"], zc: ["zc-fill", "zc-line"],
+    pce: ["pce-fill-rec", "pce-fill-ana", "pce-line-rec", "pce-line-ana", "pce-rotulo"], rod: ["rodovias"],
     rail: ["ferrovias"], ports: ["portos"], air: ["aeroportos"] };
 
   /* ---------- painel e enquadramento ---------- */
@@ -288,6 +318,16 @@ function quintis(vals) {
       new maplibregl.Popup({ closeButton: false, offset: 10 }).setLngLat(f.geometry.coordinates).setHTML(`<b>${tipo}</b><br>${f.properties.n}`).addTo(map);
       return;
     }
+    const pc = map.queryRenderedFeatures(e.point, { layers: ["pce-fill-rec", "pce-fill-ana"].filter(l => map.getLayoutProperty(l, "visibility") !== "none") });
+    if (pc.length) {
+      const p = pc[0].properties;
+      /* perto do painel, o quadro abre para a esquerda, para não ficar escondido atrás dele */
+      const perto = e.point.x > map.getCanvas().clientWidth - espacoPainel() - 320;
+      new maplibregl.Popup({ closeButton: false, offset: 6, maxWidth: "290px", ...(perto ? { anchor: "right" } : {}) }).setLngLat(e.lngLat)
+        .setHTML(`<b>Plataforma continental estendida</b><br>${p.nome}: ${p.situacao}.<br>Área no desenho: ≈ ${kmTxt(p.area_km2)} · Marinha: ${p.area_marinha}
+          <br><span class="pop-fonte">${p.fonte_curta}. Desenho para consulta, sem valor legal.</span>`).addTo(map);
+      return;
+    }
     const st = map.queryRenderedFeatures(e.point, { layers: ["estados-fill"] });
     if (st.length) selecionar(st[0].properties.sigla);
     else if (sel) selecionar(sel);
@@ -296,6 +336,9 @@ function quintis(vals) {
   /* ---------- ícones, filtro por ministério, camadas ---------- */
   const ICON = {
     zee: "M2 8c3-3 5 3 8 0s5 3 8 0M2 13c3-3 5 3 8 0s5 3 8 0M2 18c3-3 5 3 8 0s5 3 8 0",
+    mt: "M3 3v18M7 9c2-2 4 2 6 0s4 2 6 0M7 15c2-2 4 2 6 0s4 2 6 0",
+    zc: "M2 8c3-3 5 3 8 0s5 3 8 0M2 15h3M8 15h3M14 15h3M20 15h2",
+    pce: "M2 6h7l3 7 3 3h7M2 20h20",
     cla: "M12 2c3 3 4 7 3 12h-6C8 9 9 5 12 2zM9 14l-3 4h3M15 14l3 4h-3M11 18h2v3h-2z",
     rail: "M7 3h10v12H7zM7 9h10M9 15l-3 6M15 15l3 6M7 19h10",
     ports: "M12 3v12M8 7h8M4 13c0 4 4 7 8 7s8-3 8-7M4 13h3M17 13h3",
@@ -381,7 +424,8 @@ function quintis(vals) {
         <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(Math.max(...vals))}</span>
         ${vals.length < 27 ? "<span>sem cor = sem dado</span>" : ""}`;
     } else if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", cor("--land"));
-    leg += LAYERS.filter(l => l.on && l.cor).map(l => `<span><i class="key" style="background:var(${l.cor})"></i>${l.nome}</span>`).join("");
+    leg += LAYERS.filter(l => l.on && l.cor).map(l => (l.legenda || [{ nome: l.nome }]).map(k =>
+      `<span><i class="key${k.hachura ? " hach" : ""}" style="${k.hachura ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`).join("")).join("");
     document.getElementById("legend").innerHTML = leg;
     document.getElementById("back").hidden = !sel;
     document.getElementById("where").textContent = sel ? `${NAME[sel]} · ${sel}` : "Brasil · 27 UFs";

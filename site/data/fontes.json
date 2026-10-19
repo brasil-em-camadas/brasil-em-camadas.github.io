@@ -59,8 +59,8 @@
    "tipo": "area",
    "arquivo": "geo/zee.json",
    "ministerio": "def",
-   "nivel": "calculado",
-   "fonte": "Faixa de 200 milhas náuticas a partir da costa e das ilhas oceânicas, calculada; área ≈ 3,62 milhões de km² (oficial: cerca de 3,6 milhões)",
+   "nivel": "base",
+   "fonte": "Marine Regions (VLIZ), versão 12 de 2023: faixa das 12 às 200 milhas, ≈ 3,42 milhões de km²; com o mar territorial, ≈ 3,57 milhões",
    "ligada": true,
    "cor": "--sea-line"
   },
@@ -70,10 +70,41 @@
    "tipo": "area",
    "arquivo": "geo/mar_territorial.json",
    "ministerio": "def",
-   "nivel": "calculado",
-   "fonte": "Faixa de 12 milhas náuticas a partir da costa e das ilhas, calculada",
+   "nivel": "base",
+   "fonte": "Marine Regions (VLIZ), versão 4 de 2023: 12 milhas a partir das linhas de base, pontilhadas onde são retas (Decreto 8.400/2015); entre elas e a costa ficam as águas interiores, sem cor. ≈ 155 mil km²",
    "ligada": true,
    "cor": "--mt"
+  },
+  {
+   "id": "zc",
+   "nome": "Zona contígua",
+   "tipo": "area",
+   "arquivo": "geo/zona_contigua.json",
+   "ministerio": "def",
+   "nivel": "base",
+   "fonte": "Marine Regions (VLIZ), versão 4 de 2023: das 12 às 24 milhas, faixa em que o Brasil fiscaliza alfândega, impostos, imigração e saúde (Lei 8.617/1993), ≈ 167 mil km²",
+   "ligada": false,
+   "cor": "--zc"
+  },
+  {
+   "id": "pce",
+   "nome": "Plataforma continental estendida",
+   "tipo": "area",
+   "arquivo": "geo/plataforma_estendida.json",
+   "ministerio": "def",
+   "nivel": "base",
+   "fonte": "Marine Regions (VLIZ), versão 2 de 2024, e ONU: Região Sul (2019) e Margem Equatorial (2025, com os pontos do documento da ONU) reconhecidas; Margens Oriental e Meridional em análise, hachuradas. Clique numa área para ver os detalhes",
+   "ligada": false,
+   "cor": "--pce",
+   "legenda": [
+    {
+     "nome": "Plataforma estendida reconhecida"
+    },
+    {
+     "nome": "em análise na ONU",
+     "hachura": true
+    }
+   ]
   },
   {
    "id": "rod",
@@ -133,13 +164,6 @@
     -2.373
    ],
    "uf": "MA"
-  },
-  {
-   "id": "p-pce",
-   "nome": "Plataforma continental estendida",
-   "ministerio": "def",
-   "nivel": "pendente",
-   "fonte": "ONU/CLPC e Marinha (LEPLAC): Sul (2019) e Margem Equatorial (2025) reconhecidas; Oriental/Meridional em análise"
   },
   {
    "id": "p-oil",

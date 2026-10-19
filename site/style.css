@@ -5,7 +5,7 @@
   --land:#1d4a2c; --land-hi:#28603a; --edge:#5f9a6a;
   --ink:#ece9de; --muted:#a3ab9c; --dim:#6c7466; --hair:rgba(214,198,150,.16);
   --glass:rgba(10,18,20,.8); --bar:rgba(9,15,17,.94);
-  --accent:#e6b450; --road:#e9dfc4; --mt:#9fe6f2; --sea-line:#58cfe0; --rail:#e39a58; --port:#f4f7f5; --air:#a9bdf7; --cla:#ff7a6b;
+  --accent:#e6b450; --road:#e9dfc4; --mt:#9fe6f2; --sea-line:#58cfe0; --rail:#e39a58; --port:#f4f7f5; --air:#a9bdf7; --cla:#ff7a6b; --zc:#5fd0a8; --pce:#e58fd3;
   --q1:#1d4a2c; --q2:#2b6338; --q3:#3f7e44; --q4:#6aa055; --q5:#a8c97a;
   --t-api:#7fd6c9; --t-manual:#b7d98a; --t-entidade:#e8b75a; --t-base:#a9bdf7; --t-calculado:#c9a2ff; --t-pendente:#ff8f80;
   --f-display:"Big Shoulders Display","Arial Narrow",sans-serif;
@@ -47,7 +47,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .st:hover{fill:var(--land-hi)}
 .st.sel{stroke:var(--accent);stroke-width:2;filter:drop-shadow(0 0 10px rgba(155,227,165,.35))}
 .st.fade{opacity:.3}
-.zee{fill:rgba(88,207,224,.05);stroke:var(--sea-line);stroke-width:1.2;stroke-dasharray:5 4;vector-effect:non-scaling-stroke}
 .rail{fill:none;stroke:var(--rail);stroke-width:1.2;vector-effect:non-scaling-stroke;opacity:.85;transition:opacity .4s,stroke-width .4s}
 .rail.off{opacity:.1}.rail.hi{stroke-width:2.4;opacity:1;filter:drop-shadow(0 0 3px rgba(227,154,88,.8))}
 .port{fill:var(--port);stroke:var(--night);stroke-width:1;vector-effect:non-scaling-stroke}
@@ -64,6 +63,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
   display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;max-width:min(700px,calc(100% - 520px));text-shadow:0 1px 3px rgba(0,0,0,.8)}
 .ramp{display:flex}.ramp i{display:block;width:20px;height:7px}
 .key{display:inline-block;width:16px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+.key.hach{height:9px;border-radius:1px;background:repeating-linear-gradient(135deg,currentColor 0 1.5px,transparent 1.5px 4px)}
 
 .dock{position:absolute;top:var(--head,96px);right:max(20px,env(safe-area-inset-right,0px));bottom:14px;width:440px;z-index:3;
   background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:14px;
@@ -128,9 +128,23 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .dock[hidden],.unfold[hidden]{display:none}
 
 .viz-lbl.mar{font-size:12px;letter-spacing:.5em;fill:rgba(159,230,242,.32);font-style:italic}
-.zee{fill:rgba(88,207,224,.07);stroke:var(--sea-line);stroke-width:1.4;stroke-dasharray:6 4}
-.zee-lbl{font:500 10px var(--f-mono);letter-spacing:.22em;text-transform:uppercase;fill:rgba(159,230,242,.55);text-anchor:middle;pointer-events:none}
-.mt{fill:rgba(159,230,242,.10);stroke:var(--mt);stroke-width:.7;stroke-opacity:.6;vector-effect:non-scaling-stroke;pointer-events:none}
+/* camadas do mar (versão leve): áreas com preenchimento fraco e linhas de limite separadas */
+.zee-area{fill:rgba(88,207,224,.07);stroke:none;pointer-events:none}
+.zee-lim{fill:none;stroke:var(--sea-line);stroke-width:1.4;stroke-dasharray:6 4;vector-effect:non-scaling-stroke;pointer-events:none}
+.zc-area{fill:rgba(95,208,168,.10);stroke:none;pointer-events:none}
+.zc-lim{fill:none;stroke:var(--zc);stroke-width:.7;stroke-opacity:.75;vector-effect:non-scaling-stroke;pointer-events:none}
+.pce-area.reconhecida{fill:rgba(229,143,211,.16);stroke:none}
+.pce-area.em_analise{fill:url(#hachura);stroke:none}
+.hach-l{stroke:var(--pce);stroke-opacity:.5;stroke-width:1.3}
+.pce-lim{fill:none;stroke:var(--pce);stroke-width:1.2;vector-effect:non-scaling-stroke;pointer-events:none}
+.pce-lim.em_analise{stroke-dasharray:5 4;stroke-opacity:.85}
+.pce-lbl{font:500 9px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;fill:rgba(244,196,235,.9);text-anchor:middle;pointer-events:none;
+  paint-order:stroke;stroke:rgba(4,12,18,.8);stroke-width:3px}
+.zee-lbl{font:500 10px var(--f-mono);letter-spacing:.22em;text-transform:uppercase;fill:rgba(159,230,242,.6);text-anchor:middle;pointer-events:none;
+  paint-order:stroke;stroke:rgba(4,12,18,.75);stroke-width:3px}
+.mt-area{fill:rgba(159,230,242,.12);stroke:none;pointer-events:none}
+.mt-lim{fill:none;stroke:var(--mt);stroke-width:.7;stroke-opacity:.7;vector-effect:non-scaling-stroke;pointer-events:none}
+.mt-base{fill:none;stroke:var(--mt);stroke-width:1;stroke-dasharray:1 3;stroke-linecap:round;stroke-opacity:.85;vector-effect:non-scaling-stroke;pointer-events:none}
 .ilha circle{fill:var(--sea-line);stroke:var(--night);stroke-width:1}
 .ilha text{font:500 10.5px var(--f-body);fill:#cdeff5;paint-order:stroke;stroke:rgba(4,12,18,.85);stroke-width:3px;pointer-events:none}
 .road{fill:none;stroke:var(--road);stroke-width:.6;stroke-opacity:.35;vector-effect:non-scaling-stroke;pointer-events:none}

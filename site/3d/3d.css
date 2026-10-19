@@ -37,6 +37,8 @@
 @keyframes gira{to{transform:rotate(360deg)}}
 /* celular: A− / A+ na mesma linha do título da ficha, sem empurrar o texto para baixo */
 @media (max-width:900px){.dock{width:auto}.letra{clear:none;margin:-7px -4px 4px 12px}}
+/* legenda acima dos créditos do mapa (no computador os dois ficam no rodapé do mapa) */
+@media (min-width:901px){.legend{bottom:34px}}
 /* luzes à noite */
 .paint.apagado{opacity:.5}
 .luz-info{display:grid;gap:6px;margin:2px 0 4px}
