@@ -14,8 +14,8 @@ Saídas em site/data/geo/:
   rodovias.json             rodovias com sigla BR (ou de jurisdição federal), construídas, pavimentadas ou não; os trechos
                             administrados pelos estados (coincidentes com estaduais ou delegados) vêm marcados e ficam fora da soma
   rodovias_estaduais.json   rodovias estaduais pavimentadas (sigla do estado, ex.: SP-330)
-  ferrovias.json            ferrovias em operação e em obras (sem metrô, aeromóvel, abandonadas e destruídas),
-                            cortadas na divisa dos estados, com os km de cada estado
+  ferrovias.json            ferrovias existentes e em obras (sem metrô, aeromóvel, abandonadas e destruídas), cortadas na
+                            divisa dos estados, com os km de cada estado (existentes e em operação segundo o IBGE)
   portos.json               complexos portuários (marítimos e fluviais), com o estado de cada um
 """
 import argparse
@@ -182,9 +182,12 @@ def ferrovias(z):
                 or URBANOS.match((d["nome"] or "").strip())):
             continue
         obra = d["situacaofi"] == "Em construção"
-        grupos[(operadora(d["nome"]), int(obra), d["bitola"] or "")].extend(getattr(g, "geoms", [g]))
-    trechos, km_uf, km_obra = [], defaultdict(float), 0.0
-    for (op, obra, bitola), linhas in sorted(grupos.items()):
+        # "em operação" só quando o IBGE diz que sim; nos outros trechos a base não informa (inclusive linhas movimentadas,
+        # como parte da Rumo Malha Norte): continuam no mapa e na soma, mas a ficha separa os dois números
+        sem_info = not obra and d["operaciona"] != "Sim"
+        grupos[(operadora(d["nome"]), int(obra), d["bitola"] or "", int(sem_info))].extend(getattr(g, "geoms", [g]))
+    trechos, km_uf, km_obra = [], defaultdict(lambda: [0.0, 0.0]), 0.0   # por estado: [existentes, em operação segundo o IBGE]
+    for (op, obra, bitola, sem_info), linhas in sorted(grupos.items()):
         g = linemerge(linhas)
         for i in arvore.query(g):
             uf, poli = ufs[i]
@@ -195,23 +198,30 @@ def ferrovias(z):
             if obra:
                 km_obra += k
             else:
-                km_uf[uf] += k
+                km_uf[uf][0] += k
+                km_uf[uf][1] += 0 if sem_info else k
             s = simples(parte, TOL_FER)
             for linha in getattr(s, "geoms", [s]):
                 if linha.geom_type == "LineString" and len(linha.coords) >= 2:
                     t = {"uf": uf, "l": [list(c) for c in linha.coords], "op": op}
                     if obra:
                         t["obra"] = 1
+                    if sem_info:
+                        t["si"] = 1
                     if bitola and bitola != "Desconhecida":
                         t["b"] = bitola.replace("  ", " ")
                     trechos.append(t)
     meta = {"fonte": f"IBGE, Base Cartográfica Contínua 1:250.000 ({VERSAO})", "nivel": "manual", "baixado_em": date.today().isoformat(),
-            "titulo": "Ferrovias", "km_em_operacao": round(sum(km_uf.values())), "km_em_obras": round(km_obra),
-            "nota": "sem metrô, aeromóvel, linhas abandonadas e destruídas; trechos de situação não informada entram como existentes"}
-    dados = {"meta": meta, "km_por_uf": {k: round(v) for k, v in sorted(km_uf.items(), key=lambda x: -x[1])}, "trechos": trechos}
+            "titulo": "Ferrovias", "km_existentes": round(sum(v[0] for v in km_uf.values())),
+            "km_em_operacao": round(sum(v[1] for v in km_uf.values())), "km_em_obras": round(km_obra),
+            "nota": "sem metrô, aeromóvel, linhas abandonadas e destruídas; em operação = o IBGE informa que sim; "
+                    "nos trechos com si=1 a base não informa (entram como existentes)",
+            "km_por_uf_campos": ["existentes", "em operação segundo o IBGE"]}
+    dados = {"meta": meta, "km_por_uf": {k: [round(a) for a in v] for k, v in sorted(km_uf.items(), key=lambda x: -x[1][0])}, "trechos": trechos}
     texto = json.dumps(dados, ensure_ascii=False, separators=(",", ":"))
     (GEO / "ferrovias.json").write_text(texto, encoding="utf-8")
-    print(f"ferrovias.json: {len(trechos)} trechos, {meta['km_em_operacao']} km em operação, {meta['km_em_obras']} km em obras, {len(texto) // 1024} KB")
+    print(f"ferrovias.json: {len(trechos)} trechos, {meta['km_existentes']} km existentes ({meta['km_em_operacao']} em operação segundo o IBGE), "
+          f"{meta['km_em_obras']} km em obras, {len(texto) // 1024} KB")
 
 
 def portos(z):

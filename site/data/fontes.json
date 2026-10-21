@@ -181,7 +181,7 @@
    "arquivo": "geo/ferrovias.json",
    "ministerio": "trans",
    "nivel": "manual",
-   "fonte": "IBGE, base cartográfica 1:250.000 (BC250, versão 2025): 26 mil km em operação e 955 km em obras (tracejados), com a operadora de cada trecho; sem metrô e sem linhas abandonadas",
+   "fonte": "IBGE, base cartográfica 1:250.000 (BC250, versão 2025): 26 mil km de ferrovias (22 mil em operação segundo o IBGE; nos outros trechos a base não informa) e 955 km em obras (tracejados), com a operadora de cada trecho; sem metrô e sem linhas abandonadas",
    "ligada": true,
    "cor": "--rail",
    "legenda": [

@@ -93,7 +93,7 @@ function quintis(vals) {
   const ufPts = fc((ROT ? ROT.estados : []).map(e => ponto(e.c, { s: e.s, n: e.n })));
   const capPts = fc((ROT ? ROT.capitais : []).map(c => ponto(c.c, { n: c.n, pais: !!c.pais })));
   const ilhaPts = fc((ROT ? ROT.ilhas : []).map(i => ponto(i.c, { n: i.n, nome: i.nome_completo })));
-  const trilhos = fc(DATA.rail ? DATA.rail.trechos.map(t => ({ type: "Feature", properties: { uf: t.uf, op: t.op, obra: t.obra || 0, b: t.b || "" }, geometry: { type: "LineString", coordinates: t.l } })) : []);
+  const trilhos = fc(DATA.rail ? DATA.rail.trechos.map(t => ({ type: "Feature", properties: { uf: t.uf, op: t.op, obra: t.obra || 0, si: t.si || 0, b: t.b || "" }, geometry: { type: "LineString", coordinates: t.l } })) : []);
   const portos = fc((DATA.ports || []).map(p => ponto(p.c, { n: p.n, uf: p.uf, org: p.org || 0, obra: p.obra || 0 })));
   const aeros = fc((DATA.air || []).map(a => ponto(a.c, { n: a.n + (a.i ? " (" + a.i + ")" : ""), uf: a.uf })));
   /* poços em produção: [lon, lat, boe/dia, barris de petróleo/dia, mil m³ de gás/dia, poço, campo, UF, mar/terra] */
@@ -507,7 +507,7 @@ function quintis(vals) {
         return;
       }
       const html = trem
-        ? `<b>Ferrovia${p.obra == 1 ? " em obras" : ""}</b><br>${esc(p.op)}${p.b ? "<br>Bitola " + esc(p.b).toLowerCase() : ""}`
+        ? `<b>Ferrovia${p.obra == 1 ? " em obras" : ""}</b><br>${esc(p.op)}${p.b ? "<br>Bitola " + esc(p.b).toLowerCase() : ""}${p.si == 1 ? "<br>A base não informa se está em operação" : ""}`
         : f.layer.id === "rodovias-est"
           ? `<b>${esc(p.s)}</b><br>Rodovia estadual pavimentada`
           : p.e == 1
@@ -855,7 +855,8 @@ function quintis(vals) {
     const s = sel;
     const rk = Object.entries(POP).sort((a, b) => b[1] - a[1]).findIndex(e => e[0] === s) + 1;
     const Pt = (DATA.ports || []).filter(p => p.uf === s), A = (DATA.air || []).filter(a => a.uf === s);
-    const km = DATA.rail ? DATA.rail.km_por_uf[s] || 0 : 0;
+    /* ferrovias por estado: [existentes, em operação segundo o IBGE] (arquivo antigo: um número só) */
+    const fv = DATA.rail ? DATA.rail.km_por_uf[s] || 0 : 0, fr = typeof fv === "number" ? [fv, fv] : fv;
     const kr = DATA.rod && DATA.rod.meta && DATA.rod.meta.km_por_uf ? DATA.rod.meta.km_por_uf[s] : null;
     const ev = DATA.evpc && DATA.evpc.valores[s];
     const ag = DATA.agro && DATA.agro.valores[s];
@@ -872,7 +873,8 @@ function quintis(vals) {
       <div class="sec"><h3>Logística</h3>
         ${kr ? `<div class="kv"><span>Rodovias federais</span><span class="v">≈ ${fmt(kr[0])} km</span></div>
           <div class="list">${fmt(kr[1])} km pavimentados, sob administração federal (inclusive concessões).${kr[2] ? ` Mais ≈ ${fmt(kr[2])} km com sigla BR administrados pelo estado (rodovias estaduais coincidentes ou trechos delegados), em outra cor no mapa.` : ""}</div>` : ""}
-        <div class="kv"><span>Ferrovias em operação</span><span class="v">${km ? "≈ " + fmt(km) + " km" : "nenhuma na base"}</span></div>
+        <div class="kv"><span>Ferrovias</span><span class="v">${fr[0] ? "≈ " + fmt(fr[0]) + " km" : "nenhuma na base"}</span></div>
+        ${fr[0] ? `<div class="list">${fr[1] ? `≈ ${fmt(fr[1])} km em operação segundo o IBGE${fr[1] < fr[0] ? `; nos outros ≈ ${fmt(fr[0] - fr[1])} km a base não informa` : ""}` : "A base do IBGE não informa se estão em operação"}.</div>` : ""}
         <div class="kv"><span>Portos e terminais</span><span class="v">${Pt.length}</span></div>
         ${Pt.length ? `<div class="list">${Pt.map(p => esc(p.n)).join(", ")}</div>` : ""}
         ${pill("manual")} <span class="note">IBGE, base cartográfica 1:250.000 (BC250, 2025); medidas no desenho do mapa.</span>

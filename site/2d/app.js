@@ -170,7 +170,7 @@ function rewind(f) {
   const RAIL = DATA.rail ? DATA.rail.trechos : [];
   const gRail = root.append("g");
   const rails = gRail.selectAll("path").data(RAIL).join("path").attr("class", d => "rail" + (d.obra ? " obra" : ""));
-  rails.append("title").text(d => `Ferrovia${d.obra ? " em obras" : ""} · ${d.op}${d.b ? " · bitola " + d.b.toLowerCase() : ""} (IBGE, BC250 2025)`);
+  rails.append("title").text(d => `Ferrovia${d.obra ? " em obras" : ""} · ${d.op}${d.b ? " · bitola " + d.b.toLowerCase() : ""}${d.si ? " · a base não informa se está em operação" : ""} (IBGE, BC250 2025)`);
   /* linhas de transmissão (EPE), sob demanda: mais grossas quanto maior a tensão */
   const gLt = root.append("g");
   let ltP = gLt.selectAll("path");
@@ -595,7 +595,8 @@ function rewind(f) {
     const s = sel;
     const rk = Object.entries(POP).sort((a, b) => b[1] - a[1]).findIndex(e => e[0] === s) + 1;
     const Pt = (DATA.ports || []).filter(p => p.uf === s), A = (DATA.air || []).filter(a => a.uf === s);
-    const km = DATA.rail ? DATA.rail.km_por_uf[s] || 0 : 0;
+    /* ferrovias por estado: [existentes, em operação segundo o IBGE] (arquivo antigo: um número só) */
+    const fv = DATA.rail ? DATA.rail.km_por_uf[s] || 0 : 0, fr = typeof fv === "number" ? [fv, fv] : fv;
     const kr = DATA.rod && DATA.rod.meta && DATA.rod.meta.km_por_uf ? DATA.rod.meta.km_por_uf[s] : null;
     const ev = DATA.evpc && DATA.evpc.valores[s];
     const ag = DATA.agro && DATA.agro.valores[s];
@@ -612,7 +613,8 @@ function rewind(f) {
       <div class="sec"><h3>Logística</h3>
         ${kr ? `<div class="kv"><span>Rodovias federais</span><span class="v">≈ ${fmt(kr[0])} km</span></div>
           <div class="list">${fmt(kr[1])} km pavimentados, sob administração federal (inclusive concessões).${kr[2] ? ` Mais ≈ ${fmt(kr[2])} km com sigla BR administrados pelo estado (rodovias estaduais coincidentes ou trechos delegados), em outra cor no mapa.` : ""}</div>` : ""}
-        <div class="kv"><span>Ferrovias em operação</span><span class="v">${km ? "≈ " + fmt(km) + " km" : "nenhuma na base"}</span></div>
+        <div class="kv"><span>Ferrovias</span><span class="v">${fr[0] ? "≈ " + fmt(fr[0]) + " km" : "nenhuma na base"}</span></div>
+        ${fr[0] ? `<div class="list">${fr[1] ? `≈ ${fmt(fr[1])} km em operação segundo o IBGE${fr[1] < fr[0] ? `; nos outros ≈ ${fmt(fr[0] - fr[1])} km a base não informa` : ""}` : "A base do IBGE não informa se estão em operação"}.</div>` : ""}
         <div class="kv"><span>Portos e terminais</span><span class="v">${Pt.length}</span></div>
         ${Pt.length ? `<div class="list">${Pt.map(p => esc(p.n)).join(", ")}</div>` : ""}
         ${pill("manual")} <span class="note">IBGE, base cartográfica 1:250.000 (BC250, 2025); medidas no desenho do mapa.</span>
