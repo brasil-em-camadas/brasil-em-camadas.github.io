@@ -272,12 +272,35 @@ function quintis(vals) {
   const espacoPainel = () => largo() && !dock.hidden ? dock.offsetWidth + 40 : 0;
   const topo = () => largo() ? document.getElementById("top").offsetHeight : 0;
   const folga = () => largo() ? { top: topo() + 40, bottom: 40, left: 10, right: espacoPainel() + 110 } : { top: 20, bottom: 20, left: 12, right: 12 };
-  function ajustarCabecalho() { stage.style.setProperty("--head", (topo() + 4) + "px"); stage.style.setProperty("--dock-w", espacoPainel() + "px"); }
+  function ajustarCabecalho() {
+    stage.style.setProperty("--head", (topo() + 4) + "px"); stage.style.setProperty("--dock-w", espacoPainel() + "px");
+    requestAnimationFrame(afastarLegenda);
+  }
   const BRASIL = caixa({ coordinates: estados.features.map(f => f.geometry.coordinates) });
-  /* afastar tem limite: até um pouco além do enquadramento do Brasil (o globo inteiro cabe na tela, sem ficar minúsculo) */
+  /* afastar tem limite: até o globo inteiro caber na tela, abaixo do cabeçalho, com uma folga pequena.
+     Visto de cima, o globo fica sempre no centro da tela. O MapLibre aplica o limite ao tamanho do globo,
+     que é o mesmo em qualquer latitude (zoom "no equador"). */
   function limitarZoom() {
+    const cv = map.getCanvas(), w = cv.clientWidth, h = cv.clientHeight;
+    if (!w || !h) return;
+    const m = largo() ? 16 : 10;
+    const r = Math.max(60, Math.min(h / 2 - topo() - m, w / 2 - m));               /* raio do disco que cabe, em pixels */
+    const f = (map.transform && map.transform.cameraToCenterDistance) || 1.5 * h;     /* distância da câmera, em pixels */
+    /* contorno de uma esfera vista em perspectiva: r = f·R / √(f² + 2fR)  →  R = (r² + r·√(r² + f²)) / f */
+    const R = (r * r + r * Math.sqrt(r * r + f * f)) / f;
+    let z = Math.log2(2 * Math.PI * R / 512);
+    /* nunca impede o enquadramento do Brasil (o botão Centralizar) */
     const c = map.cameraForBounds(BRASIL, { padding: folga() });
-    if (c && isFinite(c.zoom)) map.setMinZoom(Math.max(0, c.zoom - 0.8));
+    if (c && isFinite(c.zoom)) z = Math.min(z, c.zoom - Math.log2(Math.cos(maplibregl.LngLat.convert(c.center).lat * Math.PI / 180)));
+    map.setMinZoom(Math.max(0, z));
+  }
+  /* legenda e créditos dividem a última linha do mapa; quando não cabem lado a lado, a legenda sobe para cima dos créditos */
+  function afastarLegenda() {
+    const lg = document.getElementById("legend"), at = document.querySelector(".maplibregl-ctrl-attrib");
+    lg.style.bottom = "";
+    if (!largo() || !at || !lg.childElementCount) return;
+    const a = at.getBoundingClientRect(), l = lg.getBoundingClientRect();
+    if (a.width && l.right + 16 > a.left) lg.style.bottom = Math.round(stage.getBoundingClientRect().bottom - a.top + 8) + "px";
   }
   function verBrasil(dur = 1400) {
     map.fitBounds(BRASIL, { padding: folga(), pitch: modo3d ? 45 : 0, bearing: 0, duration: reduce ? 0 : dur });
@@ -286,24 +309,15 @@ function quintis(vals) {
     const f = estados.features.find(x => x.properties.sigla === s);
     map.fitBounds(caixa(f.geometry), { padding: folga(), pitch: modo3d ? 55 : 0, bearing: 0, maxZoom: 8, duration: reduce ? 0 : dur });
   }
-  const fold = document.getElementById("fold");
-  function alinharBotoes() {
-    /* "Mostrar painel" ocupa o mesmo lugar do "Recolher": dá para clicar duas vezes sem mover o mouse */
-    if (dock.hidden) return;
-    const r = fold.getBoundingClientRect(), s = stage.getBoundingClientRect();
-    unfold.style.top = (r.top - s.top) + "px";
-    unfold.style.right = (s.right - r.right) + "px";
-    unfold.style.minWidth = r.width + "px"; unfold.style.height = r.height + "px";
-  }
+  /* "Mostrar painel" ocupa o mesmo lugar do "Recolher" (posição definida no style.css): dá para clicar duas vezes sem mover o mouse */
   function mostrarPainel(abrir) {
-    if (!abrir) alinharBotoes();
     dock.hidden = !abrir; unfold.hidden = abrir;
     try { localStorage.setItem("bec-painel", abrir ? "aberto" : "recolhido"); } catch (e) {}
     ajustarCabecalho(); limitarZoom(); sel ? verEstado(sel, 600) : verBrasil(600);
   }
   document.getElementById("fold").onclick = () => mostrarPainel(false);
   unfold.onclick = () => mostrarPainel(true);
-  try { if (largo() && localStorage.getItem("bec-painel") === "recolhido") { alinharBotoes(); dock.hidden = true; unfold.hidden = false; } } catch (e) {}
+  try { if (largo() && localStorage.getItem("bec-painel") === "recolhido") { dock.hidden = true; unfold.hidden = false; } } catch (e) {}
   /* tamanho das letras do painel (A− / A+), lembrado entre visitas */
   const ESC = [0.85, 1, 1.12, 1.25, 1.4], conteudo = document.getElementById("conteudo");
   let ie = 1; try { const v = +localStorage.getItem("bec-letra"); if (ESC.includes(v)) ie = ESC.indexOf(v); } catch (e) {}
@@ -480,9 +494,10 @@ function quintis(vals) {
     }
   }
 
-  /* "Legenda no mapa": liga e desliga; a escolha fica guardada neste navegador */
-  let legMapa = false;
-  try { legMapa = localStorage.getItem("bec-legenda") === "mapa"; } catch (e) {}
+  /* "Legenda no mapa": mostra ou esconde tudo o que fica sobre o mapa (escala de cores e símbolos das camadas).
+     Começa ligada; a escolha fica guardada neste navegador. A legenda completa fica sempre no rodapé. */
+  let legMapa = true;
+  try { legMapa = localStorage.getItem("bec-legenda") !== "rodape"; } catch (e) {}
   document.getElementById("legenda-mapa").onclick = () => {
     legMapa = !legMapa;
     try { localStorage.setItem("bec-legenda", legMapa ? "mapa" : "rodape"); } catch (e) {}
@@ -502,8 +517,8 @@ function quintis(vals) {
     if (L) {
       if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", ["case", ["boolean", ["feature-state", "hover"], false], "#ffffff", "#01050a"]);
       const cores = L.id === "pop" ? COR_POP_LEG : COR_NOITE_LEG;
-      leg = `<span>${L.titulo}</span><span>${L.id === "pop" ? "menos gente" : "escuro"}</span>
-        <span class="ramp">${cores.map(c => `<i style="background:${c}"></i>`).join("")}</span><span>${L.id === "pop" ? "mais gente" : "mais luz"}</span>`;
+      leg = `<span>${L.titulo}</span><span class="faixa"><span>${L.id === "pop" ? "menos gente" : "escuro"}</span>
+        <span class="ramp">${cores.map(c => `<i style="background:${c}"></i>`).join("")}</span><span>${L.id === "pop" ? "mais gente" : "mais luz"}</span></span>`;
     } else if (P && P.val) {
       const vals = Object.keys(NAME).map(P.val).filter(v => v != null);
       const q = quintis(vals), cores = RAMP.map(cor);
@@ -513,21 +528,21 @@ function quintis(vals) {
       m.push(cor("--land"));
       if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", m);
       const DD = DATA[P.id];
-      leg = `<span>${P.nome}${DD.unidade ? " (" + DD.unidade + ")" : ""}</span><span>${P.fmt(Math.min(...vals))}</span>
-        <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(Math.max(...vals))}</span>
+      leg = `<span>${P.nome}${DD.unidade ? " (" + DD.unidade + ")" : ""}</span><span class="faixa"><span>${P.fmt(Math.min(...vals))}</span>
+        <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(Math.max(...vals))}</span></span>
         ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : "<span>sem cor = sem dado</span>") : ""}`;
     } else if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", cor("--land"));
-    /* sobre o mapa fica a escala de cores; os símbolos das camadas ligadas ficam no rodapé, ao lado dos níveis de confiança,
-       e também sobre o mapa quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
+    /* legenda completa (escala de cores + símbolos das camadas ligadas): sempre no rodapé, ao lado dos níveis de confiança;
+       sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
       const forma = k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
     }).join("")}</span>`).join("");
-    document.getElementById("legend").innerHTML = leg + (legMapa ? itens : "");
+    document.getElementById("legend").innerHTML = legMapa ? leg + itens : "";
     const bl = document.getElementById("legenda-mapa");
     if (bl) bl.setAttribute("aria-pressed", legMapa);
     const lr = document.getElementById("legenda");
-    if (lr) lr.innerHTML = itens || `<span class="note">Nenhuma camada ligada. Escolha as camadas no painel.</span>`;
+    if (lr) lr.innerHTML = (leg ? `<span class="item escala">${leg}</span>` : "") + (itens || `<span class="note">Nenhuma camada ligada. Escolha as camadas no painel.</span>`);
     document.getElementById("back").hidden = !sel;
     document.getElementById("where").textContent = sel ? `${NAME[sel]} · ${sel}` : "Brasil · 27 UFs";
   }
@@ -675,6 +690,12 @@ function quintis(vals) {
       paint: { "hillshade-exaggeration": 0.5, "hillshade-shadow-color": "#04100a", "hillshade-highlight-color": "rgba(255,255,240,.55)", "hillshade-accent-color": "#0c2a18" } }, "zee-line");
     if (luz !== "off") map.setLayoutProperty("relevo", "visibility", "none");
   });
-  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { ajustarCabecalho(); map.resize(); limitarZoom(); if (!dock.hidden) alinharBotoes(); }, 150); });
+  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { ajustarCabecalho(); map.resize(); limitarZoom(); }, 150); });
+  /* a legenda acompanha os créditos quando eles abrem ou fecham (botão i) e quando a própria legenda muda de tamanho */
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(() => afastarLegenda());
+    ro.observe(document.getElementById("legend"));
+    const at = document.querySelector(".maplibregl-ctrl-attrib"); if (at) ro.observe(at);
+  }
   window.__mapa = map;
 })();

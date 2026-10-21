@@ -213,3 +213,21 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .chip.mini[aria-pressed="true"]{color:var(--night);background:var(--accent);border-color:var(--accent)}
 .legend .item{display:inline-flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
 .legend .item>span{display:inline-flex;align-items:center}
+/* escala de cores: menor valor, faixa de cores e maior valor nunca se separam; no rodapé a escala ocupa a linha toda */
+.faixa{display:inline-flex;align-items:center;gap:6px 14px;white-space:nowrap}
+.legenda .escala{grid-column:1/-1}
+
+/* alinhamento (revisão de 21/10/2026), nas duas versões:
+   - "Recolher" e "Mostrar painel" com o mesmo tamanho e no mesmo lugar (dá para clicar duas vezes sem mover o mouse);
+   - no computador, margem de 20 px dos dois lados para tudo (título, abas, botões, painel, legenda, rodapé);
+   - a linha "Brasil · 27 UFs" fica na mesma altura do "Recolher" / "Mostrar painel" */
+.fold{top:-6px;z-index:2}
+.fold,.unfold{font:600 .86rem var(--f-body);padding:6px 14px;border-radius:999px;box-sizing:border-box;white-space:nowrap}
+.unfold{display:flex;align-items:center;justify-content:center;gap:4px}
+@media (min-width:901px){
+  .top{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+  .where{top:calc(var(--head,96px) + 12px)}
+  .unfold{top:calc(var(--head,96px) + 12px);right:calc(max(20px,env(safe-area-inset-right,0px)) + 12px)}
+}
+/* telas médias (tablet deitado): abas do ministério um pouco mais juntas, para não sobrar uma aba sozinha numa linha */
+@media (min-width:901px) and (max-width:1180px){.mins{gap:4px 10px}.tab{font-size:.85rem}}

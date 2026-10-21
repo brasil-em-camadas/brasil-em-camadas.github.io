@@ -20,9 +20,6 @@
 /* painel mais largo. "Recolher" fica fixo no mesmo ponto ao rolar (top = margem negativa, então não pula);
    A− / A+ ficam logo abaixo e sobem junto com o conteúdo */
 .dock{width:500px}
-.fold{top:-6px;z-index:2}
-.fold,.unfold{font:600 .86rem var(--f-body);padding:6px 14px;border-radius:999px;box-sizing:border-box;white-space:nowrap}
-.unfold{display:flex;align-items:center;justify-content:center;gap:4px}
 .letra{float:right;clear:right;margin:6px -6px 6px 10px;display:flex;border:1px solid var(--hair);border-radius:999px;overflow:hidden;background:var(--glass)}
 .letra button{font:600 .82rem var(--f-body);color:var(--muted);background:none;border:0;padding:4px 11px;cursor:pointer}
 .letra button+button{border-left:1px solid var(--hair)}
@@ -36,8 +33,6 @@
 @keyframes gira{to{transform:rotate(360deg)}}
 /* celular: A− / A+ na mesma linha do título da ficha, sem empurrar o texto para baixo */
 @media (max-width:900px){.dock{width:auto}.letra{clear:none;margin:-7px -4px 4px 12px}}
-/* legenda acima dos créditos do mapa (no computador os dois ficam no rodapé do mapa) */
-@media (min-width:901px){.legend{bottom:34px}}
 /* luzes à noite */
 .paint.apagado{opacity:.5}
 .luz-info{display:grid;gap:6px;margin:2px 0 4px}
@@ -56,3 +51,9 @@
 /* créditos do mapa: o botão (i) que mostra e oculta os créditos fica claro sobre o fundo escuro */
 .maplibregl-ctrl-attrib-button{filter:invert(1)}
 .maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-attrib-button{background-color:rgba(0,0,0,.25)}
+/* créditos na mesma linha da legenda e na mesma margem de 20 px do resto da página; com o painel aberto, 20 px antes dele.
+   Se a legenda e os créditos não couberem lado a lado, a legenda sobe (app3d.js, afastarLegenda) */
+@media (min-width:901px){
+  .maplibregl-ctrl-bottom-right{right:max(0px,calc(var(--dock-w,0px) - 20px))}
+  .maplibregl-ctrl-bottom-right .maplibregl-ctrl{margin:0 max(20px,env(safe-area-inset-right,0px)) 12px 0}
+}

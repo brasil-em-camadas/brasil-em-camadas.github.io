@@ -350,9 +350,10 @@ function rewind(f) {
     }
   }
 
-  /* "Legenda no mapa": liga e desliga; a escolha fica guardada neste navegador */
-  let legMapa = false;
-  try { legMapa = localStorage.getItem("bec-legenda") === "mapa"; } catch (e) {}
+  /* "Legenda no mapa": mostra ou esconde tudo o que fica sobre o mapa (escala de cores e símbolos das camadas).
+     Começa ligada; a escolha fica guardada neste navegador. A legenda completa fica sempre no rodapé. */
+  let legMapa = true;
+  try { legMapa = localStorage.getItem("bec-legenda") !== "rodape"; } catch (e) {}
   document.getElementById("legenda-mapa").onclick = () => {
     legMapa = !legMapa;
     try { localStorage.setItem("bec-legenda", legMapa ? "mapa" : "rodape"); } catch (e) {}
@@ -369,21 +370,21 @@ function rewind(f) {
       const q = d3.scaleQuantile().domain(vals).range(RAMP);
       states.style("fill", d => { const v = P.val(d.properties.sigla); return v == null ? (P.vazio ? "var(--sem)" : null) : `var(${q(v)})`; });
       const D = DATA[P.id];
-      leg = `<span>${P.nome}${D.unidade ? " (" + D.unidade + ")" : ""}</span><span>${P.fmt(d3.min(vals))}</span>
-        <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(d3.max(vals))}</span>
+      leg = `<span>${P.nome}${D.unidade ? " (" + D.unidade + ")" : ""}</span><span class="faixa"><span>${P.fmt(d3.min(vals))}</span>
+        <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(d3.max(vals))}</span></span>
         ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : "<span>sem cor = sem dado</span>") : ""}`;
     } else states.style("fill", null);
-    /* sobre o mapa fica a escala de cores; os símbolos das camadas ligadas ficam no rodapé, ao lado dos níveis de confiança,
-       e também sobre o mapa quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
+    /* legenda completa (escala de cores + símbolos das camadas ligadas): sempre no rodapé, ao lado dos níveis de confiança;
+       sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
       const forma = k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
     }).join("")}</span>`).join("");
-    document.getElementById("legend").innerHTML = leg + (legMapa ? itens : "");
+    document.getElementById("legend").innerHTML = legMapa ? leg + itens : "";
     const bl = document.getElementById("legenda-mapa");
     if (bl) bl.setAttribute("aria-pressed", legMapa);
     const lr = document.getElementById("legenda");
-    if (lr) lr.innerHTML = itens || `<span class="note">Nenhuma camada ligada. Escolha as camadas no painel.</span>`;
+    if (lr) lr.innerHTML = (leg ? `<span class="item escala">${leg}</span>` : "") + (itens || `<span class="note">Nenhuma camada ligada. Escolha as camadas no painel.</span>`);
     states.classed("sel", d => d.properties.sigla === sel).classed("fade", d => sel && d.properties.sigla !== sel);
     states.filter(".sel").raise();
     rails.classed("hi", d => sel && d.uf === sel).classed("off", d => sel && d.uf !== sel);
