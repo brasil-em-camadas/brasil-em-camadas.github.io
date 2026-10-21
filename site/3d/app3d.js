@@ -130,6 +130,8 @@ function quintis(vals) {
         lav: { type: "geojson", data: fc([]) },
         usinas: { type: "geojson", data: fc([]) },
         lt: { type: "geojson", data: fc([]) },
+        dutos: { type: "geojson", data: fc([]) },
+        refin: { type: "geojson", data: DATA.refin || fc([]) },
         celm: { type: "geojson", data: fc([]) },
         g5: { type: "geojson", data: fc([]) },
         uep: { type: "geojson", data: DATA.uep || fc([]) },
@@ -192,6 +194,15 @@ function quintis(vals) {
         { id: "lt", type: "line", source: "lt", layout: { "line-join": "round" },
           paint: { "line-color": cor("--lt"), "line-opacity": 0.72,
             "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["interpolate", ["linear"], ["get", "kv"], 230, 0.5, 500, 1, 800, 1.6], 8, ["interpolate", ["linear"], ["get", "kv"], 230, 1.2, 500, 2.4, 800, 3.6]] } },
+        /* gasodutos e oleodutos (ANP): os de transporte mais grossos */
+        { id: "dutos", type: "line", source: "dutos", layout: { "line-join": "round", "line-cap": "round" },
+          paint: { "line-color": ["match", ["get", "f"], "gas", cor("--gasd"), cor("--oleod")], "line-opacity": 0.85,
+            "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "t"], "transporte"], 1.2, 0.6], 8, ["case", ["==", ["get", "t"], "transporte"], 2.8, 1.5]] } },
+        /* refinarias (tamanho pela capacidade), unidades de gás natural e terminais de GNL (ANP) */
+        { id: "refin", type: "circle", source: "refin",
+          paint: { "circle-color": ["match", ["get", "k"], "refinaria", cor("--refin"), "gnl", cor("--gnl"), cor("--upgn")],
+            "circle-stroke-color": ["match", ["get", "k"], "gnl", "#ffffff", "#1a0505"], "circle-stroke-width": 1,
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "k"], "refinaria"], ["interpolate", ["linear"], ["sqrt", ["coalesce", ["get", "bbl"], 0]], 0, 3.5, 200, 5, 660, 8], 3], 8, ["case", ["==", ["get", "k"], "refinaria"], ["interpolate", ["linear"], ["sqrt", ["coalesce", ["get", "bbl"], 0]], 0, 6, 200, 9, 660, 15], 5]] } },
         /* principal lavoura de cada município (IBGE, PAM): cor pela lavoura de maior valor, tamanho pela raiz do valor de todas
            as lavouras; os maiores vêm primeiro no arquivo e ficam por baixo */
         { id: "lav", type: "circle", source: "lav", layout: { "circle-sort-key": ["-", 0, ["get", "v"]] },
@@ -322,7 +333,7 @@ function quintis(vals) {
 
   const G = { zee: ["zee-fill", "zee-line", "zee-rotulo", "ilhas-ponto", "ilhas-rotulo"], mt: ["mt-fill", "mt-line", "mt-base"], zc: ["zc-fill", "zc-line"],
     pce: ["pce-fill-rec", "pce-fill-ana", "pce-line-rec", "pce-line-ana", "pce-rotulo"], rod: ["rodovias", "rodovias-terra", "rodovias-rotulo"], rodest: ["rodovias-est"],
-    oil: ["pocos"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi"], lav: ["lav"], usinas: ["usinas"], lt: ["lt"], celm: ["celm"], g5: ["g5"],
+    oil: ["pocos"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi"], lav: ["lav"], usinas: ["usinas"], dutos: ["dutos"], refin: ["refin"], lt: ["lt"], celm: ["celm"], g5: ["g5"],
     rail: ["ferrovias", "ferrovias-obra"], ports: ["portos"], air: ["aeroportos"] };
 
   /* ---------- painel e enquadramento ---------- */
@@ -459,6 +470,18 @@ function quintis(vals) {
           ${p.lamina_m ? `<br>Profundidade da água: ${fmt(+p.lamina_m)} m` : ""}<br><span class="pop-fonte">ANP, cadastro de unidades de produção</span>`).addTo(map);
       return;
     }
+    const ri = vis("refin") ? map.queryRenderedFeatures(perto, { layers: ["refin"] }) : [];
+    if (ri.length) {
+      const p = ri[0].properties;
+      const corpo = p.k === "refinaria"
+        ? `<b>${esc(p.n)}${p.s ? " (" + esc(p.s) + ")" : ""}</b><br>Refinaria · ${esc(p.m)} · ${esc(p.uf)}${p.bbl ? `<br>Capacidade: ${fmt(+p.bbl)} barris de petróleo por dia` : ""}${p.e ? "<br>" + esc(p.e) : ""}`
+        : p.k === "gnl"
+          ? `<b>${esc(p.n)}</b><br>Terminal de GNL (o gás chega líquido, de navio, e volta a ser gás) · ${esc(p.m)} · ${esc(p.uf)}${p.mi_m3 ? `<br>Capacidade: ${fmt(+p.mi_m3)} milhões de m³ de gás por dia` : ""}${p.e ? "<br>" + esc(p.e) : ""}`
+          : `<b>${esc(p.n)}</b><br>Unidade de processamento de gás natural${p.tipo ? " (" + esc(p.tipo) + ")" : ""} · ${esc(p.m)} · ${esc(p.uf)}`;
+      new maplibregl.Popup({ closeButton: false, offset: 10, maxWidth: "300px" }).setLngLat(ri[0].geometry.coordinates)
+        .setHTML(`${corpo}<br><span class="pop-fonte">ANP, servidor de mapas</span>`).addTo(map);
+      return;
+    }
     const po = vis("pocos") ? map.queryRenderedFeatures(perto, { layers: ["pocos"] }) : [];
     if (po.length) {
       const f = po.reduce((a, b) => b.properties.b > a.properties.b ? b : a), p = f.properties, M = DATA.oil.meta;
@@ -515,9 +538,18 @@ function quintis(vals) {
     }
     /* rodovias e ferrovias: de perto (zoom 6), para não atrapalhar o clique nos estados */
     const vias = map.getZoom() >= 6 ? map.queryRenderedFeatures([[px - 4, py - 4], [px + 4, py + 4]],
-      { layers: ["lt", "ferrovias", "ferrovias-obra", "rodovias", "rodovias-terra", "rodovias-est"].filter(vis) }) : [];
+      { layers: ["lt", "dutos", "ferrovias", "ferrovias-obra", "rodovias", "rodovias-terra", "rodovias-est"].filter(vis) }) : [];
     if (vias.length) {
       const f = vias[0], p = f.properties, trem = f.layer.id.startsWith("ferrovias");
+      if (f.layer.id === "dutos") {
+        const TIPO = { transporte: "de transporte", transferencia: "de transferência", escoamento: "de escoamento da produção" };
+        new maplibregl.Popup({ closeButton: false, offset: 6, maxWidth: "300px" }).setLngLat(e.lngLat)
+          .setHTML(`<b>${p.f === "gas" ? "Gasoduto" : "Oleoduto"} ${TIPO[p.t] || ""}</b>${p.n ? "<br>" + esc(p.n) : ""}${p.tr ? "<br>" + esc(p.tr) : ""}
+            ${p.de || p.para ? `<br>${p.de ? "De " + esc(p.de) : ""}${p.para ? " para " + esc(p.para) : ""}` : ""}${p.fl && p.f !== "gas" ? "<br>Leva: " + esc(p.fl) : ""}
+            ${p.pol || p.km ? `<br>${p.pol ? fmt1(+p.pol) + " polegadas" : ""}${p.pol && p.km ? " · " : ""}${p.km ? fmt1(+p.km) + " km" : ""}` : ""}${p.op ? "<br>" + esc(p.op) : ""}
+            <br><span class="pop-fonte">ANP, servidor de mapas</span>`).addTo(map);
+        return;
+      }
       if (f.layer.id === "lt") {
         new maplibregl.Popup({ closeButton: false, offset: 6, maxWidth: "300px" }).setLngLat(e.lngLat)
           .setHTML(`<b>${esc(p.n) || "Linha de transmissão"}</b><br>${p.kv} kV${p.ano ? " · em operação desde " + p.ano : ""}${p.c ? "<br>" + esc(p.c) : ""}
@@ -585,6 +617,8 @@ function quintis(vals) {
     "p-ene": "M13 2L5 14h6l-1 8 8-12h-6z",
     usinas: "M13 2L5 14h6l-1 8 8-12h-6z",
     lt: "M12 2l-5 20M12 2l5 20M8 9h8M7 14h10M5 20h14",
+    dutos: "M2 9h13a4 4 0 014 4v9M2 14h12M15 22h7M19 13h3",
+    refin: "M3 21V12l5 3v-3l5 3V8h3V4h3v17zM3 21h18",
     celm: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
     g5: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0"
   };
@@ -661,7 +695,7 @@ function quintis(vals) {
     lav: ["lav", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { v: m[2], g: m[3], p: m[4], pv: m[5], n: m[6], u: m[7] })))],
     oil: ["pocos", pocosFC], uep: ["uep", d => d], campos: ["campos", d => d], zc: ["zc", d => d], pce: ["pce", d => d], rodest: ["rodest", d => d],
     usinas: ["usinas", d => fc(d.usinas.map(u => ponto([u[0], u[1]], { kw: u[2], t: u[3], n: u[4], uf: u[5], a: u[6] || 0, d: u[7] || "", x: u[8] || "" })))],
-    lt: ["lt", d => d],
+    lt: ["lt", d => d], dutos: ["dutos", d => d],
     celm: ["celm", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { s: m[2], n: m[3], u: m[4], c: m[5] })))],
     g5: ["g5", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { n: m[2], u: m[3], o: m[4], c: m[5] })))] };
   /* município (código do IBGE) → linha do arquivo, para a janelinha do celular juntar as duas camadas */
@@ -799,7 +833,20 @@ function quintis(vals) {
       <div class="kv"><span>Poços produzindo</span><span class="v">${fmt(v.pocos)}</span></div>
       <div class="kv"><span>Posição no país</span><span class="v">${rk}º · ${fmt1(v.valor / O.total_boe_dia * 100)}%</span></div>`
       : `<div class="list">Nenhuma produção registrada na ANP neste mês.</div>`}
-      ${pill(O.nivel)} <span class="note">${esc(O.fonte)}; média de ${esc(O.referencia)} · atualizado em ${O.atualizado_em}</span></div>`;
+      ${pill(O.nivel)} <span class="note">${esc(O.fonte)}; média de ${esc(O.referencia)} · atualizado em ${O.atualizado_em}</span>${fichaInstalacoes(s)}</div>`;
+  }
+  /* refinarias, unidades de gás natural e terminais de GNL do estado (ANP, servidor de mapas) */
+  function fichaInstalacoes(s) {
+    const I = DATA.refin;
+    if (!I) return "";
+    const inst = I.features.map(f => f.properties).filter(p => p.uf === s);
+    if (!inst.length) return "";
+    const ref = inst.filter(p => p.k === "refinaria"), ug = inst.filter(p => p.k === "upgn"), gn = inst.filter(p => p.k === "gnl");
+    return `${ref.length ? `<div class="kv" style="margin-top:8px"><span>Refinarias</span><span class="v">${ref.length}</span></div>
+        <div class="list">${ref.map(p => esc(p.s || p.n) + (p.bbl ? ` (${fmt(Math.round(p.bbl / 1000))} mil barris/dia)` : "")).join(", ")}.</div>` : ""}
+      ${ug.length ? `<div class="kv"><span>Unidades de processamento de gás natural</span><span class="v">${ug.length}</span></div>` : ""}
+      ${gn.length ? `<div class="kv"><span>Terminais de GNL</span><span class="v">${gn.length}</span></div>` : ""}
+      ${pill(I.meta.nivel)} <span class="note">ANP, servidor de mapas · atualizado em ${I.meta.atualizado_em}</span>`;
   }
 
   /* energia elétrica do estado (EPE): potência instalada por fonte */

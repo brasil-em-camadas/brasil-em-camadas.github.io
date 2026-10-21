@@ -8,6 +8,7 @@
   --accent:#e6b450; --road:#e9dfc4; --mt:#9fe6f2; --sea-line:#58cfe0; --rail:#e39a58; --port:#f4f7f5; --air:#a9bdf7; --cla:#ff7a6b; --zc:#5fd0a8; --pce:#e58fd3; --oil:#f6c945; --uep:#ff6b4a; --campo:#d9902b; --presal:#fff0a8; --sem:#3e433f; --boi:#d9a66b; --road-est:#a9a184; --hid:#4ea3ff; --eol:#e6eefc; --sol:#ffe14d; --bio:#9be15d; --fos:#ff7b7b; --nuc:#ff4fd8; --lt:#b18cff;
   --cel1:#ff5c4d; --cel2:#ff9b45; --cel3:#f2dc6b; --cel4:#8fe3f0; --g5:#f06bff;
   --lav-soja:#ffd23f; --lav-milho:#ff8c42; --lav-cana:#4ee1c1; --lav-cafe:#c08457; --lav-mandioca:#c77dff; --lav-banana:#ff70a6; --lav-feijao:#e63946; --lav-arroz:#f1faee; --lav-outras:#8d99ae;
+  --gasd:#7fdbff; --oleod:#ff8a65; --refin:#ff3d3d; --upgn:#b3ecff; --gnl:#26c6da;
   --q1:#1d4a2c; --q2:#2b6338; --q3:#3f7e44; --q4:#6aa055; --q5:#a8c97a;
   --t-api:#7fd6c9; --t-manual:#b7d98a; --t-entidade:#e8b75a; --t-base:#a9bdf7; --t-calculado:#c9a2ff; --t-pendente:#ff8f80;
   --f-display:"Big Shoulders Display","Arial Narrow",sans-serif;
@@ -264,3 +265,8 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .lav.g-soja{fill:var(--lav-soja)}.lav.g-milho{fill:var(--lav-milho)}.lav.g-cana{fill:var(--lav-cana)}.lav.g-cafe{fill:var(--lav-cafe)}
 .lav.g-mandioca{fill:var(--lav-mandioca)}.lav.g-banana{fill:var(--lav-banana)}.lav.g-feijao{fill:var(--lav-feijao)}.lav.g-arroz{fill:var(--lav-arroz)}
 .lav.g-outras{fill:var(--lav-outras)}
+/* gasodutos, oleodutos, refinarias, unidades de gás natural e terminais de GNL (versão leve) */
+.duto{fill:none;stroke-opacity:.85;vector-effect:non-scaling-stroke;stroke-width:1.2;pointer-events:none}
+.duto.gas{stroke:var(--gasd)}.duto.oleo{stroke:var(--oleod)}.duto.fino{stroke-width:.8}
+.inst{stroke:#1a0505;stroke-width:.8;vector-effect:non-scaling-stroke;cursor:pointer}
+.inst.k-refinaria{fill:var(--refin)}.inst.k-upgn{fill:var(--upgn)}.inst.k-gnl{fill:var(--gnl);stroke:#ffffff}

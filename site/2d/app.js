@@ -179,6 +179,13 @@ function rewind(f) {
     ltP = gLt.selectAll("path").data(DATA.lt.features).join("path").attr("class", "lt")
       .style("stroke-width", d => (0.5 + Math.max(0, d.properties.kv - 230) / 570 * 1.5).toFixed(2));
   }
+  /* gasodutos e oleodutos (ANP), sob demanda */
+  const gDutos = root.append("g");
+  let dutosP = gDutos.selectAll("path");
+  function desenharDutos() {
+    dutosP = gDutos.selectAll("path").data(DATA.dutos.features).join("path")
+      .attr("class", d => "duto " + d.properties.f + (d.properties.t === "transporte" ? "" : " fino"));
+  }
   /* poços em produção: [lon, lat, boe/dia, barris/dia, mil m³ de gás/dia, poço, campo, UF, mar/terra] */
   /* rebanho bovino por município: desenhado quando o arquivo chega (camada sob demanda) */
   const gBoi = root.append("g");
@@ -248,7 +255,14 @@ function rewind(f) {
       return `${p.nome} · ${p.tipo}${p.operador ? " · " + p.operador : ""}${p.prevista ? " · prevista" : ""}${p.atende ? ". Atende: " + p.atende : ""}${p.capacidade_bbl_dia ? ". Capacidade: " + fmt(p.capacidade_bbl_dia) + " barris de petróleo/dia" : ""}. Fonte: ANP.`; });
   }
   const DESENHA = { boi: desenharBoi, oil: desenharPocos, uep: desenharUep, campos: desenharCampos, zc: desenharZc, pce: desenharPce, rodest: desenharRodEst, usinas: desenharUsinas, lt: desenharLt,
-    celm: desenharCelm, g5: desenharG5, lav: desenharLav };
+    celm: desenharCelm, g5: desenharG5, lav: desenharLav, dutos: desenharDutos };
+  /* refinarias (tamanho pela capacidade), unidades de gás natural e terminais de GNL (ANP); clicar abre o estado */
+  const gRefin = root.append("g");
+  const INST = { refinaria: "Refinaria", upgn: "Unidade de processamento de gás natural", gnl: "Terminal de GNL" };
+  const refinC = gRefin.selectAll("circle").data(DATA.refin ? DATA.refin.features.map(f => ({ ...f.properties, c: f.geometry.coordinates,
+      r0: f.properties.k === "refinaria" ? 3.2 + Math.sqrt(f.properties.bbl || 0) * 0.008 : 2.6 })) : []).join("circle").attr("class", d => "inst k-" + d.k);
+  refinC.on("click", (e, d) => { e.stopPropagation(); if (d.uf) select(d.uf); });
+  refinC.append("title").text(d => `${d.n}${d.s ? " (" + d.s + ")" : ""} · ${INST[d.k]} · ${d.m}/${d.uf}${d.bbl ? ". Capacidade: " + fmt(d.bbl) + " barris de petróleo por dia" : ""}${d.mi_m3 ? ". Capacidade: " + fmt(d.mi_m3) + " milhões de m³ de gás por dia" : ""} (ANP).`);
   const gPorts = root.append("g");
   const ports = gPorts.selectAll("circle").data(DATA.ports || []).join("circle").attr("class", "port");
   ports.append("title").text(d => d.n + (d.org ? " · porto organizado" : "") + (d.obra ? " · em obras" : "") + " (IBGE, BC250 2025)");
@@ -270,7 +284,7 @@ function rewind(f) {
   caps.append("circle").attr("r", d => d.pais ? 3.6 : 2.6);
   caps.append("text").attr("x", 6).attr("y", 4).text(d => d.n);
   const G = { zee: gZee, mt: gMt, zc: gZc, pce: gPce, rod: gRod, rail: gRail, ports: gPorts, air: gAir, cla: gCla,
-    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt, celm: gCelm, g5: gG5, lav: gLav };
+    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt, celm: gCelm, g5: gG5, lav: gLav, dutos: gDutos, refin: gRefin };
 
   let proj, path, W, H, head = 0, k = 1;
   const zoom = d3.zoom().scaleExtent([0.8, 12]).on("zoom", e => {
@@ -306,7 +320,7 @@ function rewind(f) {
     path = d3.geoPath(proj);
     gGrat.datum(d3.geoGraticule().step([5, 5])()).attr("d", path);
     MAR().forEach(sel => sel.attr("d", path));
-    camposP.attr("d", path); presalP.attr("d", path);
+    camposP.attr("d", path); presalP.attr("d", path); dutosP.attr("d", path);
     pocosC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     posBoi(); ltP.attr("d", path); usinasC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     posCel(); raioPocos();
@@ -342,7 +356,7 @@ function rewind(f) {
   function geoSobDemanda() {
     if (!path) return;
     MAR().forEach(sel => sel.attr("d", path));
-    camposP.attr("d", path); rodEstP.attr("d", path); ltP.attr("d", path);
+    camposP.attr("d", path); rodEstP.attr("d", path); ltP.attr("d", path); dutosP.attr("d", path);
     usinasC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     pocosC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     posBoi(); posCel(); raioPocos(); place();
@@ -367,6 +381,7 @@ function rewind(f) {
     caps.attr("transform", d => `translate(${proj(d.c)}) ${z}`);
     gNomes.classed("z-cap", k >= 1.9).classed("z-nome", k >= 3.2);
     ports.attr("r", 3.6 * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
+    refinC.attr("r", d => d.r0 * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     airs.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
     if (CLA) { const p = proj(CLA.ponto); gCla.selectAll("circle").attr("cx", 0).attr("cy", 0); gCla.attr("transform", `translate(${p}) scale(${s})`); }
   }
@@ -421,6 +436,8 @@ function rewind(f) {
     "p-ene": "M13 2L5 14h6l-1 8 8-12h-6z",
     usinas: "M13 2L5 14h6l-1 8 8-12h-6z",
     lt: "M12 2l-5 20M12 2l5 20M8 9h8M7 14h10M5 20h14",
+    dutos: "M2 9h13a4 4 0 014 4v9M2 14h12M15 22h7M19 13h3",
+    refin: "M3 21V12l5 3v-3l5 3V8h3V4h3v17zM3 21h18",
     celm: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
     g5: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0"
   };
@@ -531,7 +548,20 @@ function rewind(f) {
       <div class="kv"><span>Poços produzindo</span><span class="v">${fmt(v.pocos)}</span></div>
       <div class="kv"><span>Posição no país</span><span class="v">${rk}º · ${fmt1(v.valor / O.total_boe_dia * 100)}%</span></div>`
       : `<div class="list">Nenhuma produção registrada na ANP neste mês.</div>`}
-      ${pill(O.nivel)} <span class="note">${esc(O.fonte)}; média de ${esc(O.referencia)} · atualizado em ${O.atualizado_em}</span></div>`;
+      ${pill(O.nivel)} <span class="note">${esc(O.fonte)}; média de ${esc(O.referencia)} · atualizado em ${O.atualizado_em}</span>${fichaInstalacoes(s)}</div>`;
+  }
+  /* refinarias, unidades de gás natural e terminais de GNL do estado (ANP, servidor de mapas) */
+  function fichaInstalacoes(s) {
+    const I = DATA.refin;
+    if (!I) return "";
+    const inst = I.features.map(f => f.properties).filter(p => p.uf === s);
+    if (!inst.length) return "";
+    const ref = inst.filter(p => p.k === "refinaria"), ug = inst.filter(p => p.k === "upgn"), gn = inst.filter(p => p.k === "gnl");
+    return `${ref.length ? `<div class="kv" style="margin-top:8px"><span>Refinarias</span><span class="v">${ref.length}</span></div>
+        <div class="list">${ref.map(p => esc(p.s || p.n) + (p.bbl ? ` (${fmt(Math.round(p.bbl / 1000))} mil barris/dia)` : "")).join(", ")}.</div>` : ""}
+      ${ug.length ? `<div class="kv"><span>Unidades de processamento de gás natural</span><span class="v">${ug.length}</span></div>` : ""}
+      ${gn.length ? `<div class="kv"><span>Terminais de GNL</span><span class="v">${gn.length}</span></div>` : ""}
+      ${pill(I.meta.nivel)} <span class="note">ANP, servidor de mapas · atualizado em ${I.meta.atualizado_em}</span>`;
   }
 
   /* energia elétrica do estado (EPE): potência instalada por fonte */

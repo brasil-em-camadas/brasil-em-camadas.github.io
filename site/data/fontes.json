@@ -345,6 +345,56 @@
    ]
   },
   {
+   "id": "dutos",
+   "nome": "Gasodutos e oleodutos",
+   "tipo": "linhas",
+   "arquivo": "petroleo/dutos.json",
+   "sob_demanda": true,
+   "ministerio": "mme",
+   "nivel": "api",
+   "fonte": "ANP, servidor de mapas: gasodutos de transporte (cerca de 11 mil km no desenho) e de escoamento da produção no mar, e oleodutos de transporte, transferência e escoamento (petróleo, derivados e etanol). Clique num duto, de perto, para ver o nome e o trecho",
+   "ligada": false,
+   "cor": "--gasd",
+   "legenda": [
+    {
+     "nome": "Gasoduto",
+     "cor": "--gasd"
+    },
+    {
+     "nome": "Oleoduto (petróleo, derivados e etanol)",
+     "cor": "--oleod"
+    }
+   ]
+  },
+  {
+   "id": "refin",
+   "nome": "Refinarias e unidades de gás natural",
+   "tipo": "pontos",
+   "arquivo": "petroleo/instalacoes.json",
+   "ministerio": "mme",
+   "nivel": "api",
+   "fonte": "ANP, servidor de mapas: 18 refinarias (tamanho = capacidade, em barris por dia), 30 unidades de processamento de gás natural em atividade e 7 terminais de GNL (gás natural liquefeito, que chega de navio e volta a ser gás). Clique num ponto para ver os detalhes",
+   "ligada": false,
+   "cor": "--refin",
+   "legenda": [
+    {
+     "nome": "Refinaria (tamanho = capacidade)",
+     "forma": "pt",
+     "cor": "--refin"
+    },
+    {
+     "nome": "Unidade de processamento de gás natural",
+     "forma": "pt",
+     "cor": "--upgn"
+    },
+    {
+     "nome": "Terminal de GNL",
+     "forma": "pt",
+     "cor": "--gnl"
+    }
+   ]
+  },
+  {
    "id": "p-def",
    "nome": "Indústria de defesa",
    "ministerio": "def",

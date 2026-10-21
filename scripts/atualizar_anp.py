@@ -6,6 +6,8 @@ Roda sozinho no GitHub Actions (ver .github/workflows/site.yml) e também à mã
 De onde vem cada coisa:
   - posição dos poços, polígono do pré-sal, campos e unidades de produção: servidor de mapas da ANP
     (GeoServer do GeoMapsANP, serviço WFS);
+  - gasodutos e oleodutos (transporte, transferência e escoamento), refinarias, unidades de processamento de gás
+    natural e terminais de GNL: o mesmo servidor de mapas;
   - produção de cada poço: dados abertos da ANP, página "Fase de Desenvolvimento e Produção"
     (mar: um arquivo por ano, mês a mês; terra: um arquivo por trimestre).
 
@@ -289,10 +291,163 @@ def plataformas():
                                 "features": sai})
 
 
+def corrigir(texto):
+    """Algumas camadas da ANP vêm com acento estragado ("PaulÃ­nia" em vez de "Paulínia"): conserta quando dá."""
+    if isinstance(texto, str) and ("Ã" in texto or "Â" in texto):
+        try:
+            return texto.encode("latin-1").decode("utf-8")
+        except UnicodeError:
+            return texto
+    return texto
+
+
+def limpo(texto):
+    texto = " ".join(str(corrigir(texto) or "").split())
+    return "" if texto in ("-", "None") else texto
+
+
+MINUSCULAS = {"de", "da", "do", "das", "dos", "e"}
+
+
+def titulo(texto):
+    """'REFINARIA DE PAULÍNIA' -> 'Refinaria de Paulínia'; 'S.A.' e o que está entre parênteses (siglas) ficam como estão."""
+    saida, dentro = [], False
+    for i, w in enumerate(limpo(texto).split()):
+        dentro = dentro or w.startswith("(")
+        if dentro or "." in w:
+            saida.append(w)
+        else:
+            w = w.lower()
+            saida.append(w if i and w in MINUSCULAS else w[:1].upper() + w[1:])
+        dentro = dentro and not w.endswith(")")
+    return " ".join(saida)
+
+
+def simplificar_linha(linha, tol):
+    """Douglas-Peucker numa linha aberta (o simplificar() acima é para anéis e não aceita sobrar menos de 4 pontos)."""
+    if len(linha) < 3:
+        return linha
+    manter = [False] * len(linha)
+    manter[0] = manter[-1] = True
+    pilha = [(0, len(linha) - 1)]
+    while pilha:
+        i, j = pilha.pop()
+        (x1, y1), (x2, y2) = linha[i], linha[j]
+        dx, dy = x2 - x1, y2 - y1
+        maior, k = 0, None
+        for m in range(i + 1, j):
+            x, y = linha[m]
+            s = max(0, min(1, ((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy))) if dx or dy else 0
+            d = ((x - x1 - s * dx) ** 2 + (y - y1 - s * dy) ** 2) ** 0.5
+            if d > maior:
+                maior, k = d, m
+        if k is not None and maior > tol:
+            manter[k] = True
+            pilha += [(i, k), (k, j)]
+    return [p for p, ok in zip(linha, manter) if ok]
+
+
+def linha_leve(g, tol=0.002):
+    r = lambda a: [[round(x, 4), round(y, 4)] for x, y in simplificar_linha([tuple(p[:2]) for p in a], tol)]
+    if g["type"] == "LineString":
+        return {"type": "LineString", "coordinates": r(g["coordinates"])}
+    if g["type"] == "MultiLineString":
+        return {"type": "MultiLineString", "coordinates": [r(a) for a in g["coordinates"] if len(a) >= 2]}
+    return None
+
+
+def km_linha(g):
+    """Comprimento no desenho (fórmula de haversine), para os totais."""
+    from math import asin, cos, radians, sin, sqrt
+    def d(a, b):
+        (x1, y1), (x2, y2) = a[:2], b[:2]
+        h = sin(radians(y2 - y1) / 2) ** 2 + cos(radians(y1)) * cos(radians(y2)) * sin(radians(x2 - x1) / 2) ** 2
+        return 2 * 6371.0 * asin(sqrt(h))
+    partes = [g["coordinates"]] if g["type"] == "LineString" else g["coordinates"]
+    return sum(d(a, b) for parte in partes for a, b in zip(parte, parte[1:]))
+
+
+# camada da ANP, fluido, tipo de duto
+DUTOS = [("geoanp:gasodutos_de_transporte", "gas", "transporte"), ("geoanp:gasodutos_de_escoamento", "gas", "escoamento"),
+         ("geoanp:oleodutos_de_transporte", "oleo", "transporte"), ("geoanp:oleodutos_de_transferencia", "oleo", "transferencia"),
+         ("geoanp:oleodutos_de_escoamento", "oleo", "escoamento")]
+
+
+def dutos():
+    """Gasodutos e oleodutos: as cinco camadas da ANP num arquivo só, com o fluido (gás ou óleo) e o tipo."""
+    feats, km = [], {}
+    for camada, fluido, tipo in DUTOS:
+        fs = wfs(camada)
+        if not fs:
+            raise RuntimeError(f"{camada} veio vazia")
+        for f in fs:
+            g = f.get("geometry") and linha_leve(f["geometry"])
+            if not g or not g["coordinates"]:
+                continue
+            p = f["properties"]
+            props = {"f": fluido, "t": tipo, "n": limpo(p.get("DUTO") or p.get("NOME") or p.get("NOME_DUTO"))}
+            extras = {"tr": p.get("TRECHO"), "de": p.get("INST_ORIGEM") or p.get("INST_ORIGE") or p.get("INST_ORIG"),
+                      "para": p.get("INST_DEST"), "op": p.get("OPERADOR") or p.get("NOME_OPER"),
+                      "fl": p.get("FLUIDO") or p.get("PROD_REL"), "uf": p.get("ESTADO")}
+            props.update({k: limpo(v) for k, v in extras.items() if limpo(v)})
+            try:
+                props["pol"] = float(str(p.get("DIAM_POL")).replace(",", "."))
+            except ValueError:
+                pass
+            try:
+                props["km"] = round(float(str(p.get("EXTENS_KM") or p.get("EXTENSAOKM")).replace(",", ".")), 1)
+            except ValueError:
+                pass
+            feats.append({"type": "Feature", "properties": props, "geometry": g})
+            km[f"{fluido}_{tipo}"] = km.get(f"{fluido}_{tipo}", 0) + km_linha(g)
+    if len(feats) < 400:
+        raise RuntimeError(f"só {len(feats)} dutos")
+    gravar("dutos.json", {"type": "FeatureCollection",
+                          "meta": {"titulo": "Gasodutos e oleodutos", "fonte": "ANP, servidor de mapas GeoMapsANP", "nivel": "api", "atualizado_em": HOJE,
+                                   "camadas": [c for c, _, _ in DUTOS],
+                                   "nota": "transporte = rede que leva o gás ou o petróleo e derivados entre regiões; transferência = entre instalações "
+                                           "próximas (refinaria, terminal); escoamento = da produção até a costa ou até a estação; oleoduto inclui derivados e etanol",
+                                   "km_no_desenho": {k: round(v) for k, v in sorted(km.items())}, "dutos": len(feats)},
+                          "features": feats})
+
+
+def instalacoes():
+    """Refinarias, unidades de processamento de gás natural (as desativadas ficam de fora) e terminais de GNL."""
+    pts = []
+    def ponto(f, props):
+        x, y = f["geometry"]["coordinates"][:2]
+        pts.append({"type": "Feature", "properties": props, "geometry": {"type": "Point", "coordinates": [round(x, 4), round(y, 4)]}})
+    ref = wfs("geoanp:refinarias")
+    for f in ref:
+        p = f["properties"]
+        ponto(f, {"k": "refinaria", "n": titulo(p.get("NOME")), "s": limpo(p.get("SIGLA")), "e": titulo(p.get("EMPRESA")),
+                  "m": titulo(p.get("MUNICIPIO")), "uf": limpo(p.get("UF")), "bbl": p.get("CAPAC_BPD") or None})
+    upgn = [f for f in wfs("geoanp:unidade_de_processamento_de_gas_natural") if limpo(f["properties"].get("TITULARIDA")) != "Desativada"]
+    for f in upgn:
+        p = f["properties"]
+        ponto(f, {"k": "upgn", "n": limpo(p.get("NOME")), "tipo": limpo(p.get("TIPO")), "m": limpo(p.get("MUNICIPIO")), "uf": limpo(p.get("ESTADO"))})
+    gnl = wfs("geoanp:terminais_gnl")
+    for f in gnl:
+        p = f["properties"]
+        ponto(f, {"k": "gnl", "n": limpo(p.get("NOME")), "e": limpo(p.get("RAZAO_SOCI")), "m": limpo(p.get("MUNICIPIO")), "uf": limpo(p.get("UF")),
+                  "mi_m3": p.get("CAPACIDADE") or None, "sit": limpo(p.get("SITUACAO_A"))})
+    if len(ref) < 10 or len(upgn) < 10:
+        raise RuntimeError(f"só {len(ref)} refinarias e {len(upgn)} unidades de gás")
+    gravar("instalacoes.json", {"type": "FeatureCollection",
+                                "meta": {"titulo": "Refinarias, unidades de gás natural e terminais de GNL", "fonte": "ANP, servidor de mapas GeoMapsANP",
+                                         "nivel": "api", "atualizado_em": HOJE,
+                                         "camadas": ["geoanp:refinarias", "geoanp:unidade_de_processamento_de_gas_natural", "geoanp:terminais_gnl"],
+                                         "nota": "capacidade das refinarias em barris por dia (bbl); dos terminais de GNL em milhões de m³ de gás por dia, "
+                                                 "como cadastradas na ANP; unidades de gás desativadas ficam de fora",
+                                         "refinarias": len(ref), "unidades_de_gas": len(upgn), "terminais_gnl": len(gnl),
+                                         "capacidade_refino_bbl_dia": sum(f["properties"].get("CAPAC_BPD") or 0 for f in ref)},
+                                "features": pts})
+
+
 if __name__ == "__main__":
     from datetime import datetime, timezone
     ok, relato = [], {}
-    for passo in (producao, presal, campos, plataformas):
+    for passo in (producao, presal, campos, plataformas, dutos, instalacoes):
         print(f"[{passo.__name__}]")
         try:
             passo()
