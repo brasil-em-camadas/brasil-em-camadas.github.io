@@ -1,4 +1,4 @@
-"""Atualiza as camadas que vêm da API SIDRA do IBGE.
+"""Atualiza as camadas que vêm das APIs do IBGE (SIDRA e agregados).
 
 Roda sozinho no GitHub Actions (ver .github/workflows/site.yml) e também à mão:
     python scripts/atualizar_ibge.py
@@ -8,9 +8,13 @@ o arquivo antigo NÃO é apagado. O site continua com o último dado bom e a dat
 Só usa a biblioteca padrão do Python, sem instalar nada.
 """
 import csv
+import gzip
 import json
+import re
 import sys
+import time
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 from pathlib import Path
 
@@ -222,9 +226,150 @@ def atualizar_pecuaria():
     return [ok_estados, ok_mun]
 
 
+# Lavouras: IBGE, Produção Agrícola Municipal (PAM), tabela 5457, pela API de agregados (v3), que responde bem mais enxuta
+# que a SIDRA quando são milhares de municípios. Valor da produção (variável 215, mil R$) e quantidade produzida (214, em
+# toneladas; os produtos marcados com * na tabela, como abacaxi e coco-da-baía, vêm em mil frutos). Café: só o "Total"
+# (Arábica e Canephora são partes dele e contariam em dobro). A API às vezes responde compactada (gzip) mesmo sem pedir.
+# Por município, a API não aceita vários produtos numa consulta só: vai um produto por vez (83 consultas, ~60 MB).
+# A PAM sai uma vez por ano; se o ano não mudou, a parte dos municípios não é baixada de novo.
+AGREGADOS = "https://servicodados.ibge.gov.br/api/v3/agregados/5457"
+FONTE_PAM = "IBGE, Produção Agrícola Municipal (tabela 5457)"
+CAFE_PARTES = {"40140", "40141"}
+PINTURA_LAVOURA = {"40124": "soja", "40122": "milho", "40106": "cana", "40139": "cafe"}
+GRUPO_LAVOURA = {"40124": "soja", "40122": "milho", "40106": "cana", "40139": "cafe", "40119": "mandioca",
+                 "40136": "banana", "40112": "feijao", "40102": "arroz"}
+SIGLA_COD = {v: k for k, v in UF.items()}
+
+
+def pedir_json(url, tentativas=4):
+    for i in range(tentativas):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "brasil-em-camadas (dados abertos)", "Accept-Encoding": "gzip"})
+            with urllib.request.urlopen(req, timeout=180) as r:
+                b = r.read()
+            return json.loads((gzip.decompress(b) if b[:2] == b"\x1f\x8b" else b).decode("utf-8"))
+        except Exception:
+            if i == tentativas - 1:
+                raise
+            time.sleep(5 * (i + 1))
+
+
+def agregado(variavel, localidades, categoria="all"):
+    """[(código do produto, nome do produto, código do lugar, ano, valor em texto)] do último ano da tabela 5457."""
+    d = pedir_json(f"{AGREGADOS}/periodos/-1/variaveis/{variavel}?localidades={localidades}&classificacao=782%5B{categoria}%5D")
+    saida = []
+    for r in d[0]["resultados"]:
+        (cid, nome), = r["classificacoes"][0]["categoria"].items()
+        for s in r["series"]:
+            (ano, v), = s["serie"].items()
+            saida.append((cid, nome, s["localidade"]["id"], ano, v))
+    return saida
+
+
+def nome_curto(n):
+    """'Soja (em grão)' -> 'Soja'; 'Café (em grão) Total' -> 'Café'; 'Abacaxi*' -> 'Abacaxi'."""
+    n = n.replace("*", "").replace(" Total", "").strip()
+    return re.sub(r"\s*\([^)]*\)$", "", n).strip()
+
+
+def atualizar_lavouras():
+    """lavouras/estados.json (pinturas por lavoura e ficha) e lavouras/municipios.json (principal lavoura de cada município)."""
+    pasta = DADOS / "lavouras"
+    pasta.mkdir(parents=True, exist_ok=True)
+    hoje = date.today().isoformat()
+    ok_e = ok_m = False
+    ano, produtos = None, {}
+    try:
+        val, qtd = agregado(215, "N3%5Ball%5D"), agregado(214, "N3%5Ball%5D")
+        ano = max(a for *_, a, _ in val)
+        q = {(c, l): numero(v) for c, _, l, a, v in qtd if a == ano}
+        por_uf = {}
+        for c, n, l, a, v in val:
+            s, x = UF.get(l), numero(v)
+            if a != ano or not s or c in CAFE_PARTES:
+                continue
+            produtos[c] = n
+            e = por_uf.setdefault(s, {"total": None, "itens": []})
+            if c == "0":
+                e["total"] = x
+            elif x:
+                e["itens"].append((c, x))
+        valores = {}
+        for s, e in por_uf.items():
+            cod = SIGLA_COD[s]
+            item = {"valor": e["total"]}
+            for c, chave in PINTURA_LAVOURA.items():
+                item[chave] = q.get((c, cod)) or None   # zero ou sem dado: sem produção (cinza no mapa)
+            item["principais"] = [[nome_curto(produtos[c]), x, q.get((c, cod)), "mil frutos" if produtos[c].endswith("*") else "t"]
+                                  for c, x in sorted(e["itens"], key=lambda t: -t[1])[:5]]
+            valores[s] = item
+        if sum(1 for v in valores.values() if v["valor"]) < 27:
+            raise ValueError(f"só {len(valores)} estados com valor da produção")
+        novo = {"titulo": "Lavouras", "unidade": "toneladas", "referencia": ano, "fonte": FONTE_PAM, "nivel": "api", "atualizado_em": hoje,
+                "consulta": [f"{AGREGADOS}/periodos/-1/variaveis/215?localidades=N3[all]&classificacao=782[all]",
+                             f"{AGREGADOS}/periodos/-1/variaveis/214?localidades=N3[all]&classificacao=782[all]"],
+                "campos": {"valor": "valor da produção das lavouras (mil R$)", "soja": "toneladas", "milho": "toneladas", "cana": "toneladas",
+                           "cafe": "toneladas (café em grão, arábica e canephora)",
+                           "principais": "[lavoura, valor (mil R$), quantidade, unidade] das 5 de maior valor"},
+                "valores": valores}
+        (pasta / "estados.json").write_text(json.dumps(novo, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        print(f"[lavouras/estados.json] ok: {len(valores)} estados, {ano}")
+        ok_e = True
+    except Exception as e:
+        print(f"[lavouras/estados.json] falhou, mantendo o anterior: {e}")
+    try:
+        destino = pasta / "municipios.json"
+        antigo = json.loads(destino.read_text(encoding="utf-8")) if destino.exists() else None
+        if not ano or not produtos:
+            raise ValueError("sem a lista de produtos do ano (a parte dos estados falhou)")
+        if antigo and antigo["meta"].get("referencia") == ano and "--forcar" not in sys.argv:
+            print(f"[lavouras/municipios.json] já está com {ano}; não baixei de novo")
+            return [ok_e, True]
+        cats = ["0"] + [c for c in produtos if c != "0"]
+        with ThreadPoolExecutor(4) as ex:
+            partes = list(ex.map(lambda c: agregado(215, "N6%5Ball%5D", c), cats))
+        total, por_mun = {}, {}
+        for c, linhas in zip(cats, partes):
+            for _, _, l, a, v in linhas:
+                x = numero(v)
+                if a != ano or not x:
+                    continue
+                if c == "0":
+                    total[l] = x
+                else:
+                    por_mun.setdefault(l, {})[c] = x
+        sedes = {r["codigo_ibge"]: r for r in csv.DictReader(SEDES.open(encoding="utf-8"))}
+        m = []
+        for k, d in por_mun.items():
+            if k not in sedes:
+                continue
+            c = max(d, key=d.get)
+            m.append([round(float(sedes[k]["longitude"]), 4), round(float(sedes[k]["latitude"]), 4), total.get(k) or sum(d.values()),
+                      GRUPO_LAVOURA.get(c, "outras"), nome_curto(produtos[c]), d[c], sedes[k]["nome"], UF.get(k[:2], "")])
+        if len(m) < 5000:
+            raise ValueError(f"só {len(m)} municípios com lavoura")
+        m.sort(key=lambda x: -x[2])   # os maiores primeiro: os pequenos ficam desenhados por cima
+        grupos = {}
+        for x in m:
+            grupos[x[3]] = grupos.get(x[3], 0) + 1
+        novo = {"meta": {"titulo": "Principal lavoura de cada município", "referencia": ano, "fonte": FONTE_PAM + ", valor da produção de cada lavoura",
+                         "posicao": MUNICIPIOS["posicao"], "nivel": "api", "atualizado_em": hoje,
+                         "consulta": f"{AGREGADOS}/periodos/-1/variaveis/215?localidades=N6[all]&classificacao=782[<produto>]",
+                         "regra": "a lavoura de maior valor da produção no município; o tamanho do ponto mostra o valor de todas as lavouras",
+                         "municipios": len(m), "por_grupo": grupos},
+                "campos": ["lon", "lat", "valor_total_mil_rs", "grupo", "principal", "principal_mil_rs", "nome", "uf"], "municipios": m}
+        destino.write_text(json.dumps(novo, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        print(f"[lavouras/municipios.json] ok: {len(m)} municípios, {ano}; {grupos}")
+        ok_m = True
+    except Exception as e:
+        print(f"[lavouras/municipios.json] falhou, mantendo o anterior: {e}")
+    return [ok_e, ok_m]
+
+
 if __name__ == "__main__":
-    nomes = [c["arquivo"] for c in CAMADAS] + [MUNICIPIOS["arquivo"], "pecuaria/estados.json", "pecuaria/municipios.json"]
-    ok = [atualizar(c) for c in CAMADAS] + [atualizar_municipios()] + atualizar_pecuaria()
+    nomes = [c["arquivo"] for c in CAMADAS] + [MUNICIPIOS["arquivo"], "pecuaria/estados.json", "pecuaria/municipios.json",
+                                               "lavouras/estados.json", "lavouras/municipios.json"]
+    ok = [atualizar(c) for c in CAMADAS] + [atualizar_municipios()] + atualizar_pecuaria() + atualizar_lavouras()
     # registro da execução (como o petroleo/robo.json): dá para conferir cada passo sem abrir o log do GitHub
     from datetime import datetime, timezone
     (DADOS / "robo_ibge.json").write_text(json.dumps({

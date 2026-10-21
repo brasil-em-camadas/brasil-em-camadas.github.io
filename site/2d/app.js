@@ -17,7 +17,7 @@ const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 /* valores em mil R$ (padrão do IBGE) viram "R$ 71,3 bi" ou "R$ 251 mi" */
 const kmTxt = a => a >= 1e6 ? `${(a / 1e6).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} milhão de km²` : `${fmt(Math.round(a / 1e3))} mil km²`;
 const esc = t => String(t ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const reais = mil => mil >= 1e6 ? `R$ ${fmt1(mil / 1e6)} bi` : `R$ ${fmt(Math.round(mil / 1e3))} mi`;
+const reais = mil => mil >= 1e6 ? `R$ ${fmt1(mil / 1e6)} bi` : mil >= 1e3 ? `R$ ${fmt(Math.round(mil / 1e3))} mi` : `R$ ${fmt(Math.round(mil))} mil`;
 const pill = n => `<span class="pill ${NIVEL[n][0]}">${NIVEL[n][1]}</span>`;
 
 async function getJSON(p) {
@@ -46,10 +46,10 @@ function rewind(f) {
   const NAME = {}; estados.features.forEach(f => NAME[f.properties.sigla] = f.properties.name);
 
   /* carrega cada camada; arquivo ausente vira "em apuração" */
-  const DATA = {};
+  const DATA = {}, UNICO = {};
   /* camadas "sob_demanda" (arquivos grandes que começam desligados) só são baixadas quando alguém liga a camada */
   await Promise.all([...F.pintura, ...F.camadas].filter(l => l.arquivo && !l.sob_demanda).map(async l => {
-    DATA[l.id] = await getJSON("../data/" + l.arquivo);
+    DATA[l.id] = await (UNICO[l.arquivo] || (UNICO[l.arquivo] = getJSON("../data/" + l.arquivo)));
     if (!DATA[l.id] && l.nivel) l.nivel = "pendente";
   }));
   /* camadas do mar: cada arquivo traz a área ("area"), as linhas de limite ("limite", "base") e os rótulos */
@@ -63,8 +63,9 @@ function rewind(f) {
     nivel: DATA[p.id] ? DATA[p.id].nivel : "pendente",
     val: !DATA[p.id] ? null
       : p.por === "per_capita" ? s => (DATA[p.id].valores[s] && POP[s]) ? DATA[p.id].valores[s].valor / POP[s] * 1e5 : null
-      : s => { const v = DATA[p.id].valores[s]; return v == null ? null : (typeof v === "object" ? v.valor : v); },
-    fmt: p.por === "per_capita" || p.por === "percentual" ? fmt1 : fmt
+      : s => { const v = DATA[p.id].valores[s]; return v == null ? null : (typeof v === "object" ? (v[p.campo || "valor"] ?? null) : v); },
+    fmt: p.por === "per_capita" || p.por === "percentual" ? fmt1 : fmt,
+    unidade: p.unidade || (DATA[p.id] && DATA[p.id].unidade) || ""
   }))];
   const LAYERS = F.camadas.map(l => ({ ...l, on: !!l.ligada && l.nivel !== "pendente" }));
 
@@ -190,6 +191,16 @@ function rewind(f) {
     boiC.on("click", (e, d) => { e.stopPropagation(); select(d.u); });   /* clicar num ponto abre o estado dele */
     boiC.append("title").text(d => `${d.n} · ${d.u}: ${fmt(d.b)} cabeças de gado bovino (IBGE, Pesquisa da Pecuária Municipal ${M.meta.referencia}). O ponto fica na sede do município.`);
   }
+  /* principal lavoura de cada município (IBGE, PAM), sob demanda: cor pela lavoura, tamanho pelo valor de todas as lavouras */
+  const gLav = root.append("g");
+  let lavC = gLav.selectAll("circle");
+  function desenharLav() {
+    const M = DATA.lav;
+    lavC = gLav.selectAll("circle").data(M.municipios.map(m => ({ c: [m[0], m[1]], v: m[2], g: m[3], p: m[4], pv: m[5], n: m[6], u: m[7],
+      r0: Math.max(0.6, Math.min(9, 0.6 + Math.sqrt(m[2]) * 0.0028)) }))).join("circle").attr("class", d => "lav g-" + d.g);
+    lavC.on("click", (e, d) => { e.stopPropagation(); select(d.u); });
+    lavC.append("title").text(d => `${d.n} · ${d.u}: principal lavoura ${d.p} (${reais(d.pv)}, ${fmt(Math.round(d.pv / d.v * 100))}% do valor); todas as lavouras ${reais(d.v)} (IBGE, Produção Agrícola Municipal ${M.meta.referencia}). O ponto fica na sede do município.`);
+  }
   /* usinas de energia (EPE), sob demanda: cor pela fonte, tamanho pela potência; clicar abre o estado */
   const gUsinas = root.append("g");
   let usinasC = gUsinas.selectAll("circle");
@@ -237,7 +248,7 @@ function rewind(f) {
       return `${p.nome} · ${p.tipo}${p.operador ? " · " + p.operador : ""}${p.prevista ? " · prevista" : ""}${p.atende ? ". Atende: " + p.atende : ""}${p.capacidade_bbl_dia ? ". Capacidade: " + fmt(p.capacidade_bbl_dia) + " barris de petróleo/dia" : ""}. Fonte: ANP.`; });
   }
   const DESENHA = { boi: desenharBoi, oil: desenharPocos, uep: desenharUep, campos: desenharCampos, zc: desenharZc, pce: desenharPce, rodest: desenharRodEst, usinas: desenharUsinas, lt: desenharLt,
-    celm: desenharCelm, g5: desenharG5 };
+    celm: desenharCelm, g5: desenharG5, lav: desenharLav };
   const gPorts = root.append("g");
   const ports = gPorts.selectAll("circle").data(DATA.ports || []).join("circle").attr("class", "port");
   ports.append("title").text(d => d.n + (d.org ? " · porto organizado" : "") + (d.obra ? " · em obras" : "") + " (IBGE, BC250 2025)");
@@ -259,7 +270,7 @@ function rewind(f) {
   caps.append("circle").attr("r", d => d.pais ? 3.6 : 2.6);
   caps.append("text").attr("x", 6).attr("y", 4).text(d => d.n);
   const G = { zee: gZee, mt: gMt, zc: gZc, pce: gPce, rod: gRod, rail: gRail, ports: gPorts, air: gAir, cla: gCla,
-    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt, celm: gCelm, g5: gG5 };
+    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt, celm: gCelm, g5: gG5, lav: gLav };
 
   let proj, path, W, H, head = 0, k = 1;
   const zoom = d3.zoom().scaleExtent([0.8, 12]).on("zoom", e => {
@@ -336,10 +347,10 @@ function rewind(f) {
     pocosC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     posBoi(); posCel(); raioPocos(); place();
   }
-  function posCel() { for (const c of [celmC, g5C]) c.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]); }
+  function posCel() { for (const c of [celmC, g5C, lavC]) c.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]); }
   function raioPocos() {
     const s = 1 / Math.sqrt(k);
-    for (const c of [pocosC, boiC, usinasC, celmC, g5C]) c.attr("r", d => d.r0 * s);
+    for (const c of [pocosC, boiC, usinasC, celmC, g5C, lavC]) c.attr("r", d => d.r0 * s);
   }
   /* pontos mantêm tamanho legível em qualquer zoom */
   function place() {
@@ -403,6 +414,7 @@ function rewind(f) {
     "p-cel": "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
     "p-pec": "M4 10h14l2 3v4h-2M4 10v7h2M8 17h8M4 10l-1-3M16 10l1-3",
     boi: "M4 10h14l2 3v4h-2M4 10v7h2M8 17h8M4 10l-1-3M16 10l1-3",
+    lav: "M12 21V9M12 9c0-3.5 2.5-6 6-6 0 3.5-2.5 6-6 6zM12 14c0-3-2-5-5-5 0 3 2 5 5 5zM8 21h8",
     "p-rod": "M8 21L10 3M16 21L14 3M12 6v2M12 11v2M12 16v2",
     rod: "M8 21L10 3M16 21L14 3M12 6v2M12 11v2M12 16v2",
     rodest: "M8 21L10 3M16 21L14 3M12 8v1M12 14v1",
@@ -422,14 +434,16 @@ function rewind(f) {
   mins.querySelectorAll(".tab").forEach(b => b.onclick = () => {
     minF = b.dataset.m;
     mins.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-pressed", x === b));
-    LAYERS.forEach(l => { if (l.nivel !== "pendente") l.on = minF === "todos" ? !!l.ligada : l.ministerio === minF; });
+    /* o filtro liga as camadas do ministério, menos as marcadas com "no_filtro": false (ficam na lista, desligadas) */
+    LAYERS.forEach(l => { if (l.nivel !== "pendente") l.on = minF === "todos" ? !!l.ligada : l.ministerio === minF && l.no_filtro !== false; });
     const p = PAINT.find(p => p.ministerio === minF && p.ok);
     paint = minF === "todos" ? "pop" : (p ? p.id : "none");
     render();
   });
 
   function controls() {
-    const pv = PAINT.filter(p => p.id === "none" || minF === "todos" || p.ministerio === minF);
+    /* pinturas marcadas "so_no_ministerio" (as lavouras) só aparecem com o filtro do ministério, para não lotar "Todos" */
+    const pv = PAINT.filter(p => p.id === "none" || (minF === "todos" ? !p.so_no_ministerio : p.ministerio === minF));
     document.getElementById("paint").innerHTML = pv.map(p =>
       `<button class="chip" data-p="${p.id}" aria-pressed="${paint === p.id}" ${p.id !== "none" && !p.ok ? "disabled title=\"Em apuração\"" : ""}>${p.nome}</button>`).join("");
     document.querySelectorAll("#paint .chip:not([disabled])").forEach(b => b.onclick = () => { paint = b.dataset.p; render(); });
@@ -484,7 +498,7 @@ function rewind(f) {
       const q = d3.scaleQuantile().domain(vals).range(RAMP);
       states.style("fill", d => { const v = P.val(d.properties.sigla); return v == null ? (P.vazio ? "var(--sem)" : null) : `var(${q(v)})`; });
       const D = DATA[P.id];
-      leg = `<span>${P.nome}${D.unidade ? " (" + D.unidade + ")" : ""}</span><span class="faixa"><span>${P.fmt(d3.min(vals))}</span>
+      leg = `<span>${P.nome}${P.unidade ? " (" + P.unidade + ")" : ""}</span><span class="faixa"><span>${P.fmt(d3.min(vals))}</span>
         <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(d3.max(vals))}</span></span>
         ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : "<span>sem cor = sem dado</span>") : ""}`;
     } else states.style("fill", null);
@@ -539,6 +553,18 @@ function rewind(f) {
       ${fonte}</div>`;
   }
 
+  /* principais lavouras do estado (IBGE, PAM): as 5 de maior valor da produção, com a quantidade */
+  const milhoes = x => `${fmt1(x)} ${x < 1.95 ? "milhão" : "milhões"}`;   /* 1,6 milhão; 2 milhões */
+  const quant = (q, un) => q == null ? "" : un === "mil frutos" ? (q >= 1e3 ? `${milhoes(q / 1e3)} de frutos` : `${fmt(q)} mil frutos`)
+    : q >= 1e6 ? `${milhoes(q / 1e6)} de t` : q >= 1e3 ? `${fmt1(q / 1e3)} mil t` : `${fmt(q)} t`;
+  function fichaLavouras(s) {
+    const L = DATA.soja || DATA.milho || DATA.cana || DATA.cafe, v = L && L.valores[s];
+    if (!v || !v.principais || !v.principais.length) return "";
+    return `<div class="list" style="margin-top:8px">Principais lavouras, pelo valor da produção:</div>
+      ${v.principais.map(([n, mil, q, un]) => `<div class="kv"><span>${esc(n)}</span><span class="v">${reais(mil)}${q != null ? " · " + quant(q, un) : ""}</span></div>`).join("")}
+      ${pill(L.nivel)} <span class="note">${esc(L.fonte)}, ref. ${esc(L.referencia)} · atualizado em ${L.atualizado_em}</span>`;
+  }
+
   /* telefonia celular do estado (Anatel): sinal 4G/5G, 5G nos municípios, fibra, antenas e o índice de conectividade */
   function fichaCelular(s) {
     const C = DATA.cel;
@@ -583,6 +609,8 @@ function rewind(f) {
     if (!sel) {
       el.innerHTML = `<h2>Visão nacional</h2><div class="fname">Brasil</div>
         <div class="kv"><span>População</span><span class="v">${fmt(popTot)}</span></div>${popInfo}
+        ${DATA.agro ? `<div class="kv" style="margin-top:8px"><span>Produção agrícola</span><span class="v">${reais(Object.values(DATA.agro.valores).reduce((a, b) => a + b, 0))}</span></div>
+          ${pill(DATA.agro.nivel)} <span class="note">IBGE, valor da produção das lavouras, ref. ${esc(DATA.agro.referencia)} · atualizado em ${DATA.agro.atualizado_em}</span>` : ""}
         ${DATA.oleo ? `<div class="kv" style="margin-top:8px"><span>Petróleo e gás</span><span class="v">${fmt1(DATA.oleo.total_boe_dia / 1e6)} milhões de boe/dia</span></div>
           ${pill(DATA.oleo.nivel)} <span class="note">ANP, média de ${esc(DATA.oleo.referencia)} · atualizado em ${DATA.oleo.atualizado_em}. boe = barril de óleo equivalente.</span>` : ""}
         ${DATA.ene ? `<div class="kv" style="margin-top:8px"><span>Energia elétrica</span><span class="v">${fmt(Math.round(DATA.ene.total_mw / 1000))} mil MW</span></div>
@@ -608,7 +636,8 @@ function rewind(f) {
       <div class="sec"><h3>Agricultura</h3>
         ${ag != null ? `<div class="kv"><span>${DATA.agro.titulo}</span><span class="v">${reais(ag)}</span></div>
           ${pill(DATA.agro.nivel)} <span class="note">${DATA.agro.fonte}, ref. ${DATA.agro.referencia} · atualizado em ${DATA.agro.atualizado_em}</span>`
-        : `${pill("pendente")} <span class="note">O robô de atualização ainda não rodou.</span>`}</div>
+        : `${pill("pendente")} <span class="note">O robô de atualização ainda não rodou.</span>`}
+      ${fichaLavouras(s)}</div>
       ${fichaPecuaria(s)}
       <div class="sec"><h3>Logística</h3>
         ${kr ? `<div class="kv"><span>Rodovias federais</span><span class="v">≈ ${fmt(kr[0])} km</span></div>

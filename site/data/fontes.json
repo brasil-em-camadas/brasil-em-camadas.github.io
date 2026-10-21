@@ -25,6 +25,50 @@
    "por": "total"
   },
   {
+   "id": "soja",
+   "nome": "Soja",
+   "arquivo": "lavouras/estados.json",
+   "campo": "soja",
+   "unidade": "toneladas",
+   "ministerio": "agri",
+   "por": "total",
+   "vazio": "sem produção",
+   "so_no_ministerio": true
+  },
+  {
+   "id": "milho",
+   "nome": "Milho",
+   "arquivo": "lavouras/estados.json",
+   "campo": "milho",
+   "unidade": "toneladas",
+   "ministerio": "agri",
+   "por": "total",
+   "vazio": "sem produção",
+   "so_no_ministerio": true
+  },
+  {
+   "id": "cana",
+   "nome": "Cana-de-açúcar",
+   "arquivo": "lavouras/estados.json",
+   "campo": "cana",
+   "unidade": "toneladas",
+   "ministerio": "agri",
+   "por": "total",
+   "vazio": "sem produção",
+   "so_no_ministerio": true
+  },
+  {
+   "id": "cafe",
+   "nome": "Café",
+   "arquivo": "lavouras/estados.json",
+   "campo": "cafe",
+   "unidade": "toneladas",
+   "ministerio": "agri",
+   "por": "total",
+   "vazio": "sem produção",
+   "so_no_ministerio": true
+  },
+  {
    "id": "reb",
    "nome": "Rebanho bovino",
    "arquivo": "pecuaria/estados.json",
@@ -360,6 +404,65 @@
    ]
   },
   {
+   "id": "lav",
+   "nome": "Principal lavoura por município",
+   "tipo": "pontos",
+   "arquivo": "lavouras/municipios.json",
+   "sob_demanda": true,
+   "ministerio": "agri",
+   "nivel": "api",
+   "fonte": "IBGE, Produção Agrícola Municipal (tabela 5457): a lavoura de maior valor da produção em cada município, no ponto da sede. O tamanho do ponto mostra o valor de todas as lavouras do município. Clique num ponto para ver os números",
+   "ligada": false,
+   "cor": "--lav-soja",
+   "legenda": [
+    {
+     "nome": "Soja",
+     "forma": "pt",
+     "cor": "--lav-soja"
+    },
+    {
+     "nome": "Milho",
+     "forma": "pt",
+     "cor": "--lav-milho"
+    },
+    {
+     "nome": "Cana-de-açúcar",
+     "forma": "pt",
+     "cor": "--lav-cana"
+    },
+    {
+     "nome": "Café",
+     "forma": "pt",
+     "cor": "--lav-cafe"
+    },
+    {
+     "nome": "Mandioca",
+     "forma": "pt",
+     "cor": "--lav-mandioca"
+    },
+    {
+     "nome": "Banana",
+     "forma": "pt",
+     "cor": "--lav-banana"
+    },
+    {
+     "nome": "Feijão",
+     "forma": "pt",
+     "cor": "--lav-feijao"
+    },
+    {
+     "nome": "Arroz",
+     "forma": "pt",
+     "cor": "--lav-arroz"
+    },
+    {
+     "nome": "outras lavouras",
+     "forma": "pt",
+     "cor": "--lav-outras"
+    }
+   ]
+  },
+  {
    "id": "boi",
    "nome": "Rebanho bovino por município",
    "tipo": "pontos",
@@ -375,7 +478,8 @@
      "nome": "Rebanho bovino por município (tamanho = cabeças)",
      "forma": "pt"
     }
-   ]
+   ],
+   "no_filtro": false
   },
   {
    "id": "p-rod",
