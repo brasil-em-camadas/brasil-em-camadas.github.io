@@ -184,3 +184,19 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .apoio .note{font-size:.78rem;opacity:.8}
 @media (min-width:901px){.foot{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto}}
 @media (max-width:900px){.apoio{align-items:flex-start}}
+/* rodapé (21/10/2026): 1ª faixa = níveis de confiança | legenda | apoio; 2ª faixa = "Sobre" na largura toda, em colunas */
+.foot{grid-template-areas:"niveis legenda apoio" "sobre sobre sobre";row-gap:30px}
+.niveis{grid-area:niveis}.legenda-bloco{grid-area:legenda}.apoio{grid-area:apoio}.sobre{grid-area:sobre}
+.legenda{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px 24px;align-items:start;font-size:.88rem}
+.legenda .item{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;color:var(--ink);opacity:.9}
+.legenda .item>span{display:inline-flex;align-items:center}
+.legend:empty{display:none}
+.sobre{columns:3 300px;column-gap:44px;column-rule:1px solid var(--hair);padding-top:22px;border-top:1px solid var(--hair)}
+.sobre h2{column-span:all}
+.sobre p{max-width:none;orphans:3;widows:3}
+@media (max-width:900px){
+  .foot{grid-template-areas:"niveis" "legenda" "sobre" "apoio"}
+  .sobre{columns:1}
+}
+/* telas médias: um pouco mais de largura para os níveis de confiança, para as explicações não quebrarem em três linhas */
+@media (min-width:901px) and (max-width:1300px){.foot{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto}}

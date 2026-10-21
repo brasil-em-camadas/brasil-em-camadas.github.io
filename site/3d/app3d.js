@@ -494,11 +494,14 @@ function quintis(vals) {
         <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(Math.max(...vals))}</span>
         ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : "<span>sem cor = sem dado</span>") : ""}`;
     } else if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", cor("--land"));
-    leg += LAYERS.filter(l => l.on && l.cor).map(l => (l.legenda || [{ nome: l.nome }]).map(k => {
+    /* sobre o mapa fica só a escala de cores; os símbolos das camadas ligadas vão para o rodapé, ao lado dos níveis de confiança */
+    document.getElementById("legend").innerHTML = leg;
+    const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
       const forma = k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
-    }).join("")).join("");
-    document.getElementById("legend").innerHTML = leg;
+    }).join("")}</span>`).join("");
+    const lr = document.getElementById("legenda");
+    if (lr) lr.innerHTML = itens || `<span class="note">Nenhuma camada ligada. Escolha as camadas no painel.</span>`;
     document.getElementById("back").hidden = !sel;
     document.getElementById("where").textContent = sel ? `${NAME[sel]} · ${sel}` : "Brasil · 27 UFs";
   }

@@ -357,11 +357,14 @@ function rewind(f) {
         <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(d3.max(vals))}</span>
         ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : "<span>sem cor = sem dado</span>") : ""}`;
     } else states.style("fill", null);
-    leg += LAYERS.filter(l => l.on && l.cor).map(l => (l.legenda || [{ nome: l.nome }]).map(k => {
+    /* sobre o mapa fica só a escala de cores; os símbolos das camadas ligadas vão para o rodapé, ao lado dos níveis de confiança */
+    document.getElementById("legend").innerHTML = leg;
+    const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
       const forma = k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
-    }).join("")).join("");
-    document.getElementById("legend").innerHTML = leg;
+    }).join("")}</span>`).join("");
+    const lr = document.getElementById("legenda");
+    if (lr) lr.innerHTML = itens || `<span class="note">Nenhuma camada ligada. Escolha as camadas no painel.</span>`;
     states.classed("sel", d => d.properties.sigla === sel).classed("fade", d => sel && d.properties.sigla !== sel);
     states.filter(".sel").raise();
     rails.classed("hi", d => sel && d.uf === sel).classed("off", d => sel && d.uf !== sel);
