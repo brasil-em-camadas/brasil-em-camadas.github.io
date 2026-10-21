@@ -11,7 +11,8 @@ site/                 o site em si (é isto que vai para o ar)
   letras/             as letras do site (Barlow, Big Shoulders Display, JetBrains Mono), guardadas aqui, sem Google Fonts
   3d/                 o motor do mapa 3D: app3d.js (funcionamento), 3d.css, MapLibre (vendor/) e letras do mapa (fontes/)
                       (3d/index.html só redireciona quem tinha o endereço antigo da página de teste)
-  2d/                 versão leve em 2D (D3), para aparelhos que não abrem o globo
+  2d/                 versão leve em 2D (D3, cópia em 2d/vendor/), para aparelhos que não abrem o globo
+  vendor/count.js     script do contador de visitas (GoatCounter, licença ISC), guardado aqui
   data/fontes.json    o registro de todas as camadas: nome, ministério, fonte, nível de confiança
   data/*.json         os dados de cada camada
   data/geo/*.json     contornos, ferrovias, portos, aeroportos e limites do mar (ZEE, mar territorial,
@@ -63,6 +64,7 @@ Os limites do mar não entram no robô mensal, porque mudam raramente. Para refa
 - Limites do mar: Marine Regions, do Flanders Marine Institute (VLIZ, Bélgica), licença CC-BY 4.0. ZEE versão 12 ([doi:10.14284/632](https://doi.org/10.14284/632)), mar territorial versão 4 ([doi:10.14284/633](https://doi.org/10.14284/633)), zona contígua versão 4 ([doi:10.14284/630](https://doi.org/10.14284/630)), águas interiores versão 4 ([doi:10.14284/631](https://doi.org/10.14284/631)), todas de 2023, e plataforma continental estendida versão 2, de 2024 ([doi:10.14284/697](https://doi.org/10.14284/697)). O site usa um derivado simplificado só do Brasil; o original fica no Marine Regions, que pede para não ser redistribuído em outros lugares. Os desenhos não têm valor legal. Margem Equatorial: pontos do limite publicados pela CLPC/ONU (documento público das Nações Unidas). Situação de cada área da plataforma na ONU (CLPC): página do LEPLAC da Marinha (SECIRM).
 - Luzes à noite: população de cada município pela API SIDRA do IBGE (Censo 2022); posição das sedes municipais da base aberta [municipios-brasileiros](https://github.com/kelvins/municipios-brasileiros) (licença MIT), cópia em `scripts/dados/`; iluminação noturna NASA Black Marble via GIBS (domínio público).
 
+- Versão leve: biblioteca D3 7.8.5 (licença ISC), cópia em `site/2d/vendor/`. Contador de visitas: script `count.js` do GoatCounter (licença ISC), cópia em `site/vendor/`; a contagem continua indo para `brasilemcamadas.goatcounter.com`.
 - Letras do site: Barlow, Big Shoulders Display e JetBrains Mono, licença SIL Open Font License 1.1; cópias dos pacotes Fontsource 5.3.0 (as mesmas versões do Google Fonts) em `site/letras/`, com as licenças. Só os conjuntos latin e latin-ext e os pesos usados.
 - Mapa 3D: imagem do planeta NASA Blue Marble via GIBS (domínio público); altitude do terreno Terrain Tiles na AWS (dados abertos); motor MapLibre GL JS 5.24.0 (licença BSD, cópia em `site/3d/vendor/`); letras Open Sans (licença Apache 2.0), do projeto openmaptiles/fonts.
 

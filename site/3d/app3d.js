@@ -442,18 +442,19 @@ function quintis(vals) {
     });
     document.getElementById("paint").classList.toggle("apagado", luz !== "off");
     /* luzes à noite: uma de cada vez, para não misturar as duas imagens */
-    const zv = LUZ.filter(l => minF === "todos" || l.ministerio === minF);
-    document.getElementById("luzes").innerHTML = [{ id: "off", nome: "Desligadas" }, ...zv].map(l =>
-      `<button class="chip" data-l="${l.id}" aria-pressed="${luz === l.id}" ${l.falhou ? "disabled title=\"Não foi possível carregar\"" : ""}>${l.nome}</button>`).join("");
-    document.querySelectorAll("#luzes .chip:not([disabled])").forEach(b => b.onclick = () => definirLuz(b.dataset.l));
+    const zv = LUZ.filter(l => minF === "todos" || l.ministerio === minF), gl = document.getElementById("luzes");
+    gl.hidden = !zv.length;
+    gl.innerHTML = `<span class="lbl">Luzes à noite</span>` + zv.map(l =>
+      `<button class="back" data-l="${l.id}" aria-pressed="${luz === l.id}" ${l.falhou ? "disabled title=\"Não foi possível carregar\"" : `title="${luz === l.id ? "Apagar as luzes" : "Acender: " + l.titulo}"`}>${l.nome}</button>`).join("");
+    gl.querySelectorAll("button:not([disabled])").forEach(b => b.onclick = () => definirLuz(luz === b.dataset.l ? "off" : b.dataset.l));
     const L = LUZ.find(l => l.id === luz), info = document.getElementById("luz-info");
     if (!L) info.innerHTML = "";
     else {
       const dd = L.id === "pop" ? luzPop : null;
-      info.innerHTML = `<div class="luz-info"><p class="note"><b>${L.titulo}.</b> ${L.explica}</p>
+      info.innerHTML = `<h2 style="margin-top:14px">Luzes à noite</h2><div class="luz-info"><p class="note"><b>${L.titulo}.</b> ${L.explica}</p>
         <div>${dd ? `${pill(dd.nivel)} <span class="note">${dd.fonte} · atualizado em ${dd.atualizado_em}. Posição: ${dd.posicao}.</span>`
              : `${pill(L.nivel)} <span class="note">${L.fonte}.</span>`}</div>
-        <p class="note">Com as luzes acesas, os estados ficam sem cor e as rodovias e ferrovias se apagam, para não se confundirem com as luzes (dá para religar em Camadas). Escolha uma pintura acima para voltar às cores.</p></div>`;
+        <p class="note">Com as luzes acesas, os estados ficam sem cor e as rodovias e ferrovias se apagam, para não se confundirem com as luzes (dá para religar em Camadas). Para apagar, clique de novo no botão da luz, no alto do mapa, ou escolha uma pintura acima.</p></div>`;
     }
     const lv = LAYERS.filter(l => minF === "todos" || l.ministerio === minF);
     document.getElementById("layers").innerHTML = lv.length ? lv.map(l => `
@@ -463,6 +464,14 @@ function quintis(vals) {
         <span class="src">${l.fonte}${quando(l.id)} · ${F.ministerios[l.ministerio]}</span></span>
       </label>`).join("") : `<p class="note">Este ministério ainda não tem camadas de mapa.</p>`;
     lv.filter(l => l.nivel !== "pendente").forEach(l => document.getElementById("ly-" + l.id).onchange = e => { l.on = e.target.checked; render(); });
+    /* ligar ou desligar de uma vez todas as camadas da lista (respeita o ministério escolhido) */
+    const lig = lv.filter(l => l.nivel !== "pendente"), todas = document.getElementById("todas");
+    if (todas) {
+      const tudo = lig.length > 0 && lig.every(l => l.on);
+      todas.hidden = !lig.length;
+      todas.textContent = tudo ? "Desligar todas" : "Ligar todas";
+      todas.onclick = () => { lig.forEach(l => { l.on = !tudo; }); guardadas = null; render(); };
+    }
   }
 
   /* ---------- desenho ---------- */

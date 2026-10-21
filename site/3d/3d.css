@@ -43,3 +43,10 @@
 .luz-info{display:grid;gap:6px;margin:2px 0 4px}
 .luz-info p{margin:0}
 .pop-fonte{font-size:11px;color:var(--muted)}
+/* luzes à noite na linha do Relevo 3D; a linha quebra antes de passar por baixo do painel */
+.where{flex-wrap:wrap;max-width:calc(100% - var(--dock-w,0px) - 40px)}
+.luzes-topo{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.luzes-topo[hidden]{display:none}
+.luzes-topo .lbl{margin-left:6px}
+@media (max-width:900px){.where{max-width:none;padding-bottom:8px}.luzes-topo{gap:6px}.luzes-topo .lbl{margin-left:0;letter-spacing:.08em}
+  .luzes-topo .back{padding:5px 10px;font-size:.84rem}}

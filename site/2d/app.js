@@ -340,6 +340,14 @@ function rewind(f) {
         <span class="src">${l.fonte}${quando(l.id)} · ${F.ministerios[l.ministerio]}</span></span>
       </label>`).join("") : `<p class="note">Este ministério ainda não tem camadas de mapa.</p>`;
     lv.filter(l => l.nivel !== "pendente").forEach(l => document.getElementById("ly-" + l.id).onchange = e => { l.on = e.target.checked; render(); });
+    /* ligar ou desligar de uma vez todas as camadas da lista (respeita o ministério escolhido) */
+    const lig = lv.filter(l => l.nivel !== "pendente"), todas = document.getElementById("todas");
+    if (todas) {
+      const tudo = lig.length > 0 && lig.every(l => l.on);
+      todas.hidden = !lig.length;
+      todas.textContent = tudo ? "Desligar todas" : "Ligar todas";
+      todas.onclick = () => { lig.forEach(l => { l.on = !tudo; }); render(); };
+    }
   }
 
   /* ---------- desenho ---------- */

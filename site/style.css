@@ -200,3 +200,11 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 }
 /* telas médias: um pouco mais de largura para os níveis de confiança, para as explicações não quebrarem em três linhas */
 @media (min-width:901px) and (max-width:1300px){.foot{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto}}
+/* apoio: frase centralizada embaixo do botão */
+.apoio{align-items:center;justify-self:end;text-align:center}
+@media (max-width:900px){.apoio{align-items:center;justify-self:start}}
+/* cabeçalho "Camadas" com o botão de ligar/desligar todas */
+.cab{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+.cab h2{margin:0}
+.chip.mini{font-size:.8rem;padding:3px 10px}
+.chip.mini[hidden]{display:none}
