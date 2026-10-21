@@ -9,6 +9,7 @@
   --cel1:#ff5c4d; --cel2:#ff9b45; --cel3:#f2dc6b; --cel4:#8fe3f0; --g5:#f06bff;
   --lav-soja:#ffd23f; --lav-milho:#ff8c42; --lav-cana:#4ee1c1; --lav-cafe:#c08457; --lav-mandioca:#c77dff; --lav-banana:#ff70a6; --lav-feijao:#e63946; --lav-arroz:#f1faee; --lav-outras:#8d99ae;
   --gasd:#7fdbff; --oleod:#ff8a65; --refin:#ff3d3d; --upgn:#b3ecff; --gnl:#26c6da; --def:#d9e4ec;
+  --tr0:#cfd8dc; --tr1:#cfe3ea; --tr2:#f3d27a; --tr3:#ec8f3c; --tr4:#c4462b;
   --q1:#1d4a2c; --q2:#2b6338; --q3:#3f7e44; --q4:#6aa055; --q5:#a8c97a;
   --t-api:#7fd6c9; --t-manual:#b7d98a; --t-entidade:#e8b75a; --t-base:#a9bdf7; --t-calculado:#c9a2ff; --t-pendente:#ff8f80;
   --f-display:"Big Shoulders Display","Arial Narrow",sans-serif;
@@ -275,3 +276,7 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .se{fill:var(--lt);stroke:#14082a;stroke-width:.8;vector-effect:non-scaling-stroke;cursor:default}
 /* indústria de defesa (versão leve): escudo no ponto da sede, maior = mais empresas credenciadas */
 .edef{fill:var(--def);stroke:#0b1622;stroke-width:1;vector-effect:non-scaling-stroke;cursor:pointer}
+/* tráfego nos pedágios federais (versão leve): tamanho = veículos por dia, cor = parte de caminhões e ônibus */
+.ped{stroke:#1a0d05;stroke-width:.6;vector-effect:non-scaling-stroke;fill-opacity:.9;cursor:pointer}
+.ped.f1{fill:var(--tr1)}.ped.f2{fill:var(--tr2)}.ped.f3{fill:var(--tr3)}.ped.f4{fill:var(--tr4)}
+.ped.sem{fill:none;stroke:var(--tr0);stroke-width:1.3;pointer-events:visibleStroke}

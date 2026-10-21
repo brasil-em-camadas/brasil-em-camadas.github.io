@@ -288,6 +288,17 @@ function rewind(f) {
       r0: f.properties.k === "refinaria" ? 3.2 + Math.sqrt(f.properties.bbl || 0) * 0.008 : 2.6 })) : []).join("circle").attr("class", d => "inst k-" + d.k);
   refinC.on("click", (e, d) => { e.stopPropagation(); if (d.uf) select(d.uf); });
   refinC.append("title").text(d => `${d.n}${d.s ? " (" + d.s + ")" : ""} · ${INST[d.k]} · ${d.m}/${d.uf}${d.bbl ? ". Capacidade: " + fmt(d.bbl) + " barris de petróleo por dia" : ""}${d.mi_m3 ? ". Capacidade: " + fmt(d.mi_m3) + " milhões de m³ de gás por dia" : ""} (ANP).`);
+  /* pedágios federais (ANTT): tamanho pela raiz dos veículos por dia, cor pela parte de caminhões e ônibus;
+     praça sem número confiável fica só com o contorno; clicar abre o estado */
+  const gPed = root.append("g");
+  const FX_PED = c => c >= 55 ? 4 : c >= 40 ? 3 : c >= 25 ? 2 : 1;
+  const pedC = gPed.selectAll("circle").data(DATA.pedagio ? DATA.pedagio.pracas.map(p => ({ c: [p[0], p[1]], p,
+      r0: p[12] ? 2.2 : 1.2 + Math.sqrt(p[8]) * 0.03 })) : []).join("circle").attr("class", d => d.p[12] ? "ped sem" : "ped f" + FX_PED(d.p[9]));
+  pedC.on("click", (e, d) => { e.stopPropagation(); if (d.p[7]) select(d.p[7]); });
+  pedC.append("title").text(d => { const p = d.p, M = DATA.pedagio.meta;
+    return `${p[13] ? "Validador do pedágio" : "Praça de pedágio"} ${p[2]} · ${p[3]} · ${p[4]}, km ${p[5]} · ${p[6]}${p[7] ? "/" + p[7] : ""}: `
+      + (p[12] === 1 ? `sem volume informado à ANTT em ${M.referencia}.` : p[12] === 2 ? "o volume informado à ANTT não fecha (mais de 40% aparece como motos); o número não é mostrado."
+        : `≈ ${fmt(p[8])} veículos por dia, ${fmt1(p[9])}% caminhões e ônibus (média de ${p[10]} ${p[10] > 1 ? "meses" : "mês"}, ${p[11]}).`) + " Fonte: ANTT."; });
   const gPorts = root.append("g");
   const ports = gPorts.selectAll("circle").data(DATA.ports || []).join("circle").attr("class", "port");
   ports.append("title").text(d => d.n + (d.org ? " · porto organizado" : "") + (d.obra ? " · em obras" : "") + " (IBGE, BC250 2025)");
@@ -309,7 +320,7 @@ function rewind(f) {
   caps.append("circle").attr("r", d => d.pais ? 3.6 : 2.6);
   caps.append("text").attr("x", 6).attr("y", 4).text(d => d.n);
   const G = { zee: gZee, mt: gMt, zc: gZc, pce: gPce, rod: gRod, rail: gRail, ports: gPorts, air: gAir, cla: gCla,
-    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt, celm: gCelm, g5: gG5, lav: gLav, dutos: gDutos, refin: gRefin, se: gSe, empdef: gDef };
+    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt, celm: gCelm, g5: gG5, lav: gLav, dutos: gDutos, refin: gRefin, se: gSe, empdef: gDef, pedagio: gPed };
 
   let proj, path, W, H, head = 0, k = 1;
   const zoom = d3.zoom().scaleExtent([0.8, 12]).on("zoom", e => {
@@ -407,6 +418,7 @@ function rewind(f) {
     gNomes.classed("z-cap", k >= 1.9).classed("z-nome", k >= 3.2);
     ports.attr("r", 3.6 * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     refinC.attr("r", d => d.r0 * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
+    pedC.attr("r", d => d.r0 * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     seP.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
     defP.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
     airs.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
@@ -468,7 +480,8 @@ function rewind(f) {
     refin: "M3 21V12l5 3v-3l5 3V8h3V4h3v17zM3 21h18",
     celm: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
     g5: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
-    empdef: "M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"
+    empdef: "M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z",
+    pedagio: "M5 21V8h3v13M8 11h12v3H8zM4 21h5"
   };
   const quando = id => { const m = DATA[id] && DATA[id].meta; return m && m.atualizado_em ? ` · ${m.referencia ? "ref. " + esc(m.referencia) + ", " : ""}atualizado em ${m.atualizado_em}` : ""; };
   const icon = id => ICON[id] ? `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[id]}"/></svg>` : `<span class="ico"></span>`;
@@ -641,6 +654,16 @@ function rewind(f) {
       ${G5 ? `<br>${pill(C.nivel)} <span class="note">5G: Anatel, presença da telefonia móvel (RQUAL), ${esc(G5.referencia)} · atualizado em ${G5.atualizado_em}</span>` : ""}</div>`;
   }
 
+  /* pedágios federais do estado (ANTT): quantas praças e a mais movimentada */
+  function fichaPedagio(s) {
+    const P = DATA.pedagio, v = P && P.meta.por_uf[s];
+    if (!v) return "";
+    const m = v.maior;
+    return `<div class="kv" style="margin-top:8px"><span>Praças de pedágio federais</span><span class="v">${fmt(v.pracas)}</span></div>
+      ${m ? `<div class="list">A mais movimentada: ${esc(m[0])} (${esc(m[2])}, km ${esc(m[3])}, ${esc(m[4])}), com ≈ ${fmt(m[1])} veículos por dia.</div>` : ""}
+      ${pill(P.meta.nivel)} <span class="note">ANTT, média de ${esc(P.meta.referencia)} · atualizado em ${P.meta.atualizado_em}. Só as concessões federais.</span>`;
+  }
+
   /* defesa do estado: empresas credenciadas pelo Ministério da Defesa (EED e ED) e, no Maranhão, o Centro de Alcântara */
   function fichaDefesa(s) {
     const D = DATA.defesa, v = D && D.valores[s], cla = CLA && s === CLA.uf;
@@ -730,7 +753,8 @@ function rewind(f) {
         ${pill("manual")} <span class="note">IBGE, base cartográfica 1:250.000 (BC250, 2025); medidas no desenho do mapa.</span>
         <div class="kv" style="margin-top:8px"><span>Aeroportos na base</span><span class="v">${A.length}</span></div>
         ${A.length ? `<div class="list">${A.map(a => a.n + (a.i ? " (" + a.i + ")" : "")).join(", ")}</div>` : ""}
-        ${pill("base")} <span class="note">Natural Earth, só os maiores. Ausência na base não significa ausência real.</span></div>
+        ${pill("base")} <span class="note">Natural Earth, só os maiores. Ausência na base não significa ausência real.</span>
+        ${fichaPedagio(s)}</div>
       ${fichaOleo(s)}
       ${fichaEnergia(s)}
       ${fichaCelular(s)}

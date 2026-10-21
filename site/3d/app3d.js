@@ -99,6 +99,9 @@ function quintis(vals) {
   const aeros = fc((DATA.air || []).map(a => ponto(a.c, { n: a.n + (a.i ? " (" + a.i + ")" : ""), uf: a.uf })));
   /* poços em produção: [lon, lat, boe/dia, barris de petróleo/dia, mil m³ de gás/dia, poço, campo, UF, mar/terra] */
   const pocosFC = d => fc(d.pocos.map(p => ponto([p[0], p[1]], { b: p[2], o: p[3], g: p[4], n: p[5], c: p[6], u: p[7], a: p[8] })));
+  /* pedágios federais (ANTT): [lon, lat, praça, concessionária, rodovia, km, município, UF, veículos/dia, % comerciais,
+     meses usados, período, aviso, validador]; a janelinha lê a linha pelo índice */
+  const pedFC = d => fc(d.pracas.map((p, i) => ponto([p[0], p[1]], { v: p[8] || 0, c: p[9] == null ? -1 : p[9], a: p[12], i })));
 
   /* ---------- mapa ---------- */
   const fonte = (estilo) => [estilo];
@@ -108,7 +111,7 @@ function quintis(vals) {
   const map = new maplibregl.Map({
     container: "map",
     locale: { "AttributionControl.ToggleAttribution": "Mostrar ou ocultar os créditos do mapa" },
-    attributionControl: { compact: true, customAttribution: "NASA Blue Marble · Terrain Tiles (AWS) · Natural Earth · IBGE · Marine Regions · ANP · EPE · Anatel · Ministério da Defesa" },
+    attributionControl: { compact: true, customAttribution: "NASA Blue Marble · Terrain Tiles (AWS) · Natural Earth · IBGE · Marine Regions · ANP · EPE · Anatel · ANTT · Ministério da Defesa" },
     style: {
       version: 8,
       projection: { type: "globe" },
@@ -136,6 +139,7 @@ function quintis(vals) {
         celm: { type: "geojson", data: fc([]) },
         g5: { type: "geojson", data: fc([]) },
         empdef: { type: "geojson", data: fc([]) },
+        pedagio: { type: "geojson", data: DATA.pedagio ? pedFC(DATA.pedagio) : fc([]) },
         uep: { type: "geojson", data: DATA.uep || fc([]) },
         campos: { type: "geojson", data: DATA.campos || fc([]) },
         presal: { type: "geojson", data: DATA.presal || fc([]) },
@@ -244,6 +248,17 @@ function quintis(vals) {
             "circle-stroke-opacity": ["interpolate", ["linear"], ["zoom"], 3, 0.7, 5, 0.95],
             "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 3, 0.7, 5, 1.2, 8, 1.8],
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 2, 5, 3.6, 7, 5.6, 9, 8] } },
+        /* pedágios federais (ANTT): tamanho pela raiz dos veículos por dia, cor pela parte de caminhões e ônibus;
+           praça sem número confiável (a > 0) fica só com o contorno */
+        { id: "pedagio", type: "circle", source: "pedagio", layout: { "circle-sort-key": ["-", 0, ["get", "v"]] },
+          paint: { "circle-color": ["step", ["get", "c"], cor("--tr1"), 25, cor("--tr2"), 40, cor("--tr3"), 55, cor("--tr4")],
+            "circle-opacity": ["case", [">", ["get", "a"], 0], 0, 0.92],
+            "circle-stroke-color": ["case", [">", ["get", "a"], 0], cor("--tr0"), "#1a0d05"],
+            "circle-stroke-width": ["case", [">", ["get", "a"], 0], 1.4, 0.6],
+            "circle-radius": ["interpolate", ["linear"], ["zoom"],
+              3, ["case", [">", ["get", "a"], 0], 2.4, ["interpolate", ["linear"], ["sqrt", ["get", "v"]], 0, 1.5, 100, 3.5, 280, 8]],
+              6, ["case", [">", ["get", "a"], 0], 3.5, ["interpolate", ["linear"], ["sqrt", ["get", "v"]], 0, 2.5, 100, 6, 280, 13]],
+              9, ["case", [">", ["get", "a"], 0], 5, ["interpolate", ["linear"], ["sqrt", ["get", "v"]], 0, 4, 100, 9, 280, 20]]] } },
         /* tamanho do poço pela produção (raiz quadrada: a área do ponto acompanha os barris) */
         { id: "pocos", type: "circle", source: "pocos", layout: { "circle-sort-key": ["get", "b"] },
           paint: { "circle-color": cor("--oil"), "circle-opacity": 0.88, "circle-stroke-color": "#2a1d05", "circle-stroke-width": 0.5,
@@ -364,7 +379,7 @@ function quintis(vals) {
 
   const G = { zee: ["zee-fill", "zee-line", "zee-rotulo", "ilhas-ponto", "ilhas-rotulo"], mt: ["mt-fill", "mt-line", "mt-base"], zc: ["zc-fill", "zc-line"],
     pce: ["pce-fill-rec", "pce-fill-ana", "pce-line-rec", "pce-line-ana", "pce-rotulo"], rod: ["rodovias", "rodovias-terra", "rodovias-rotulo"], rodest: ["rodovias-est"],
-    oil: ["pocos"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi"], lav: ["lav"], usinas: ["usinas"], dutos: ["dutos"], refin: ["refin"], se: ["se"], lt: ["lt"], celm: ["celm"], g5: ["g5"], empdef: ["empdef"],
+    oil: ["pocos"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi"], lav: ["lav"], usinas: ["usinas"], dutos: ["dutos"], refin: ["refin"], se: ["se"], lt: ["lt"], celm: ["celm"], g5: ["g5"], empdef: ["empdef"], pedagio: ["pedagio"],
     rail: ["ferrovias", "ferrovias-obra"], ports: ["portos"], air: ["aeroportos"] };
 
   /* ---------- painel e enquadramento ---------- */
@@ -583,6 +598,18 @@ function quintis(vals) {
         .setHTML(`<b>${esc(p.n)} · ${esc(p.u)}</b><br>${lin.join("<br>")}<br><span class="pop-fonte">Anatel, dados abertos. O ponto fica na sede do município.</span>`).addTo(map);
       return;
     }
+    /* pedágios federais: de perto (zoom 4,5), como os outros pontos por município */
+    const pd = vis("pedagio") && DATA.pedagio && map.getZoom() >= 4.5 ? map.queryRenderedFeatures(perto, { layers: ["pedagio"] }) : [];
+    if (pd.length) {
+      const f = pd.reduce((a, b) => b.properties.v < a.properties.v ? b : a), M = DATA.pedagio.meta, p = DATA.pedagio.pracas[f.properties.i];
+      const num = p[12] === 1 ? `Sem volume informado à ANTT em ${esc(M.referencia)}.`
+        : p[12] === 2 ? "O volume informado à ANTT não fecha (mais de 40% aparece como motos); por isso o número não é mostrado."
+        : `≈ ${fmt(p[8])} veículos por dia · ${fmt1(p[9])}% caminhões e ônibus<br>Média de ${p[10]} ${p[10] > 1 ? "meses" : "mês"} (${esc(p[11])}); conta os sentidos em que há cobrança.`;
+      new maplibregl.Popup({ closeButton: false, offset: 8, maxWidth: "300px" }).setLngLat(f.geometry.coordinates)
+        .setHTML(`<b>${p[13] ? "Validador do pedágio" : "Praça de pedágio"} ${esc(p[2])}</b><br>${esc(p[3])} · ${esc(p[4])}, km ${esc(p[5])}<br>${esc(p[6])}${p[7] ? " (" + esc(p[7]) + ")" : ""}
+          <br>${num}<br><span class="pop-fonte">ANTT, dados abertos (números informados pelas concessionárias)</span>`).addTo(map);
+      return;
+    }
     const pts = map.queryRenderedFeatures(e.point, { layers: ["portos", "aeroportos", "capitais"].filter(l => map.getLayoutProperty(l, "visibility") !== "none") });
     if (pts.length) {
       const f = pts[0], tipo = f.layer.id === "portos" ? "Porto" : f.layer.id === "aeroportos" ? "Aeroporto" : "Capital";
@@ -676,7 +703,8 @@ function quintis(vals) {
     refin: "M3 21V12l5 3v-3l5 3V8h3V4h3v17zM3 21h18",
     celm: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
     g5: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
-    empdef: "M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"
+    empdef: "M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z",
+    pedagio: "M5 21V8h3v13M8 11h12v3H8zM4 21h5"
   };
   const quando = id => { const m = DATA[id] && DATA[id].meta; return m && m.atualizado_em ? ` · ${m.referencia ? "ref. " + esc(m.referencia) + ", " : ""}atualizado em ${m.atualizado_em}` : ""; };
   const icon = id => ICON[id] ? `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[id]}"/></svg>` : `<span class="ico"></span>`;
@@ -956,6 +984,16 @@ function quintis(vals) {
       ${G5 ? `<br>${pill(C.nivel)} <span class="note">5G: Anatel, presença da telefonia móvel (RQUAL), ${esc(G5.referencia)} · atualizado em ${G5.atualizado_em}</span>` : ""}</div>`;
   }
 
+  /* pedágios federais do estado (ANTT): quantas praças e a mais movimentada */
+  function fichaPedagio(s) {
+    const P = DATA.pedagio, v = P && P.meta.por_uf[s];
+    if (!v) return "";
+    const m = v.maior;
+    return `<div class="kv" style="margin-top:8px"><span>Praças de pedágio federais</span><span class="v">${fmt(v.pracas)}</span></div>
+      ${m ? `<div class="list">A mais movimentada: ${esc(m[0])} (${esc(m[2])}, km ${esc(m[3])}, ${esc(m[4])}), com ≈ ${fmt(m[1])} veículos por dia.</div>` : ""}
+      ${pill(P.meta.nivel)} <span class="note">ANTT, média de ${esc(P.meta.referencia)} · atualizado em ${P.meta.atualizado_em}. Só as concessões federais.</span>`;
+  }
+
   /* defesa do estado: empresas credenciadas pelo Ministério da Defesa (EED e ED) e, no Maranhão, o Centro de Alcântara */
   function fichaDefesa(s) {
     const D = DATA.defesa, v = D && D.valores[s], cla = CLA && s === CLA.uf;
@@ -1045,7 +1083,8 @@ function quintis(vals) {
         ${pill("manual")} <span class="note">IBGE, base cartográfica 1:250.000 (BC250, 2025); medidas no desenho do mapa.</span>
         <div class="kv" style="margin-top:8px"><span>Aeroportos na base</span><span class="v">${A.length}</span></div>
         ${A.length ? `<div class="list">${A.map(a => a.n + (a.i ? " (" + a.i + ")" : "")).join(", ")}</div>` : ""}
-        ${pill("base")} <span class="note">Natural Earth, só os maiores. Ausência na base não significa ausência real.</span></div>
+        ${pill("base")} <span class="note">Natural Earth, só os maiores. Ausência na base não significa ausência real.</span>
+        ${fichaPedagio(s)}</div>
       ${fichaOleo(s)}
       ${fichaEnergia(s)}
       ${fichaCelular(s)}

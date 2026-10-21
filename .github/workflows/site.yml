@@ -1,5 +1,5 @@
 # Robô do Brasil em Camadas
-# - Todo dia 3 de cada mês (e quando você clicar em "Run workflow"): busca dados novos do IBGE, da ANP, da EPE, da Anatel e do Ministério da Defesa e salva no repositório.
+# - Todo dia 3 de cada mês (e quando você clicar em "Run workflow"): busca dados novos do IBGE, da ANP, da EPE, da Anatel, da ANTT e do Ministério da Defesa e salva no repositório.
 # - Depois de cada mudança: publica o site no GitHub Pages.
 # Versões das ações conferidas em 21/10/2026 (todas em Node 24; o Node 20 foi descontinuado pelo GitHub).
 name: Atualizar dados e publicar
@@ -43,6 +43,11 @@ jobs:
       - name: Buscar dados da Anatel (telefonia celular)
         continue-on-error: true
         run: python scripts/atualizar_anatel.py
+      # Tráfego nos pedágios federais (ANTT); o servidor da ANTT às vezes demora, então o passo tem limite de tempo; se falhar, ficam os arquivos antigos.
+      - name: Buscar o tráfego nos pedágios federais (ANTT)
+        continue-on-error: true
+        timeout-minutes: 25
+        run: python scripts/atualizar_antt.py
       # Indústria de defesa: lista das empresas credenciadas pelo Ministério da Defesa (planilha do gov.br); se falhar, ficam os arquivos antigos.
       - name: Buscar a lista da indústria de defesa (Ministério da Defesa)
         continue-on-error: true
@@ -52,7 +57,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add site/data
-          git diff --cached --quiet || (git commit -m "Atualiza dados do IBGE, da ANP, da EPE, da Anatel e da Defesa" && git push)
+          git diff --cached --quiet || (git commit -m "Atualiza dados do IBGE, da ANP, da EPE, da Anatel, da ANTT e da Defesa" && git push)
 
   publicar:
     needs: atualizar

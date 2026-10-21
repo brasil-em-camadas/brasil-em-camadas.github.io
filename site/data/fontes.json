@@ -552,11 +552,42 @@
    "no_filtro": false
   },
   {
-   "id": "p-rod",
-   "nome": "Rodovias de carga e fluxo",
+   "id": "pedagio",
+   "nome": "Tráfego nos pedágios federais",
+   "tipo": "pontos",
+   "arquivo": "trafego/pedagios.json",
    "ministerio": "trans",
-   "nivel": "pendente",
-   "fonte": "DNIT, Plano Nacional de Contagem de Tráfego"
+   "nivel": "api",
+   "fonte": "ANTT, dados abertos: veículos por dia em cada praça de pedágio das rodovias federais concedidas (média dos 12 meses mais recentes publicados), com a parte de caminhões e ônibus. Só as concessões federais: pedágios estaduais e rodovias sem pedágio ficam de fora. Clique de perto numa praça para ver os números",
+   "ligada": false,
+   "cor": "--tr3",
+   "legenda": [
+    {
+     "nome": "Pedágio federal (maior = mais veículos por dia); caminhões e ônibus: menos de 25%",
+     "forma": "pt",
+     "cor": "--tr1"
+    },
+    {
+     "nome": "25 a 40%",
+     "forma": "pt",
+     "cor": "--tr2"
+    },
+    {
+     "nome": "40 a 55%",
+     "forma": "pt",
+     "cor": "--tr3"
+    },
+    {
+     "nome": "55% ou mais",
+     "forma": "pt",
+     "cor": "--tr4"
+    },
+    {
+     "nome": "sem número confiável",
+     "forma": "anel",
+     "cor": "--tr0"
+    }
+   ]
   },
   {
    "id": "usinas",
