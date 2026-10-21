@@ -4,7 +4,7 @@
  "referencia": "2022",
  "fonte": "IBGE, Censo Demográfico 2022 (tabela SIDRA 4709)",
  "nivel": "api",
- "atualizado_em": "2026-10-17",
+ "atualizado_em": "2026-10-21",
  "consulta": "https://apisidra.ibge.gov.br/values/t/4709/n3/all/v/93/p/2022",
  "valores": {
   "RO": 1581196,

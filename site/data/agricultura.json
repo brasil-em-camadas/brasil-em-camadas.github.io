@@ -4,7 +4,7 @@
  "referencia": "2025",
  "fonte": "IBGE, Produção Agrícola Municipal (tabela SIDRA 5457, total das lavouras)",
  "nivel": "api",
- "atualizado_em": "2026-10-17",
+ "atualizado_em": "2026-10-21",
  "consulta": "https://apisidra.ibge.gov.br/values/t/5457/n3/all/v/215/p/last%201/c782/0",
  "valores": {
   "RO": 12935673,
