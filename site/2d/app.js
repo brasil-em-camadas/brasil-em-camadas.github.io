@@ -247,6 +247,23 @@ function rewind(f) {
     g5C.on("click", (e, d) => { e.stopPropagation(); select(d.u); });
     g5C.append("title").text(d => `${d.n} · ${d.u}: 5G de ${d.o} (Anatel, ${M.meta.referencia}). Não quer dizer sinal 5G em todo o município.`);
   }
+  /* indústria de defesa (Ministério da Defesa), sob demanda: escudo na sede do município, maior = mais empresas credenciadas;
+     clicar abre o estado */
+  const ESCUDO = { draw(c, size) { const r = Math.sqrt(size) / 2;
+    c.moveTo(-r, -r); c.lineTo(r, -r); c.lineTo(r, r * 0.2); c.quadraticCurveTo(r * 0.9, r * 0.95, 0, r * 1.3); c.quadraticCurveTo(-r * 0.9, r * 0.95, -r, r * 0.2); c.closePath(); } };
+  const gDef = root.append("g");
+  let defP = gDef.selectAll("path");
+  function desenharDef() {
+    const M = DATA.empdef;
+    /* os de mais empresas vêm primeiro no arquivo e ficam por baixo */
+    defP = gDef.selectAll("path").data(M.municipios.map(m => ({ c: [m[0], m[1]], n: m[2], u: m[3], es: m[5] }))).join("path").attr("class", "edef")
+      .attr("d", d => d3.symbol(ESCUDO, Math.pow(2.6 + 1.9 * Math.sqrt(d.es.length), 2))());
+    defP.on("click", (e, d) => { e.stopPropagation(); select(d.u); });
+    defP.append("title").text(d => { const eed = d.es.filter(x => x[1] === "EED").length, ed = d.es.length - eed;
+      return `${d.n} · ${d.u}: ${d.es.length} ${d.es.length > 1 ? "empresas credenciadas" : "empresa credenciada"} pelo Ministério da Defesa (${eed} EED, ${ed} ED): `
+        + d.es.slice(0, 8).map(x => x[0]).join("; ") + (d.es.length > 8 ? `; e mais ${d.es.length - 8}` : "")
+        + `. ${M.meta.referencia}. O ponto fica na sede do município, não no endereço da empresa.`; });
+  }
   const gPocos = root.append("g");
   let pocosC = gPocos.selectAll("circle");
   function desenharPocos() {
@@ -263,7 +280,7 @@ function rewind(f) {
       return `${p.nome} · ${p.tipo}${p.operador ? " · " + p.operador : ""}${p.prevista ? " · prevista" : ""}${p.atende ? ". Atende: " + p.atende : ""}${p.capacidade_bbl_dia ? ". Capacidade: " + fmt(p.capacidade_bbl_dia) + " barris de petróleo/dia" : ""}. Fonte: ANP.`; });
   }
   const DESENHA = { boi: desenharBoi, oil: desenharPocos, uep: desenharUep, campos: desenharCampos, zc: desenharZc, pce: desenharPce, rodest: desenharRodEst, usinas: desenharUsinas, lt: desenharLt,
-    celm: desenharCelm, g5: desenharG5, lav: desenharLav, dutos: desenharDutos, se: desenharSe };
+    celm: desenharCelm, g5: desenharG5, lav: desenharLav, dutos: desenharDutos, se: desenharSe, empdef: desenharDef };
   /* refinarias (tamanho pela capacidade), unidades de gás natural e terminais de GNL (ANP); clicar abre o estado */
   const gRefin = root.append("g");
   const INST = { refinaria: "Refinaria", upgn: "Unidade de processamento de gás natural", gnl: "Terminal de GNL" };
@@ -292,7 +309,7 @@ function rewind(f) {
   caps.append("circle").attr("r", d => d.pais ? 3.6 : 2.6);
   caps.append("text").attr("x", 6).attr("y", 4).text(d => d.n);
   const G = { zee: gZee, mt: gMt, zc: gZc, pce: gPce, rod: gRod, rail: gRail, ports: gPorts, air: gAir, cla: gCla,
-    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt, celm: gCelm, g5: gG5, lav: gLav, dutos: gDutos, refin: gRefin, se: gSe };
+    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt, celm: gCelm, g5: gG5, lav: gLav, dutos: gDutos, refin: gRefin, se: gSe, empdef: gDef };
 
   let proj, path, W, H, head = 0, k = 1;
   const zoom = d3.zoom().scaleExtent([0.8, 12]).on("zoom", e => {
@@ -391,6 +408,7 @@ function rewind(f) {
     ports.attr("r", 3.6 * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     refinC.attr("r", d => d.r0 * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     seP.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
+    defP.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
     airs.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
     if (CLA) { const p = proj(CLA.ponto); gCla.selectAll("circle").attr("cx", 0).attr("cy", 0); gCla.attr("transform", `translate(${p}) scale(${s})`); }
   }
@@ -449,7 +467,8 @@ function rewind(f) {
     se: "M12 2l9 10-9 10-9-10zM12 7v10M8 12h8",
     refin: "M3 21V12l5 3v-3l5 3V8h3V4h3v17zM3 21h18",
     celm: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
-    g5: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0"
+    g5: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
+    empdef: "M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"
   };
   const quando = id => { const m = DATA[id] && DATA[id].meta; return m && m.atualizado_em ? ` · ${m.referencia ? "ref. " + esc(m.referencia) + ", " : ""}atualizado em ${m.atualizado_em}` : ""; };
   const icon = id => ICON[id] ? `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[id]}"/></svg>` : `<span class="ico"></span>`;
@@ -622,6 +641,26 @@ function rewind(f) {
       ${G5 ? `<br>${pill(C.nivel)} <span class="note">5G: Anatel, presença da telefonia móvel (RQUAL), ${esc(G5.referencia)} · atualizado em ${G5.atualizado_em}</span>` : ""}</div>`;
   }
 
+  /* defesa do estado: empresas credenciadas pelo Ministério da Defesa (EED e ED) e, no Maranhão, o Centro de Alcântara */
+  function fichaDefesa(s) {
+    const D = DATA.defesa, v = D && D.valores[s], cla = CLA && s === CLA.uf;
+    if (!D && !cla) return "";
+    let ind = "";
+    if (D && v) {
+      const pos = 1 + Object.values(D.valores).filter(x => x.valor > v.valor).length;   /* empate: mesma posição */
+      const nos = v.municipios.reduce((a, b) => a + b[1], 0), resto = v.valor - v.sem_municipio - nos;
+      ind = `<div class="kv"><span>Empresas credenciadas pelo Ministério da Defesa</span><span class="v">${fmt(v.valor)} · ${pos}º</span></div>
+        <div class="kv"><span>Estratégicas de defesa (EED)</span><span class="v">${fmt(v.eed)}</span></div>
+        <div class="kv"><span>De defesa (ED)</span><span class="v">${fmt(v.ed)}</span></div>
+        ${v.municipios.length ? `<div class="list">Municípios com mais empresas: ${v.municipios.map(([n, q]) => `${esc(n)} (${q})`).join(", ")}${resto > 0 ? `; mais ${fmt(resto)} em outros municípios` : ""}.</div>` : ""}
+        ${v.sem_municipio ? `<div class="list">${v.sem_municipio > 1 ? `${v.sem_municipio} empresas vêm` : "1 empresa vem"} na lista sem um município que dê para localizar (só o estado, um bairro comum a várias cidades ou cidade de outro estado) e ${v.sem_municipio > 1 ? "ficam" : "fica"} fora do mapa.</div>` : ""}
+        <div class="list">EED: sede, produção e controle no Brasil, com tecnologia própria; pode usar o regime tributário especial da defesa (Lei 12.598/2012). ED: fabrica produtos de defesa ou faz parte da cadeia que os produz.</div>`;
+    } else if (D) ind = `<div class="list">Nenhuma empresa deste estado na lista das credenciadas pelo Ministério da Defesa.</div>`;
+    return `<div class="sec"><h3>Defesa</h3>${ind}
+      ${D ? `${pill(D.nivel)} <span class="note">${esc(D.fonte)}, ${esc(D.referencia)} · atualizado em ${D.atualizado_em}</span>` : ""}
+      ${cla ? `<div class="list" style="margin-top:8px">${CLA.nome}, base de lançamento de foguetes da Força Aérea.</div>${pill("calculado")} <span class="note">posição aproximada</span>` : ""}</div>`;
+  }
+
   /* pecuária e aquicultura do estado (IBGE, PPM) */
   function fichaPecuaria(s) {
     const R = DATA.reb;
@@ -657,6 +696,8 @@ function rewind(f) {
           ${pill(DATA.ene.nivel)} <span class="note">EPE, potência instalada (${esc(DATA.ene.referencia)}) · atualizado em ${DATA.ene.atualizado_em}. Sem os painéis solares de telhado.</span>` : ""}
         ${DATA.cel && DATA.cel.cinco_g ? `<div class="kv" style="margin-top:8px"><span>Municípios com 5G</span><span class="v">${fmt(DATA.cel.cinco_g.municipios)} de ${fmt(DATA.cel.cinco_g.total)}</span></div>
           ${pill(DATA.cel.nivel)} <span class="note">Anatel, presença da telefonia móvel (RQUAL), ${esc(DATA.cel.cinco_g.referencia)} · atualizado em ${DATA.cel.cinco_g.atualizado_em}. Pelo menos uma operadora com 5G no município.</span>` : ""}
+        ${DATA.defesa ? `<div class="kv" style="margin-top:8px"><span>Indústria de defesa</span><span class="v">${fmt(DATA.defesa.total)} empresas</span></div>
+          ${pill(DATA.defesa.nivel)} <span class="note">Ministério da Defesa, empresas credenciadas: ${fmt(DATA.defesa.eed)} estratégicas de defesa (EED) e ${fmt(DATA.defesa.ed)} de defesa (ED); ${esc(DATA.defesa.referencia)} · atualizado em ${DATA.defesa.atualizado_em}</span>` : ""}
         <p class="lede">Clique num estado para aproximar. Cada camada mostra de onde veio o dado e seu nível de confiança. Arraste para mover e role para aproximar.</p>`;
       return;
     }
@@ -693,7 +734,7 @@ function rewind(f) {
       ${fichaOleo(s)}
       ${fichaEnergia(s)}
       ${fichaCelular(s)}
-      ${CLA && s === CLA.uf ? `<div class="sec"><h3>Defesa</h3><div class="list">${CLA.nome}, base de lançamento de foguetes da Força Aérea.</div>${pill("calculado")} <span class="note">posição aproximada</span></div>` : ""}
+      ${fichaDefesa(s)}
       <div class="sec"><h3>Mobilidade elétrica</h3>
         <div class="kv"><span>Eletropostos</span><span class="v">${ev ? fmt(ev.valor) : "—"}</span></div>
         ${ev ? `${pill("entidade")} <span class="note">${ev.fonte}, ref. ${ev.referencia}</span>` : `${pill("pendente")} <span class="note">Nenhum número publicado encontrado.</span>`}</div>`;

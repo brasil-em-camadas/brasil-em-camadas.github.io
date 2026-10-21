@@ -1,0 +1,19 @@
+cnpj,cidade,uf,codigo_ibge,motivo
+,Barra da Tijuca,RJ,3304557,bairro do Rio de Janeiro
+,Benfica,RJ,3304557,bairro do Rio de Janeiro
+,Bonsucesso,RJ,3304557,bairro do Rio de Janeiro
+,Inhaúma,RJ,3304557,bairro do Rio de Janeiro
+,Jacaré,RJ,3304557,bairro do Rio de Janeiro
+,Leblon,RJ,3304557,bairro do Rio de Janeiro
+,Penha,RJ,3304557,bairro do Rio de Janeiro
+,Majé,RJ,3302502,erro de digitação (Magé)
+,Bela Vista,SP,3550308,distrito de São Paulo
+,Campo Belo,SP,3550308,distrito de São Paulo
+,Itaim Bibi,SP,3550308,distrito de São Paulo
+,Pinheiros,SP,3550308,distrito de São Paulo
+,São Miguel Paulista,SP,3550308,distrito de São Paulo
+,Vila Olímpia,SP,3550308,bairro de São Paulo
+,Eugênio de Melo,SP,3549904,distrito de São José dos Campos
+,Vilas Flores,RS,4323309,erro de digitação (Vila Flores)
+,Belo Horizonte,BH,3106200,"a coluna UF traz BH, sigla da cidade"
+,Distrito Federal,DF,5300108,o Distrito Federal tem um só município (Brasília)

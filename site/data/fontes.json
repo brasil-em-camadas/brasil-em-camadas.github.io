@@ -104,6 +104,14 @@
    "arquivo": "celular/estados.json",
    "ministerio": "com",
    "por": "percentual"
+  },
+  {
+   "id": "defesa",
+   "nome": "Indústria de defesa",
+   "arquivo": "defesa/estados.json",
+   "ministerio": "def",
+   "por": "total",
+   "vazio": "nenhuma empresa credenciada"
   }
  ],
  "luzes": [
@@ -395,11 +403,23 @@
    ]
   },
   {
-   "id": "p-def",
+   "id": "empdef",
    "nome": "Indústria de defesa",
+   "tipo": "pontos",
+   "arquivo": "defesa/empresas.json",
+   "sob_demanda": true,
    "ministerio": "def",
-   "nivel": "pendente",
-   "fonte": "Ministério da Defesa, lista pública a confirmar"
+   "nivel": "api",
+   "fonte": "Ministério da Defesa, lista das empresas credenciadas como estratégicas de defesa (EED) ou de defesa (ED), no ponto da sede do município informado na lista, não no endereço da empresa; maior = mais empresas. Clique de perto num escudo para ver a lista",
+   "ligada": false,
+   "cor": "--def",
+   "legenda": [
+    {
+     "nome": "Empresas de defesa credenciadas (maior = mais empresas)",
+     "forma": "esc",
+     "cor": "--def"
+    }
+   ]
   },
   {
    "id": "celm",

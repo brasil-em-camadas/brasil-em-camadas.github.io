@@ -38,6 +38,9 @@
 .luz-info{display:grid;gap:6px;margin:2px 0 4px}
 .luz-info p{margin:0}
 .pop-fonte{font-size:11px;color:var(--muted)}
+/* lista longa na janelinha (empresas de defesa de um município): rola dentro dela */
+.pop-lista{max-height:180px;overflow-y:auto;margin:6px 0 4px;padding-right:4px;font-size:12px;line-height:1.35;scrollbar-width:thin}
+.pop-lista span{color:var(--muted);font-size:11px}
 /* luzes à noite na linha do Relevo 3D; a linha quebra antes de passar por baixo do painel */
 .where{flex-wrap:wrap;max-width:calc(100% - var(--dock-w,0px) - 40px)}
 .luzes-topo{display:flex;align-items:center;gap:8px;flex-wrap:wrap}

@@ -108,7 +108,7 @@ function quintis(vals) {
   const map = new maplibregl.Map({
     container: "map",
     locale: { "AttributionControl.ToggleAttribution": "Mostrar ou ocultar os créditos do mapa" },
-    attributionControl: { compact: true, customAttribution: "NASA Blue Marble · Terrain Tiles (AWS) · Natural Earth · IBGE · Marine Regions · ANP · EPE · Anatel" },
+    attributionControl: { compact: true, customAttribution: "NASA Blue Marble · Terrain Tiles (AWS) · Natural Earth · IBGE · Marine Regions · ANP · EPE · Anatel · Ministério da Defesa" },
     style: {
       version: 8,
       projection: { type: "globe" },
@@ -135,6 +135,7 @@ function quintis(vals) {
         refin: { type: "geojson", data: DATA.refin || fc([]) },
         celm: { type: "geojson", data: fc([]) },
         g5: { type: "geojson", data: fc([]) },
+        empdef: { type: "geojson", data: fc([]) },
         uep: { type: "geojson", data: DATA.uep || fc([]) },
         campos: { type: "geojson", data: DATA.campos || fc([]) },
         presal: { type: "geojson", data: DATA.presal || fc([]) },
@@ -253,6 +254,12 @@ function quintis(vals) {
         { id: "plataformas", type: "symbol", source: "uep",
           layout: { "icon-image": ["case", ["get", "prevista"], "uep-prevista", "uep"], "icon-allow-overlap": true, "icon-ignore-placement": true,
             "icon-size": ["interpolate", ["linear"], ["zoom"], 3, 0.55, 6, 0.85, 9, 1.15] } },
+        /* indústria de defesa (Ministério da Defesa): escudo na sede do município, maior quanto mais empresas credenciadas
+           (raiz quadrada: a área acompanha o número); os maiores ficam por baixo */
+        { id: "empdef", type: "symbol", source: "empdef", layout: { "symbol-sort-key": ["-", 0, ["get", "n"]], "icon-image": "escudo",
+            "icon-allow-overlap": true, "icon-ignore-placement": true,
+            "icon-size": ["interpolate", ["linear"], ["zoom"], 3, ["interpolate", ["linear"], ["sqrt", ["get", "n"]], 1, 0.5, 7.2, 1.45],
+              6, ["interpolate", ["linear"], ["sqrt", ["get", "n"]], 1, 0.75, 7.2, 2.1], 9, ["interpolate", ["linear"], ["sqrt", ["get", "n"]], 1, 1, 7.2, 2.7]] } },
         { id: "estado-sel", type: "line", source: "estados", filter: ["==", ["get", "sigla"], ""],
           paint: { "line-color": cor("--accent"), "line-width": 2.6 } },
         { id: "pce-rotulo", type: "symbol", source: "pce", filter: ["==", ["get", "parte"], "rotulo"],
@@ -298,6 +305,16 @@ function quintis(vals) {
   });
   /* hachura (listras diagonais) da plataforma continental ainda em análise na ONU */
   map.on("styleimagemissing", e => {
+    if (e.id === "escudo" && !map.hasImage("escudo")) {
+      /* indústria de defesa: escudo claro com borda escura */
+      const n = 32, c = document.createElement("canvas"); c.width = c.height = n;
+      const x = c.getContext("2d");
+      const escudo = (m) => { x.beginPath(); x.moveTo(5 + m, 3 + m); x.lineTo(27 - m, 3 + m); x.lineTo(27 - m, 15);
+        x.quadraticCurveTo(26 - m, 25 - m, 16, 30 - m * 1.4); x.quadraticCurveTo(6 + m, 25 - m, 5 + m, 15); x.closePath(); };
+      escudo(0); x.fillStyle = "#0b1622"; x.fill(); escudo(2.6); x.fillStyle = cor("--def"); x.fill();
+      map.addImage("escudo", x.getImageData(0, 0, n, n), { pixelRatio: 2 });
+      return;
+    }
     if (e.id === "se" && !map.hasImage("se")) {
       /* subestação: losango com borda escura */
       const n = 24, c = document.createElement("canvas"); c.width = c.height = n;
@@ -347,7 +364,7 @@ function quintis(vals) {
 
   const G = { zee: ["zee-fill", "zee-line", "zee-rotulo", "ilhas-ponto", "ilhas-rotulo"], mt: ["mt-fill", "mt-line", "mt-base"], zc: ["zc-fill", "zc-line"],
     pce: ["pce-fill-rec", "pce-fill-ana", "pce-line-rec", "pce-line-ana", "pce-rotulo"], rod: ["rodovias", "rodovias-terra", "rodovias-rotulo"], rodest: ["rodovias-est"],
-    oil: ["pocos"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi"], lav: ["lav"], usinas: ["usinas"], dutos: ["dutos"], refin: ["refin"], se: ["se"], lt: ["lt"], celm: ["celm"], g5: ["g5"],
+    oil: ["pocos"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi"], lav: ["lav"], usinas: ["usinas"], dutos: ["dutos"], refin: ["refin"], se: ["se"], lt: ["lt"], celm: ["celm"], g5: ["g5"], empdef: ["empdef"],
     rail: ["ferrovias", "ferrovias-obra"], ports: ["portos"], air: ["aeroportos"] };
 
   /* ---------- painel e enquadramento ---------- */
@@ -483,6 +500,21 @@ function quintis(vals) {
           ${p.atende ? `<br>Atende: ${esc(p.atende)}` : ""}${p.capacidade_bbl_dia ? `<br>Capacidade: ${fmt(+p.capacidade_bbl_dia)} barris de petróleo/dia` : ""}
           ${p.lamina_m ? `<br>Profundidade da água: ${fmt(+p.lamina_m)} m` : ""}<br><span class="pop-fonte">ANP, cadastro de unidades de produção</span>`).addTo(map);
       return;
+    }
+    /* indústria de defesa: de longe o clique abre o estado (como no gado e no celular); a partir do zoom 4,5, a lista do município */
+    const df = vis("empdef") && DATA.empdef && map.getZoom() >= 4.5 ? map.queryRenderedFeatures(perto, { layers: ["empdef"] }) : [];
+    if (df.length) {
+      const f = df.reduce((a, b) => b.properties.n < a.properties.n ? b : a), M = DATA.empdef.meta;   /* o menor fica por cima */
+      const m = indiceDef()[f.properties.c];
+      if (m) {
+        const es = m[5], eed = es.filter(x => x[1] === "EED").length, ed = es.length - eed;
+        const partes = [eed ? `${fmt(eed)} ${eed > 1 ? "estratégicas" : "estratégica"} de defesa (EED)` : "", ed ? `${fmt(ed)} de defesa (ED)` : ""].filter(Boolean).join(" e ");
+        new maplibregl.Popup({ closeButton: false, offset: 10, maxWidth: "340px" }).setLngLat(f.geometry.coordinates)
+          .setHTML(`<b>${esc(m[2])} · ${esc(m[3])}</b><br>${fmt(es.length)} ${es.length > 1 ? "empresas credenciadas" : "empresa credenciada"} pelo Ministério da Defesa: ${partes}
+            <div class="pop-lista">${es.map(x => `${esc(x[0])} <span>${x[1]}</span>`).join("<br>")}</div>
+            <span class="pop-fonte">${esc(M.fonte)}, ${esc(M.referencia)}. O ponto fica na sede do município, não no endereço da empresa.</span>`).addTo(map);
+        return;
+      }
     }
     const ri = vis("refin") ? map.queryRenderedFeatures(perto, { layers: ["refin"] }) : [];
     if (ri.length) {
@@ -643,7 +675,8 @@ function quintis(vals) {
     se: "M12 2l9 10-9 10-9-10zM12 7v10M8 12h8",
     refin: "M3 21V12l5 3v-3l5 3V8h3V4h3v17zM3 21h18",
     celm: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
-    g5: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0"
+    g5: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
+    empdef: "M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"
   };
   const quando = id => { const m = DATA[id] && DATA[id].meta; return m && m.atualizado_em ? ` · ${m.referencia ? "ref. " + esc(m.referencia) + ", " : ""}atualizado em ${m.atualizado_em}` : ""; };
   const icon = id => ICON[id] ? `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[id]}"/></svg>` : `<span class="ico"></span>`;
@@ -720,10 +753,13 @@ function quintis(vals) {
     usinas: ["usinas", d => fc(d.usinas.map(u => ponto([u[0], u[1]], { kw: u[2], t: u[3], n: u[4], uf: u[5], a: u[6] || 0, d: u[7] || "", x: u[8] || "" })))],
     lt: ["lt", d => d], dutos: ["dutos", d => d], se: ["se", d => d],
     celm: ["celm", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { s: m[2], n: m[3], u: m[4], c: m[5] })))],
-    g5: ["g5", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { n: m[2], u: m[3], o: m[4], c: m[5] })))] };
+    g5: ["g5", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { n: m[2], u: m[3], o: m[4], c: m[5] })))],
+    /* indústria de defesa: [lon, lat, município, UF, código do IBGE, [[empresa, EED ou ED], ...]]; a lista fica fora do mapa */
+    empdef: ["empdef", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { n: m[5].length, c: m[4] })))] };
   /* município (código do IBGE) → linha do arquivo, para a janelinha do celular juntar as duas camadas */
   const INDICE = {};
   const indice = id => DATA[id] ? (INDICE[id] || (INDICE[id] = Object.fromEntries(DATA[id].municipios.map(m => [m[5], m])))) : {};
+  const indiceDef = () => DATA.empdef ? (INDICE.empdef || (INDICE.empdef = Object.fromEntries(DATA.empdef.municipios.map(m => [m[4], m])))) : {};
   function baixarSobDemanda() {
     LAYERS.filter(l => l.on && l.sob_demanda && !DATA[l.id] && !l.baixando).forEach(async l => {
       l.baixando = true; l.falhou = false;
@@ -920,6 +956,26 @@ function quintis(vals) {
       ${G5 ? `<br>${pill(C.nivel)} <span class="note">5G: Anatel, presença da telefonia móvel (RQUAL), ${esc(G5.referencia)} · atualizado em ${G5.atualizado_em}</span>` : ""}</div>`;
   }
 
+  /* defesa do estado: empresas credenciadas pelo Ministério da Defesa (EED e ED) e, no Maranhão, o Centro de Alcântara */
+  function fichaDefesa(s) {
+    const D = DATA.defesa, v = D && D.valores[s], cla = CLA && s === CLA.uf;
+    if (!D && !cla) return "";
+    let ind = "";
+    if (D && v) {
+      const pos = 1 + Object.values(D.valores).filter(x => x.valor > v.valor).length;   /* empate: mesma posição */
+      const nos = v.municipios.reduce((a, b) => a + b[1], 0), resto = v.valor - v.sem_municipio - nos;
+      ind = `<div class="kv"><span>Empresas credenciadas pelo Ministério da Defesa</span><span class="v">${fmt(v.valor)} · ${pos}º</span></div>
+        <div class="kv"><span>Estratégicas de defesa (EED)</span><span class="v">${fmt(v.eed)}</span></div>
+        <div class="kv"><span>De defesa (ED)</span><span class="v">${fmt(v.ed)}</span></div>
+        ${v.municipios.length ? `<div class="list">Municípios com mais empresas: ${v.municipios.map(([n, q]) => `${esc(n)} (${q})`).join(", ")}${resto > 0 ? `; mais ${fmt(resto)} em outros municípios` : ""}.</div>` : ""}
+        ${v.sem_municipio ? `<div class="list">${v.sem_municipio > 1 ? `${v.sem_municipio} empresas vêm` : "1 empresa vem"} na lista sem um município que dê para localizar (só o estado, um bairro comum a várias cidades ou cidade de outro estado) e ${v.sem_municipio > 1 ? "ficam" : "fica"} fora do mapa.</div>` : ""}
+        <div class="list">EED: sede, produção e controle no Brasil, com tecnologia própria; pode usar o regime tributário especial da defesa (Lei 12.598/2012). ED: fabrica produtos de defesa ou faz parte da cadeia que os produz.</div>`;
+    } else if (D) ind = `<div class="list">Nenhuma empresa deste estado na lista das credenciadas pelo Ministério da Defesa.</div>`;
+    return `<div class="sec"><h3>Defesa</h3>${ind}
+      ${D ? `${pill(D.nivel)} <span class="note">${esc(D.fonte)}, ${esc(D.referencia)} · atualizado em ${D.atualizado_em}</span>` : ""}
+      ${cla ? `<div class="list" style="margin-top:8px">${CLA.nome}, base de lançamento de foguetes da Força Aérea.</div>${pill("calculado")} <span class="note">posição aproximada</span>` : ""}</div>`;
+  }
+
   /* pecuária e aquicultura do estado (IBGE, PPM) */
   function fichaPecuaria(s) {
     const R = DATA.reb;
@@ -955,6 +1011,8 @@ function quintis(vals) {
           ${pill(DATA.ene.nivel)} <span class="note">EPE, potência instalada (${esc(DATA.ene.referencia)}) · atualizado em ${DATA.ene.atualizado_em}. Sem os painéis solares de telhado.</span>` : ""}
         ${DATA.cel && DATA.cel.cinco_g ? `<div class="kv" style="margin-top:8px"><span>Municípios com 5G</span><span class="v">${fmt(DATA.cel.cinco_g.municipios)} de ${fmt(DATA.cel.cinco_g.total)}</span></div>
           ${pill(DATA.cel.nivel)} <span class="note">Anatel, presença da telefonia móvel (RQUAL), ${esc(DATA.cel.cinco_g.referencia)} · atualizado em ${DATA.cel.cinco_g.atualizado_em}. Pelo menos uma operadora com 5G no município.</span>` : ""}
+        ${DATA.defesa ? `<div class="kv" style="margin-top:8px"><span>Indústria de defesa</span><span class="v">${fmt(DATA.defesa.total)} empresas</span></div>
+          ${pill(DATA.defesa.nivel)} <span class="note">Ministério da Defesa, empresas credenciadas: ${fmt(DATA.defesa.eed)} estratégicas de defesa (EED) e ${fmt(DATA.defesa.ed)} de defesa (ED); ${esc(DATA.defesa.referencia)} · atualizado em ${DATA.defesa.atualizado_em}</span>` : ""}
         <p class="lede">Clique num estado para aproximar. Arraste para girar o globo, role para aproximar e use o botão "Relevo 3D" para ver as montanhas em altura.</p>`;
       return;
     }
@@ -991,7 +1049,7 @@ function quintis(vals) {
       ${fichaOleo(s)}
       ${fichaEnergia(s)}
       ${fichaCelular(s)}
-      ${CLA && s === CLA.uf ? `<div class="sec"><h3>Defesa</h3><div class="list">${CLA.nome}, base de lançamento de foguetes da Força Aérea.</div>${pill("calculado")} <span class="note">posição aproximada</span></div>` : ""}
+      ${fichaDefesa(s)}
       <div class="sec"><h3>Mobilidade elétrica</h3>
         <div class="kv"><span>Eletropostos</span><span class="v">${ev ? fmt(ev.valor) : "—"}</span></div>
         ${ev ? `${pill("entidade")} <span class="note">${ev.fonte}, ref. ${ev.referencia}</span>` : `${pill("pendente")} <span class="note">Nenhum número publicado encontrado.</span>`}</div>`;
