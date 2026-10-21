@@ -126,6 +126,8 @@ function quintis(vals) {
         pce: { type: "geojson", data: DATA.pce || fc([]) },
         pocos: { type: "geojson", data: fc([]) },
         boi: { type: "geojson", data: fc([]) },
+        usinas: { type: "geojson", data: fc([]) },
+        lt: { type: "geojson", data: fc([]) },
         uep: { type: "geojson", data: DATA.uep || fc([]) },
         campos: { type: "geojson", data: DATA.campos || fc([]) },
         presal: { type: "geojson", data: DATA.presal || fc([]) },
@@ -182,6 +184,10 @@ function quintis(vals) {
           paint: { "line-color": cor("--rail"), "line-opacity": 0.9, "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1, 8, 2.6] } },
         { id: "ferrovias-obra", type: "line", source: "trilhos", filter: ["==", ["get", "obra"], 1],
           paint: { "line-color": cor("--rail"), "line-opacity": 0.9, "line-dasharray": [2, 1.5], "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1, 8, 2.4] } },
+        /* linhas de transmissão (EPE): mais grossas quanto maior a tensão (230 a 800 kV) */
+        { id: "lt", type: "line", source: "lt", layout: { "line-join": "round" },
+          paint: { "line-color": cor("--lt"), "line-opacity": 0.72,
+            "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["interpolate", ["linear"], ["get", "kv"], 230, 0.5, 500, 1, 800, 1.6], 8, ["interpolate", ["linear"], ["get", "kv"], 230, 1.2, 500, 2.4, 800, 3.6]] } },
         /* rebanho bovino por município: tamanho pela raiz quadrada das cabeças (a área do ponto acompanha o rebanho);
            os maiores vêm primeiro no arquivo e ficam por baixo, para os pequenos continuarem visíveis */
         { id: "boi", type: "circle", source: "boi", layout: { "circle-sort-key": ["-", 0, ["get", "b"]] },
@@ -190,6 +196,14 @@ function quintis(vals) {
               3, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 0.5, 100, 1, 300, 2, 700, 3.6, 1700, 7],
               6, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 0.9, 100, 1.9, 300, 3.8, 700, 7, 1700, 13],
               9, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 1.6, 100, 3.4, 300, 6.8, 700, 12, 1700, 22]] } },
+        /* usinas (EPE): cor pela fonte, tamanho pela raiz quadrada da potência (a área do ponto acompanha os MW) */
+        { id: "usinas", type: "circle", source: "usinas", layout: { "circle-sort-key": ["-", 0, ["get", "kw"]] },
+          paint: { "circle-color": ["match", ["get", "t"], ["uhe", "pch", "cgh"], cor("--hid"), "eol", cor("--eol"), "sol", cor("--sol"), "bio", cor("--bio"), "fos", cor("--fos"), "nuc", cor("--nuc"), "#ffffff"],
+            "circle-opacity": 0.88, "circle-stroke-color": "#0d1712", "circle-stroke-width": 0.6,
+            "circle-radius": ["interpolate", ["linear"], ["zoom"],
+              3, ["interpolate", ["linear"], ["sqrt", ["get", "kw"]], 0, 1, 100, 1.4, 300, 2.4, 1000, 4.5, 3800, 12],
+              6, ["interpolate", ["linear"], ["sqrt", ["get", "kw"]], 0, 1.8, 100, 2.6, 300, 4.4, 1000, 8, 3800, 20],
+              9, ["interpolate", ["linear"], ["sqrt", ["get", "kw"]], 0, 3, 100, 4.4, 300, 7.5, 1000, 13, 3800, 30]] } },
         /* tamanho do poço pela produção (raiz quadrada: a área do ponto acompanha os barris) */
         { id: "pocos", type: "circle", source: "pocos", layout: { "circle-sort-key": ["get", "b"] },
           paint: { "circle-color": cor("--oil"), "circle-opacity": 0.88, "circle-stroke-color": "#2a1d05", "circle-stroke-width": 0.5,
@@ -285,7 +299,7 @@ function quintis(vals) {
 
   const G = { zee: ["zee-fill", "zee-line", "zee-rotulo", "ilhas-ponto", "ilhas-rotulo"], mt: ["mt-fill", "mt-line", "mt-base"], zc: ["zc-fill", "zc-line"],
     pce: ["pce-fill-rec", "pce-fill-ana", "pce-line-rec", "pce-line-ana", "pce-rotulo"], rod: ["rodovias", "rodovias-terra", "rodovias-rotulo"], rodest: ["rodovias-est"],
-    oil: ["pocos"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi"],
+    oil: ["pocos"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi"], usinas: ["usinas"], lt: ["lt"],
     rail: ["ferrovias", "ferrovias-obra"], ports: ["portos"], air: ["aeroportos"] };
 
   /* ---------- painel e enquadramento ---------- */
@@ -431,6 +445,16 @@ function quintis(vals) {
           <br><span class="pop-fonte">ANP, média de ${esc(M.referencia)}</span>`).addTo(map);
       return;
     }
+    const us = vis("usinas") && map.getZoom() >= 4 ? map.queryRenderedFeatures(perto, { layers: ["usinas"] }) : [];
+    if (us.length) {
+      const f = us.reduce((a, b) => b.properties.kw > a.properties.kw ? b : a), p = f.properties, M = DATA.usinas.meta;
+      const hidro = ["uhe", "pch", "cgh"].includes(p.t), obs = (M.observacoes || {})[p.n];
+      new maplibregl.Popup({ closeButton: false, offset: 8, maxWidth: "300px" }).setLngLat(f.geometry.coordinates)
+        .setHTML(`<b>${esc(p.n)}</b><br>${esc(M.tipos[p.t])} · ${fmt1(p.kw / 1000)} MW${p.uf ? " · " + esc(p.uf) : ""}${p.a ? "<br>Em operação desde " + p.a : ""}
+          ${p.x ? "<br>" + (hidro ? "Rio: " : "Combustível: ") + esc(p.x) : ""}${p.d ? "<br>" + esc(p.d) : ""}${obs ? "<br><i>" + esc(obs) + "</i>" : ""}
+          <br><span class="pop-fonte">EPE, Webmap; ${esc(M.referencia)}</span>`).addTo(map);
+      return;
+    }
     /* de longe os pontos do gado cobrem os estados: o clique abre o estado; a partir do zoom 4,5 abre o município */
     const bo = vis("boi") && map.getZoom() >= 4.5 ? map.queryRenderedFeatures(perto, { layers: ["boi"] }) : [];
     if (bo.length) {
@@ -449,9 +473,15 @@ function quintis(vals) {
     }
     /* rodovias e ferrovias: de perto (zoom 6), para não atrapalhar o clique nos estados */
     const vias = map.getZoom() >= 6 ? map.queryRenderedFeatures([[px - 4, py - 4], [px + 4, py + 4]],
-      { layers: ["ferrovias", "ferrovias-obra", "rodovias", "rodovias-terra", "rodovias-est"].filter(vis) }) : [];
+      { layers: ["lt", "ferrovias", "ferrovias-obra", "rodovias", "rodovias-terra", "rodovias-est"].filter(vis) }) : [];
     if (vias.length) {
       const f = vias[0], p = f.properties, trem = f.layer.id.startsWith("ferrovias");
+      if (f.layer.id === "lt") {
+        new maplibregl.Popup({ closeButton: false, offset: 6, maxWidth: "300px" }).setLngLat(e.lngLat)
+          .setHTML(`<b>${esc(p.n) || "Linha de transmissão"}</b><br>${p.kv} kV${p.ano ? " · em operação desde " + p.ano : ""}${p.c ? "<br>" + esc(p.c) : ""}
+            <br><span class="pop-fonte">EPE, Webmap (sistema elétrico existente)</span>`).addTo(map);
+        return;
+      }
       const html = trem
         ? `<b>Ferrovia${p.obra == 1 ? " em obras" : ""}</b><br>${esc(p.op)}${p.b ? "<br>Bitola " + esc(p.b).toLowerCase() : ""}`
         : f.layer.id === "rodovias-est"
@@ -507,7 +537,9 @@ function quintis(vals) {
     "p-rod": "M8 21L10 3M16 21L14 3M12 6v2M12 11v2M12 16v2",
     rod: "M8 21L10 3M16 21L14 3M12 6v2M12 11v2M12 16v2",
     rodest: "M8 21L10 3M16 21L14 3M12 8v1M12 14v1",
-    "p-ene": "M13 2L5 14h6l-1 8 8-12h-6z"
+    "p-ene": "M13 2L5 14h6l-1 8 8-12h-6z",
+    usinas: "M13 2L5 14h6l-1 8 8-12h-6z",
+    lt: "M12 2l-5 20M12 2l5 20M8 9h8M7 14h10M5 20h14"
   };
   const quando = id => { const m = DATA[id] && DATA[id].meta; return m && m.atualizado_em ? ` · ${m.referencia ? "ref. " + esc(m.referencia) + ", " : ""}atualizado em ${m.atualizado_em}` : ""; };
   const icon = id => ICON[id] ? `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[id]}"/></svg>` : `<span class="ico"></span>`;
@@ -577,7 +609,9 @@ function quintis(vals) {
   /* camadas sob demanda: o arquivo é baixado na primeira vez que a camada é ligada */
   /* id da camada → [fonte de dados do mapa, conversão do arquivo] */
   const SOB = { boi: ["boi", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { b: m[2], n: m[3], u: m[4] })))],
-    oil: ["pocos", pocosFC], uep: ["uep", d => d], campos: ["campos", d => d], zc: ["zc", d => d], pce: ["pce", d => d], rodest: ["rodest", d => d] };
+    oil: ["pocos", pocosFC], uep: ["uep", d => d], campos: ["campos", d => d], zc: ["zc", d => d], pce: ["pce", d => d], rodest: ["rodest", d => d],
+    usinas: ["usinas", d => fc(d.usinas.map(u => ponto([u[0], u[1]], { kw: u[2], t: u[3], n: u[4], uf: u[5], a: u[6] || 0, d: u[7] || "", x: u[8] || "" })))],
+    lt: ["lt", d => d] };
   function baixarSobDemanda() {
     LAYERS.filter(l => l.on && l.sob_demanda && !DATA[l.id] && !l.baixando).forEach(async l => {
       l.baixando = true; l.falhou = false;
@@ -713,6 +747,25 @@ function quintis(vals) {
       ${pill(O.nivel)} <span class="note">${esc(O.fonte)}; média de ${esc(O.referencia)} · atualizado em ${O.atualizado_em}</span></div>`;
   }
 
+  /* energia elétrica do estado (EPE): potência instalada por fonte */
+  function fichaEnergia(s) {
+    const E = DATA.ene;
+    if (!E) return "";
+    const v = E.valores[s], fonte = `${pill(E.nivel)} <span class="note">${esc(E.fonte)}; ${esc(E.referencia)} · atualizado em ${E.atualizado_em}</span>`;
+    if (!v) return `<div class="sec"><h3>Energia elétrica</h3><div class="list">Nenhuma usina deste estado na base da EPE (geração centralizada).</div>${fonte}</div>`;
+    const NOM = { hid: "Hidrelétricas", eol: "Eólicas", sol: "Solares", bio: "Térmicas a biomassa", fos: "Térmicas fósseis", nuc: "Nucleares" };
+    const partes = [["hid", (v.uhe || 0) + (v.pch || 0) + (v.cgh || 0)], ["eol", v.eol], ["sol", v.sol], ["bio", v.bio], ["fos", v.fos], ["nuc", v.nuc]]
+      .filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]);
+    const rk = Object.entries(E.valores).sort((a, b) => b[1].valor - a[1].valor).findIndex(e => e[0] === s) + 1;
+    return `<div class="sec"><h3>Energia elétrica</h3>
+      <div class="kv"><span>Potência instalada</span><span class="v">${fmt(Math.round(v.valor))} MW</span></div>
+      <div class="kv"><span>Posição no país</span><span class="v">${rk}º · ${fmt1(v.valor / E.total_mw * 100)}%</span></div>
+      ${partes.map(([k, mw]) => `<div class="kv"><span>${NOM[k]}</span><span class="v">${fmt(Math.round(mw))} MW · ${mw / v.valor < 0.001 ? "menos de 0,1" : fmt1(mw / v.valor * 100)}%</span></div>`).join("")}
+      <div class="list">${fmt(v.usinas)} usinas na base. Só a geração centralizada: os painéis solares de telhado não entram.</div>
+      ${(v.obs || []).map(o => `<div class="list"><i>${esc(o)}</i></div>`).join("")}
+      ${fonte}</div>`;
+  }
+
   /* pecuária e aquicultura do estado (IBGE, PPM) */
   function fichaPecuaria(s) {
     const R = DATA.reb;
@@ -742,6 +795,8 @@ function quintis(vals) {
         <div class="kv"><span>População</span><span class="v">${fmt(popTot)}</span></div>${popInfo}
         ${DATA.oleo ? `<div class="kv" style="margin-top:8px"><span>Petróleo e gás</span><span class="v">${fmt1(DATA.oleo.total_boe_dia / 1e6)} milhões de boe/dia</span></div>
           ${pill(DATA.oleo.nivel)} <span class="note">ANP, média de ${esc(DATA.oleo.referencia)} · atualizado em ${DATA.oleo.atualizado_em}. boe = barril de óleo equivalente.</span>` : ""}
+        ${DATA.ene ? `<div class="kv" style="margin-top:8px"><span>Energia elétrica</span><span class="v">${fmt(Math.round(DATA.ene.total_mw / 1000))} mil MW</span></div>
+          ${pill(DATA.ene.nivel)} <span class="note">EPE, potência instalada (${esc(DATA.ene.referencia)}) · atualizado em ${DATA.ene.atualizado_em}. Sem os painéis solares de telhado.</span>` : ""}
         <p class="lede">Clique num estado para aproximar. Arraste para girar o globo, role para aproximar e use o botão "Relevo 3D" para ver as montanhas em altura.</p>`;
       return;
     }
@@ -773,6 +828,7 @@ function quintis(vals) {
         ${A.length ? `<div class="list">${A.map(a => a.n + (a.i ? " (" + a.i + ")" : "")).join(", ")}</div>` : ""}
         ${pill("base")} <span class="note">Natural Earth, só os maiores. Ausência na base não significa ausência real.</span></div>
       ${fichaOleo(s)}
+      ${fichaEnergia(s)}
       ${CLA && s === CLA.uf ? `<div class="sec"><h3>Defesa</h3><div class="list">${CLA.nome}, base de lançamento de foguetes da Força Aérea.</div>${pill("calculado")} <span class="note">posição aproximada</span></div>` : ""}
       <div class="sec"><h3>Mobilidade elétrica</h3>
         <div class="kv"><span>Eletropostos</span><span class="v">${ev ? fmt(ev.valor) : "—"}</span></div>

@@ -5,7 +5,7 @@
   --land:#1d4a2c; --land-hi:#28603a; --edge:#5f9a6a;
   --ink:#ece9de; --muted:#a3ab9c; --dim:#6c7466; --hair:rgba(214,198,150,.16);
   --glass:rgba(10,18,20,.8); --bar:rgba(9,15,17,.94);
-  --accent:#e6b450; --road:#e9dfc4; --mt:#9fe6f2; --sea-line:#58cfe0; --rail:#e39a58; --port:#f4f7f5; --air:#a9bdf7; --cla:#ff7a6b; --zc:#5fd0a8; --pce:#e58fd3; --oil:#f6c945; --uep:#ff6b4a; --campo:#d9902b; --presal:#fff0a8; --sem:#3e433f; --boi:#d9a66b; --road-est:#a9a184;
+  --accent:#e6b450; --road:#e9dfc4; --mt:#9fe6f2; --sea-line:#58cfe0; --rail:#e39a58; --port:#f4f7f5; --air:#a9bdf7; --cla:#ff7a6b; --zc:#5fd0a8; --pce:#e58fd3; --oil:#f6c945; --uep:#ff6b4a; --campo:#d9902b; --presal:#fff0a8; --sem:#3e433f; --boi:#d9a66b; --road-est:#a9a184; --hid:#4ea3ff; --eol:#e6eefc; --sol:#ffe14d; --bio:#9be15d; --fos:#ff7b7b; --nuc:#ff4fd8; --lt:#b18cff;
   --q1:#1d4a2c; --q2:#2b6338; --q3:#3f7e44; --q4:#6aa055; --q5:#a8c97a;
   --t-api:#7fd6c9; --t-manual:#b7d98a; --t-entidade:#e8b75a; --t-base:#a9bdf7; --t-calculado:#c9a2ff; --t-pendente:#ff8f80;
   --f-display:"Big Shoulders Display","Arial Narrow",sans-serif;
@@ -245,3 +245,8 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 }
 /* "Brasil · 27 UFs" legível sobre o mapa claro da versão leve */
 .where #where{text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 8px rgba(0,0,0,.6)}
+/* energia elétrica (versão leve): usinas por fonte e linhas de transmissão */
+.usina{stroke:#0d1712;stroke-width:.5;vector-effect:non-scaling-stroke;fill-opacity:.88;cursor:default}
+.usina.t-uhe,.usina.t-pch,.usina.t-cgh{fill:var(--hid)}.usina.t-eol{fill:var(--eol)}.usina.t-sol{fill:var(--sol)}
+.usina.t-bio{fill:var(--bio)}.usina.t-fos{fill:var(--fos)}.usina.t-nuc{fill:var(--nuc)}
+.lt{fill:none;stroke:var(--lt);stroke-opacity:.72;vector-effect:non-scaling-stroke;pointer-events:none}

@@ -1,5 +1,5 @@
 # Robô do Brasil em Camadas
-# - Todo dia 3 de cada mês (e quando você clicar em "Run workflow"): busca dados novos do IBGE e da ANP e salva no repositório.
+# - Todo dia 3 de cada mês (e quando você clicar em "Run workflow"): busca dados novos do IBGE, da ANP e da EPE e salva no repositório.
 # - Depois de cada mudança: publica o site no GitHub Pages.
 # Versões das ações conferidas em 21/10/2026 (todas em Node 24; o Node 20 foi descontinuado pelo GitHub).
 name: Atualizar dados e publicar
@@ -35,12 +35,16 @@ jobs:
       - name: Buscar dados da ANP (petróleo e gás)
         continue-on-error: true
         run: python scripts/atualizar_anp.py
+      # Energia elétrica (usinas e linhas de transmissão) do Webmap da EPE; se falhar, ficam os arquivos antigos.
+      - name: Buscar dados da EPE (energia elétrica)
+        continue-on-error: true
+        run: python scripts/atualizar_epe.py
       - name: Salvar se algo mudou
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add site/data
-          git diff --cached --quiet || (git commit -m "Atualiza dados do IBGE e da ANP" && git push)
+          git diff --cached --quiet || (git commit -m "Atualiza dados do IBGE, da ANP e da EPE" && git push)
 
   publicar:
     needs: atualizar

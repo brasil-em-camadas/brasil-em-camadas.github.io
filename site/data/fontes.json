@@ -45,6 +45,14 @@
    "ministerio": "mme",
    "por": "total",
    "vazio": "sem produção"
+  },
+  {
+   "id": "ene",
+   "nome": "Energia elétrica",
+   "arquivo": "energia/estados.json",
+   "ministerio": "mme",
+   "por": "total",
+   "vazio": "sem usina na base"
   }
  ],
  "luzes": [
@@ -321,11 +329,65 @@
    "fonte": "DNIT, Plano Nacional de Contagem de Tráfego"
   },
   {
-   "id": "p-ene",
-   "nome": "Usinas e linhas de transmissão",
+   "id": "usinas",
+   "nome": "Usinas de energia elétrica",
+   "tipo": "pontos",
+   "arquivo": "energia/usinas.json",
+   "sob_demanda": true,
    "ministerio": "mme",
-   "nivel": "pendente",
-   "fonte": "EPE, Webmap"
+   "nivel": "api",
+   "fonte": "EPE, Webmap (sistema elétrico existente): usinas em operação, por fonte; o tamanho do ponto mostra a potência. É a geração centralizada: os painéis solares de telhado não entram. Clique numa usina para ver os números",
+   "ligada": false,
+   "cor": "--hid",
+   "legenda": [
+    {
+     "nome": "Hidrelétrica",
+     "forma": "pt",
+     "cor": "--hid"
+    },
+    {
+     "nome": "Eólica",
+     "forma": "pt",
+     "cor": "--eol"
+    },
+    {
+     "nome": "Solar",
+     "forma": "pt",
+     "cor": "--sol"
+    },
+    {
+     "nome": "Térmica a biomassa",
+     "forma": "pt",
+     "cor": "--bio"
+    },
+    {
+     "nome": "Térmica fóssil",
+     "forma": "pt",
+     "cor": "--fos"
+    },
+    {
+     "nome": "Nuclear",
+     "forma": "pt",
+     "cor": "--nuc"
+    }
+   ]
+  },
+  {
+   "id": "lt",
+   "nome": "Linhas de transmissão",
+   "tipo": "linhas",
+   "arquivo": "energia/linhas.json",
+   "sob_demanda": true,
+   "ministerio": "mme",
+   "nivel": "api",
+   "fonte": "EPE, Webmap (sistema elétrico existente): linhas do sistema interligado, de 230 a 800 kV; quanto mais grossa, maior a tensão. Clique numa linha, de perto, para ver o nome",
+   "ligada": false,
+   "cor": "--lt",
+   "legenda": [
+    {
+     "nome": "Linha de transmissão (mais grossa = tensão maior)"
+    }
+   ]
   }
  ],
  "apoio": {

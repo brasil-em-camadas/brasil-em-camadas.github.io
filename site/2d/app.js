@@ -171,6 +171,13 @@ function rewind(f) {
   const gRail = root.append("g");
   const rails = gRail.selectAll("path").data(RAIL).join("path").attr("class", d => "rail" + (d.obra ? " obra" : ""));
   rails.append("title").text(d => `Ferrovia${d.obra ? " em obras" : ""} · ${d.op}${d.b ? " · bitola " + d.b.toLowerCase() : ""} (IBGE, BC250 2025)`);
+  /* linhas de transmissão (EPE), sob demanda: mais grossas quanto maior a tensão */
+  const gLt = root.append("g");
+  let ltP = gLt.selectAll("path");
+  function desenharLt() {
+    ltP = gLt.selectAll("path").data(DATA.lt.features).join("path").attr("class", "lt")
+      .style("stroke-width", d => (0.5 + Math.max(0, d.properties.kv - 230) / 570 * 1.5).toFixed(2));
+  }
   /* poços em produção: [lon, lat, boe/dia, barris/dia, mil m³ de gás/dia, poço, campo, UF, mar/terra] */
   /* rebanho bovino por município: desenhado quando o arquivo chega (camada sob demanda) */
   const gBoi = root.append("g");
@@ -182,6 +189,17 @@ function rewind(f) {
       r0: Math.max(0.6, Math.min(8, 0.6 + Math.sqrt(m[2]) * 0.0045)) }))).join("circle").attr("class", "boi");
     boiC.on("click", (e, d) => { e.stopPropagation(); select(d.u); });   /* clicar num ponto abre o estado dele */
     boiC.append("title").text(d => `${d.n} · ${d.u}: ${fmt(d.b)} cabeças de gado bovino (IBGE, Pesquisa da Pecuária Municipal ${M.meta.referencia}). O ponto fica na sede do município.`);
+  }
+  /* usinas de energia (EPE), sob demanda: cor pela fonte, tamanho pela potência; clicar abre o estado */
+  const gUsinas = root.append("g");
+  let usinasC = gUsinas.selectAll("circle");
+  function desenharUsinas() {
+    const M = DATA.usinas.meta;
+    usinasC = gUsinas.selectAll("circle").data(DATA.usinas.usinas.map(u => ({ c: [u[0], u[1]], kw: u[2], t: u[3], n: u[4], uf: u[5], a: u[6], d: u[7], x: u[8],
+      r0: Math.max(0.8, Math.min(11, 0.8 + Math.sqrt(u[2]) * 0.0028)) }))).join("circle").attr("class", d => "usina t-" + d.t);
+    usinasC.on("click", (e, d) => { e.stopPropagation(); if (d.uf) select(d.uf); });
+    usinasC.append("title").text(d => `${d.n} · ${M.tipos[d.t]} · ${fmt1(d.kw / 1000)} MW${d.uf ? " · " + d.uf : ""}${d.a ? ". Em operação desde " + d.a : ""}`
+      + `${(M.observacoes || {})[d.n] ? ". " + M.observacoes[d.n] : ""} (EPE, Webmap; ${M.referencia}).`);
   }
   const gPocos = root.append("g");
   let pocosC = gPocos.selectAll("circle");
@@ -198,7 +216,7 @@ function rewind(f) {
     uepR.append("title").text(d => { const p = d.properties;
       return `${p.nome} · ${p.tipo}${p.operador ? " · " + p.operador : ""}${p.prevista ? " · prevista" : ""}${p.atende ? ". Atende: " + p.atende : ""}${p.capacidade_bbl_dia ? ". Capacidade: " + fmt(p.capacidade_bbl_dia) + " barris de petróleo/dia" : ""}. Fonte: ANP.`; });
   }
-  const DESENHA = { boi: desenharBoi, oil: desenharPocos, uep: desenharUep, campos: desenharCampos, zc: desenharZc, pce: desenharPce, rodest: desenharRodEst };
+  const DESENHA = { boi: desenharBoi, oil: desenharPocos, uep: desenharUep, campos: desenharCampos, zc: desenharZc, pce: desenharPce, rodest: desenharRodEst, usinas: desenharUsinas, lt: desenharLt };
   const gPorts = root.append("g");
   const ports = gPorts.selectAll("circle").data(DATA.ports || []).join("circle").attr("class", "port");
   ports.append("title").text(d => d.n + (d.org ? " · porto organizado" : "") + (d.obra ? " · em obras" : "") + " (IBGE, BC250 2025)");
@@ -220,7 +238,7 @@ function rewind(f) {
   caps.append("circle").attr("r", d => d.pais ? 3.6 : 2.6);
   caps.append("text").attr("x", 6).attr("y", 4).text(d => d.n);
   const G = { zee: gZee, mt: gMt, zc: gZc, pce: gPce, rod: gRod, rail: gRail, ports: gPorts, air: gAir, cla: gCla,
-    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst };
+    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt };
 
   let proj, path, W, H, head = 0, k = 1;
   const zoom = d3.zoom().scaleExtent([0.8, 12]).on("zoom", e => {
@@ -258,7 +276,7 @@ function rewind(f) {
     MAR().forEach(sel => sel.attr("d", path));
     camposP.attr("d", path); presalP.attr("d", path);
     pocosC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
-    posBoi();
+    posBoi(); ltP.attr("d", path); usinasC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     raioPocos();
     roads.attr("d", path); rodEstP.attr("d", path);
     states.attr("d", path);
@@ -292,11 +310,12 @@ function rewind(f) {
   function geoSobDemanda() {
     if (!path) return;
     MAR().forEach(sel => sel.attr("d", path));
-    camposP.attr("d", path); rodEstP.attr("d", path);
+    camposP.attr("d", path); rodEstP.attr("d", path); ltP.attr("d", path);
+    usinasC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     pocosC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     posBoi(); raioPocos(); place();
   }
-  function raioPocos() { const s = 1 / Math.sqrt(k); pocosC.attr("r", d => d.r0 * s); boiC.attr("r", d => d.r0 * s); }
+  function raioPocos() { const s = 1 / Math.sqrt(k); pocosC.attr("r", d => d.r0 * s); boiC.attr("r", d => d.r0 * s); usinasC.attr("r", d => d.r0 * s); }
   /* pontos mantêm tamanho legível em qualquer zoom */
   function place() {
     const s = 1 / Math.sqrt(k);
@@ -362,7 +381,9 @@ function rewind(f) {
     "p-rod": "M8 21L10 3M16 21L14 3M12 6v2M12 11v2M12 16v2",
     rod: "M8 21L10 3M16 21L14 3M12 6v2M12 11v2M12 16v2",
     rodest: "M8 21L10 3M16 21L14 3M12 8v1M12 14v1",
-    "p-ene": "M13 2L5 14h6l-1 8 8-12h-6z"
+    "p-ene": "M13 2L5 14h6l-1 8 8-12h-6z",
+    usinas: "M13 2L5 14h6l-1 8 8-12h-6z",
+    lt: "M12 2l-5 20M12 2l5 20M8 9h8M7 14h10M5 20h14"
   };
   const quando = id => { const m = DATA[id] && DATA[id].meta; return m && m.atualizado_em ? ` · ${m.referencia ? "ref. " + esc(m.referencia) + ", " : ""}atualizado em ${m.atualizado_em}` : ""; };
   const icon = id => ICON[id] ? `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[id]}"/></svg>` : `<span class="ico"></span>`;
@@ -472,6 +493,25 @@ function rewind(f) {
       ${pill(O.nivel)} <span class="note">${esc(O.fonte)}; média de ${esc(O.referencia)} · atualizado em ${O.atualizado_em}</span></div>`;
   }
 
+  /* energia elétrica do estado (EPE): potência instalada por fonte */
+  function fichaEnergia(s) {
+    const E = DATA.ene;
+    if (!E) return "";
+    const v = E.valores[s], fonte = `${pill(E.nivel)} <span class="note">${esc(E.fonte)}; ${esc(E.referencia)} · atualizado em ${E.atualizado_em}</span>`;
+    if (!v) return `<div class="sec"><h3>Energia elétrica</h3><div class="list">Nenhuma usina deste estado na base da EPE (geração centralizada).</div>${fonte}</div>`;
+    const NOM = { hid: "Hidrelétricas", eol: "Eólicas", sol: "Solares", bio: "Térmicas a biomassa", fos: "Térmicas fósseis", nuc: "Nucleares" };
+    const partes = [["hid", (v.uhe || 0) + (v.pch || 0) + (v.cgh || 0)], ["eol", v.eol], ["sol", v.sol], ["bio", v.bio], ["fos", v.fos], ["nuc", v.nuc]]
+      .filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]);
+    const rk = Object.entries(E.valores).sort((a, b) => b[1].valor - a[1].valor).findIndex(e => e[0] === s) + 1;
+    return `<div class="sec"><h3>Energia elétrica</h3>
+      <div class="kv"><span>Potência instalada</span><span class="v">${fmt(Math.round(v.valor))} MW</span></div>
+      <div class="kv"><span>Posição no país</span><span class="v">${rk}º · ${fmt1(v.valor / E.total_mw * 100)}%</span></div>
+      ${partes.map(([k, mw]) => `<div class="kv"><span>${NOM[k]}</span><span class="v">${fmt(Math.round(mw))} MW · ${mw / v.valor < 0.001 ? "menos de 0,1" : fmt1(mw / v.valor * 100)}%</span></div>`).join("")}
+      <div class="list">${fmt(v.usinas)} usinas na base. Só a geração centralizada: os painéis solares de telhado não entram.</div>
+      ${(v.obs || []).map(o => `<div class="list"><i>${esc(o)}</i></div>`).join("")}
+      ${fonte}</div>`;
+  }
+
   /* pecuária e aquicultura do estado (IBGE, PPM) */
   function fichaPecuaria(s) {
     const R = DATA.reb;
@@ -501,6 +541,8 @@ function rewind(f) {
         <div class="kv"><span>População</span><span class="v">${fmt(popTot)}</span></div>${popInfo}
         ${DATA.oleo ? `<div class="kv" style="margin-top:8px"><span>Petróleo e gás</span><span class="v">${fmt1(DATA.oleo.total_boe_dia / 1e6)} milhões de boe/dia</span></div>
           ${pill(DATA.oleo.nivel)} <span class="note">ANP, média de ${esc(DATA.oleo.referencia)} · atualizado em ${DATA.oleo.atualizado_em}. boe = barril de óleo equivalente.</span>` : ""}
+        ${DATA.ene ? `<div class="kv" style="margin-top:8px"><span>Energia elétrica</span><span class="v">${fmt(Math.round(DATA.ene.total_mw / 1000))} mil MW</span></div>
+          ${pill(DATA.ene.nivel)} <span class="note">EPE, potência instalada (${esc(DATA.ene.referencia)}) · atualizado em ${DATA.ene.atualizado_em}. Sem os painéis solares de telhado.</span>` : ""}
         <p class="lede">Clique num estado para aproximar. Cada camada mostra de onde veio o dado e seu nível de confiança. Arraste para mover e role para aproximar.</p>`;
       return;
     }
@@ -532,6 +574,7 @@ function rewind(f) {
         ${A.length ? `<div class="list">${A.map(a => a.n + (a.i ? " (" + a.i + ")" : "")).join(", ")}</div>` : ""}
         ${pill("base")} <span class="note">Natural Earth, só os maiores. Ausência na base não significa ausência real.</span></div>
       ${fichaOleo(s)}
+      ${fichaEnergia(s)}
       ${CLA && s === CLA.uf ? `<div class="sec"><h3>Defesa</h3><div class="list">${CLA.nome}, base de lançamento de foguetes da Força Aérea.</div>${pill("calculado")} <span class="note">posição aproximada</span></div>` : ""}
       <div class="sec"><h3>Mobilidade elétrica</h3>
         <div class="kv"><span>Eletropostos</span><span class="v">${ev ? fmt(ev.valor) : "—"}</span></div>
