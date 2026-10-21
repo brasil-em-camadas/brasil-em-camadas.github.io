@@ -54,8 +54,7 @@ function rewind(f) {
   }));
   /* camadas do mar: cada arquivo traz a área ("area"), as linhas de limite ("limite", "base") e os rótulos */
   const parte = (id, p) => DATA[id] && DATA[id].features ? DATA[id].features.filter(f => f.properties.parte === p) : [];
-  ["zee", "mt", "zc", "pce", "presal"].forEach(id => parte(id, "area").forEach(rewind));
-  if (DATA.campos) DATA.campos.features.forEach(rewind);
+  ["zee", "mt", "presal"].forEach(id => parte(id, "area").forEach(rewind));   /* as camadas sob demanda acertam o sentido ao chegar */
   const POP = DATA.pop ? DATA.pop.valores : {};
   const popTot = Object.values(POP).reduce((a, b) => a + b, 0);
 
@@ -109,12 +108,18 @@ function rewind(f) {
     .each(function (d) { const p = d.n.split("\n"); d3.select(this).selectAll("tspan").data(p).join("tspan").attr("x", 0).attr("dy", (_, i) => i ? "1.15em" : (p.length > 1 ? "-0.3em" : 0)).text(s => s); });
   const ROT = await getJSON("../data/geo/rotulos.json") || { capitais: [], estados: [], ilhas: [] };
   const gPce = root.append("g");
-  const pceA = gPce.selectAll("path.pce-area").data(parte("pce", "area")).join("path").attr("class", d => "pce-area " + d.properties.status);
-  pceA.append("title").text(d => `Plataforma continental estendida · ${d.properties.nome}: ${d.properties.situacao}. ` +
-    `Área no desenho ≈ ${kmTxt(d.properties.area_km2)}; Marinha: ${d.properties.area_marinha}. ${d.properties.fonte_curta}. Sem valor legal.`);
-  const pceL = gPce.selectAll("path.pce-lim").data(parte("pce", "limite")).join("path").attr("class", d => "pce-lim " + d.properties.status);
-  const pceT = gPce.selectAll("text").data(parte("pce", "rotulo")).join("text").attr("class", "pce-lbl")
-    .each(function (d) { const p = d.properties.texto.split("\n"); d3.select(this).selectAll("tspan").data(p).join("tspan").attr("x", 0).attr("dy", (_, i) => i ? "1.25em" : "-0.3em").text(t => t); });
+  /* camadas sob demanda (zona contígua, plataforma estendida, poços, plataformas, campos, rebanho): começam vazias
+     e são desenhadas quando o arquivo chega (ver baixarSobDemanda e DESENHA, mais abaixo) */
+  let pceA = gPce.selectAll("path.pce-area"), pceL = gPce.selectAll("path.pce-lim"), pceT = gPce.selectAll("text");
+  function desenharPce() {
+    parte("pce", "area").forEach(rewind);
+    pceA = gPce.selectAll("path.pce-area").data(parte("pce", "area")).join("path").attr("class", d => "pce-area " + d.properties.status);
+    pceA.append("title").text(d => `Plataforma continental estendida · ${d.properties.nome}: ${d.properties.situacao}. ` +
+      `Área no desenho ≈ ${kmTxt(d.properties.area_km2)}; Marinha: ${d.properties.area_marinha}. ${d.properties.fonte_curta}. Sem valor legal.`);
+    pceL = gPce.selectAll("path.pce-lim").data(parte("pce", "limite")).join("path").attr("class", d => "pce-lim " + d.properties.status);
+    pceT = gPce.selectAll("text").data(parte("pce", "rotulo")).join("text").attr("class", "pce-lbl")
+      .each(function (d) { const p = d.properties.texto.split("\n"); d3.select(this).selectAll("tspan").data(p).join("tspan").attr("x", 0).attr("dy", (_, i) => i ? "1.25em" : "-0.3em").text(t => t); });
+  }
   const gZee = root.append("g");
   const zeeA = gZee.selectAll("path.zee-area").data(parte("zee", "area")).join("path").attr("class", "zee-area");
   const zeeL = gZee.selectAll("path.zee-lim").data(parte("zee", "limite")).join("path").attr("class", "zee-lim");
@@ -124,13 +129,17 @@ function rewind(f) {
   ilhas.append("text").attr("x", d => d.dx).attr("y", d => d.dy).attr("text-anchor", d => d.a).text(d => d.n);
   ilhas.append("title").text(d => d.nome_completo);
   const gZc = root.append("g");
-  const zcA = gZc.selectAll("path.zc-area").data(parte("zc", "area")).join("path").attr("class", "zc-area");
-  const zcL = gZc.selectAll("path.zc-lim").data(parte("zc", "limite")).join("path").attr("class", "zc-lim");
+  let zcA = gZc.selectAll("path.zc-area"), zcL = gZc.selectAll("path.zc-lim");
+  function desenharZc() {
+    parte("zc", "area").forEach(rewind);
+    zcA = gZc.selectAll("path.zc-area").data(parte("zc", "area")).join("path").attr("class", "zc-area");
+    zcL = gZc.selectAll("path.zc-lim").data(parte("zc", "limite")).join("path").attr("class", "zc-lim");
+  }
   const gMt = root.append("g");
   const mtA = gMt.selectAll("path.mt-area").data(parte("mt", "area")).join("path").attr("class", "mt-area");
   const mtL = gMt.selectAll("path.mt-lim").data([...parte("mt", "limite"), ...parte("mt", "base")]).join("path")
     .attr("class", d => d.properties.parte === "base" ? "mt-base" : "mt-lim");
-  const MAR = [pceA, pceL, zeeA, zeeL, zcA, zcL, mtA, mtL];
+  const MAR = () => [pceA, pceL, zeeA, zeeL, zcA, zcL, mtA, mtL];
   const states = root.append("g").selectAll("path").data(estados.features).join("path")
     .attr("class", "st").attr("tabindex", 0).attr("aria-label", d => d.properties.name)
     .on("click", (e, d) => { e.stopPropagation(); select(d.properties.sigla); })
@@ -140,9 +149,13 @@ function rewind(f) {
     .attr("preserveAspectRatio", "none").attr("clip-path", "url(#clip-br)") : null;
   states.append("title").text(d => d.properties.name);
   const gCampos = root.append("g");
-  const camposP = gCampos.selectAll("path").data(DATA.campos ? DATA.campos.features : []).join("path").attr("class", "campo");
-  camposP.append("title").text(d => { const p = d.properties;
-    return `Campo ${p.nome} · ${p.etapa}${p.fluido ? " · " + p.fluido : ""}${p.operador ? ". Operador: " + p.operador : ""}${p.bacia ? ". Bacia " + p.bacia : ""}${p.inicio ? ", produção desde " + p.inicio : ""}. Fonte: ANP.`; });
+  let camposP = gCampos.selectAll("path");
+  function desenharCampos() {
+    DATA.campos.features.forEach(rewind);
+    camposP = gCampos.selectAll("path").data(DATA.campos.features).join("path").attr("class", "campo");
+    camposP.append("title").text(d => { const p = d.properties;
+      return `Campo ${p.nome} · ${p.etapa}${p.fluido ? " · " + p.fluido : ""}${p.operador ? ". Operador: " + p.operador : ""}${p.bacia ? ". Bacia " + p.bacia : ""}${p.inicio ? ", produção desde " + p.inicio : ""}. Fonte: ANP.`; });
+  }
   const gPresal = root.append("g");
   const presalP = gPresal.selectAll("path").data(parte("presal", "area")).join("path").attr("class", "presal");
   const presalT = gPresal.selectAll("text").data(parte("presal", "rotulo")).join("text").attr("class", "presal-lbl").text(d => d.properties.texto);
@@ -153,8 +166,6 @@ function rewind(f) {
   const gRail = root.append("g");
   const rails = gRail.selectAll("path").data(RAIL).join("path").attr("class", "rail");
   /* poços em produção: [lon, lat, boe/dia, barris/dia, mil m³ de gás/dia, poço, campo, UF, mar/terra] */
-  const POCOS = DATA.oil && DATA.oil.pocos ? DATA.oil.pocos.map(p => ({ c: [p[0], p[1]], b: p[2], o: p[3], g: p[4], n: p[5], campo: p[6], u: p[7], a: p[8],
-    r0: Math.max(0.9, Math.min(9, 0.9 + Math.sqrt(p[2]) * 0.034)) })) : [];
   /* rebanho bovino por município: desenhado quando o arquivo chega (camada sob demanda) */
   const gBoi = root.append("g");
   let boiC = gBoi.selectAll("circle");
@@ -165,15 +176,23 @@ function rewind(f) {
       r0: Math.max(0.6, Math.min(8, 0.6 + Math.sqrt(m[2]) * 0.0045)) }))).join("circle").attr("class", "boi");
     boiC.on("click", (e, d) => { e.stopPropagation(); select(d.u); });   /* clicar num ponto abre o estado dele */
     boiC.append("title").text(d => `${d.n} · ${d.u}: ${fmt(d.b)} cabeças de gado bovino (IBGE, Pesquisa da Pecuária Municipal ${M.meta.referencia}). O ponto fica na sede do município.`);
-    if (proj) { posBoi(); raioPocos(); }
   }
   const gPocos = root.append("g");
-  const pocosC = gPocos.selectAll("circle").data(POCOS).join("circle").attr("class", "poco");
-  pocosC.append("title").text(d => `Poço ${d.n} · campo ${d.campo} · ${d.a === "M" ? "mar" : "terra"}${d.u ? " · " + d.u : ""}. Petróleo: ${fmt(Math.round(d.o))} barris/dia; gás: ${fmt1(d.g)} mil m³/dia; total ${fmt(Math.round(d.b))} boe/dia (ANP, média de ${DATA.oil.meta.referencia}).`);
+  let pocosC = gPocos.selectAll("circle");
+  function desenharPocos() {
+    const POCOS = DATA.oil.pocos.map(p => ({ c: [p[0], p[1]], b: p[2], o: p[3], g: p[4], n: p[5], campo: p[6], u: p[7], a: p[8],
+      r0: Math.max(0.9, Math.min(9, 0.9 + Math.sqrt(p[2]) * 0.034)) }));
+    pocosC = gPocos.selectAll("circle").data(POCOS).join("circle").attr("class", "poco");
+    pocosC.append("title").text(d => `Poço ${d.n} · campo ${d.campo} · ${d.a === "M" ? "mar" : "terra"}${d.u ? " · " + d.u : ""}. Petróleo: ${fmt(Math.round(d.o))} barris/dia; gás: ${fmt1(d.g)} mil m³/dia; total ${fmt(Math.round(d.b))} boe/dia (ANP, média de ${DATA.oil.meta.referencia}).`);
+  }
   const gUep = root.append("g");
-  const uepR = gUep.selectAll("rect").data(DATA.uep ? DATA.uep.features : []).join("rect").attr("class", d => d.properties.prevista ? "uep prev" : "uep");
-  uepR.append("title").text(d => { const p = d.properties;
-    return `${p.nome} · ${p.tipo}${p.operador ? " · " + p.operador : ""}${p.prevista ? " · prevista" : ""}${p.atende ? ". Atende: " + p.atende : ""}${p.capacidade_bbl_dia ? ". Capacidade: " + fmt(p.capacidade_bbl_dia) + " barris de petróleo/dia" : ""}. Fonte: ANP.`; });
+  let uepR = gUep.selectAll("rect");
+  function desenharUep() {
+    uepR = gUep.selectAll("rect").data(DATA.uep.features).join("rect").attr("class", d => d.properties.prevista ? "uep prev" : "uep");
+    uepR.append("title").text(d => { const p = d.properties;
+      return `${p.nome} · ${p.tipo}${p.operador ? " · " + p.operador : ""}${p.prevista ? " · prevista" : ""}${p.atende ? ". Atende: " + p.atende : ""}${p.capacidade_bbl_dia ? ". Capacidade: " + fmt(p.capacidade_bbl_dia) + " barris de petróleo/dia" : ""}. Fonte: ANP.`; });
+  }
+  const DESENHA = { boi: desenharBoi, oil: desenharPocos, uep: desenharUep, campos: desenharCampos, zc: desenharZc, pce: desenharPce };
   const gPorts = root.append("g");
   const ports = gPorts.selectAll("circle").data(DATA.ports || []).join("circle").attr("class", "port");
   ports.append("title").text(d => "Porto: " + d.n);
@@ -230,7 +249,7 @@ function rewind(f) {
     proj = d3.geoMercator().fitExtent([[pad + (wide ? 40 : 0), head + (wide ? 44 : 24)], [W - dockW - pad, H - (wide ? 50 : 12)]], fc);
     path = d3.geoPath(proj);
     gGrat.datum(d3.geoGraticule().step([5, 5])()).attr("d", path);
-    MAR.forEach(sel => sel.attr("d", path));
+    MAR().forEach(sel => sel.attr("d", path));
     camposP.attr("d", path); presalP.attr("d", path);
     pocosC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     posBoi();
@@ -262,6 +281,14 @@ function rewind(f) {
       for (let i = 0; i < 26; i++) { const t = ang(x, y); x += Math.cos(t) * step; y += Math.sin(t) * step; d += `L${x.toFixed(1)},${y.toFixed(1)}`; }
     }
     return d;
+  }
+  /* geometria das camadas sob demanda, depois que o arquivo chega (sem mexer no zoom atual) */
+  function geoSobDemanda() {
+    if (!path) return;
+    MAR().forEach(sel => sel.attr("d", path));
+    camposP.attr("d", path);
+    pocosC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
+    posBoi(); raioPocos(); place();
   }
   function raioPocos() { const s = 1 / Math.sqrt(k); pocosC.attr("r", d => d.r0 * s); boiC.attr("r", d => d.r0 * s); }
   /* pontos mantêm tamanho legível em qualquer zoom */
@@ -383,7 +410,7 @@ function rewind(f) {
       l.baixando = false;
       if (!d) { l.on = false; l.falhou = true; render(); return; }
       DATA[l.id] = d;
-      if (l.id === "boi") desenharBoi();
+      if (DESENHA[l.id]) { DESENHA[l.id](); geoSobDemanda(); }
       render();
     });
   }

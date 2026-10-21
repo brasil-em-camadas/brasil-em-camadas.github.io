@@ -97,7 +97,7 @@ function quintis(vals) {
   const portos = fc((DATA.ports || []).map(p => ponto(p.c, { n: p.n, uf: p.uf })));
   const aeros = fc((DATA.air || []).map(a => ponto(a.c, { n: a.n + (a.i ? " (" + a.i + ")" : ""), uf: a.uf })));
   /* poços em produção: [lon, lat, boe/dia, barris de petróleo/dia, mil m³ de gás/dia, poço, campo, UF, mar/terra] */
-  const pocos = fc(DATA.oil && DATA.oil.pocos ? DATA.oil.pocos.map(p => ponto([p[0], p[1]], { b: p[2], o: p[3], g: p[4], n: p[5], c: p[6], u: p[7], a: p[8] })) : []);
+  const pocosFC = d => fc(d.pocos.map(p => ponto([p[0], p[1]], { b: p[2], o: p[3], g: p[4], n: p[5], c: p[6], u: p[7], a: p[8] })));
 
   /* ---------- mapa ---------- */
   const fonte = (estilo) => [estilo];
@@ -124,7 +124,7 @@ function quintis(vals) {
         mt: { type: "geojson", data: DATA.mt || fc([]) },
         zc: { type: "geojson", data: DATA.zc || fc([]) },
         pce: { type: "geojson", data: DATA.pce || fc([]) },
-        pocos: { type: "geojson", data: pocos },
+        pocos: { type: "geojson", data: fc([]) },
         boi: { type: "geojson", data: fc([]) },
         uep: { type: "geojson", data: DATA.uep || fc([]) },
         campos: { type: "geojson", data: DATA.campos || fc([]) },
@@ -524,7 +524,9 @@ function quintis(vals) {
     render();
   };
   /* camadas sob demanda: o arquivo é baixado na primeira vez que a camada é ligada */
-  const SOB = { boi: d => fc(d.municipios.map(m => ponto([m[0], m[1]], { b: m[2], n: m[3], u: m[4] }))) };
+  /* id da camada → [fonte de dados do mapa, conversão do arquivo] */
+  const SOB = { boi: ["boi", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { b: m[2], n: m[3], u: m[4] })))],
+    oil: ["pocos", pocosFC], uep: ["uep", d => d], campos: ["campos", d => d], zc: ["zc", d => d], pce: ["pce", d => d] };
   function baixarSobDemanda() {
     LAYERS.filter(l => l.on && l.sob_demanda && !DATA[l.id] && !l.baixando).forEach(async l => {
       l.baixando = true; l.falhou = false;
@@ -532,8 +534,9 @@ function quintis(vals) {
       l.baixando = false;
       if (!d) { l.on = false; l.falhou = true; render(); return; }
       DATA[l.id] = d;
-      const aplicar = () => map.getSource(l.id).setData(SOB[l.id](d));
-      map.getSource(l.id) ? aplicar() : map.once("load", aplicar);
+      const [fonte, converte] = SOB[l.id];
+      const aplicar = () => map.getSource(fonte).setData(converte(d));
+      map.getSource(fonte) ? aplicar() : map.once("load", aplicar);
       render();
     });
   }
