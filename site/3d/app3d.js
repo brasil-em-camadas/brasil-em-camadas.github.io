@@ -484,14 +484,6 @@ function quintis(vals) {
           ${p.lamina_m ? `<br>Profundidade da água: ${fmt(+p.lamina_m)} m` : ""}<br><span class="pop-fonte">ANP, cadastro de unidades de produção</span>`).addTo(map);
       return;
     }
-    const su = vis("se") && map.getZoom() >= 5 ? map.queryRenderedFeatures(perto, { layers: ["se"] }) : [];
-    if (su.length) {
-      const p = su.reduce((a, b) => b.properties.kv > a.properties.kv ? b : a).properties;
-      new maplibregl.Popup({ closeButton: false, offset: 8, maxWidth: "300px" }).setLngLat(su[0].geometry.coordinates)
-        .setHTML(`<b>${esc(p.n)}</b><br>Subestação · ${esc(p.t)} kV${p.ano ? " · em operação desde " + p.ano : ""}${p.c ? "<br>" + esc(p.c) : ""}
-          <br><span class="pop-fonte">EPE, Webmap (sistema elétrico existente)</span>`).addTo(map);
-      return;
-    }
     const ri = vis("refin") ? map.queryRenderedFeatures(perto, { layers: ["refin"] }) : [];
     if (ri.length) {
       const p = ri[0].properties;
@@ -502,6 +494,14 @@ function quintis(vals) {
           : `<b>${esc(p.n)}</b><br>Unidade de processamento de gás natural${p.tipo ? " (" + esc(p.tipo) + ")" : ""} · ${esc(p.m)} · ${esc(p.uf)}`;
       new maplibregl.Popup({ closeButton: false, offset: 10, maxWidth: "300px" }).setLngLat(ri[0].geometry.coordinates)
         .setHTML(`${corpo}<br><span class="pop-fonte">ANP, servidor de mapas</span>`).addTo(map);
+      return;
+    }
+    const su = vis("se") && map.getZoom() >= 5 ? map.queryRenderedFeatures(perto, { layers: ["se"] }) : [];
+    if (su.length) {
+      const p = su.reduce((a, b) => b.properties.kv > a.properties.kv ? b : a).properties;
+      new maplibregl.Popup({ closeButton: false, offset: 8, maxWidth: "300px" }).setLngLat(su[0].geometry.coordinates)
+        .setHTML(`<b>${esc(p.n)}</b><br>Subestação · ${esc(p.t)} kV${p.ano ? " · em operação desde " + p.ano : ""}${p.c ? "<br>" + esc(p.c) : ""}
+          <br><span class="pop-fonte">EPE, Webmap (sistema elétrico existente)</span>`).addTo(map);
       return;
     }
     const po = vis("pocos") ? map.queryRenderedFeatures(perto, { layers: ["pocos"] }) : [];
