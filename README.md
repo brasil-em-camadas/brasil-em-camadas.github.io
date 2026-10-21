@@ -25,6 +25,7 @@ scripts/
   atualizar_anp.py    robô que busca petróleo e gás na ANP (produção por poço e servidor de mapas)
   gerar_relevo.py     gera as imagens de relevo (roda só quando acionado à mão)
   gerar_limites_maritimos.py  gera os limites do mar a partir do Marine Regions (roda só à mão)
+  gerar_contorno_estados.py   gera o contorno dos estados a partir da malha oficial do IBGE (roda só à mão, uma vez por ano)
   dados/              arquivos de apoio dos robôs (ex.: posição da sede de cada município)
 .github/workflows/
   site.yml            agenda do robô e publicação automática no GitHub Pages
@@ -35,6 +36,8 @@ scripts/
 Todo dia 3 de cada mês o GitHub executa o robô. Ele busca população (por estado e por município), produção agrícola, rebanhos (por estado e o gado bovino de cada município) e aquicultura na API SIDRA do IBGE, e petróleo e gás na ANP: a produção de cada poço no último mês que já tem dados de terra e de mar (o mar sai todo mês, a terra por trimestre), a posição dos poços, os campos, as plataformas e o polígono do pré-sal. Se a ANP falhar, os arquivos antigos ficam e o site é publicado mesmo assim, com a data antiga à vista. Se a busca der certo, os arquivos de dados são trocados e o site é republicado. Cada robô deixa o resultado de cada passo em `site/data/robo_ibge.json` e `site/data/petroleo/robo.json`, para conferir sem abrir o registro do GitHub. Se der errado, o dado antigo fica, com a data antiga, e o GitHub avisa por e-mail.
 
 Para rodar na hora: aba **Actions** → **Atualizar dados e publicar** → **Run workflow**.
+
+O contorno dos estados vem da Malha Municipal Digital do IBGE (recorte por UF, versão 2025), simplificado em dois níveis: `estados.json` (leve, usado na abertura, na versão leve e pelos robôs) e `estados_detalhe.json` (o globo troca para ele quando alguém aproxima o mapa). As divisas ficam idênticas nos dois lados, sem frestas. Quando o IBGE publicar a malha nova: `pip install shapely pyproj pyshp numpy` e `python scripts/gerar_contorno_estados.py --ano AAAA`; depois, rodar "Gerar relevo do mapa" no GitHub, porque o relevo é recortado pelo contorno.
 
 Os limites do mar não entram no robô mensal, porque mudam raramente. Para refazer (versão nova do Marine Regions ou nova área aprovada pela ONU): `pip install shapely pyproj` e `python scripts/gerar_limites_maritimos.py`. O script confere a versão de cada camada e para sozinho se ela mudou, para lembrar de atualizar as citações e os textos em `site/data/fontes.json`. A Margem Equatorial usa o limite aprovado pela ONU em 2025, porque o Marine Regions ainda traz só o pedido de 2017: os 462 pontos da Tabela 4 do Anexo I do [resumo das recomendações da CLPC](https://static.un.org/Depts/los/clcs_new/submissions_files/bra02_rev17/20250227ComRecBrarev1summary.pdf) estão em `scripts/dados/clpc_margem_equatorial_2025.csv`, e o script confere cada ponto pela distância ao anterior que a própria tabela informa.
 

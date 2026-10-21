@@ -111,9 +111,9 @@ def molde_terra(tamanho, oeste, leste, sul, norte):
     def px(pt):
         lon, lat = pt[0], max(min(pt[1], 85), -85)
         return ((lon - oeste) / (leste - oeste) * ow, (yN - merc(lat)) / (yN - yS) * oh)
-    m = Image.new("L", (ow, oh), 0)
-    d = ImageDraw.Draw(m)
-    for arq in ("mundo.json", "estados.json"):
+    def desenhar(arq):
+        m = Image.new("L", (ow, oh), 0)
+        d = ImageDraw.Draw(m)
         for f in json.loads((GEO / arq).read_text(encoding="utf-8"))["features"]:
             g = f["geometry"]
             if not g:
@@ -123,7 +123,14 @@ def molde_terra(tamanho, oeste, leste, sul, norte):
                 d.polygon([px(p) for p in anel_ext], fill=255)
                 for b in buracos:
                     d.polygon([px(p) for p in b], fill=0)
-    return m.filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.GaussianBlur(1))
+        return m
+    # outros países (contorno grosseiro do Natural Earth): um pouco alargados, para o relevo não ficar com fresta na costa
+    paises = desenhar("mundo.json").filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.GaussianBlur(1))
+    # Brasil: contorno do IBGE, preciso; os estados cobrem a terra no mapa, então o relevo para exatamente na costa
+    # (antes era alargado como os países e aparecia como uma faixa clara no mar, ao longo da costa)
+    arq_br = "estados_detalhe.json" if (GEO / "estados_detalhe.json").exists() else "estados.json"
+    brasil = desenhar(arq_br).filter(ImageFilter.GaussianBlur(0.6))
+    return Image.fromarray(np.maximum(np.asarray(paises), np.asarray(brasil)))
 
 
 def aplicar_molde(img, caixa):

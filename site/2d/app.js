@@ -309,8 +309,11 @@ function rewind(f) {
     airs.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
     if (CLA) { const p = proj(CLA.ponto); gCla.selectAll("circle").attr("cx", 0).attr("cy", 0); gCla.attr("transform", `translate(${p}) scale(${s})`); }
   }
+  /* enquadramento pelo continente: a "caixa" de cada estado não inclui as ilhas oceânicas (ver gerar_contorno_estados.py) */
+  const limites = f => { const c = f.properties && f.properties.caixa; if (!c) return path.bounds(f);
+    return [proj([c[0][0], c[1][1]]), proj([c[1][0], c[0][1]])]; };
   function zoomTo(feature, dur = 1100) {
-    const [[x0, y0], [x1, y1]] = path.bounds(feature);
+    const [[x0, y0], [x1, y1]] = limites(feature);
     const usableW = W - espacoPainel();
     const s = Math.min(10, 0.8 / Math.max((x1 - x0) / usableW, (y1 - y0) / (H - head)));
     const t = d3.zoomIdentity.translate(usableW / 2, (H + head) / 2).scale(s).translate(-(x0 + x1) / 2, -(y0 + y1) / 2);

@@ -286,7 +286,11 @@ function quintis(vals) {
     stage.style.setProperty("--head", (topo() + 4) + "px"); stage.style.setProperty("--dock-w", espacoPainel() + "px");
     requestAnimationFrame(afastarLegenda);
   }
-  const BRASIL = caixa({ coordinates: estados.features.map(f => f.geometry.coordinates) });
+  /* enquadramento pelo continente: cada estado traz a "caixa" sem as ilhas oceânicas (Fernando de Noronha, Trindade),
+     gravada pelo gerador do contorno; sem ela, o Espírito Santo seria enquadrado junto com Trindade, a 1.100 km da costa */
+  const caixaUF = f => f.properties.caixa || caixa(f.geometry);
+  const BRASIL = (() => { const cs = estados.features.map(caixaUF);
+    return [[Math.min(...cs.map(c => c[0][0])), Math.min(...cs.map(c => c[0][1]))], [Math.max(...cs.map(c => c[1][0])), Math.max(...cs.map(c => c[1][1]))]]; })();
   /* afastar tem limite: até o globo inteiro caber na tela, abaixo do cabeçalho, com uma folga pequena.
      Visto de cima, o globo fica sempre no centro da tela. O MapLibre aplica o limite ao tamanho do globo,
      que é o mesmo em qualquer latitude (zoom "no equador"). */
@@ -317,7 +321,7 @@ function quintis(vals) {
   }
   function verEstado(s, dur = 1400) {
     const f = estados.features.find(x => x.properties.sigla === s);
-    map.fitBounds(caixa(f.geometry), { padding: folga(), pitch: modo3d ? 55 : 0, bearing: 0, maxZoom: 8, duration: reduce ? 0 : dur });
+    map.fitBounds(caixaUF(f), { padding: folga(), pitch: modo3d ? 55 : 0, bearing: 0, maxZoom: 8, duration: reduce ? 0 : dur });
   }
   /* "Mostrar painel" ocupa o mesmo lugar do "Recolher" (posição definida no style.css): dá para clicar duas vezes sem mover o mouse */
   function mostrarPainel(abrir) {
@@ -341,9 +345,26 @@ function quintis(vals) {
   document.getElementById("mais").onclick = () => letra(1);
   letra(0);
 
+  /* contorno detalhado do IBGE (desvio máximo ≈ 1,7 km, contra ≈ 5 km do contorno leve da abertura):
+     baixado na primeira vez que alguém aproxima o mapa ou escolhe um estado */
+  let detalhe = "nao";
+  async function detalhar() {
+    if (detalhe !== "nao") return;
+    detalhe = "baixando";
+    const d = await getJSON(D + "geo/estados_detalhe.json");
+    if (!d) { detalhe = "nao"; return; }
+    const aplicar = () => {
+      map.getSource("estados").setData(d); detalhe = "ok";
+      estados.features.forEach(f => { const u = f.properties.sigla; map.setFeatureState({ source: "estados", id: u }, { fade: !!sel && u !== sel, hover: u === hover }); });
+    };
+    map.getSource("estados") ? aplicar() : map.once("load", aplicar);
+  }
+  map.on("zoomend", () => { if (map.getZoom() >= 5) detalhar(); });
+
   function selecionar(s) {
     if (sel) { map.setFeatureState({ source: "estados", id: sel }, { sel: false }); }
     sel = (sel === s) ? null : s;
+    if (sel) detalhar();
     estados.features.forEach(f => map.setFeatureState({ source: "estados", id: f.properties.sigla }, { fade: !!sel && f.properties.sigla !== sel }));
     map.setFilter("estado-sel", ["==", ["get", "sigla"], sel || ""]);
     linhasTrem();
