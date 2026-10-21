@@ -290,14 +290,19 @@ def plataformas():
 
 
 if __name__ == "__main__":
-    ok = []
+    from datetime import datetime, timezone
+    ok, relato = [], {}
     for passo in (producao, presal, campos, plataformas):
         print(f"[{passo.__name__}]")
         try:
             passo()
             ok.append(True)
+            relato[passo.__name__] = "ok"
         except Exception as e:   # rede, formato, qualquer coisa: mantém o arquivo antigo
             print(f"[{passo.__name__}] falhou, mantendo o anterior: {e}")
             ok.append(False)
+            relato[passo.__name__] = f"falhou: {str(e)[:300]}"
+    # registro da última execução (mostra se o robô conseguiu falar com a ANP, mesmo quando o dado não mudou)
+    gravar("robo.json", {"rodou_em": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "passos": relato})
     # Só falha se NADA atualizou. No site.yml este passo não derruba a publicação dos outros dados.
     sys.exit(0 if any(ok) else 1)
