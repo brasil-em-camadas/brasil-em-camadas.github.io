@@ -156,6 +156,8 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .road.major{stroke-width:1.1;stroke-opacity:.55}
 /* rodovias do IBGE (BC250): federais; sem pavimento tracejada; estaduais pavimentadas mais apagadas */
 .road{stroke-width:1;stroke-opacity:.58}.road.terra{stroke-dasharray:3 3;stroke-opacity:.45}
+/* trecho com sigla BR administrado pelo estado (coincidente com rodovia estadual ou delegado): cor das estaduais, fora da soma federal */
+.road.est-adm{stroke:var(--road-est);stroke-width:.8}
 .road.est{stroke:var(--road-est);stroke-width:.5;stroke-opacity:.45}
 .rail.obra{stroke-dasharray:5 4}
 .nomes{pointer-events:none}

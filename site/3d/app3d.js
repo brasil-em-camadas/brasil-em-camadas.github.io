@@ -174,14 +174,14 @@ function quintis(vals) {
         { id: "presal-line", type: "line", source: "presal", filter: AREA,
           paint: { "line-color": cor("--presal"), "line-width": 1.5, "line-opacity": 0.9, "line-dasharray": [3, 2] } },
         /* rodovias (IBGE, BC250): estaduais pavimentadas por baixo; federais pavimentadas em traço cheio,
-           federais sem pavimento tracejadas */
+           federais sem pavimento tracejadas; trechos com sigla BR administrados pelo estado (e=1) na cor das estaduais */
         { id: "rodovias-est", type: "line", source: "rodest", layout: { "line-cap": "round" },
           paint: { "line-color": cor("--road-est"), "line-opacity": 0.5, "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.4, 8, 1.3] } },
         { id: "rodovias-terra", type: "line", source: "rod", filter: ["==", ["get", "p"], 0],
-          paint: { "line-color": cor("--road"), "line-opacity": 0.5, "line-dasharray": [2, 2], "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.6, 8, 1.4] } },
+          paint: { "line-color": ["case", ["==", ["get", "e"], 1], cor("--road-est"), cor("--road")], "line-opacity": 0.5, "line-dasharray": [2, 2], "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.6, 8, 1.4] } },
         { id: "rodovias", type: "line", source: "rod", filter: ["==", ["get", "p"], 1], layout: { "line-cap": "round", "line-join": "round" },
-          paint: { "line-color": cor("--road"), "line-opacity": 0.62,
-            "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.8, 8, 2] } },
+          paint: { "line-color": ["case", ["==", ["get", "e"], 1], cor("--road-est"), cor("--road")], "line-opacity": 0.62,
+            "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "e"], 1], 0.6, 0.8], 8, ["case", ["==", ["get", "e"], 1], 1.5, 2]] } },
         { id: "ferrovias", type: "line", source: "trilhos", filter: ["!=", ["get", "obra"], 1],
           paint: { "line-color": cor("--rail"), "line-opacity": 0.9, "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1, 8, 2.6] } },
         { id: "ferrovias-obra", type: "line", source: "trilhos", filter: ["==", ["get", "obra"], 1],
@@ -510,6 +510,8 @@ function quintis(vals) {
         ? `<b>Ferrovia${p.obra == 1 ? " em obras" : ""}</b><br>${esc(p.op)}${p.b ? "<br>Bitola " + esc(p.b).toLowerCase() : ""}`
         : f.layer.id === "rodovias-est"
           ? `<b>${esc(p.s)}</b><br>Rodovia estadual pavimentada`
+          : p.e == 1
+            ? `<b>${esc(p.s)}</b><br>Trecho com sigla BR administrado pelo estado (rodovia estadual coincidente ou trecho delegado), ${p.p == 1 ? "pavimentado" : "sem pavimento"}`
           : `<b>${p.s ? esc(p.s) : "Rodovia federal"}</b><br>Rodovia federal ${p.p == 1 ? "pavimentada" : "sem pavimento"}${p.c ? "<br>Concessionada" + (p.c !== "concessionada" ? " (" + esc(p.c) + ")" : "") : ""}`;
       new maplibregl.Popup({ closeButton: false, offset: 6, maxWidth: "280px" }).setLngLat(e.lngLat)
         .setHTML(`${html}<br><span class="pop-fonte">IBGE, base cartográfica 1:250.000 (2025)</span>`).addTo(map);
@@ -869,7 +871,7 @@ function quintis(vals) {
       ${fichaPecuaria(s)}
       <div class="sec"><h3>Logística</h3>
         ${kr ? `<div class="kv"><span>Rodovias federais</span><span class="v">≈ ${fmt(kr[0])} km</span></div>
-          <div class="list">${fmt(kr[1])} km pavimentados.</div>` : ""}
+          <div class="list">${fmt(kr[1])} km pavimentados, sob administração federal (inclusive concessões).${kr[2] ? ` Mais ≈ ${fmt(kr[2])} km com sigla BR administrados pelo estado (rodovias estaduais coincidentes ou trechos delegados), em outra cor no mapa.` : ""}</div>` : ""}
         <div class="kv"><span>Ferrovias em operação</span><span class="v">${km ? "≈ " + fmt(km) + " km" : "nenhuma na base"}</span></div>
         <div class="kv"><span>Portos e terminais</span><span class="v">${Pt.length}</span></div>
         ${Pt.length ? `<div class="list">${Pt.map(p => esc(p.n)).join(", ")}</div>` : ""}

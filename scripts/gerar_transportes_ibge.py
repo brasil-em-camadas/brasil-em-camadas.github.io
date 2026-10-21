@@ -11,7 +11,8 @@ Roda só à mão, quando sair uma versão nova da BC250 (a cada dois anos, mais 
   python scripts/gerar_transportes_ibge.py                 (baixa os ~800 MB do IBGE)
 
 Saídas em site/data/geo/:
-  rodovias.json             rodovias federais (sigla BR ou jurisdição federal), construídas, pavimentadas ou não
+  rodovias.json             rodovias com sigla BR (ou de jurisdição federal), construídas, pavimentadas ou não; os trechos
+                            administrados pelos estados (coincidentes com estaduais ou delegados) vêm marcados e ficam fora da soma
   rodovias_estaduais.json   rodovias estaduais pavimentadas (sigla do estado, ex.: SP-330)
   ferrovias.json            ferrovias em operação e em obras (sem metrô, aeromóvel, abandonadas e destruídas),
                             cortadas na divisa dos estados, com os km de cada estado
@@ -115,19 +116,27 @@ def rodovias(z):
         conc = "" if conc in ("", "Não") else ("concessionada" if conc.upper() == "ANTT" else conc)   # "ANTT" é a agência, não a concessionária
         if not conc and d["administra"] == "Concessionada":
             conc = "concessionada"
-        grupos[("F" if federal else "E", s, int(pav), conc)].extend(getattr(g, "geoms", [g]))
+        # Trecho com sigla BR administrado pelo estado ou pelo município: a BR planejada passa sobre uma rodovia estadual
+        # (ex.: BR-364/MT-170) ou o trecho foi delegado ao estado. O DNIT não conta esses trechos na malha federal; aqui eles
+        # continuam desenhados (em outra cor) e ficam fora da soma. Conferido em 21/10/2026: sem eles a malha federal da BC250
+        # dá 77 mil km, perto dos 75,8 mil km do DNIT; com eles dava 98 mil (Minas Gerais: 16,6 mil km, contra 9,2 mil do DNIT).
+        est_adm = int(federal and d["administra"] in ("Estadual/Distrital", "Municipal"))
+        grupos[("F" if federal else "E", s, int(pav), conc, est_adm)].extend(getattr(g, "geoms", [g]))
     estados = json.loads((GEO / "estados_detalhe.json").read_text(encoding="utf-8"))["features"]
     ufs = [(f["properties"]["sigla"], shape(f["geometry"])) for f in estados]
     arvore = shapely.STRtree([g for _, g in ufs])
-    por_uf = defaultdict(lambda: [0.0, 0.0])   # rodovia federal por estado: [total, pavimentada]
+    # por estado: [federal, federal pavimentada, trechos com sigla BR administrados pelo estado]
+    por_uf = defaultdict(lambda: [0.0, 0.0, 0.0])
     saidas = {"F": [], "E": []}
-    extensao = {"F": 0.0, "E": 0.0, "F_pav": 0.0}
-    for (tipo, s, pav, conc), linhas in sorted(grupos.items()):
+    extensao = {"F": 0.0, "E": 0.0, "F_pav": 0.0, "F_est": 0.0}
+    for (tipo, s, pav, conc, est_adm), linhas in sorted(grupos.items()):
         g = linemerge(linhas)
         k = km(g)
-        extensao[tipo] += k
-        if tipo == "F" and pav:
-            extensao["F_pav"] += k
+        if est_adm:
+            extensao["F_est"] += k
+        else:
+            extensao[tipo] += k
+            extensao["F_pav"] += k if tipo == "F" and pav else 0
         if tipo == "F":
             for i in arvore.query(g):
                 parte = g.intersection(ufs[i][1])
@@ -135,12 +144,17 @@ def rodovias(z):
                     continue
                 kp = km(parte)
                 v = por_uf[ufs[i][0]]
-                v[0] += kp
-                v[1] += kp if pav else 0
+                if est_adm:
+                    v[2] += kp
+                else:
+                    v[0] += kp
+                    v[1] += kp if pav else 0
         g = simples(g, TOL_ROD)
         if g.is_empty:
             continue
         props = {"s": s, "p": pav}
+        if est_adm:
+            props["e"] = 1
         if conc:
             props["c"] = conc
         saidas[tipo].append({"type": "Feature", "properties": props, "geometry": mapping(g)})
@@ -148,10 +162,13 @@ def rodovias(z):
     base = {"fonte": fonte, "nivel": "manual", "baixado_em": date.today().isoformat(),
             "simplificacao": f"tolerância {TOL_ROD}° (~450 m); coordenadas com 3 casas (~110 m)"}
     gravar("rodovias.json", {**base, "titulo": "Rodovias federais", "km": round(extensao["F"]), "km_pavimentados": round(extensao["F_pav"]),
-                             "nota": "rodovias com sigla BR ou de jurisdição federal; inclui trechos em que a BR coincide com uma rodovia estadual",
-                             "campos": {"s": "sigla", "p": "pavimentada (1/0)", "c": "concessionária"},
+                             "km_administrados_pelos_estados": round(extensao["F_est"]),
+                             "nota": "rodovias com sigla BR ou de jurisdição federal, sob administração federal (inclusive concessões); "
+                                     "os trechos com sigla BR administrados pelos estados (coincidentes com rodovias estaduais ou delegados) "
+                                     "vêm com e=1 e ficam fora de km e km_pavimentados",
+                             "campos": {"s": "sigla", "p": "pavimentada (1/0)", "e": "administrado pelo estado ou município (1)", "c": "concessionária"},
                              "km_por_uf": {u: [round(a) for a in v] for u, v in sorted(por_uf.items())},
-                             "km_por_uf_campos": ["total", "pavimentada"]}, saidas["F"])
+                             "km_por_uf_campos": ["federal", "federal pavimentada", "sigla BR administrada pelo estado"]}, saidas["F"])
     gravar("rodovias_estaduais.json", {**base, "titulo": "Rodovias estaduais pavimentadas", "km": round(extensao["E"])}, saidas["E"])
 
 

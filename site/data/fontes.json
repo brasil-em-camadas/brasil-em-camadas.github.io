@@ -145,7 +145,7 @@
    "arquivo": "geo/rodovias.json",
    "ministerio": "trans",
    "nivel": "manual",
-   "fonte": "IBGE, base cartográfica 1:250.000 (BC250, versão 2025), com o número da BR e a jurisdição atualizados pelo IBGE a partir de dados do DNIT: 98 mil km, 87 mil pavimentados. De perto aparece o número da BR; clique numa rodovia para ver a situação",
+   "fonte": "IBGE, base cartográfica 1:250.000 (BC250, versão 2025), com o número da BR e a jurisdição atualizados pelo IBGE a partir de dados do DNIT: 77 mil km sob administração federal (inclusive concessões), 69 mil pavimentados. Os 21 mil km com sigla BR administrados pelos estados (rodovias estaduais coincidentes ou trechos delegados) aparecem em outra cor e ficam fora da soma. De perto aparece o número da BR; clique numa rodovia para ver a situação",
    "ligada": true,
    "cor": "--road",
    "legenda": [
@@ -155,6 +155,10 @@
     {
      "nome": "sem pavimento",
      "forma": "tr"
+    },
+    {
+     "nome": "trecho de BR administrado pelo estado",
+     "cor": "--road-est"
     }
    ]
   },

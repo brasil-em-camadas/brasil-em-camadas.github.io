@@ -166,7 +166,7 @@ function rewind(f) {
   function desenharRodEst() { rodEstP = gRodEst.selectAll("path").data(DATA.rodest.features).join("path").attr("class", "road est"); }
   const gRod = root.append("g");
   const roads = gRod.selectAll("path").data(DATA.rod ? DATA.rod.features : []).join("path")
-    .attr("class", d => "road" + (d.properties.p ? "" : " terra"));
+    .attr("class", d => "road" + (d.properties.p ? "" : " terra") + (d.properties.e ? " est-adm" : ""));
   const RAIL = DATA.rail ? DATA.rail.trechos : [];
   const gRail = root.append("g");
   const rails = gRail.selectAll("path").data(RAIL).join("path").attr("class", d => "rail" + (d.obra ? " obra" : ""));
@@ -611,7 +611,7 @@ function rewind(f) {
       ${fichaPecuaria(s)}
       <div class="sec"><h3>Logística</h3>
         ${kr ? `<div class="kv"><span>Rodovias federais</span><span class="v">≈ ${fmt(kr[0])} km</span></div>
-          <div class="list">${fmt(kr[1])} km pavimentados.</div>` : ""}
+          <div class="list">${fmt(kr[1])} km pavimentados, sob administração federal (inclusive concessões).${kr[2] ? ` Mais ≈ ${fmt(kr[2])} km com sigla BR administrados pelo estado (rodovias estaduais coincidentes ou trechos delegados), em outra cor no mapa.` : ""}</div>` : ""}
         <div class="kv"><span>Ferrovias em operação</span><span class="v">${km ? "≈ " + fmt(km) + " km" : "nenhuma na base"}</span></div>
         <div class="kv"><span>Portos e terminais</span><span class="v">${Pt.length}</span></div>
         ${Pt.length ? `<div class="list">${Pt.map(p => esc(p.n)).join(", ")}</div>` : ""}
