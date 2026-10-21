@@ -64,7 +64,7 @@ function rewind(f) {
     val: !DATA[p.id] ? null
       : p.por === "per_capita" ? s => (DATA[p.id].valores[s] && POP[s]) ? DATA[p.id].valores[s].valor / POP[s] * 1e5 : null
       : s => { const v = DATA[p.id].valores[s]; return v == null ? null : (typeof v === "object" ? v.valor : v); },
-    fmt: p.por === "per_capita" ? fmt1 : fmt
+    fmt: p.por === "per_capita" || p.por === "percentual" ? fmt1 : fmt
   }))];
   const LAYERS = F.camadas.map(l => ({ ...l, on: !!l.ligada && l.nivel !== "pendente" }));
 
@@ -160,13 +160,13 @@ function rewind(f) {
   const presalP = gPresal.selectAll("path").data(parte("presal", "area")).join("path").attr("class", "presal");
   const presalT = gPresal.selectAll("text").data(parte("presal", "rotulo")).join("text").attr("class", "presal-lbl").text(d => d.properties.texto);
   /* rodovias (IBGE, BC250): estaduais pavimentadas sob demanda, por baixo; federais com traço cheio (pavimentadas,
-     mais grosso na pista dupla) ou tracejado (sem pavimento) */
+     ou tracejado (sem pavimento) */
   const gRodEst = root.append("g");
   let rodEstP = gRodEst.selectAll("path");
   function desenharRodEst() { rodEstP = gRodEst.selectAll("path").data(DATA.rodest.features).join("path").attr("class", "road est"); }
   const gRod = root.append("g");
   const roads = gRod.selectAll("path").data(DATA.rod ? DATA.rod.features : []).join("path")
-    .attr("class", d => "road" + (d.properties.p ? "" : " terra") + (d.properties.d ? " dup" : ""));
+    .attr("class", d => "road" + (d.properties.p ? "" : " terra"));
   const RAIL = DATA.rail ? DATA.rail.trechos : [];
   const gRail = root.append("g");
   const rails = gRail.selectAll("path").data(RAIL).join("path").attr("class", d => "rail" + (d.obra ? " obra" : ""));
@@ -201,6 +201,26 @@ function rewind(f) {
     usinasC.append("title").text(d => `${d.n} · ${M.tipos[d.t]} · ${fmt1(d.kw / 1000)} MW${d.uf ? " · " + d.uf : ""}${d.a ? ". Em operação desde " + d.a : ""}`
       + `${(M.observacoes || {})[d.n] ? ". " + M.observacoes[d.n] : ""} (EPE, Webmap; ${M.referencia}).`);
   }
+  /* telefonia celular (Anatel), sob demanda: sinal 4G/5G por município (cor pela faixa) e anel nos municípios com 5G;
+     clicar num ponto abre o estado dele */
+  const FAIXA = s => s >= 95 ? 4 : s >= 80 ? 3 : s >= 50 ? 2 : 1;
+  const gCelm = root.append("g");
+  let celmC = gCelm.selectAll("circle");
+  function desenharCelm() {
+    const M = DATA.celm;
+    celmC = gCelm.selectAll("circle").data(M.municipios.map(m => ({ c: [m[0], m[1]], s: m[2], n: m[3], u: m[4], r0: 1.5 }))).join("circle")
+      .attr("class", d => "celm f" + FAIXA(d.s));
+    celmC.on("click", (e, d) => { e.stopPropagation(); select(d.u); });
+    celmC.append("title").text(d => `${d.n} · ${d.u}: sinal 4G ou 5G para ${fmt1(d.s)}% da população (estimativa da Anatel, IBC ${M.meta.referencia}). O ponto fica na sede do município.`);
+  }
+  const gG5 = root.append("g");
+  let g5C = gG5.selectAll("circle");
+  function desenharG5() {
+    const M = DATA.g5;
+    g5C = gG5.selectAll("circle").data(M.municipios.map(m => ({ c: [m[0], m[1]], n: m[2], u: m[3], o: m[4], r0: 2.3 }))).join("circle").attr("class", "g5");
+    g5C.on("click", (e, d) => { e.stopPropagation(); select(d.u); });
+    g5C.append("title").text(d => `${d.n} · ${d.u}: 5G de ${d.o} (Anatel, ${M.meta.referencia}). Não quer dizer sinal 5G em todo o município.`);
+  }
   const gPocos = root.append("g");
   let pocosC = gPocos.selectAll("circle");
   function desenharPocos() {
@@ -216,7 +236,8 @@ function rewind(f) {
     uepR.append("title").text(d => { const p = d.properties;
       return `${p.nome} · ${p.tipo}${p.operador ? " · " + p.operador : ""}${p.prevista ? " · prevista" : ""}${p.atende ? ". Atende: " + p.atende : ""}${p.capacidade_bbl_dia ? ". Capacidade: " + fmt(p.capacidade_bbl_dia) + " barris de petróleo/dia" : ""}. Fonte: ANP.`; });
   }
-  const DESENHA = { boi: desenharBoi, oil: desenharPocos, uep: desenharUep, campos: desenharCampos, zc: desenharZc, pce: desenharPce, rodest: desenharRodEst, usinas: desenharUsinas, lt: desenharLt };
+  const DESENHA = { boi: desenharBoi, oil: desenharPocos, uep: desenharUep, campos: desenharCampos, zc: desenharZc, pce: desenharPce, rodest: desenharRodEst, usinas: desenharUsinas, lt: desenharLt,
+    celm: desenharCelm, g5: desenharG5 };
   const gPorts = root.append("g");
   const ports = gPorts.selectAll("circle").data(DATA.ports || []).join("circle").attr("class", "port");
   ports.append("title").text(d => d.n + (d.org ? " · porto organizado" : "") + (d.obra ? " · em obras" : "") + " (IBGE, BC250 2025)");
@@ -238,7 +259,7 @@ function rewind(f) {
   caps.append("circle").attr("r", d => d.pais ? 3.6 : 2.6);
   caps.append("text").attr("x", 6).attr("y", 4).text(d => d.n);
   const G = { zee: gZee, mt: gMt, zc: gZc, pce: gPce, rod: gRod, rail: gRail, ports: gPorts, air: gAir, cla: gCla,
-    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt };
+    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt, celm: gCelm, g5: gG5 };
 
   let proj, path, W, H, head = 0, k = 1;
   const zoom = d3.zoom().scaleExtent([0.8, 12]).on("zoom", e => {
@@ -277,7 +298,7 @@ function rewind(f) {
     camposP.attr("d", path); presalP.attr("d", path);
     pocosC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     posBoi(); ltP.attr("d", path); usinasC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
-    raioPocos();
+    posCel(); raioPocos();
     roads.attr("d", path); rodEstP.attr("d", path);
     states.attr("d", path);
     vizP.attr("d", path); vizB.attr("d", path);
@@ -313,9 +334,13 @@ function rewind(f) {
     camposP.attr("d", path); rodEstP.attr("d", path); ltP.attr("d", path);
     usinasC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     pocosC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
-    posBoi(); raioPocos(); place();
+    posBoi(); posCel(); raioPocos(); place();
   }
-  function raioPocos() { const s = 1 / Math.sqrt(k); pocosC.attr("r", d => d.r0 * s); boiC.attr("r", d => d.r0 * s); usinasC.attr("r", d => d.r0 * s); }
+  function posCel() { for (const c of [celmC, g5C]) c.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]); }
+  function raioPocos() {
+    const s = 1 / Math.sqrt(k);
+    for (const c of [pocosC, boiC, usinasC, celmC, g5C]) c.attr("r", d => d.r0 * s);
+  }
   /* pontos mantêm tamanho legível em qualquer zoom */
   function place() {
     const s = 1 / Math.sqrt(k);
@@ -383,7 +408,9 @@ function rewind(f) {
     rodest: "M8 21L10 3M16 21L14 3M12 8v1M12 14v1",
     "p-ene": "M13 2L5 14h6l-1 8 8-12h-6z",
     usinas: "M13 2L5 14h6l-1 8 8-12h-6z",
-    lt: "M12 2l-5 20M12 2l5 20M8 9h8M7 14h10M5 20h14"
+    lt: "M12 2l-5 20M12 2l5 20M8 9h8M7 14h10M5 20h14",
+    celm: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
+    g5: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0"
   };
   const quando = id => { const m = DATA[id] && DATA[id].meta; return m && m.atualizado_em ? ` · ${m.referencia ? "ref. " + esc(m.referencia) + ", " : ""}atualizado em ${m.atualizado_em}` : ""; };
   const icon = id => ICON[id] ? `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[id]}"/></svg>` : `<span class="ico"></span>`;
@@ -464,7 +491,7 @@ function rewind(f) {
     /* legenda completa (escala de cores + símbolos das camadas ligadas): sempre no rodapé, ao lado dos níveis de confiança;
        sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
-      const forma = k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr"].includes(forma);
+      const forma = k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
     }).join("")}</span>`).join("");
     document.getElementById("legend").innerHTML = legMapa ? leg + itens : "";
@@ -512,6 +539,23 @@ function rewind(f) {
       ${fonte}</div>`;
   }
 
+  /* telefonia celular do estado (Anatel): sinal 4G/5G, 5G nos municípios, fibra, antenas e o índice de conectividade */
+  function fichaCelular(s) {
+    const C = DATA.cel;
+    if (!C || !C.valores[s]) return "";
+    const v = C.valores[s], G5 = C.cinco_g;
+    const pos = k => Object.entries(C.valores).filter(e => e[1][k] != null).sort((a, b) => b[1][k] - a[1][k]).findIndex(e => e[0] === s) + 1;
+    return `<div class="sec"><h3>Telefonia celular</h3>
+      <div class="kv"><span>Moradores com sinal 4G ou 5G</span><span class="v">${fmt1(v.valor)}% · ${pos("valor")}º</span></div>
+      ${v.g5 ? `<div class="kv"><span>Municípios com 5G</span><span class="v">${fmt(v.g5[0])} de ${fmt(v.g5[1])}</span></div>` : ""}
+      ${v.fibra != null ? `<div class="kv"><span>Municípios com fibra óptica</span><span class="v">${fmt(v.fibra)}%</span></div>` : ""}
+      ${v.erb_10mil != null ? `<div class="kv"><span>Antenas por 10 mil habitantes</span><span class="v">${fmt1(v.erb_10mil)}</span></div>` : ""}
+      ${v.ibc != null ? `<div class="kv"><span>Índice Brasileiro de Conectividade</span><span class="v">${fmt1(v.ibc)} · ${pos("ibc")}º</span></div>` : ""}
+      <div class="list">O sinal é estimado pela Anatel a partir das antenas licenciadas, não medido no local. Fibra óptica: a rede que leva a internet até a cidade (backhaul). O índice vai de 0 a 100 e junta sinal, acessos, antenas, fibra e concorrência.</div>
+      ${pill(C.nivel)} <span class="note">${esc(C.fonte)} · atualizado em ${C.atualizado_em}</span>
+      ${G5 ? `<br>${pill(C.nivel)} <span class="note">5G: Anatel, presença da telefonia móvel (RQUAL), ${esc(G5.referencia)} · atualizado em ${G5.atualizado_em}</span>` : ""}</div>`;
+  }
+
   /* pecuária e aquicultura do estado (IBGE, PPM) */
   function fichaPecuaria(s) {
     const R = DATA.reb;
@@ -543,6 +587,8 @@ function rewind(f) {
           ${pill(DATA.oleo.nivel)} <span class="note">ANP, média de ${esc(DATA.oleo.referencia)} · atualizado em ${DATA.oleo.atualizado_em}. boe = barril de óleo equivalente.</span>` : ""}
         ${DATA.ene ? `<div class="kv" style="margin-top:8px"><span>Energia elétrica</span><span class="v">${fmt(Math.round(DATA.ene.total_mw / 1000))} mil MW</span></div>
           ${pill(DATA.ene.nivel)} <span class="note">EPE, potência instalada (${esc(DATA.ene.referencia)}) · atualizado em ${DATA.ene.atualizado_em}. Sem os painéis solares de telhado.</span>` : ""}
+        ${DATA.cel && DATA.cel.cinco_g ? `<div class="kv" style="margin-top:8px"><span>Municípios com 5G</span><span class="v">${fmt(DATA.cel.cinco_g.municipios)} de ${fmt(DATA.cel.cinco_g.total)}</span></div>
+          ${pill(DATA.cel.nivel)} <span class="note">Anatel, presença da telefonia móvel (RQUAL), ${esc(DATA.cel.cinco_g.referencia)} · atualizado em ${DATA.cel.cinco_g.atualizado_em}. Pelo menos uma operadora com 5G no município.</span>` : ""}
         <p class="lede">Clique num estado para aproximar. Cada camada mostra de onde veio o dado e seu nível de confiança. Arraste para mover e role para aproximar.</p>`;
       return;
     }
@@ -565,7 +611,7 @@ function rewind(f) {
       ${fichaPecuaria(s)}
       <div class="sec"><h3>Logística</h3>
         ${kr ? `<div class="kv"><span>Rodovias federais</span><span class="v">≈ ${fmt(kr[0])} km</span></div>
-          <div class="list">${fmt(kr[1])} km pavimentados${kr[2] ? `, ${fmt(kr[2])} km em pista dupla` : ""}.</div>` : ""}
+          <div class="list">${fmt(kr[1])} km pavimentados.</div>` : ""}
         <div class="kv"><span>Ferrovias em operação</span><span class="v">${km ? "≈ " + fmt(km) + " km" : "nenhuma na base"}</span></div>
         <div class="kv"><span>Portos e terminais</span><span class="v">${Pt.length}</span></div>
         ${Pt.length ? `<div class="list">${Pt.map(p => esc(p.n)).join(", ")}</div>` : ""}
@@ -575,6 +621,7 @@ function rewind(f) {
         ${pill("base")} <span class="note">Natural Earth, só os maiores. Ausência na base não significa ausência real.</span></div>
       ${fichaOleo(s)}
       ${fichaEnergia(s)}
+      ${fichaCelular(s)}
       ${CLA && s === CLA.uf ? `<div class="sec"><h3>Defesa</h3><div class="list">${CLA.nome}, base de lançamento de foguetes da Força Aérea.</div>${pill("calculado")} <span class="note">posição aproximada</span></div>` : ""}
       <div class="sec"><h3>Mobilidade elétrica</h3>
         <div class="kv"><span>Eletropostos</span><span class="v">${ev ? fmt(ev.valor) : "—"}</span></div>

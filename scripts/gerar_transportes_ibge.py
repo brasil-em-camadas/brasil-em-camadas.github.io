@@ -108,19 +108,21 @@ def rodovias(z):
         pav = d["revestimen"] == "Pavimentado"
         if d["situacaofi"] in ("Abandonada", "Destruída", "Planejada") or not (federal or (estadual and pav)):
             continue
-        dupla = d["canteirodi"] == "Sim" or (d["nrpistas"] or 0) >= 2
+        # Pista dupla fica de fora: os campos da BC250 para isso (canteiro divisório e número de pistas) não batem com a
+        # estrada real. Conferido em 21/10/2026: a BR-319 no Amazonas, de terra, aparece com canteiro em 449 km; a Fernão Dias
+        # (BR-381) em Minas, duplicada, aparece com uma pista em quase toda a extensão. Somados, davam 29 mil km de "pista dupla".
         conc = d["concession"].strip()
         conc = "" if conc in ("", "Não") else ("concessionada" if conc.upper() == "ANTT" else conc)   # "ANTT" é a agência, não a concessionária
         if not conc and d["administra"] == "Concessionada":
             conc = "concessionada"
-        grupos[("F" if federal else "E", s, int(pav), int(dupla), conc)].extend(getattr(g, "geoms", [g]))
+        grupos[("F" if federal else "E", s, int(pav), conc)].extend(getattr(g, "geoms", [g]))
     estados = json.loads((GEO / "estados_detalhe.json").read_text(encoding="utf-8"))["features"]
     ufs = [(f["properties"]["sigla"], shape(f["geometry"])) for f in estados]
     arvore = shapely.STRtree([g for _, g in ufs])
-    por_uf = defaultdict(lambda: [0.0, 0.0, 0.0])   # rodovia federal por estado: [total, pavimentada, pista dupla]
+    por_uf = defaultdict(lambda: [0.0, 0.0])   # rodovia federal por estado: [total, pavimentada]
     saidas = {"F": [], "E": []}
     extensao = {"F": 0.0, "E": 0.0, "F_pav": 0.0}
-    for (tipo, s, pav, dupla, conc), linhas in sorted(grupos.items()):
+    for (tipo, s, pav, conc), linhas in sorted(grupos.items()):
         g = linemerge(linhas)
         k = km(g)
         extensao[tipo] += k
@@ -135,11 +137,10 @@ def rodovias(z):
                 v = por_uf[ufs[i][0]]
                 v[0] += kp
                 v[1] += kp if pav else 0
-                v[2] += kp if dupla else 0
         g = simples(g, TOL_ROD)
         if g.is_empty:
             continue
-        props = {"s": s, "p": pav, "d": dupla}
+        props = {"s": s, "p": pav}
         if conc:
             props["c"] = conc
         saidas[tipo].append({"type": "Feature", "properties": props, "geometry": mapping(g)})
@@ -148,9 +149,9 @@ def rodovias(z):
             "simplificacao": f"tolerância {TOL_ROD}° (~450 m); coordenadas com 3 casas (~110 m)"}
     gravar("rodovias.json", {**base, "titulo": "Rodovias federais", "km": round(extensao["F"]), "km_pavimentados": round(extensao["F_pav"]),
                              "nota": "rodovias com sigla BR ou de jurisdição federal; inclui trechos em que a BR coincide com uma rodovia estadual",
-                             "campos": {"s": "sigla", "p": "pavimentada (1/0)", "d": "pista dupla (1/0)", "c": "concessionária"},
+                             "campos": {"s": "sigla", "p": "pavimentada (1/0)", "c": "concessionária"},
                              "km_por_uf": {u: [round(a) for a in v] for u, v in sorted(por_uf.items())},
-                             "km_por_uf_campos": ["total", "pavimentada", "pista dupla"]}, saidas["F"])
+                             "km_por_uf_campos": ["total", "pavimentada"]}, saidas["F"])
     gravar("rodovias_estaduais.json", {**base, "titulo": "Rodovias estaduais pavimentadas", "km": round(extensao["E"])}, saidas["E"])
 
 

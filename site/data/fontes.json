@@ -53,6 +53,13 @@
    "ministerio": "mme",
    "por": "total",
    "vazio": "sem usina na base"
+  },
+  {
+   "id": "cel",
+   "nome": "Celular 4G/5G",
+   "arquivo": "celular/estados.json",
+   "ministerio": "com",
+   "por": "percentual"
   }
  ],
  "luzes": [
@@ -143,7 +150,7 @@
    "cor": "--road",
    "legenda": [
     {
-     "nome": "Rodovia federal pavimentada (mais grossa na pista dupla)"
+     "nome": "Rodovia federal pavimentada"
     },
     {
      "nome": "sem pavimento",
@@ -297,11 +304,56 @@
    "fonte": "Ministério da Defesa, lista pública a confirmar"
   },
   {
-   "id": "p-cel",
-   "nome": "Cobertura 3G/4G/5G",
+   "id": "celm",
+   "nome": "Sinal 4G/5G por município",
+   "tipo": "pontos",
+   "arquivo": "celular/municipios.json",
+   "sob_demanda": true,
    "ministerio": "com",
-   "nivel": "pendente",
-   "fonte": "Anatel, dados abertos a confirmar"
+   "nivel": "api",
+   "fonte": "Anatel, Índice Brasileiro de Conectividade (IBC): parte dos moradores de cada município com sinal 4G ou 5G de pelo menos uma operadora, no ponto da sede. É estimativa da Anatel a partir das antenas licenciadas, não medição no local. Clique num ponto para ver o número",
+   "ligada": false,
+   "cor": "--cel4",
+   "legenda": [
+    {
+     "nome": "Sinal 4G/5G para 95% ou mais da população",
+     "forma": "pt",
+     "cor": "--cel4"
+    },
+    {
+     "nome": "80 a 95%",
+     "forma": "pt",
+     "cor": "--cel3"
+    },
+    {
+     "nome": "50 a 80%",
+     "forma": "pt",
+     "cor": "--cel2"
+    },
+    {
+     "nome": "menos de 50%",
+     "forma": "pt",
+     "cor": "--cel1"
+    }
+   ]
+  },
+  {
+   "id": "g5",
+   "nome": "5G nos municípios",
+   "tipo": "pontos",
+   "arquivo": "celular/5g.json",
+   "sob_demanda": true,
+   "ministerio": "com",
+   "nivel": "api",
+   "fonte": "Anatel, presença da telefonia móvel (indicadores de qualidade, RQUAL), atualizada todo mês: municípios onde há 5G de pelo menos uma operadora, com um anel na sede. Não quer dizer sinal 5G em todo o município",
+   "ligada": false,
+   "cor": "--g5",
+   "legenda": [
+    {
+     "nome": "Município com 5G",
+     "forma": "anel"
+    }
+   ]
   },
   {
    "id": "boi",

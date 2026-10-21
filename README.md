@@ -19,11 +19,14 @@ site/                 o site em si (é isto que vai para o ar)
                       zona contígua, plataforma continental estendida)
   data/relevo/        imagens de relevo do fundo (geradas por scripts/gerar_relevo.py)
   data/petroleo/      poços em produção, produção por estado, campos, plataformas e pré-sal (robô da ANP)
+  data/energia/       usinas, linhas de transmissão e potência por estado (robô da EPE)
+  data/celular/       sinal 4G/5G por estado e por município e municípios com 5G (robô da Anatel)
   data/luzes/         população de cada município, para as "Luzes à noite" da página 3D
 scripts/
   atualizar_ibge.py   robô que busca dados novos na API do IBGE
   atualizar_epe.py    robô que busca usinas e linhas de transmissão no Webmap da EPE
   atualizar_anp.py    robô que busca petróleo e gás na ANP (produção por poço e servidor de mapas)
+  atualizar_anatel.py robô que busca a telefonia celular nos dados abertos da Anatel (sinal 4G/5G e 5G nos municípios)
   gerar_relevo.py     gera as imagens de relevo (roda só quando acionado à mão)
   gerar_limites_maritimos.py  gera os limites do mar a partir do Marine Regions (roda só à mão)
   gerar_contorno_estados.py   gera o contorno dos estados a partir da malha oficial do IBGE (roda só à mão, uma vez por ano)
@@ -36,7 +39,7 @@ scripts/
 
 ## Como o site se atualiza
 
-Todo dia 3 de cada mês o GitHub executa o robô. Ele busca população (por estado e por município), produção agrícola, rebanhos (por estado e o gado bovino de cada município) e aquicultura na API SIDRA do IBGE, energia elétrica na EPE (usinas em operação e linhas de transmissão) e petróleo e gás na ANP: a produção de cada poço no último mês que já tem dados de terra e de mar (o mar sai todo mês, a terra por trimestre), a posição dos poços, os campos, as plataformas e o polígono do pré-sal. Se a ANP falhar, os arquivos antigos ficam e o site é publicado mesmo assim, com a data antiga à vista. Se a busca der certo, os arquivos de dados são trocados e o site é republicado. Cada robô deixa o resultado de cada passo em `site/data/robo_ibge.json` e `site/data/petroleo/robo.json`, para conferir sem abrir o registro do GitHub. Se der errado, o dado antigo fica, com a data antiga, e o GitHub avisa por e-mail.
+Todo dia 3 de cada mês o GitHub executa o robô. Ele busca população (por estado e por município), produção agrícola, rebanhos (por estado e o gado bovino de cada município) e aquicultura na API SIDRA do IBGE, energia elétrica na EPE (usinas em operação e linhas de transmissão), telefonia celular na Anatel (sinal 4G/5G, atualizado pela Anatel uma vez por ano, e municípios com 5G, todo mês) e petróleo e gás na ANP: a produção de cada poço no último mês que já tem dados de terra e de mar (o mar sai todo mês, a terra por trimestre), a posição dos poços, os campos, as plataformas e o polígono do pré-sal. Se a ANP falhar, os arquivos antigos ficam e o site é publicado mesmo assim, com a data antiga à vista. Se a busca der certo, os arquivos de dados são trocados e o site é republicado. Cada robô deixa o resultado de cada passo em `site/data/robo_ibge.json`, `site/data/petroleo/robo.json`, `site/data/energia/robo.json` e `site/data/celular/robo.json`, para conferir sem abrir o registro do GitHub. Se der errado, o dado antigo fica, com a data antiga, e o GitHub avisa por e-mail.
 
 Para rodar na hora: aba **Actions** → **Atualizar dados e publicar** → **Run workflow**.
 
@@ -67,6 +70,7 @@ Os limites do mar não entram no robô mensal, porque mudam raramente. Para refa
 - IBGE (população, agricultura, pecuária e aquicultura, contornos dos estados): dados públicos oficiais. Pecuária: Pesquisa da Pecuária Municipal, tabelas SIDRA 3939 (rebanhos) e 3940 (aquicultura).
 - EPE (Empresa de Pesquisa Energética), Webmap do sistema elétrico existente: usinas e linhas de transmissão (dados públicos do governo federal).
 - IBGE, base cartográfica 1:250.000 (BC250, versão 2025): rodovias federais e estaduais pavimentadas, ferrovias e portos. Dados públicos oficiais.
+- Anatel, dados abertos (licença CC-BY, catálogo no dados.gov.br): Índice Brasileiro de Conectividade (IBC; população coberta por 4G ou 5G por estado e por município, fibra óptica e antenas por estado), em `paineis_de_dados/meu_municipio/ibc.zip`, e presença da telefonia móvel (RQUAL; tecnologias de cada operadora em cada município, todo mês), em `paineis_de_dados/infraestrutura/smp_mun_atendidos.zip`. O sinal é estimado pela Anatel a partir das antenas licenciadas, não é medição.
 - Natural Earth (aeroportos, contorno dos países e imagens de relevo): domínio público.
 - Eletropostos: números da ABVE citados por veículos de imprensa, com a fonte indicada em cada estado.
 - Petróleo e gás: ANP. Produção por poço nos dados abertos (página "Fase de Desenvolvimento e Produção") e posição dos poços, campos, unidades de produção e polígono do pré-sal no servidor de mapas do GeoMapsANP. Dados abertos do governo federal: uso livre, citando a fonte (Decreto 8.777/2016, art. 2º, III). A soma nacional foi conferida com o Boletim Mensal da Produção da ANP; o polígono do pré-sal foi conferido com o Anexo da Lei 12.351/2010. Óleo equivalente (boe) pela convenção da ANP: 1.000 m³ de gás = 1 m³ de petróleo = 6,2898 barris.

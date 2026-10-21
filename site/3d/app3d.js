@@ -77,7 +77,7 @@ function quintis(vals) {
     val: !DATA[p.id] ? null
       : p.por === "per_capita" ? s => (DATA[p.id].valores[s] && POP[s]) ? DATA[p.id].valores[s].valor / POP[s] * 1e5 : null
       : s => { const v = DATA[p.id].valores[s]; return v == null ? null : (typeof v === "object" ? v.valor : v); },
-    fmt: p.por === "per_capita" ? fmt1 : fmt
+    fmt: p.por === "per_capita" || p.por === "percentual" ? fmt1 : fmt
   }))];
   const LAYERS = F.camadas.map(l => ({ ...l, on: !!l.ligada && l.nivel !== "pendente" }));
   const CLA = F.camadas.find(l => l.id === "cla");
@@ -107,7 +107,7 @@ function quintis(vals) {
   const map = new maplibregl.Map({
     container: "map",
     locale: { "AttributionControl.ToggleAttribution": "Mostrar ou ocultar os créditos do mapa" },
-    attributionControl: { compact: true, customAttribution: "NASA Blue Marble · Terrain Tiles (AWS) · Natural Earth · IBGE · Marine Regions · ANP" },
+    attributionControl: { compact: true, customAttribution: "NASA Blue Marble · Terrain Tiles (AWS) · Natural Earth · IBGE · Marine Regions · ANP · EPE · Anatel" },
     style: {
       version: 8,
       projection: { type: "globe" },
@@ -128,6 +128,8 @@ function quintis(vals) {
         boi: { type: "geojson", data: fc([]) },
         usinas: { type: "geojson", data: fc([]) },
         lt: { type: "geojson", data: fc([]) },
+        celm: { type: "geojson", data: fc([]) },
+        g5: { type: "geojson", data: fc([]) },
         uep: { type: "geojson", data: DATA.uep || fc([]) },
         campos: { type: "geojson", data: DATA.campos || fc([]) },
         presal: { type: "geojson", data: DATA.presal || fc([]) },
@@ -171,7 +173,7 @@ function quintis(vals) {
         { id: "campos-line", type: "line", source: "campos", paint: { "line-color": cor("--campo"), "line-width": 0.8, "line-opacity": 0.85 } },
         { id: "presal-line", type: "line", source: "presal", filter: AREA,
           paint: { "line-color": cor("--presal"), "line-width": 1.5, "line-opacity": 0.9, "line-dasharray": [3, 2] } },
-        /* rodovias (IBGE, BC250): estaduais pavimentadas por baixo; federais pavimentadas em traço cheio (mais grosso na pista dupla),
+        /* rodovias (IBGE, BC250): estaduais pavimentadas por baixo; federais pavimentadas em traço cheio,
            federais sem pavimento tracejadas */
         { id: "rodovias-est", type: "line", source: "rodest", layout: { "line-cap": "round" },
           paint: { "line-color": cor("--road-est"), "line-opacity": 0.5, "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.4, 8, 1.3] } },
@@ -179,7 +181,7 @@ function quintis(vals) {
           paint: { "line-color": cor("--road"), "line-opacity": 0.5, "line-dasharray": [2, 2], "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.6, 8, 1.4] } },
         { id: "rodovias", type: "line", source: "rod", filter: ["==", ["get", "p"], 1], layout: { "line-cap": "round", "line-join": "round" },
           paint: { "line-color": cor("--road"), "line-opacity": 0.62,
-            "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "d"], 1], 1.1, 0.7], 8, ["case", ["==", ["get", "d"], 1], 3, 1.7]] } },
+            "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.8, 8, 2] } },
         { id: "ferrovias", type: "line", source: "trilhos", filter: ["!=", ["get", "obra"], 1],
           paint: { "line-color": cor("--rail"), "line-opacity": 0.9, "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1, 8, 2.6] } },
         { id: "ferrovias-obra", type: "line", source: "trilhos", filter: ["==", ["get", "obra"], 1],
@@ -204,6 +206,17 @@ function quintis(vals) {
               3, ["interpolate", ["linear"], ["sqrt", ["get", "kw"]], 0, 1, 100, 1.4, 300, 2.4, 1000, 4.5, 3800, 12],
               6, ["interpolate", ["linear"], ["sqrt", ["get", "kw"]], 0, 1.8, 100, 2.6, 300, 4.4, 1000, 8, 3800, 20],
               9, ["interpolate", ["linear"], ["sqrt", ["get", "kw"]], 0, 3, 100, 4.4, 300, 7.5, 1000, 13, 3800, 30]] } },
+        /* sinal 4G/5G por município (Anatel, IBC): cor pela faixa da população com sinal; os de sinal fraco ficam por cima */
+        { id: "celm", type: "circle", source: "celm", layout: { "circle-sort-key": ["-", 0, ["get", "s"]] },
+          paint: { "circle-color": ["step", ["get", "s"], cor("--cel1"), 50, cor("--cel2"), 80, cor("--cel3"), 95, cor("--cel4")],
+            "circle-opacity": 0.9, "circle-stroke-color": "#06100c", "circle-stroke-width": 0.5,
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 1.5, 6, 3, 9, 5.5] } },
+        /* 5G (Anatel, RQUAL): anel em volta da sede dos municípios com 5G */
+        { id: "g5", type: "circle", source: "g5",
+          paint: { "circle-opacity": 0, "circle-stroke-color": cor("--g5"),
+            "circle-stroke-opacity": ["interpolate", ["linear"], ["zoom"], 3, 0.7, 5, 0.95],
+            "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 3, 0.7, 5, 1.2, 8, 1.8],
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 2, 5, 3.6, 7, 5.6, 9, 8] } },
         /* tamanho do poço pela produção (raiz quadrada: a área do ponto acompanha os barris) */
         { id: "pocos", type: "circle", source: "pocos", layout: { "circle-sort-key": ["get", "b"] },
           paint: { "circle-color": cor("--oil"), "circle-opacity": 0.88, "circle-stroke-color": "#2a1d05", "circle-stroke-width": 0.5,
@@ -299,7 +312,7 @@ function quintis(vals) {
 
   const G = { zee: ["zee-fill", "zee-line", "zee-rotulo", "ilhas-ponto", "ilhas-rotulo"], mt: ["mt-fill", "mt-line", "mt-base"], zc: ["zc-fill", "zc-line"],
     pce: ["pce-fill-rec", "pce-fill-ana", "pce-line-rec", "pce-line-ana", "pce-rotulo"], rod: ["rodovias", "rodovias-terra", "rodovias-rotulo"], rodest: ["rodovias-est"],
-    oil: ["pocos"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi"], usinas: ["usinas"], lt: ["lt"],
+    oil: ["pocos"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi"], usinas: ["usinas"], lt: ["lt"], celm: ["celm"], g5: ["g5"],
     rail: ["ferrovias", "ferrovias-obra"], ports: ["portos"], air: ["aeroportos"] };
 
   /* ---------- painel e enquadramento ---------- */
@@ -464,6 +477,17 @@ function quintis(vals) {
           <br><span class="pop-fonte">IBGE, Pesquisa da Pecuária Municipal ${esc(M.referencia)}. O ponto fica na sede do município.</span>`).addTo(map);
       return;
     }
+    /* celular: de perto (zoom 4,5), como o gado; a janelinha junta o sinal e o 5G do município, se os dois arquivos já chegaram */
+    const ce = map.getZoom() >= 4.5 ? map.queryRenderedFeatures(perto, { layers: ["celm", "g5"].filter(vis) }) : [];
+    if (ce.length) {
+      const p = ce[0].properties, m = indice("celm")[p.c], g = indice("g5")[p.c];
+      const lin = [];
+      if (m) lin.push(`Sinal 4G ou 5G: ${fmt1(m[2])}% da população (estimativa da Anatel, IBC ${esc(DATA.celm.meta.referencia)})`);
+      if (DATA.g5) lin.push(g ? `5G: ${esc(g[4])} (${esc(DATA.g5.meta.referencia)})` : `Sem 5G registrado em ${esc(DATA.g5.meta.referencia)}`);
+      new maplibregl.Popup({ closeButton: false, offset: 8, maxWidth: "300px" }).setLngLat(ce[0].geometry.coordinates)
+        .setHTML(`<b>${esc(p.n)} · ${esc(p.u)}</b><br>${lin.join("<br>")}<br><span class="pop-fonte">Anatel, dados abertos. O ponto fica na sede do município.</span>`).addTo(map);
+      return;
+    }
     const pts = map.queryRenderedFeatures(e.point, { layers: ["portos", "aeroportos", "capitais"].filter(l => map.getLayoutProperty(l, "visibility") !== "none") });
     if (pts.length) {
       const f = pts[0], tipo = f.layer.id === "portos" ? "Porto" : f.layer.id === "aeroportos" ? "Aeroporto" : "Capital";
@@ -486,7 +510,7 @@ function quintis(vals) {
         ? `<b>Ferrovia${p.obra == 1 ? " em obras" : ""}</b><br>${esc(p.op)}${p.b ? "<br>Bitola " + esc(p.b).toLowerCase() : ""}`
         : f.layer.id === "rodovias-est"
           ? `<b>${esc(p.s)}</b><br>Rodovia estadual pavimentada`
-          : `<b>${p.s ? esc(p.s) : "Rodovia federal"}</b><br>Rodovia federal ${p.p == 1 ? "pavimentada" : "sem pavimento"}${p.d == 1 ? " · pista dupla" : ""}${p.c ? "<br>Concessionada" + (p.c !== "concessionada" ? " (" + esc(p.c) + ")" : "") : ""}`;
+          : `<b>${p.s ? esc(p.s) : "Rodovia federal"}</b><br>Rodovia federal ${p.p == 1 ? "pavimentada" : "sem pavimento"}${p.c ? "<br>Concessionada" + (p.c !== "concessionada" ? " (" + esc(p.c) + ")" : "") : ""}`;
       new maplibregl.Popup({ closeButton: false, offset: 6, maxWidth: "280px" }).setLngLat(e.lngLat)
         .setHTML(`${html}<br><span class="pop-fonte">IBGE, base cartográfica 1:250.000 (2025)</span>`).addTo(map);
       return;
@@ -539,7 +563,9 @@ function quintis(vals) {
     rodest: "M8 21L10 3M16 21L14 3M12 8v1M12 14v1",
     "p-ene": "M13 2L5 14h6l-1 8 8-12h-6z",
     usinas: "M13 2L5 14h6l-1 8 8-12h-6z",
-    lt: "M12 2l-5 20M12 2l5 20M8 9h8M7 14h10M5 20h14"
+    lt: "M12 2l-5 20M12 2l5 20M8 9h8M7 14h10M5 20h14",
+    celm: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
+    g5: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0"
   };
   const quando = id => { const m = DATA[id] && DATA[id].meta; return m && m.atualizado_em ? ` · ${m.referencia ? "ref. " + esc(m.referencia) + ", " : ""}atualizado em ${m.atualizado_em}` : ""; };
   const icon = id => ICON[id] ? `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[id]}"/></svg>` : `<span class="ico"></span>`;
@@ -611,7 +637,12 @@ function quintis(vals) {
   const SOB = { boi: ["boi", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { b: m[2], n: m[3], u: m[4] })))],
     oil: ["pocos", pocosFC], uep: ["uep", d => d], campos: ["campos", d => d], zc: ["zc", d => d], pce: ["pce", d => d], rodest: ["rodest", d => d],
     usinas: ["usinas", d => fc(d.usinas.map(u => ponto([u[0], u[1]], { kw: u[2], t: u[3], n: u[4], uf: u[5], a: u[6] || 0, d: u[7] || "", x: u[8] || "" })))],
-    lt: ["lt", d => d] };
+    lt: ["lt", d => d],
+    celm: ["celm", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { s: m[2], n: m[3], u: m[4], c: m[5] })))],
+    g5: ["g5", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { n: m[2], u: m[3], o: m[4], c: m[5] })))] };
+  /* município (código do IBGE) → linha do arquivo, para a janelinha do celular juntar as duas camadas */
+  const INDICE = {};
+  const indice = id => DATA[id] ? (INDICE[id] || (INDICE[id] = Object.fromEntries(DATA[id].municipios.map(m => [m[5], m])))) : {};
   function baixarSobDemanda() {
     LAYERS.filter(l => l.on && l.sob_demanda && !DATA[l.id] && !l.baixando).forEach(async l => {
       l.baixando = true; l.falhou = false;
@@ -658,7 +689,7 @@ function quintis(vals) {
     /* legenda completa (escala de cores + símbolos das camadas ligadas): sempre no rodapé, ao lado dos níveis de confiança;
        sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
-      const forma = k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr"].includes(forma);
+      const forma = k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
     }).join("")}</span>`).join("");
     document.getElementById("legend").innerHTML = legMapa ? leg + itens : "";
@@ -766,6 +797,23 @@ function quintis(vals) {
       ${fonte}</div>`;
   }
 
+  /* telefonia celular do estado (Anatel): sinal 4G/5G, 5G nos municípios, fibra, antenas e o índice de conectividade */
+  function fichaCelular(s) {
+    const C = DATA.cel;
+    if (!C || !C.valores[s]) return "";
+    const v = C.valores[s], G5 = C.cinco_g;
+    const pos = k => Object.entries(C.valores).filter(e => e[1][k] != null).sort((a, b) => b[1][k] - a[1][k]).findIndex(e => e[0] === s) + 1;
+    return `<div class="sec"><h3>Telefonia celular</h3>
+      <div class="kv"><span>Moradores com sinal 4G ou 5G</span><span class="v">${fmt1(v.valor)}% · ${pos("valor")}º</span></div>
+      ${v.g5 ? `<div class="kv"><span>Municípios com 5G</span><span class="v">${fmt(v.g5[0])} de ${fmt(v.g5[1])}</span></div>` : ""}
+      ${v.fibra != null ? `<div class="kv"><span>Municípios com fibra óptica</span><span class="v">${fmt(v.fibra)}%</span></div>` : ""}
+      ${v.erb_10mil != null ? `<div class="kv"><span>Antenas por 10 mil habitantes</span><span class="v">${fmt1(v.erb_10mil)}</span></div>` : ""}
+      ${v.ibc != null ? `<div class="kv"><span>Índice Brasileiro de Conectividade</span><span class="v">${fmt1(v.ibc)} · ${pos("ibc")}º</span></div>` : ""}
+      <div class="list">O sinal é estimado pela Anatel a partir das antenas licenciadas, não medido no local. Fibra óptica: a rede que leva a internet até a cidade (backhaul). O índice vai de 0 a 100 e junta sinal, acessos, antenas, fibra e concorrência.</div>
+      ${pill(C.nivel)} <span class="note">${esc(C.fonte)} · atualizado em ${C.atualizado_em}</span>
+      ${G5 ? `<br>${pill(C.nivel)} <span class="note">5G: Anatel, presença da telefonia móvel (RQUAL), ${esc(G5.referencia)} · atualizado em ${G5.atualizado_em}</span>` : ""}</div>`;
+  }
+
   /* pecuária e aquicultura do estado (IBGE, PPM) */
   function fichaPecuaria(s) {
     const R = DATA.reb;
@@ -797,6 +845,8 @@ function quintis(vals) {
           ${pill(DATA.oleo.nivel)} <span class="note">ANP, média de ${esc(DATA.oleo.referencia)} · atualizado em ${DATA.oleo.atualizado_em}. boe = barril de óleo equivalente.</span>` : ""}
         ${DATA.ene ? `<div class="kv" style="margin-top:8px"><span>Energia elétrica</span><span class="v">${fmt(Math.round(DATA.ene.total_mw / 1000))} mil MW</span></div>
           ${pill(DATA.ene.nivel)} <span class="note">EPE, potência instalada (${esc(DATA.ene.referencia)}) · atualizado em ${DATA.ene.atualizado_em}. Sem os painéis solares de telhado.</span>` : ""}
+        ${DATA.cel && DATA.cel.cinco_g ? `<div class="kv" style="margin-top:8px"><span>Municípios com 5G</span><span class="v">${fmt(DATA.cel.cinco_g.municipios)} de ${fmt(DATA.cel.cinco_g.total)}</span></div>
+          ${pill(DATA.cel.nivel)} <span class="note">Anatel, presença da telefonia móvel (RQUAL), ${esc(DATA.cel.cinco_g.referencia)} · atualizado em ${DATA.cel.cinco_g.atualizado_em}. Pelo menos uma operadora com 5G no município.</span>` : ""}
         <p class="lede">Clique num estado para aproximar. Arraste para girar o globo, role para aproximar e use o botão "Relevo 3D" para ver as montanhas em altura.</p>`;
       return;
     }
@@ -819,7 +869,7 @@ function quintis(vals) {
       ${fichaPecuaria(s)}
       <div class="sec"><h3>Logística</h3>
         ${kr ? `<div class="kv"><span>Rodovias federais</span><span class="v">≈ ${fmt(kr[0])} km</span></div>
-          <div class="list">${fmt(kr[1])} km pavimentados${kr[2] ? `, ${fmt(kr[2])} km em pista dupla` : ""}.</div>` : ""}
+          <div class="list">${fmt(kr[1])} km pavimentados.</div>` : ""}
         <div class="kv"><span>Ferrovias em operação</span><span class="v">${km ? "≈ " + fmt(km) + " km" : "nenhuma na base"}</span></div>
         <div class="kv"><span>Portos e terminais</span><span class="v">${Pt.length}</span></div>
         ${Pt.length ? `<div class="list">${Pt.map(p => esc(p.n)).join(", ")}</div>` : ""}
@@ -829,6 +879,7 @@ function quintis(vals) {
         ${pill("base")} <span class="note">Natural Earth, só os maiores. Ausência na base não significa ausência real.</span></div>
       ${fichaOleo(s)}
       ${fichaEnergia(s)}
+      ${fichaCelular(s)}
       ${CLA && s === CLA.uf ? `<div class="sec"><h3>Defesa</h3><div class="list">${CLA.nome}, base de lançamento de foguetes da Força Aérea.</div>${pill("calculado")} <span class="note">posição aproximada</span></div>` : ""}
       <div class="sec"><h3>Mobilidade elétrica</h3>
         <div class="kv"><span>Eletropostos</span><span class="v">${ev ? fmt(ev.valor) : "—"}</span></div>
