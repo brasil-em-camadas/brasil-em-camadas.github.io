@@ -69,7 +69,12 @@ def baixar(url, cache=None, tentativas=4):
 
 def recursos(conjunto):
     """Arquivos CSV de um conjunto do catálogo da ANTT: [(nome, endereço)]."""
-    d = json.loads(baixar(API + conjunto))
+    bruto = baixar(API + conjunto)
+    try:
+        d = json.loads(bruto)
+    except ValueError:
+        trecho = " ".join(bruto[:400].decode("utf-8", "replace").split())
+        raise ValueError(f"o catálogo da ANTT não respondeu em JSON ({len(bruto)} bytes): {trecho[:200]}")
     return [(r.get("name") or "", r["url"]) for r in d["result"]["resources"] if (r.get("format") or "").upper() == "CSV"]
 
 
