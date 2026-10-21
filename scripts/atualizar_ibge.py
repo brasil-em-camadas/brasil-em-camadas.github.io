@@ -223,6 +223,12 @@ def atualizar_pecuaria():
 
 
 if __name__ == "__main__":
+    nomes = [c["arquivo"] for c in CAMADAS] + [MUNICIPIOS["arquivo"], "pecuaria/estados.json", "pecuaria/municipios.json"]
     ok = [atualizar(c) for c in CAMADAS] + [atualizar_municipios()] + atualizar_pecuaria()
+    # registro da execução (como o petroleo/robo.json): dá para conferir cada passo sem abrir o log do GitHub
+    from datetime import datetime, timezone
+    (DADOS / "robo_ibge.json").write_text(json.dumps({
+        "rodou_em": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "passos": {n: ("ok" if o else "falhou (ficou o arquivo anterior)") for n, o in zip(nomes, ok)}}, ensure_ascii=False), encoding="utf-8")
     # Só falha o robô se NADA atualizou, para alguém ser avisado por e-mail pelo GitHub.
     sys.exit(0 if any(ok) else 1)
