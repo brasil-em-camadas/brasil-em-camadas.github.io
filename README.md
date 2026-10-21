@@ -32,7 +32,7 @@ scripts/
 
 ## Como o site se atualiza
 
-Todo dia 3 de cada mês o GitHub executa o robô. Ele busca população (por estado e por município), produção agrícola, rebanhos (por estado e o gado bovino de cada município) e aquicultura na API SIDRA do IBGE, e petróleo e gás na ANP: a produção de cada poço no último mês que já tem dados de terra e de mar (o mar sai todo mês, a terra por trimestre), a posição dos poços, os campos, as plataformas e o polígono do pré-sal. Se a ANP falhar, os arquivos antigos ficam e o site é publicado mesmo assim, com a data antiga à vista. Se a busca der certo, os arquivos de dados são trocados e o site é republicado. Se der errado, o dado antigo fica, com a data antiga, e o GitHub avisa por e-mail.
+Todo dia 3 de cada mês o GitHub executa o robô. Ele busca população (por estado e por município), produção agrícola, rebanhos (por estado e o gado bovino de cada município) e aquicultura na API SIDRA do IBGE, e petróleo e gás na ANP: a produção de cada poço no último mês que já tem dados de terra e de mar (o mar sai todo mês, a terra por trimestre), a posição dos poços, os campos, as plataformas e o polígono do pré-sal. Se a ANP falhar, os arquivos antigos ficam e o site é publicado mesmo assim, com a data antiga à vista. Se a busca der certo, os arquivos de dados são trocados e o site é republicado. Cada robô deixa o resultado de cada passo em `site/data/robo_ibge.json` e `site/data/petroleo/robo.json`, para conferir sem abrir o registro do GitHub. Se der errado, o dado antigo fica, com a data antiga, e o GitHub avisa por e-mail.
 
 Para rodar na hora: aba **Actions** → **Atualizar dados e publicar** → **Run workflow**.
 
@@ -54,6 +54,7 @@ Os limites do mar não entram no robô mensal, porque mudam raramente. Para refa
 1. Coloque o arquivo de dados em `site/data/`.
 2. Registre a camada em `site/data/fontes.json` com nome, ministério, fonte e nível.
 3. Se a fonte tiver API, acrescente a consulta em `scripts/atualizar_ibge.py` (ou crie um robô parecido).
+4. Se o arquivo for grande e a camada começar desligada, marque `"sob_demanda": true` em `fontes.json`: o arquivo só é baixado quando alguém liga a camada. No globo, registre a conversão em `SOB` (`site/3d/app3d.js`); na versão leve, a função de desenho em `DESENHA` (`site/2d/app.js`).
 
 ## Fontes e licenças dos dados
 
