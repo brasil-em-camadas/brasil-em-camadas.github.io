@@ -208,3 +208,8 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .cab h2{margin:0}
 .chip.mini{font-size:.8rem;padding:3px 10px}
 .chip.mini[hidden]{display:none}
+/* botões do cabeçalho "Camadas" e itens da legenda quando ela aparece sobre o mapa */
+.cab-bt{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.chip.mini[aria-pressed="true"]{color:var(--night);background:var(--accent);border-color:var(--accent)}
+.legend .item{display:inline-flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
+.legend .item>span{display:inline-flex;align-items:center}

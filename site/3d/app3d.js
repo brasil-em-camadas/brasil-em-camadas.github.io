@@ -105,6 +105,7 @@ function quintis(vals) {
   const AREA = ["==", ["get", "parte"], "area"], LIMITE = ["==", ["get", "parte"], "limite"];
   const map = new maplibregl.Map({
     container: "map",
+    locale: { "AttributionControl.ToggleAttribution": "Mostrar ou ocultar os créditos do mapa" },
     attributionControl: { compact: true, customAttribution: "NASA Blue Marble · Terrain Tiles (AWS) · Natural Earth · IBGE · Marine Regions · ANP" },
     style: {
       version: 8,
@@ -273,6 +274,11 @@ function quintis(vals) {
   const folga = () => largo() ? { top: topo() + 40, bottom: 40, left: 10, right: espacoPainel() + 110 } : { top: 20, bottom: 20, left: 12, right: 12 };
   function ajustarCabecalho() { stage.style.setProperty("--head", (topo() + 4) + "px"); stage.style.setProperty("--dock-w", espacoPainel() + "px"); }
   const BRASIL = caixa({ coordinates: estados.features.map(f => f.geometry.coordinates) });
+  /* afastar tem limite: até um pouco além do enquadramento do Brasil (o globo inteiro cabe na tela, sem ficar minúsculo) */
+  function limitarZoom() {
+    const c = map.cameraForBounds(BRASIL, { padding: folga() });
+    if (c && isFinite(c.zoom)) map.setMinZoom(Math.max(0, c.zoom - 0.8));
+  }
   function verBrasil(dur = 1400) {
     map.fitBounds(BRASIL, { padding: folga(), pitch: modo3d ? 45 : 0, bearing: 0, duration: reduce ? 0 : dur });
   }
@@ -293,7 +299,7 @@ function quintis(vals) {
     if (!abrir) alinharBotoes();
     dock.hidden = !abrir; unfold.hidden = abrir;
     try { localStorage.setItem("bec-painel", abrir ? "aberto" : "recolhido"); } catch (e) {}
-    ajustarCabecalho(); sel ? verEstado(sel, 600) : verBrasil(600);
+    ajustarCabecalho(); limitarZoom(); sel ? verEstado(sel, 600) : verBrasil(600);
   }
   document.getElementById("fold").onclick = () => mostrarPainel(false);
   unfold.onclick = () => mostrarPainel(true);
@@ -474,6 +480,14 @@ function quintis(vals) {
     }
   }
 
+  /* "Legenda no mapa": liga e desliga; a escolha fica guardada neste navegador */
+  let legMapa = false;
+  try { legMapa = localStorage.getItem("bec-legenda") === "mapa"; } catch (e) {}
+  document.getElementById("legenda-mapa").onclick = () => {
+    legMapa = !legMapa;
+    try { localStorage.setItem("bec-legenda", legMapa ? "mapa" : "rodape"); } catch (e) {}
+    render();
+  };
   /* ---------- desenho ---------- */
   function render() {
     controls();
@@ -503,12 +517,15 @@ function quintis(vals) {
         <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(Math.max(...vals))}</span>
         ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : "<span>sem cor = sem dado</span>") : ""}`;
     } else if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", cor("--land"));
-    /* sobre o mapa fica só a escala de cores; os símbolos das camadas ligadas vão para o rodapé, ao lado dos níveis de confiança */
-    document.getElementById("legend").innerHTML = leg;
+    /* sobre o mapa fica a escala de cores; os símbolos das camadas ligadas ficam no rodapé, ao lado dos níveis de confiança,
+       e também sobre o mapa quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
       const forma = k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
     }).join("")}</span>`).join("");
+    document.getElementById("legend").innerHTML = leg + (legMapa ? itens : "");
+    const bl = document.getElementById("legenda-mapa");
+    if (bl) bl.setAttribute("aria-pressed", legMapa);
     const lr = document.getElementById("legenda");
     if (lr) lr.innerHTML = itens || `<span class="note">Nenhuma camada ligada. Escolha as camadas no painel.</span>`;
     document.getElementById("back").hidden = !sel;
@@ -641,7 +658,7 @@ function quintis(vals) {
 
   /* ---------- abertura ---------- */
   ajustarCabecalho(); controls(); ficha();
-  verBrasil(0);
+  limitarZoom(); verBrasil(0);
   /* aplica cores e camadas ligadas assim que o estilo é lido, antes das imagens chegarem */
   map.once("style.load", () => render());
   const aviso = document.getElementById("carregando");
@@ -658,6 +675,6 @@ function quintis(vals) {
       paint: { "hillshade-exaggeration": 0.5, "hillshade-shadow-color": "#04100a", "hillshade-highlight-color": "rgba(255,255,240,.55)", "hillshade-accent-color": "#0c2a18" } }, "zee-line");
     if (luz !== "off") map.setLayoutProperty("relevo", "visibility", "none");
   });
-  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { ajustarCabecalho(); map.resize(); if (!dock.hidden) alinharBotoes(); }, 150); });
+  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { ajustarCabecalho(); map.resize(); limitarZoom(); if (!dock.hidden) alinharBotoes(); }, 150); });
   window.__mapa = map;
 })();

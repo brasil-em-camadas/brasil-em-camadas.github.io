@@ -50,3 +50,9 @@
 .luzes-topo .lbl{margin-left:6px}
 @media (max-width:900px){.where{max-width:none;padding-bottom:8px}.luzes-topo{gap:6px}.luzes-topo .lbl{margin-left:0;letter-spacing:.08em}
   .luzes-topo .back{padding:5px 10px;font-size:.84rem}}
+/* luzes à noite numa linha própria, embaixo de "Brasil · 27 UFs" */
+.luzes-topo{flex-basis:100%}
+.luzes-topo .lbl{margin-left:0}
+/* créditos do mapa: o botão (i) que mostra e oculta os créditos fica claro sobre o fundo escuro */
+.maplibregl-ctrl-attrib-button{filter:invert(1)}
+.maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-attrib-button{background-color:rgba(0,0,0,.25)}

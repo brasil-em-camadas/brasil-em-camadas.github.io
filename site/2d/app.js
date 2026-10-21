@@ -185,7 +185,7 @@ function rewind(f) {
     oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal };
 
   let proj, path, W, H, head = 0, k = 1;
-  const zoom = d3.zoom().scaleExtent([0.55, 12]).on("zoom", e => {
+  const zoom = d3.zoom().scaleExtent([0.8, 12]).on("zoom", e => {
     root.attr("transform", e.transform); k = e.transform.k; place();
   }).on("end", raioPocos);   /* são milhares de poços: o tamanho deles só é refeito quando o zoom termina */
   svg.call(zoom).on("dblclick.zoom", null);
@@ -350,6 +350,14 @@ function rewind(f) {
     }
   }
 
+  /* "Legenda no mapa": liga e desliga; a escolha fica guardada neste navegador */
+  let legMapa = false;
+  try { legMapa = localStorage.getItem("bec-legenda") === "mapa"; } catch (e) {}
+  document.getElementById("legenda-mapa").onclick = () => {
+    legMapa = !legMapa;
+    try { localStorage.setItem("bec-legenda", legMapa ? "mapa" : "rodape"); } catch (e) {}
+    render();
+  };
   /* ---------- desenho ---------- */
   function render() {
     controls();
@@ -365,12 +373,15 @@ function rewind(f) {
         <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(d3.max(vals))}</span>
         ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : "<span>sem cor = sem dado</span>") : ""}`;
     } else states.style("fill", null);
-    /* sobre o mapa fica só a escala de cores; os símbolos das camadas ligadas vão para o rodapé, ao lado dos níveis de confiança */
-    document.getElementById("legend").innerHTML = leg;
+    /* sobre o mapa fica a escala de cores; os símbolos das camadas ligadas ficam no rodapé, ao lado dos níveis de confiança,
+       e também sobre o mapa quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
       const forma = k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
     }).join("")}</span>`).join("");
+    document.getElementById("legend").innerHTML = leg + (legMapa ? itens : "");
+    const bl = document.getElementById("legenda-mapa");
+    if (bl) bl.setAttribute("aria-pressed", legMapa);
     const lr = document.getElementById("legenda");
     if (lr) lr.innerHTML = itens || `<span class="note">Nenhuma camada ligada. Escolha as camadas no painel.</span>`;
     states.classed("sel", d => d.properties.sigla === sel).classed("fade", d => sel && d.properties.sigla !== sel);

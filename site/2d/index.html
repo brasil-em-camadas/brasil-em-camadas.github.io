@@ -11,7 +11,7 @@
 <link rel="preload" href="../letras/barlow-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../letras/big-shoulders-display-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../letras/letras.css?v=1">
-<link rel="stylesheet" href="../style.css?v=17">
+<link rel="stylesheet" href="../style.css?v=18">
 </head>
 <body>
 <main class="stage" id="stage">
@@ -29,7 +29,7 @@
     <section class="blk">
       <h2>Pintar estados por</h2>
       <div class="paint" id="paint" role="group" aria-label="Pintar estados por"></div>
-      <div class="cab"><h2>Camadas</h2><button class="chip mini" id="todas" hidden></button></div>
+      <div class="cab"><h2>Camadas</h2><span class="cab-bt"><button class="chip mini" id="legenda-mapa" aria-pressed="false" title="Mostra também sobre o mapa os símbolos das camadas ligadas (bom para tela cheia)">Legenda no mapa</button><button class="chip mini" id="todas" hidden></button></span></div>
       <div id="layers"></div>
     </section>
   </aside>
@@ -58,7 +58,7 @@
 </footer>
 
 <script src="vendor/d3.min.js?v=7.8.5"></script>
-<script src="app.js?v=16"></script>
+<script src="app.js?v=17"></script>
 <!-- contagem de visitas: GoatCounter, sem cookies e sem guardar o IP (script guardado no próprio site) -->
 <script data-goatcounter="https://brasilemcamadas.goatcounter.com/count" async src="../vendor/count.js?v=1"></script>
 </body>
