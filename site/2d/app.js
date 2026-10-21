@@ -159,12 +159,18 @@ function rewind(f) {
   const gPresal = root.append("g");
   const presalP = gPresal.selectAll("path").data(parte("presal", "area")).join("path").attr("class", "presal");
   const presalT = gPresal.selectAll("text").data(parte("presal", "rotulo")).join("text").attr("class", "presal-lbl").text(d => d.properties.texto);
+  /* rodovias (IBGE, BC250): estaduais pavimentadas sob demanda, por baixo; federais com traço cheio (pavimentadas,
+     mais grosso na pista dupla) ou tracejado (sem pavimento) */
+  const gRodEst = root.append("g");
+  let rodEstP = gRodEst.selectAll("path");
+  function desenharRodEst() { rodEstP = gRodEst.selectAll("path").data(DATA.rodest.features).join("path").attr("class", "road est"); }
   const gRod = root.append("g");
   const roads = gRod.selectAll("path").data(DATA.rod ? DATA.rod.features : []).join("path")
-    .attr("class", d => d.properties.type === "Major Highway" ? "road major" : "road");
+    .attr("class", d => "road" + (d.properties.p ? "" : " terra") + (d.properties.d ? " dup" : ""));
   const RAIL = DATA.rail ? DATA.rail.trechos : [];
   const gRail = root.append("g");
-  const rails = gRail.selectAll("path").data(RAIL).join("path").attr("class", "rail");
+  const rails = gRail.selectAll("path").data(RAIL).join("path").attr("class", d => "rail" + (d.obra ? " obra" : ""));
+  rails.append("title").text(d => `Ferrovia${d.obra ? " em obras" : ""} · ${d.op}${d.b ? " · bitola " + d.b.toLowerCase() : ""} (IBGE, BC250 2025)`);
   /* poços em produção: [lon, lat, boe/dia, barris/dia, mil m³ de gás/dia, poço, campo, UF, mar/terra] */
   /* rebanho bovino por município: desenhado quando o arquivo chega (camada sob demanda) */
   const gBoi = root.append("g");
@@ -192,10 +198,10 @@ function rewind(f) {
     uepR.append("title").text(d => { const p = d.properties;
       return `${p.nome} · ${p.tipo}${p.operador ? " · " + p.operador : ""}${p.prevista ? " · prevista" : ""}${p.atende ? ". Atende: " + p.atende : ""}${p.capacidade_bbl_dia ? ". Capacidade: " + fmt(p.capacidade_bbl_dia) + " barris de petróleo/dia" : ""}. Fonte: ANP.`; });
   }
-  const DESENHA = { boi: desenharBoi, oil: desenharPocos, uep: desenharUep, campos: desenharCampos, zc: desenharZc, pce: desenharPce };
+  const DESENHA = { boi: desenharBoi, oil: desenharPocos, uep: desenharUep, campos: desenharCampos, zc: desenharZc, pce: desenharPce, rodest: desenharRodEst };
   const gPorts = root.append("g");
   const ports = gPorts.selectAll("circle").data(DATA.ports || []).join("circle").attr("class", "port");
-  ports.append("title").text(d => "Porto: " + d.n);
+  ports.append("title").text(d => d.n + (d.org ? " · porto organizado" : "") + (d.obra ? " · em obras" : "") + " (IBGE, BC250 2025)");
   const gAir = root.append("g");
   const airs = gAir.selectAll("path").data(DATA.air || []).join("path").attr("class", "air").attr("d", d3.symbol(d3.symbolTriangle, 40));
   airs.append("title").text(d => `Aeroporto: ${d.n}${d.i ? " (" + d.i + ")" : ""}`);
@@ -214,7 +220,7 @@ function rewind(f) {
   caps.append("circle").attr("r", d => d.pais ? 3.6 : 2.6);
   caps.append("text").attr("x", 6).attr("y", 4).text(d => d.n);
   const G = { zee: gZee, mt: gMt, zc: gZc, pce: gPce, rod: gRod, rail: gRail, ports: gPorts, air: gAir, cla: gCla,
-    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi };
+    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst };
 
   let proj, path, W, H, head = 0, k = 1;
   const zoom = d3.zoom().scaleExtent([0.8, 12]).on("zoom", e => {
@@ -254,7 +260,7 @@ function rewind(f) {
     pocosC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     posBoi();
     raioPocos();
-    roads.attr("d", path);
+    roads.attr("d", path); rodEstP.attr("d", path);
     states.attr("d", path);
     vizP.attr("d", path); vizB.attr("d", path);
     clipBr.attr("d", path(estados));
@@ -286,7 +292,7 @@ function rewind(f) {
   function geoSobDemanda() {
     if (!path) return;
     MAR().forEach(sel => sel.attr("d", path));
-    camposP.attr("d", path);
+    camposP.attr("d", path); rodEstP.attr("d", path);
     pocosC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     posBoi(); raioPocos(); place();
   }
@@ -354,6 +360,8 @@ function rewind(f) {
     "p-pec": "M4 10h14l2 3v4h-2M4 10v7h2M8 17h8M4 10l-1-3M16 10l1-3",
     boi: "M4 10h14l2 3v4h-2M4 10v7h2M8 17h8M4 10l-1-3M16 10l1-3",
     "p-rod": "M8 21L10 3M16 21L14 3M12 6v2M12 11v2M12 16v2",
+    rod: "M8 21L10 3M16 21L14 3M12 6v2M12 11v2M12 16v2",
+    rodest: "M8 21L10 3M16 21L14 3M12 8v1M12 14v1",
     "p-ene": "M13 2L5 14h6l-1 8 8-12h-6z"
   };
   const quando = id => { const m = DATA[id] && DATA[id].meta; return m && m.atualizado_em ? ` · ${m.referencia ? "ref. " + esc(m.referencia) + ", " : ""}atualizado em ${m.atualizado_em}` : ""; };
@@ -500,6 +508,7 @@ function rewind(f) {
     const rk = Object.entries(POP).sort((a, b) => b[1] - a[1]).findIndex(e => e[0] === s) + 1;
     const Pt = (DATA.ports || []).filter(p => p.uf === s), A = (DATA.air || []).filter(a => a.uf === s);
     const km = DATA.rail ? DATA.rail.km_por_uf[s] || 0 : 0;
+    const kr = DATA.rod && DATA.rod.meta && DATA.rod.meta.km_por_uf ? DATA.rod.meta.km_por_uf[s] : null;
     const ev = DATA.evpc && DATA.evpc.valores[s];
     const ag = DATA.agro && DATA.agro.valores[s];
     el.innerHTML = `
@@ -513,12 +522,15 @@ function rewind(f) {
         : `${pill("pendente")} <span class="note">O robô de atualização ainda não rodou.</span>`}</div>
       ${fichaPecuaria(s)}
       <div class="sec"><h3>Logística</h3>
-        <div class="kv"><span>Ferrovias no mapa</span><span class="v">${km ? "≈ " + fmt(km) + " km" : "nenhuma na base"}</span></div>
-        <div class="kv"><span>Portos na base</span><span class="v">${Pt.length}</span></div>
-        ${Pt.length ? `<div class="list">${Pt.map(p => p.n).join(", ")}</div>` : ""}
-        <div class="kv"><span>Aeroportos na base</span><span class="v">${A.length}</span></div>
+        ${kr ? `<div class="kv"><span>Rodovias federais</span><span class="v">≈ ${fmt(kr[0])} km</span></div>
+          <div class="list">${fmt(kr[1])} km pavimentados${kr[2] ? `, ${fmt(kr[2])} km em pista dupla` : ""}.</div>` : ""}
+        <div class="kv"><span>Ferrovias em operação</span><span class="v">${km ? "≈ " + fmt(km) + " km" : "nenhuma na base"}</span></div>
+        <div class="kv"><span>Portos e terminais</span><span class="v">${Pt.length}</span></div>
+        ${Pt.length ? `<div class="list">${Pt.map(p => esc(p.n)).join(", ")}</div>` : ""}
+        ${pill("manual")} <span class="note">IBGE, base cartográfica 1:250.000 (BC250, 2025); medidas no desenho do mapa.</span>
+        <div class="kv" style="margin-top:8px"><span>Aeroportos na base</span><span class="v">${A.length}</span></div>
         ${A.length ? `<div class="list">${A.map(a => a.n + (a.i ? " (" + a.i + ")" : "")).join(", ")}</div>` : ""}
-        ${pill("base")} <span class="note">Ausência na base não significa ausência real.</span></div>
+        ${pill("base")} <span class="note">Natural Earth, só os maiores. Ausência na base não significa ausência real.</span></div>
       ${fichaOleo(s)}
       ${CLA && s === CLA.uf ? `<div class="sec"><h3>Defesa</h3><div class="list">${CLA.nome}, base de lançamento de foguetes da Força Aérea.</div>${pill("calculado")} <span class="note">posição aproximada</span></div>` : ""}
       <div class="sec"><h3>Mobilidade elétrica</h3>

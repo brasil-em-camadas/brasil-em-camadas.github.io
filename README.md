@@ -27,6 +27,7 @@ scripts/
   gerar_limites_maritimos.py  gera os limites do mar a partir do Marine Regions (roda só à mão)
   gerar_contorno_estados.py   gera o contorno dos estados a partir da malha oficial do IBGE (roda só à mão, uma vez por ano)
   gerar_sedes_municipais.py   gera a posição oficial das sedes municipais (IBGE, Localidades do Brasil 2022; roda só à mão)
+  gerar_transportes_ibge.py   gera rodovias, ferrovias e portos a partir da base cartográfica 1:250.000 do IBGE (BC250; roda só à mão)
   dados/              arquivos de apoio dos robôs (ex.: posição da sede de cada município)
 .github/workflows/
   site.yml            agenda do robô e publicação automática no GitHub Pages
@@ -63,7 +64,8 @@ Os limites do mar não entram no robô mensal, porque mudam raramente. Para refa
 ## Fontes e licenças dos dados
 
 - IBGE (população, agricultura, pecuária e aquicultura, contornos dos estados): dados públicos oficiais. Pecuária: Pesquisa da Pecuária Municipal, tabelas SIDRA 3939 (rebanhos) e 3940 (aquicultura).
-- Natural Earth (ferrovias, portos, aeroportos, contorno dos países e imagens de relevo): domínio público.
+- IBGE, base cartográfica 1:250.000 (BC250, versão 2025): rodovias federais e estaduais pavimentadas, ferrovias e portos. Dados públicos oficiais.
+- Natural Earth (aeroportos, contorno dos países e imagens de relevo): domínio público.
 - Eletropostos: números da ABVE citados por veículos de imprensa, com a fonte indicada em cada estado.
 - Petróleo e gás: ANP. Produção por poço nos dados abertos (página "Fase de Desenvolvimento e Produção") e posição dos poços, campos, unidades de produção e polígono do pré-sal no servidor de mapas do GeoMapsANP. Dados abertos do governo federal: uso livre, citando a fonte (Decreto 8.777/2016, art. 2º, III). A soma nacional foi conferida com o Boletim Mensal da Produção da ANP; o polígono do pré-sal foi conferido com o Anexo da Lei 12.351/2010. Óleo equivalente (boe) pela convenção da ANP: 1.000 m³ de gás = 1 m³ de petróleo = 6,2898 barris.
 - Limites do mar: Marine Regions, do Flanders Marine Institute (VLIZ, Bélgica), licença CC-BY 4.0. ZEE versão 12 ([doi:10.14284/632](https://doi.org/10.14284/632)), mar territorial versão 4 ([doi:10.14284/633](https://doi.org/10.14284/633)), zona contígua versão 4 ([doi:10.14284/630](https://doi.org/10.14284/630)), águas interiores versão 4 ([doi:10.14284/631](https://doi.org/10.14284/631)), todas de 2023, e plataforma continental estendida versão 2, de 2024 ([doi:10.14284/697](https://doi.org/10.14284/697)). O site usa um derivado simplificado só do Brasil; o original fica no Marine Regions, que pede para não ser redistribuído em outros lugares. Os desenhos não têm valor legal. Margem Equatorial: pontos do limite publicados pela CLPC/ONU (documento público das Nações Unidas). Situação de cada área da plataforma na ONU (CLPC): página do LEPLAC da Marinha (SECIRM).

@@ -5,7 +5,7 @@
   --land:#1d4a2c; --land-hi:#28603a; --edge:#5f9a6a;
   --ink:#ece9de; --muted:#a3ab9c; --dim:#6c7466; --hair:rgba(214,198,150,.16);
   --glass:rgba(10,18,20,.8); --bar:rgba(9,15,17,.94);
-  --accent:#e6b450; --road:#e9dfc4; --mt:#9fe6f2; --sea-line:#58cfe0; --rail:#e39a58; --port:#f4f7f5; --air:#a9bdf7; --cla:#ff7a6b; --zc:#5fd0a8; --pce:#e58fd3; --oil:#f6c945; --uep:#ff6b4a; --campo:#d9902b; --presal:#fff0a8; --sem:#3e433f; --boi:#d9a66b;
+  --accent:#e6b450; --road:#e9dfc4; --mt:#9fe6f2; --sea-line:#58cfe0; --rail:#e39a58; --port:#f4f7f5; --air:#a9bdf7; --cla:#ff7a6b; --zc:#5fd0a8; --pce:#e58fd3; --oil:#f6c945; --uep:#ff6b4a; --campo:#d9902b; --presal:#fff0a8; --sem:#3e433f; --boi:#d9a66b; --road-est:#a9a184;
   --q1:#1d4a2c; --q2:#2b6338; --q3:#3f7e44; --q4:#6aa055; --q5:#a8c97a;
   --t-api:#7fd6c9; --t-manual:#b7d98a; --t-entidade:#e8b75a; --t-base:#a9bdf7; --t-calculado:#c9a2ff; --t-pendente:#ff8f80;
   --f-display:"Big Shoulders Display","Arial Narrow",sans-serif;
@@ -152,6 +152,10 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .ilha text{font:500 10.5px var(--f-body);fill:#cdeff5;paint-order:stroke;stroke:rgba(4,12,18,.85);stroke-width:3px;pointer-events:none}
 .road{fill:none;stroke:var(--road);stroke-width:.6;stroke-opacity:.35;vector-effect:non-scaling-stroke;pointer-events:none}
 .road.major{stroke-width:1.1;stroke-opacity:.55}
+/* rodovias do IBGE (BC250): federais; pista dupla mais grossa; sem pavimento tracejada; estaduais pavimentadas mais apagadas */
+.road{stroke-width:.9;stroke-opacity:.55}.road.dup{stroke-width:1.5;stroke-opacity:.65}.road.terra{stroke-dasharray:3 3;stroke-opacity:.45}
+.road.est{stroke:var(--road-est);stroke-width:.5;stroke-opacity:.45}
+.rail.obra{stroke-dasharray:5 4}
 .nomes{pointer-events:none}
 .uf{font:600 11px var(--f-mono);letter-spacing:.08em;fill:#f4f1e6;text-anchor:middle;dominant-baseline:middle;paint-order:stroke;stroke:rgba(8,20,12,.75);stroke-width:3px}
 .uf .n{display:none;font-family:var(--f-body);letter-spacing:.02em;font-size:13px}

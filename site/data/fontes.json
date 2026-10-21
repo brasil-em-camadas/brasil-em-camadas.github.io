@@ -125,14 +125,35 @@
   },
   {
    "id": "rod",
-   "nome": "Rodovias principais",
+   "nome": "Rodovias federais",
    "tipo": "linhas",
    "arquivo": "geo/rodovias.json",
    "ministerio": "trans",
-   "nivel": "base",
-   "fonte": "Natural Earth, traçado sem número da BR; a versão oficial virá do DNIT",
+   "nivel": "manual",
+   "fonte": "IBGE, base cartográfica 1:250.000 (BC250, versão 2025), com o número da BR e a jurisdição atualizados pelo IBGE a partir de dados do DNIT: 98 mil km, 87 mil pavimentados. De perto aparece o número da BR; clique numa rodovia para ver a situação",
    "ligada": true,
-   "cor": "--road"
+   "cor": "--road",
+   "legenda": [
+    {
+     "nome": "Rodovia federal pavimentada (mais grossa na pista dupla)"
+    },
+    {
+     "nome": "sem pavimento",
+     "forma": "tr"
+    }
+   ]
+  },
+  {
+   "id": "rodest",
+   "nome": "Rodovias estaduais pavimentadas",
+   "tipo": "linhas",
+   "arquivo": "geo/rodovias_estaduais.json",
+   "sob_demanda": true,
+   "ministerio": "trans",
+   "nivel": "manual",
+   "fonte": "IBGE, base cartográfica 1:250.000 (BC250, versão 2025): rodovias com sigla do estado (ex.: SP-330) e pavimentadas, 136 mil km",
+   "ligada": false,
+   "cor": "--road-est"
   },
   {
    "id": "rail",
@@ -140,10 +161,19 @@
    "tipo": "linhas",
    "arquivo": "geo/ferrovias.json",
    "ministerio": "trans",
-   "nivel": "base",
-   "fonte": "Natural Earth, traçado de 2012",
+   "nivel": "manual",
+   "fonte": "IBGE, base cartográfica 1:250.000 (BC250, versão 2025): 26 mil km em operação e 955 km em obras (tracejados), com a operadora de cada trecho; sem metrô e sem linhas abandonadas",
    "ligada": true,
-   "cor": "--rail"
+   "cor": "--rail",
+   "legenda": [
+    {
+     "nome": "Ferrovia"
+    },
+    {
+     "nome": "em obras",
+     "forma": "tr"
+    }
+   ]
   },
   {
    "id": "ports",
@@ -151,8 +181,8 @@
    "tipo": "pontos",
    "arquivo": "geo/portos.json",
    "ministerio": "portaer",
-   "nivel": "base",
-   "fonte": "Natural Earth, lista incompleta",
+   "nivel": "manual",
+   "fonte": "IBGE, base cartográfica 1:250.000 (BC250, versão 2025): 133 complexos portuários, marítimos e fluviais (37 portos organizados)",
    "ligada": false,
    "cor": "--port"
   },
