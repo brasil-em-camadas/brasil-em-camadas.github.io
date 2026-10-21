@@ -15,7 +15,9 @@ da Comissão Mista da Indústria de Defesa (CMID). O nome do arquivo muda a cada
 Município: a planilha traz cidade e UF. Quando a cidade não é o nome de um município (bairro, distrito, nome do estado,
 erro de digitação), vale a correção de scripts/dados/defesa_municipios.csv, feita à mão e com o motivo de cada uma.
 Correção com CNPJ vale só para aquela empresa; sem CNPJ, vale para a cidade e UF escritas daquele jeito.
-A empresa sem correção entra na contagem do estado, fica sem ponto no mapa e aparece no robo.json para alguém corrigir.
+Empresa nova sem correção: o robô consulta o município no cadastro do CNPJ da Receita Federal (pela BrasilAPI,
+brasilapi.com.br, que repassa os dados abertos da Receita) e anota no robo.json, para a correção virar permanente no
+CSV. Se a consulta falhar, a empresa entra só na contagem do estado, fica sem ponto no mapa e aparece no robo.json.
 
 Roda sozinho no GitHub Actions (site.yml), junto com os outros robôs, e também à mão:
     python scripts/atualizar_defesa.py
@@ -56,6 +58,7 @@ UF = {"11": "RO", "12": "AC", "13": "AM", "14": "RR", "15": "PA", "16": "AP", "1
 M = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
 R_ID = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
 AGENTE = {"User-Agent": "Mozilla/5.0 (compatible; brasil-em-camadas; dados abertos)"}
+CNPJ_API = "https://brasilapi.com.br/api/cnpj/v1/"
 
 
 def baixar(url, tentativas=5):
@@ -216,12 +219,32 @@ def municipios(empresas):
     return sedes
 
 
+def consultar_cnpj(empresas, sedes):
+    """Empresa sem município reconhecível: município do cadastro do CNPJ (Receita Federal, pela BrasilAPI)."""
+    achadas = []
+    for e in empresas:
+        if e["codigo"] or len(e["cnpj"]) != 14:
+            continue
+        try:
+            d = json.loads(baixar(CNPJ_API + e["cnpj"], tentativas=2))
+            cod = str(d.get("codigo_municipio_ibge") or "")
+        except Exception as erro:
+            print(f"[defesa] CNPJ {e['cnpj']} sem resposta: {erro}")
+            continue
+        if cod in sedes:
+            e["codigo"], e["uf"] = cod, UF[cod[:2]]
+            e["motivo"] = f"município pelo cadastro do CNPJ na Receita Federal, consultado em {date.today().isoformat()}"
+            achadas.append([e["nome"], e["cidade"], e["uf"], e["cnpj"], cod, sedes[cod]["nome"]])
+        time.sleep(1)
+    return achadas
+
+
 def gravar(nome, dados):
     SAIDA.mkdir(parents=True, exist_ok=True)
     (SAIDA / nome).write_text(json.dumps(dados, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
 
-def principal(arquivo):
+def principal(arquivo, cnpj=True):
     passos = {}
     if arquivo:
         url, dados = "arquivo local", Path(arquivo).read_bytes()
@@ -232,6 +255,9 @@ def principal(arquivo):
     empresas, conta, revisao = empresas_da_planilha(ler_xlsx(dados))
     passos["planilha"] = "ok"
     sedes = municipios(empresas)
+    achadas = consultar_cnpj(empresas, sedes) if cnpj else []
+    if achadas:
+        passos["cnpj"] = f"ok, {len(achadas)} município(s) pelo cadastro do CNPJ (copiar para scripts/dados/defesa_municipios.csv)"
     data_lista, reuniao = revisao or (None, "")
     referencia = f"lista de {'/'.join(reversed(data_lista.split('-')))}" if data_lista else "lista sem data"
     if reuniao:
@@ -284,19 +310,21 @@ def principal(arquivo):
     passos["municipios"] = "ok" if not sem else f"ok, {len(sem)} sem município (ver sem_municipio)"
     print(f"[defesa] {referencia}: {conta['total']} empresas ({conta['eed']} EED, {conta['ed']} ED) em {len(lista)} municípios; "
           f"{len(corrigidas)} com cidade corrigida, {len(sem)} sem município")
-    return passos, sem
+    return passos, sem, achadas
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--arquivo", help="planilha .xlsx já baixada")
-    arq = ap.parse_args().arquivo
+    ap.add_argument("--sem-cnpj", action="store_true", help="não consultar o cadastro do CNPJ")
+    args = ap.parse_args()
     try:
-        passos, sem = principal(arq)
+        passos, sem, achadas = principal(args.arquivo, not args.sem_cnpj)
         ok = True
     except Exception as e:
         print(f"[defesa] falhou, mantendo os arquivos anteriores: {e}")
-        passos, sem, ok = {"planilha": f"falhou (ficaram os arquivos anteriores): {str(e)[:160]}"}, [], False
+        passos, sem, achadas, ok = {"planilha": f"falhou (ficaram os arquivos anteriores): {str(e)[:160]}"}, [], [], False
     gravar("robo.json", {"rodou_em": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "passos": passos,
-                         "sem_municipio": [[e["nome"], e["cidade"], e["uf"], e["cnpj"]] for e in sem]})
+                         "sem_municipio": [[e["nome"], e["cidade"], e["uf"], e["cnpj"]] for e in sem],
+                         "municipio_pelo_cnpj": achadas})
     sys.exit(0 if ok else 1)
