@@ -14,6 +14,8 @@ const RAMP = ["--q1", "--q2", "--q3", "--q4", "--q5"];
 const fmt = n => n.toLocaleString("pt-BR");
 const fmt1 = n => n.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
 const kmTxt = a => a >= 1e6 ? `${(a / 1e6).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} milhão de km²` : `${fmt(Math.round(a / 1e3))} mil km²`;
+/* texto vindo de bases externas entra no HTML sempre escapado */
+const esc = t => String(t ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const reais = mil => mil >= 1e6 ? `R$ ${fmt1(mil / 1e6)} bi` : `R$ ${fmt(Math.round(mil / 1e3))} mi`;
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const pill = n => `<span class="pill ${NIVEL[n][0]}">${NIVEL[n][1]}</span>`;
@@ -93,6 +95,8 @@ function quintis(vals) {
   const trilhos = fc(DATA.rail ? DATA.rail.trechos.map(t => ({ type: "Feature", properties: { uf: t.uf }, geometry: { type: "LineString", coordinates: t.l } })) : []);
   const portos = fc((DATA.ports || []).map(p => ponto(p.c, { n: p.n, uf: p.uf })));
   const aeros = fc((DATA.air || []).map(a => ponto(a.c, { n: a.n + (a.i ? " (" + a.i + ")" : ""), uf: a.uf })));
+  /* poços em produção: [lon, lat, boe/dia, barris de petróleo/dia, mil m³ de gás/dia, poço, campo, UF, mar/terra] */
+  const pocos = fc(DATA.oil && DATA.oil.pocos ? DATA.oil.pocos.map(p => ponto([p[0], p[1]], { b: p[2], o: p[3], g: p[4], n: p[5], c: p[6], u: p[7], a: p[8] })) : []);
 
   /* ---------- mapa ---------- */
   const fonte = (estilo) => [estilo];
@@ -101,7 +105,7 @@ function quintis(vals) {
   const AREA = ["==", ["get", "parte"], "area"], LIMITE = ["==", ["get", "parte"], "limite"];
   const map = new maplibregl.Map({
     container: "map",
-    attributionControl: { compact: true, customAttribution: "NASA Blue Marble · Terrain Tiles (AWS) · Natural Earth · IBGE · Marine Regions" },
+    attributionControl: { compact: true, customAttribution: "NASA Blue Marble · Terrain Tiles (AWS) · Natural Earth · IBGE · Marine Regions · ANP" },
     style: {
       version: 8,
       projection: { type: "globe" },
@@ -118,6 +122,10 @@ function quintis(vals) {
         mt: { type: "geojson", data: DATA.mt || fc([]) },
         zc: { type: "geojson", data: DATA.zc || fc([]) },
         pce: { type: "geojson", data: DATA.pce || fc([]) },
+        pocos: { type: "geojson", data: pocos },
+        uep: { type: "geojson", data: DATA.uep || fc([]) },
+        campos: { type: "geojson", data: DATA.campos || fc([]) },
+        presal: { type: "geojson", data: DATA.presal || fc([]) },
         rod: { type: "geojson", data: DATA.rod || fc([]) },
         trilhos: { type: "geojson", data: trilhos },
         portos: { type: "geojson", data: portos },
@@ -153,16 +161,33 @@ function quintis(vals) {
         { id: "pce-line-ana", type: "line", source: "pce", filter: ["all", LIMITE, ["==", ["get", "status"], "em_analise"]],
           paint: { "line-color": cor("--pce"), "line-width": 1.2, "line-opacity": 0.85, "line-dasharray": [3, 2] } },
         { id: "estados-line", type: "line", source: "estados", paint: { "line-color": "rgba(220,240,225,.55)", "line-width": 0.8 } },
+        { id: "campos-fill", type: "fill", source: "campos", paint: { "fill-color": "rgba(217,144,43,.2)" } },
+        { id: "campos-line", type: "line", source: "campos", paint: { "line-color": cor("--campo"), "line-width": 0.8, "line-opacity": 0.85 } },
+        { id: "presal-line", type: "line", source: "presal", filter: AREA,
+          paint: { "line-color": cor("--presal"), "line-width": 1.5, "line-opacity": 0.9, "line-dasharray": [3, 2] } },
         { id: "rodovias", type: "line", source: "rod",
           paint: { "line-color": cor("--road"), "line-opacity": ["case", ["==", ["get", "type"], "Major Highway"], 0.6, 0.38],
             "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "type"], "Major Highway"], 0.8, 0.5], 8, ["case", ["==", ["get", "type"], "Major Highway"], 2.2, 1.2]] } },
         { id: "ferrovias", type: "line", source: "trilhos",
           paint: { "line-color": cor("--rail"), "line-opacity": 0.9, "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1, 8, 2.6] } },
+        /* tamanho do poço pela produção (raiz quadrada: a área do ponto acompanha os barris) */
+        { id: "pocos", type: "circle", source: "pocos", layout: { "circle-sort-key": ["get", "b"] },
+          paint: { "circle-color": cor("--oil"), "circle-opacity": 0.88, "circle-stroke-color": "#2a1d05", "circle-stroke-width": 0.5,
+            "circle-radius": ["interpolate", ["linear"], ["zoom"],
+              3, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 0.8, 10, 1.2, 50, 2.4, 150, 4.5, 260, 6.5],
+              6, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 1.4, 10, 2.2, 50, 4, 150, 7.5, 260, 10.5],
+              9, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 2.4, 10, 3.6, 50, 6.5, 150, 12, 260, 17]] } },
+        { id: "plataformas", type: "symbol", source: "uep",
+          layout: { "icon-image": ["case", ["get", "prevista"], "uep-prevista", "uep"], "icon-allow-overlap": true, "icon-ignore-placement": true,
+            "icon-size": ["interpolate", ["linear"], ["zoom"], 3, 0.55, 6, 0.85, 9, 1.15] } },
         { id: "estado-sel", type: "line", source: "estados", filter: ["==", ["get", "sigla"], ""],
           paint: { "line-color": cor("--accent"), "line-width": 2.6 } },
         { id: "pce-rotulo", type: "symbol", source: "pce", filter: ["==", ["get", "parte"], "rotulo"],
           layout: { "text-field": ["get", "texto"], "text-font": fonte(SEMI), "text-size": 10, "text-letter-spacing": 0.12, "text-transform": "uppercase", "text-max-width": 14 },
           paint: { "text-color": "rgba(244,196,235,.9)", ...halo } },
+        { id: "presal-rotulo", type: "symbol", source: "presal", filter: ["==", ["get", "parte"], "rotulo"],
+          layout: { "text-field": ["get", "texto"], "text-font": fonte(SEMI), "text-size": 11, "text-letter-spacing": 0.3 },
+          paint: { "text-color": "rgba(255,240,168,.95)", ...halo } },
         { id: "zee-rotulo", type: "symbol", source: "zee", filter: LIMITE,
           layout: { "symbol-placement": "line", "symbol-spacing": 900, "text-field": "ZONA ECONÔMICA EXCLUSIVA · 200 MILHAS", "text-font": fonte(SEMI), "text-size": 10, "text-letter-spacing": 0.2, "text-max-angle": 30 },
           paint: { "text-color": "rgba(159,230,242,.75)", ...halo } },
@@ -196,6 +221,15 @@ function quintis(vals) {
   });
   /* hachura (listras diagonais) da plataforma continental ainda em análise na ONU */
   map.on("styleimagemissing", e => {
+    if ((e.id === "uep" || e.id === "uep-prevista") && !map.hasImage(e.id)) {
+      /* plataforma: quadrado cheio; prevista: só o contorno */
+      const n = 24, c = document.createElement("canvas"); c.width = c.height = n;
+      const x = c.getContext("2d");
+      if (e.id === "uep") { x.fillStyle = "#200805"; x.fillRect(3, 3, 18, 18); x.fillStyle = cor("--uep"); x.fillRect(5, 5, 14, 14); }
+      else { x.strokeStyle = "#200805"; x.lineWidth = 5; x.strokeRect(6, 6, 12, 12); x.strokeStyle = cor("--uep"); x.lineWidth = 2.6; x.strokeRect(6, 6, 12, 12); }
+      map.addImage(e.id, x.getImageData(0, 0, n, n), { pixelRatio: 2 });
+      return;
+    }
     if (e.id !== "hachura" || map.hasImage("hachura")) return;
     const n = 16, c = document.createElement("canvas"); c.width = c.height = n;
     const x = c.getContext("2d");
@@ -227,6 +261,7 @@ function quintis(vals) {
 
   const G = { zee: ["zee-fill", "zee-line", "zee-rotulo", "ilhas-ponto", "ilhas-rotulo"], mt: ["mt-fill", "mt-line", "mt-base"], zc: ["zc-fill", "zc-line"],
     pce: ["pce-fill-rec", "pce-fill-ana", "pce-line-rec", "pce-line-ana", "pce-rotulo"], rod: ["rodovias"],
+    oil: ["pocos"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"],
     rail: ["ferrovias"], ports: ["portos"], air: ["aeroportos"] };
 
   /* ---------- painel e enquadramento ---------- */
@@ -312,6 +347,26 @@ function quintis(vals) {
         return;
       }
     }
+    const vis = l => map.getLayer(l) && map.getLayoutProperty(l, "visibility") !== "none";
+    const { x: px, y: py } = e.point, perto = [[px - 5, py - 5], [px + 5, py + 5]];
+    const ue = vis("plataformas") ? map.queryRenderedFeatures(perto, { layers: ["plataformas"] }) : [];
+    if (ue.length) {
+      const p = ue[0].properties;
+      new maplibregl.Popup({ closeButton: false, offset: 10, maxWidth: "300px" }).setLngLat(ue[0].geometry.coordinates)
+        .setHTML(`<b>${esc(p.nome)}</b><br>${esc(p.tipo)}${p.operador ? " · " + esc(p.operador) : ""}${p.prevista === true || p.prevista === "true" ? "<br><b>Prevista</b>" : ""}
+          ${p.atende ? `<br>Atende: ${esc(p.atende)}` : ""}${p.capacidade_bbl_dia ? `<br>Capacidade: ${fmt(+p.capacidade_bbl_dia)} barris de petróleo/dia` : ""}
+          ${p.lamina_m ? `<br>Profundidade da água: ${fmt(+p.lamina_m)} m` : ""}<br><span class="pop-fonte">ANP, cadastro de unidades de produção</span>`).addTo(map);
+      return;
+    }
+    const po = vis("pocos") ? map.queryRenderedFeatures(perto, { layers: ["pocos"] }) : [];
+    if (po.length) {
+      const f = po.reduce((a, b) => b.properties.b > a.properties.b ? b : a), p = f.properties, M = DATA.oil.meta;
+      new maplibregl.Popup({ closeButton: false, offset: 8 }).setLngLat(f.geometry.coordinates)
+        .setHTML(`<b>Poço ${esc(p.n)}</b><br>Campo ${esc(p.c)} · ${p.a === "M" ? "mar" : "terra"}${p.u ? " · " + esc(p.u) : ""}
+          <br>Petróleo: ${fmt(Math.round(p.o))} barris/dia<br>Gás: ${fmt1(p.g)} mil m³/dia<br>Total: ${fmt(Math.round(p.b))} boe/dia
+          <br><span class="pop-fonte">ANP, média de ${esc(M.referencia)}</span>`).addTo(map);
+      return;
+    }
     const pts = map.queryRenderedFeatures(e.point, { layers: ["portos", "aeroportos", "capitais"].filter(l => map.getLayoutProperty(l, "visibility") !== "none") });
     if (pts.length) {
       const f = pts[0], tipo = f.layer.id === "portos" ? "Porto" : f.layer.id === "aeroportos" ? "Aeroporto" : "Capital";
@@ -326,6 +381,15 @@ function quintis(vals) {
       new maplibregl.Popup({ closeButton: false, offset: 6, maxWidth: "290px", ...(perto ? { anchor: "right" } : {}) }).setLngLat(e.lngLat)
         .setHTML(`<b>Plataforma continental estendida</b><br>${p.nome}: ${p.situacao}.<br>Área no desenho: ≈ ${kmTxt(p.area_km2)} · Marinha: ${p.area_marinha}
           <br><span class="pop-fonte">${p.fonte_curta}. Desenho para consulta, sem valor legal.</span>`).addTo(map);
+      return;
+    }
+    const cp = vis("campos-fill") ? map.queryRenderedFeatures(e.point, { layers: ["campos-fill"] }) : [];
+    if (cp.length) {
+      const p = cp[0].properties;
+      new maplibregl.Popup({ closeButton: false, offset: 6, maxWidth: "290px" }).setLngLat(e.lngLat)
+        .setHTML(`<b>Campo ${esc(p.nome)}</b><br>${esc(p.etapa)}${p.fluido ? " · " + esc(p.fluido) : ""}
+          ${p.operador ? `<br>Operador: ${esc(p.operador)}` : ""}${p.bacia ? `<br>Bacia ${esc(p.bacia)}` : ""}${p.inicio ? ` · produção desde ${esc(p.inicio)}` : ""}
+          <br><span class="pop-fonte">ANP, servidor de mapas</span>`).addTo(map);
       return;
     }
     const st = map.queryRenderedFeatures(e.point, { layers: ["estados-fill"] });
@@ -344,12 +408,17 @@ function quintis(vals) {
     ports: "M12 3v12M8 7h8M4 13c0 4 4 7 8 7s8-3 8-7M4 13h3M17 13h3",
     air: "M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z",
     "p-oil": "M6 21L12 3l6 18M8 15h8M9 10h6M4 21h16",
+    oil: "M6 21L12 3l6 18M8 15h8M9 10h6M4 21h16",
+    uep: "M3 20h18M6 20v-8h12v8M8 12V8h8v4M12 8V3M10 3h4",
+    campos: "M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3zM9 4v13M15 7v13",
+    presal: "M4 9l7-5 9 4-2 10-11 2z",
     "p-def": "M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z",
     "p-cel": "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
     "p-pec": "M4 10h14l2 3v4h-2M4 10v7h2M8 17h8M4 10l-1-3M16 10l1-3",
     "p-rod": "M8 21L10 3M16 21L14 3M12 6v2M12 11v2M12 16v2",
     "p-ene": "M13 2L5 14h6l-1 8 8-12h-6z"
   };
+  const quando = id => { const m = DATA[id] && DATA[id].meta; return m && m.atualizado_em ? ` · ${m.referencia ? "ref. " + esc(m.referencia) + ", " : ""}atualizado em ${m.atualizado_em}` : ""; };
   const icon = id => ICON[id] ? `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[id]}"/></svg>` : `<span class="ico"></span>`;
   const mins = document.getElementById("mins");
   mins.insertAdjacentHTML("beforeend", [["todos", "Todos"], ...Object.entries(F.ministerios)]
@@ -391,7 +460,7 @@ function quintis(vals) {
       <label class="layer ${l.nivel === "pendente" ? "pend" : ""}">
         <input type="checkbox" id="ly-${l.id}" ${l.on ? "checked" : ""} ${l.nivel === "pendente" ? "disabled" : ""}>${icon(l.id)}
         <span><span class="nm">${l.cor ? `<i class="key" style="background:var(${l.cor})"></i>` : ""}${l.nome} ${pill(l.nivel)}</span>
-        <span class="src">${l.fonte} · ${F.ministerios[l.ministerio]}</span></span>
+        <span class="src">${l.fonte}${quando(l.id)} · ${F.ministerios[l.ministerio]}</span></span>
       </label>`).join("") : `<p class="note">Este ministério ainda não tem camadas de mapa.</p>`;
     lv.filter(l => l.nivel !== "pendente").forEach(l => document.getElementById("ly-" + l.id).onchange = e => { l.on = e.target.checked; render(); });
   }
@@ -416,16 +485,19 @@ function quintis(vals) {
       const vals = Object.keys(NAME).map(P.val).filter(v => v != null);
       const q = quintis(vals), cores = RAMP.map(cor);
       const m = ["match", ["get", "sigla"]];
-      Object.keys(NAME).forEach(s => { const v = P.val(s); m.push(s, v == null ? cor("--land") : cores[q(v)]); });
+      /* sem valor: cor da terra; quando a falta tem significado ("sem produção"), cinza, para não parecer o grupo mais baixo */
+      Object.keys(NAME).forEach(s => { const v = P.val(s); m.push(s, v == null ? cor(P.vazio ? "--sem" : "--land") : cores[q(v)]); });
       m.push(cor("--land"));
       if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", m);
       const DD = DATA[P.id];
       leg = `<span>${P.nome}${DD.unidade ? " (" + DD.unidade + ")" : ""}</span><span>${P.fmt(Math.min(...vals))}</span>
         <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(Math.max(...vals))}</span>
-        ${vals.length < 27 ? "<span>sem cor = sem dado</span>" : ""}`;
+        ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : "<span>sem cor = sem dado</span>") : ""}`;
     } else if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", cor("--land"));
-    leg += LAYERS.filter(l => l.on && l.cor).map(l => (l.legenda || [{ nome: l.nome }]).map(k =>
-      `<span><i class="key${k.hachura ? " hach" : ""}" style="${k.hachura ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`).join("")).join("");
+    leg += LAYERS.filter(l => l.on && l.cor).map(l => (l.legenda || [{ nome: l.nome }]).map(k => {
+      const forma = k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr"].includes(forma);
+      return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
+    }).join("")).join("");
     document.getElementById("legend").innerHTML = leg;
     document.getElementById("back").hidden = !sel;
     document.getElementById("where").textContent = sel ? `${NAME[sel]} · ${sel}` : "Brasil · 27 UFs";
@@ -492,12 +564,28 @@ function quintis(vals) {
     render();
   }
 
+  function fichaOleo(s) {
+    const O = DATA.oleo;
+    if (!O) return "";
+    const v = O.valores[s], rk = Object.entries(O.valores).sort((a, b) => b[1].valor - a[1].valor).findIndex(e => e[0] === s) + 1;
+    return `<div class="sec"><h3>Petróleo e gás</h3>${v ? `
+      <div class="kv"><span>Produção total</span><span class="v">${fmt(v.valor)} boe/dia</span></div>
+      <div class="kv"><span>Petróleo</span><span class="v">${fmt(v.petroleo_bbl_dia)} barris/dia</span></div>
+      <div class="kv"><span>Gás natural</span><span class="v">${fmt(v.gas_mil_m3_dia)} mil m³/dia</span></div>
+      <div class="kv"><span>Poços produzindo</span><span class="v">${fmt(v.pocos)}</span></div>
+      <div class="kv"><span>Posição no país</span><span class="v">${rk}º · ${fmt1(v.valor / O.total_boe_dia * 100)}%</span></div>`
+      : `<div class="list">Nenhuma produção registrada na ANP neste mês.</div>`}
+      ${pill(O.nivel)} <span class="note">${esc(O.fonte)}; média de ${esc(O.referencia)} · atualizado em ${O.atualizado_em}</span></div>`;
+  }
+
   function ficha() {
     const el = document.getElementById("ficha");
     const popInfo = DATA.pop ? `${pill(DATA.pop.nivel)} <span class="note">${DATA.pop.fonte} · atualizado em ${DATA.pop.atualizado_em}</span>` : pill("pendente");
     if (!sel) {
       el.innerHTML = `<h2>Visão nacional</h2><div class="fname">Brasil</div>
         <div class="kv"><span>População</span><span class="v">${fmt(popTot)}</span></div>${popInfo}
+        ${DATA.oleo ? `<div class="kv" style="margin-top:8px"><span>Petróleo e gás</span><span class="v">${fmt1(DATA.oleo.total_boe_dia / 1e6)} milhões de boe/dia</span></div>
+          ${pill(DATA.oleo.nivel)} <span class="note">ANP, média de ${esc(DATA.oleo.referencia)} · atualizado em ${DATA.oleo.atualizado_em}. boe = barril de óleo equivalente.</span>` : ""}
         <p class="lede">Clique num estado para aproximar. Arraste para girar o globo, role para aproximar e use o botão "Relevo 3D" para ver as montanhas em altura.</p>`;
       return;
     }
@@ -523,6 +611,7 @@ function quintis(vals) {
         <div class="kv"><span>Aeroportos na base</span><span class="v">${A.length}</span></div>
         ${A.length ? `<div class="list">${A.map(a => a.n + (a.i ? " (" + a.i + ")" : "")).join(", ")}</div>` : ""}
         ${pill("base")} <span class="note">Ausência na base não significa ausência real.</span></div>
+      ${fichaOleo(s)}
       ${CLA && s === CLA.uf ? `<div class="sec"><h3>Defesa</h3><div class="list">${CLA.nome}, base de lançamento de foguetes da Força Aérea.</div>${pill("calculado")} <span class="note">posição aproximada</span></div>` : ""}
       <div class="sec"><h3>Mobilidade elétrica</h3>
         <div class="kv"><span>Eletropostos</span><span class="v">${ev ? fmt(ev.valor) : "—"}</span></div>

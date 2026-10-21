@@ -30,6 +30,14 @@
    "arquivo": "eletropostos.json",
    "ministerio": "setor",
    "por": "per_capita"
+  },
+  {
+   "id": "oleo",
+   "nome": "Petróleo e gás",
+   "arquivo": "petroleo/producao_estados.json",
+   "ministerio": "mme",
+   "por": "total",
+   "vazio": "sem produção"
   }
  ],
  "luzes": [
@@ -166,11 +174,70 @@
    "uf": "MA"
   },
   {
-   "id": "p-oil",
-   "nome": "Poços de petróleo e gás",
+   "id": "oil",
+   "nome": "Poços em produção",
+   "tipo": "pontos",
+   "arquivo": "petroleo/pocos.json",
    "ministerio": "mme",
-   "nivel": "pendente",
-   "fonte": "ANP, produção por poço (dados abertos)"
+   "nivel": "api",
+   "fonte": "ANP: produção de cada poço (dados abertos) e posição dos poços (servidor de mapas). O tamanho do ponto mostra a produção em barris de óleo equivalente por dia. Clique num poço para ver os números",
+   "ligada": false,
+   "cor": "--oil",
+   "legenda": [
+    {
+     "nome": "Poços em produção (tamanho = produção)",
+     "forma": "pt"
+    }
+   ]
+  },
+  {
+   "id": "uep",
+   "nome": "Plataformas e unidades de produção",
+   "tipo": "pontos",
+   "arquivo": "petroleo/plataformas.json",
+   "ministerio": "mme",
+   "nivel": "api",
+   "fonte": "ANP, cadastro das unidades de produção (plataformas fixas, FPSOs e outras); as previstas aparecem vazadas. Clique numa para ver os detalhes",
+   "ligada": false,
+   "cor": "--uep",
+   "legenda": [
+    {
+     "nome": "Plataformas",
+     "forma": "sq"
+    },
+    {
+     "nome": "previstas",
+     "forma": "sqv"
+    }
+   ]
+  },
+  {
+   "id": "campos",
+   "nome": "Campos de petróleo e gás",
+   "tipo": "area",
+   "arquivo": "petroleo/campos.json",
+   "ministerio": "mme",
+   "nivel": "api",
+   "fonte": "ANP: campos em produção, em desenvolvimento e em reabilitação (os em devolução ficam de fora). Clique num campo para ver os detalhes",
+   "ligada": false,
+   "cor": "--campo"
+  },
+  {
+   "id": "presal",
+   "nome": "Polígono do pré-sal",
+   "tipo": "area",
+   "arquivo": "petroleo/presal.json",
+   "ministerio": "mme",
+   "nivel": "api",
+   "fonte": "ANP; é o polígono definido na Lei 12.351/2010, conferido vértice a vértice",
+   "ligada": false,
+   "cor": "--presal",
+   "legenda": [
+    {
+     "nome": "Polígono do pré-sal",
+     "forma": "tr"
+    }
+   ]
   },
   {
    "id": "p-def",

@@ -1,5 +1,5 @@
 # Robô do Brasil em Camadas
-# - Todo dia 3 de cada mês (e quando você clicar em "Run workflow"): busca dados novos do IBGE e salva no repositório.
+# - Todo dia 3 de cada mês (e quando você clicar em "Run workflow"): busca dados novos do IBGE e da ANP e salva no repositório.
 # - Depois de cada mudança: publica o site no GitHub Pages.
 name: Atualizar dados e publicar
 
@@ -30,12 +30,16 @@ jobs:
           python-version: "3.12"
       - name: Buscar dados do IBGE
         run: python scripts/atualizar_ibge.py
+      # Se a ANP falhar, o robô mantém os arquivos antigos e o site é publicado mesmo assim (com a data antiga à vista).
+      - name: Buscar dados da ANP (petróleo e gás)
+        continue-on-error: true
+        run: python scripts/atualizar_anp.py
       - name: Salvar se algo mudou
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add site/data
-          git diff --cached --quiet || (git commit -m "Atualiza dados do IBGE" && git push)
+          git diff --cached --quiet || (git commit -m "Atualiza dados do IBGE e da ANP" && git push)
 
   publicar:
     needs: atualizar

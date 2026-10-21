@@ -5,7 +5,7 @@
   --land:#1d4a2c; --land-hi:#28603a; --edge:#5f9a6a;
   --ink:#ece9de; --muted:#a3ab9c; --dim:#6c7466; --hair:rgba(214,198,150,.16);
   --glass:rgba(10,18,20,.8); --bar:rgba(9,15,17,.94);
-  --accent:#e6b450; --road:#e9dfc4; --mt:#9fe6f2; --sea-line:#58cfe0; --rail:#e39a58; --port:#f4f7f5; --air:#a9bdf7; --cla:#ff7a6b; --zc:#5fd0a8; --pce:#e58fd3;
+  --accent:#e6b450; --road:#e9dfc4; --mt:#9fe6f2; --sea-line:#58cfe0; --rail:#e39a58; --port:#f4f7f5; --air:#a9bdf7; --cla:#ff7a6b; --zc:#5fd0a8; --pce:#e58fd3; --oil:#f6c945; --uep:#ff6b4a; --campo:#d9902b; --presal:#fff0a8; --sem:#3e433f;
   --q1:#1d4a2c; --q2:#2b6338; --q3:#3f7e44; --q4:#6aa055; --q5:#a8c97a;
   --t-api:#7fd6c9; --t-manual:#b7d98a; --t-entidade:#e8b75a; --t-base:#a9bdf7; --t-calculado:#c9a2ff; --t-pendente:#ff8f80;
   --f-display:"Big Shoulders Display","Arial Narrow",sans-serif;
@@ -64,6 +64,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .ramp{display:flex}.ramp i{display:block;width:20px;height:7px}
 .key{display:inline-block;width:16px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
 .key.hach{height:9px;border-radius:1px;background:repeating-linear-gradient(135deg,currentColor 0 1.5px,transparent 1.5px 4px)}
+.key.pt{width:9px;height:9px;border-radius:50%}.key.sq{width:9px;height:9px;border-radius:1px}
+.key.sqv{width:9px;height:9px;border-radius:1px;background:none;border:1.5px solid currentColor}
+.key.tr{height:0;border-top:2px dashed currentColor;background:none}
 
 .dock{position:absolute;top:var(--head,96px);right:max(20px,env(safe-area-inset-right,0px));bottom:14px;width:440px;z-index:3;
   background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:14px;
@@ -159,3 +162,11 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .cap text{display:none;font:500 11.5px var(--f-body);fill:#fff;paint-order:stroke;stroke:rgba(8,20,12,.85);stroke-width:3px}
 .z-cap .cap text,.cap.pais text{display:inline}
 .viz-lbl.peq{font-size:8.5px;letter-spacing:.14em}
+/* petróleo e gás (versão leve) */
+.campo{fill:rgba(217,144,43,.18);stroke:var(--campo);stroke-width:.8;vector-effect:non-scaling-stroke}
+.presal{fill:none;stroke:var(--presal);stroke-width:1.4;stroke-dasharray:6 4;vector-effect:non-scaling-stroke;pointer-events:none}
+.presal-lbl{font:500 10px var(--f-mono);letter-spacing:.24em;fill:rgba(255,240,168,.9);text-anchor:middle;pointer-events:none;
+  paint-order:stroke;stroke:rgba(4,12,18,.8);stroke-width:3px}
+.poco{fill:var(--oil);fill-opacity:.85;stroke:#2a1d05;stroke-width:.5;vector-effect:non-scaling-stroke}
+.uep{fill:var(--uep);stroke:#200805;stroke-width:1;vector-effect:non-scaling-stroke}
+.uep.prev{fill:none;stroke:var(--uep);stroke-width:1.5}

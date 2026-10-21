@@ -16,9 +16,11 @@ site/                 o site em si (é isto que vai para o ar)
   data/geo/*.json     contornos, ferrovias, portos, aeroportos e limites do mar (ZEE, mar territorial,
                       zona contígua, plataforma continental estendida)
   data/relevo/        imagens de relevo do fundo (geradas por scripts/gerar_relevo.py)
+  data/petroleo/      poços em produção, produção por estado, campos, plataformas e pré-sal (robô da ANP)
   data/luzes/         população de cada município, para as "Luzes à noite" da página 3D
 scripts/
   atualizar_ibge.py   robô que busca dados novos na API do IBGE
+  atualizar_anp.py    robô que busca petróleo e gás na ANP (produção por poço e servidor de mapas)
   gerar_relevo.py     gera as imagens de relevo (roda só quando acionado à mão)
   gerar_limites_maritimos.py  gera os limites do mar a partir do Marine Regions (roda só à mão)
   dados/              arquivos de apoio dos robôs (ex.: posição da sede de cada município)
@@ -28,7 +30,7 @@ scripts/
 
 ## Como o site se atualiza
 
-Todo dia 3 de cada mês o GitHub executa o robô. Ele busca população (por estado e por município) e produção agrícola na API SIDRA do IBGE. Se a busca der certo, os arquivos de dados são trocados e o site é republicado. Se der errado, o dado antigo fica, com a data antiga, e o GitHub avisa por e-mail.
+Todo dia 3 de cada mês o GitHub executa o robô. Ele busca população (por estado e por município) e produção agrícola na API SIDRA do IBGE, e petróleo e gás na ANP: a produção de cada poço no último mês que já tem dados de terra e de mar (o mar sai todo mês, a terra por trimestre), a posição dos poços, os campos, as plataformas e o polígono do pré-sal. Se a ANP falhar, os arquivos antigos ficam e o site é publicado mesmo assim, com a data antiga à vista. Se a busca der certo, os arquivos de dados são trocados e o site é republicado. Se der errado, o dado antigo fica, com a data antiga, e o GitHub avisa por e-mail.
 
 Para rodar na hora: aba **Actions** → **Atualizar dados e publicar** → **Run workflow**.
 
@@ -56,6 +58,7 @@ Os limites do mar não entram no robô mensal, porque mudam raramente. Para refa
 - IBGE (população, agricultura, contornos dos estados): dados públicos oficiais.
 - Natural Earth (ferrovias, portos, aeroportos, contorno dos países e imagens de relevo): domínio público.
 - Eletropostos: números da ABVE citados por veículos de imprensa, com a fonte indicada em cada estado.
+- Petróleo e gás: ANP. Produção por poço nos dados abertos (página "Fase de Desenvolvimento e Produção") e posição dos poços, campos, unidades de produção e polígono do pré-sal no servidor de mapas do GeoMapsANP. Dados abertos do governo federal: uso livre, citando a fonte (Decreto 8.777/2016, art. 2º, III). A soma nacional foi conferida com o Boletim Mensal da Produção da ANP; o polígono do pré-sal foi conferido com o Anexo da Lei 12.351/2010. Óleo equivalente (boe) pela convenção da ANP: 1.000 m³ de gás = 1 m³ de petróleo = 6,2898 barris.
 - Limites do mar: Marine Regions, do Flanders Marine Institute (VLIZ, Bélgica), licença CC-BY 4.0. ZEE versão 12 ([doi:10.14284/632](https://doi.org/10.14284/632)), mar territorial versão 4 ([doi:10.14284/633](https://doi.org/10.14284/633)), zona contígua versão 4 ([doi:10.14284/630](https://doi.org/10.14284/630)), águas interiores versão 4 ([doi:10.14284/631](https://doi.org/10.14284/631)), todas de 2023, e plataforma continental estendida versão 2, de 2024 ([doi:10.14284/697](https://doi.org/10.14284/697)). O site usa um derivado simplificado só do Brasil; o original fica no Marine Regions, que pede para não ser redistribuído em outros lugares. Os desenhos não têm valor legal. Margem Equatorial: pontos do limite publicados pela CLPC/ONU (documento público das Nações Unidas). Situação de cada área da plataforma na ONU (CLPC): página do LEPLAC da Marinha (SECIRM).
 - Luzes à noite: população de cada município pela API SIDRA do IBGE (Censo 2022); posição das sedes municipais da base aberta [municipios-brasileiros](https://github.com/kelvins/municipios-brasileiros) (licença MIT), cópia em `scripts/dados/`; iluminação noturna NASA Black Marble via GIBS (domínio público).
 
