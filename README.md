@@ -61,6 +61,10 @@ Os limites do mar não entram no robô mensal, porque mudam raramente. Para refa
 
 - Mapa 3D: imagem do planeta NASA Blue Marble via GIBS (domínio público); altitude do terreno Terrain Tiles na AWS (dados abertos); motor MapLibre GL JS 5.24.0 (licença BSD, cópia em `site/3d/vendor/`); letras Open Sans (licença Apache 2.0), do projeto openmaptiles/fonts.
 
+## Contagem de visitas
+
+As páginas (principal e versão leve) contam visitas com o [GoatCounter](https://www.goatcounter.com/), painel em `brasilemcamadas.goatcounter.com`. Ele não usa cookies e não guarda endereço IP nem identificador de quem visita; o site avisa isso no rodapé. Navegadores automáticos e testes em `localhost` não são contados.
+
 ## Domínio próprio (para o futuro)
 
 O site foi feito para mudar de endereço sem reescrever nada:
