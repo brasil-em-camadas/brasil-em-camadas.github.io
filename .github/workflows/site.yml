@@ -1,6 +1,7 @@
 # Robô do Brasil em Camadas
 # - Todo dia 3 de cada mês (e quando você clicar em "Run workflow"): busca dados novos do IBGE e da ANP e salva no repositório.
 # - Depois de cada mudança: publica o site no GitHub Pages.
+# Versões das ações conferidas em 21/10/2026 (todas em Node 24; o Node 20 foi descontinuado pelo GitHub).
 name: Atualizar dados e publicar
 
 on:
@@ -24,8 +25,8 @@ jobs:
     if: github.event_name != 'push'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Buscar dados do IBGE
@@ -49,12 +50,12 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: main
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
