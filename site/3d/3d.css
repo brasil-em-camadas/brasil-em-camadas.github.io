@@ -15,7 +15,6 @@
 @keyframes cla{from{opacity:.9;transform:scale(.6)}to{opacity:0;transform:scale(2.8)}}
 .sem3d{position:absolute;inset:40% 20% auto;z-index:5;text-align:center;background:var(--glass);padding:20px;border-radius:12px}
 .sem3d a{color:var(--accent)}
-.foot a{color:var(--accent)}
 @media (prefers-reduced-motion:reduce){.mk-cla i.p,.carregando span{animation:none}}
 
 /* painel mais largo. "Recolher" fica fixo no mesmo ponto ao rolar (top = margem negativa, então não pula);
@@ -44,14 +43,3 @@
 .luz-info{display:grid;gap:6px;margin:2px 0 4px}
 .luz-info p{margin:0}
 .pop-fonte{font-size:11px;color:var(--muted)}
-/* apoio ao projeto: discreto, no rodapé, à direita (embaixo do painel) */
-.apoio{display:flex;flex-direction:column;align-items:flex-end;gap:6px;align-self:start;padding-top:2px}
-.apoio[hidden]{display:none}
-.apoiar{display:inline-flex;align-items:center;gap:8px;font:500 .88rem var(--f-body);color:var(--muted);text-decoration:none;
-  border:1px solid var(--hair);border-radius:999px;padding:7px 15px;transition:color .2s,border-color .2s;white-space:nowrap}
-.apoiar svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
-.foot .apoiar{color:var(--muted)}
-.foot .apoiar:hover,.foot .apoiar:focus-visible{color:var(--ink);border-color:var(--accent)}
-.apoio .note{font-size:.78rem;opacity:.8}
-@media (min-width:901px){.foot{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto}}
-@media (max-width:900px){.apoio{align-items:flex-start}}

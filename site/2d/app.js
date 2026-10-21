@@ -423,6 +423,13 @@ function rewind(f) {
         ${ev ? `${pill("entidade")} <span class="note">${ev.fonte}, ref. ${ev.referencia}</span>` : `${pill("pendente")} <span class="note">Nenhum número publicado encontrado.</span>`}</div>`;
   }
 
+  /* botão de apoio no rodapé: só aparece quando há link em fontes.json */
+  const AP = F.apoio, apoio = document.getElementById("apoio");
+  if (AP && AP.link && apoio) {
+    apoio.innerHTML = `<a class="apoiar" href="${esc(AP.link)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg>${esc(AP.texto)}</a>
+      ${AP.nota ? `<span class="note">${esc(AP.nota)}</span>` : ""}`;
+    apoio.hidden = false;
+  }
   document.getElementById("tiers").innerHTML = Object.values(NIVEL)
     .map(([c, t, d]) => `<div><span><span class="pill ${c}">${t}</span></span><span>${d}</span></div>`).join("");
 
