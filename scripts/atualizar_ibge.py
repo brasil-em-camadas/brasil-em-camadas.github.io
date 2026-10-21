@@ -93,12 +93,12 @@ def atualizar(c):
 
 # População de cada município, para a camada "Luzes à noite · População" da página 3D.
 # A posição de cada município é a sede (a cidade). As coordenadas ficam em scripts/dados/sedes_municipais.csv
-# (base aberta "municipios-brasileiros", licença MIT); a população vem da API do IBGE.
+# (IBGE, Localidades do Brasil 2022; gerado por scripts/gerar_sedes_municipais.py); a população vem da API do IBGE.
 MUNICIPIOS = {
     "arquivo": "luzes/municipios.json",
     "consulta": "/t/4709/n6/all/v/93/p/2022",
     "fonte": "IBGE, Censo Demográfico 2022 (tabela SIDRA 4709), população de cada município",
-    "posicao": "sede de cada município (base aberta municipios-brasileiros, derivada de dados do IBGE)",
+    "posicao": "sede de cada município (IBGE, Localidades do Brasil 2022)",
 }
 SEDES = Path(__file__).resolve().parent / "dados" / "sedes_municipais.csv"
 

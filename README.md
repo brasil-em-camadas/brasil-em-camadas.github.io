@@ -26,6 +26,7 @@ scripts/
   gerar_relevo.py     gera as imagens de relevo (roda só quando acionado à mão)
   gerar_limites_maritimos.py  gera os limites do mar a partir do Marine Regions (roda só à mão)
   gerar_contorno_estados.py   gera o contorno dos estados a partir da malha oficial do IBGE (roda só à mão, uma vez por ano)
+  gerar_sedes_municipais.py   gera a posição oficial das sedes municipais (IBGE, Localidades do Brasil 2022; roda só à mão)
   dados/              arquivos de apoio dos robôs (ex.: posição da sede de cada município)
 .github/workflows/
   site.yml            agenda do robô e publicação automática no GitHub Pages
@@ -66,7 +67,7 @@ Os limites do mar não entram no robô mensal, porque mudam raramente. Para refa
 - Eletropostos: números da ABVE citados por veículos de imprensa, com a fonte indicada em cada estado.
 - Petróleo e gás: ANP. Produção por poço nos dados abertos (página "Fase de Desenvolvimento e Produção") e posição dos poços, campos, unidades de produção e polígono do pré-sal no servidor de mapas do GeoMapsANP. Dados abertos do governo federal: uso livre, citando a fonte (Decreto 8.777/2016, art. 2º, III). A soma nacional foi conferida com o Boletim Mensal da Produção da ANP; o polígono do pré-sal foi conferido com o Anexo da Lei 12.351/2010. Óleo equivalente (boe) pela convenção da ANP: 1.000 m³ de gás = 1 m³ de petróleo = 6,2898 barris.
 - Limites do mar: Marine Regions, do Flanders Marine Institute (VLIZ, Bélgica), licença CC-BY 4.0. ZEE versão 12 ([doi:10.14284/632](https://doi.org/10.14284/632)), mar territorial versão 4 ([doi:10.14284/633](https://doi.org/10.14284/633)), zona contígua versão 4 ([doi:10.14284/630](https://doi.org/10.14284/630)), águas interiores versão 4 ([doi:10.14284/631](https://doi.org/10.14284/631)), todas de 2023, e plataforma continental estendida versão 2, de 2024 ([doi:10.14284/697](https://doi.org/10.14284/697)). O site usa um derivado simplificado só do Brasil; o original fica no Marine Regions, que pede para não ser redistribuído em outros lugares. Os desenhos não têm valor legal. Margem Equatorial: pontos do limite publicados pela CLPC/ONU (documento público das Nações Unidas). Situação de cada área da plataforma na ONU (CLPC): página do LEPLAC da Marinha (SECIRM).
-- Luzes à noite: população de cada município pela API SIDRA do IBGE (Censo 2022); posição das sedes municipais da base aberta [municipios-brasileiros](https://github.com/kelvins/municipios-brasileiros) (licença MIT), cópia em `scripts/dados/`; iluminação noturna NASA Black Marble via GIBS (domínio público).
+- Luzes à noite: população de cada município pela API SIDRA do IBGE (Censo 2022); posição das sedes municipais do IBGE (Localidades do Brasil 2022), em `scripts/dados/sedes_municipais.csv`, gerado por `scripts/gerar_sedes_municipais.py`; iluminação noturna NASA Black Marble via GIBS (domínio público).
 
 - Versão leve: biblioteca D3 7.8.5 (licença ISC), cópia em `site/2d/vendor/`. Contador de visitas: script `count.js` do GoatCounter (licença ISC), cópia em `site/vendor/`; a contagem continua indo para `brasilemcamadas.goatcounter.com`.
 - Letras do site: Barlow, Big Shoulders Display e JetBrains Mono, licença SIL Open Font License 1.1; cópias dos pacotes Fontsource 5.3.0 (as mesmas versões do Google Fonts) em `site/letras/`, com as licenças. Só os conjuntos latin e latin-ext e os pesos usados.
