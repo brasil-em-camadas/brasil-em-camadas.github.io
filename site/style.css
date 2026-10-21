@@ -247,7 +247,8 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
    a borda da caixa fica na margem de 20 px */
 @media (min-width:901px){
   .legend:not(:empty){background:rgba(6,14,12,.66);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
-    padding:6px 12px;border-radius:10px;opacity:1;max-width:min(720px,calc(100% - 540px))}
+    padding:6px 12px;border-radius:10px;opacity:1;max-width:min(720px,calc(100% - 540px));
+    max-height:40vh;overflow-y:auto;overscroll-behavior:contain}   /* com muitas camadas ligadas, a legenda rola em vez de cobrir o mapa */
 }
 /* "Brasil · 27 UFs" legível sobre o mapa claro da versão leve */
 .where #where{text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 8px rgba(0,0,0,.6)}
