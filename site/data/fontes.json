@@ -598,6 +598,25 @@
      "nome": "Linha de transmissão (mais grossa = tensão maior)"
     }
    ]
+  },
+  {
+   "id": "se",
+   "nome": "Subestações",
+   "tipo": "pontos",
+   "arquivo": "energia/subestacoes.json",
+   "sob_demanda": true,
+   "ministerio": "mme",
+   "nivel": "api",
+   "fonte": "EPE, Webmap (sistema elétrico existente): 926 subestações, onde a tensão das linhas de transmissão muda; maior = tensão mais alta (de 230 a 800 kV). Clique numa, de perto, para ver o nome",
+   "ligada": false,
+   "cor": "--lt",
+   "legenda": [
+    {
+     "nome": "Subestação (maior = tensão mais alta)",
+     "forma": "sq",
+     "cor": "--lt"
+    }
+   ]
   }
  ],
  "apoio": {

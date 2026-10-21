@@ -179,6 +179,14 @@ function rewind(f) {
     ltP = gLt.selectAll("path").data(DATA.lt.features).join("path").attr("class", "lt")
       .style("stroke-width", d => (0.5 + Math.max(0, d.properties.kv - 230) / 570 * 1.5).toFixed(2));
   }
+  /* subestações (EPE), sob demanda: losango, maior quanto mais alta a tensão */
+  const gSe = root.append("g");
+  let seP = gSe.selectAll("path");
+  function desenharSe() {
+    seP = gSe.selectAll("path").data(DATA.se.features.map(f => ({ ...f.properties, c: f.geometry.coordinates }))).join("path").attr("class", "se")
+      .attr("d", d => d3.symbol(d3.symbolDiamond, d.kv >= 700 ? 46 : d.kv >= 440 ? 30 : 18)());
+    seP.append("title").text(d => `${d.n} · subestação ${d.t} kV${d.ano ? ", em operação desde " + d.ano : ""}${d.c ? ". " + d.c : ""} (EPE).`);
+  }
   /* gasodutos e oleodutos (ANP), sob demanda */
   const gDutos = root.append("g");
   let dutosP = gDutos.selectAll("path");
@@ -255,7 +263,7 @@ function rewind(f) {
       return `${p.nome} · ${p.tipo}${p.operador ? " · " + p.operador : ""}${p.prevista ? " · prevista" : ""}${p.atende ? ". Atende: " + p.atende : ""}${p.capacidade_bbl_dia ? ". Capacidade: " + fmt(p.capacidade_bbl_dia) + " barris de petróleo/dia" : ""}. Fonte: ANP.`; });
   }
   const DESENHA = { boi: desenharBoi, oil: desenharPocos, uep: desenharUep, campos: desenharCampos, zc: desenharZc, pce: desenharPce, rodest: desenharRodEst, usinas: desenharUsinas, lt: desenharLt,
-    celm: desenharCelm, g5: desenharG5, lav: desenharLav, dutos: desenharDutos };
+    celm: desenharCelm, g5: desenharG5, lav: desenharLav, dutos: desenharDutos, se: desenharSe };
   /* refinarias (tamanho pela capacidade), unidades de gás natural e terminais de GNL (ANP); clicar abre o estado */
   const gRefin = root.append("g");
   const INST = { refinaria: "Refinaria", upgn: "Unidade de processamento de gás natural", gnl: "Terminal de GNL" };
@@ -284,7 +292,7 @@ function rewind(f) {
   caps.append("circle").attr("r", d => d.pais ? 3.6 : 2.6);
   caps.append("text").attr("x", 6).attr("y", 4).text(d => d.n);
   const G = { zee: gZee, mt: gMt, zc: gZc, pce: gPce, rod: gRod, rail: gRail, ports: gPorts, air: gAir, cla: gCla,
-    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt, celm: gCelm, g5: gG5, lav: gLav, dutos: gDutos, refin: gRefin };
+    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt, celm: gCelm, g5: gG5, lav: gLav, dutos: gDutos, refin: gRefin, se: gSe };
 
   let proj, path, W, H, head = 0, k = 1;
   const zoom = d3.zoom().scaleExtent([0.8, 12]).on("zoom", e => {
@@ -382,6 +390,7 @@ function rewind(f) {
     gNomes.classed("z-cap", k >= 1.9).classed("z-nome", k >= 3.2);
     ports.attr("r", 3.6 * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     refinC.attr("r", d => d.r0 * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
+    seP.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
     airs.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
     if (CLA) { const p = proj(CLA.ponto); gCla.selectAll("circle").attr("cx", 0).attr("cy", 0); gCla.attr("transform", `translate(${p}) scale(${s})`); }
   }
@@ -437,6 +446,7 @@ function rewind(f) {
     usinas: "M13 2L5 14h6l-1 8 8-12h-6z",
     lt: "M12 2l-5 20M12 2l5 20M8 9h8M7 14h10M5 20h14",
     dutos: "M2 9h13a4 4 0 014 4v9M2 14h12M15 22h7M19 13h3",
+    se: "M12 2l9 10-9 10-9-10zM12 7v10M8 12h8",
     refin: "M3 21V12l5 3v-3l5 3V8h3V4h3v17zM3 21h18",
     celm: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
     g5: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0"

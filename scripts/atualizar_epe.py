@@ -3,13 +3,13 @@
 Fonte: EPE (Empresa de Pesquisa Energética, ligada ao Ministério de Minas e Energia), serviço público de mapas
 "Sistema Elétrico Existente": https://gisepeprd2.epe.gov.br/arcgis/rest/services/SMA/Webmap_EPE_Sistema_Eletrico_Existente/MapServer
 Camadas: 0 eólicas, 1 solares, 2 hidrelétricas (UHE), 3 PCH, 4 CGH, 5 térmicas a biomassa, 6 térmicas fósseis,
-7 nucleares, 9 linhas de transmissão. A potência vem em kW; o estado vem do código CEG da ANEEL (ex.: EOL.CV.RJ.028730-0.01).
+7 nucleares, 8 subestações, 9 linhas de transmissão. A potência vem em kW; o estado vem do código CEG da ANEEL (ex.: EOL.CV.RJ.028730-0.01).
 É geração centralizada: os painéis solares de telhado (geração distribuída) não estão na base.
 
 Roda sozinho no GitHub Actions (site.yml), junto com os robôs do IBGE e da ANP, e também à mão:
     python scripts/atualizar_epe.py
 Só usa a biblioteca padrão. Se a EPE falhar ou responder algo incompleto, os arquivos antigos ficam.
-Saídas em site/data/energia/: usinas.json, linhas.json, estados.json e robo.json (resultado de cada passo).
+Saídas em site/data/energia/: usinas.json, linhas.json, subestacoes.json, estados.json e robo.json (resultado de cada passo).
 """
 import json
 import sys
@@ -152,9 +152,38 @@ def linhas():
     print(f"[energia] {len(saida)} linhas de transmissão")
 
 
+def subestacoes():
+    feats = consultar(8, "Nome,Ano_Opera,Tensao,Concession")
+    if len(feats) != contar(8):
+        raise ValueError(f"subestações: vieram {len(feats)} de {contar(8)}")
+    saida = []
+    for f in feats:
+        p, g = f.get("properties") or {}, f.get("geometry") or {}
+        if g.get("type") != "Point":
+            continue
+        tensoes = " ".join((p.get("Tensao") or "").split())
+        kvs = [int(x) for x in tensoes.replace(",", "/").split("/") if x.strip().isdigit()]
+        props = {"n": " ".join((p.get("Nome") or "").split()), "t": tensoes, "kv": max(kvs) if kvs else 0}
+        ano = (p.get("Ano_Opera") or "").strip()
+        if ano.isdigit():
+            props["ano"] = int(ano)
+        agente = " ".join((p.get("Concession") or "").split())
+        if agente and agente != "-":
+            props["c"] = agente
+        x, y = g["coordinates"][:2]
+        saida.append({"type": "Feature", "properties": props, "geometry": {"type": "Point", "coordinates": [round(x, 4), round(y, 4)]}})
+    if len(saida) < 500:
+        raise ValueError(f"só {len(saida)} subestações")
+    saida.sort(key=lambda f: f["properties"]["kv"])   # as de tensão mais alta por último: ficam por cima
+    meta = {"titulo": "Subestações", "fonte": FONTE, "nivel": "api", "atualizado_em": date.today().isoformat(), "consulta": BASE + "/8",
+            "nota": "subestações do sistema existente na base da EPE; tensão em kV (várias = os níveis de tensão da subestação)", "subestacoes": len(saida)}
+    gravar("subestacoes.json", {"type": "FeatureCollection", "meta": meta, "features": saida})
+    print(f"[energia] {len(saida)} subestações")
+
+
 if __name__ == "__main__":
     passos = {}
-    for nome, f in (("usinas", usinas), ("linhas", linhas)):
+    for nome, f in (("usinas", usinas), ("linhas", linhas), ("subestacoes", subestacoes)):
         try:
             f()
             passos[nome] = "ok"

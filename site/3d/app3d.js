@@ -131,6 +131,7 @@ function quintis(vals) {
         usinas: { type: "geojson", data: fc([]) },
         lt: { type: "geojson", data: fc([]) },
         dutos: { type: "geojson", data: fc([]) },
+        se: { type: "geojson", data: fc([]) },
         refin: { type: "geojson", data: DATA.refin || fc([]) },
         celm: { type: "geojson", data: fc([]) },
         g5: { type: "geojson", data: fc([]) },
@@ -194,6 +195,10 @@ function quintis(vals) {
         { id: "lt", type: "line", source: "lt", layout: { "line-join": "round" },
           paint: { "line-color": cor("--lt"), "line-opacity": 0.72,
             "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["interpolate", ["linear"], ["get", "kv"], 230, 0.5, 500, 1, 800, 1.6], 8, ["interpolate", ["linear"], ["get", "kv"], 230, 1.2, 500, 2.4, 800, 3.6]] } },
+        /* subestações (EPE): losango lilás, maior quanto mais alta a tensão */
+        { id: "se", type: "symbol", source: "se", layout: { "symbol-sort-key": ["get", "kv"], "icon-image": "se", "icon-allow-overlap": true, "icon-ignore-placement": true,
+            "icon-size": ["interpolate", ["linear"], ["zoom"], 3, ["interpolate", ["linear"], ["get", "kv"], 230, 0.35, 500, 0.55, 800, 0.8],
+              8, ["interpolate", ["linear"], ["get", "kv"], 230, 0.7, 500, 1, 800, 1.35]] } },
         /* gasodutos e oleodutos (ANP): os de transporte mais grossos */
         { id: "dutos", type: "line", source: "dutos", layout: { "line-join": "round", "line-cap": "round" },
           paint: { "line-color": ["match", ["get", "f"], "gas", cor("--gasd"), cor("--oleod")], "line-opacity": 0.85,
@@ -293,6 +298,15 @@ function quintis(vals) {
   });
   /* hachura (listras diagonais) da plataforma continental ainda em análise na ONU */
   map.on("styleimagemissing", e => {
+    if (e.id === "se" && !map.hasImage("se")) {
+      /* subestação: losango com borda escura */
+      const n = 24, c = document.createElement("canvas"); c.width = c.height = n;
+      const x = c.getContext("2d");
+      const losango = r => { x.beginPath(); x.moveTo(12, 12 - r); x.lineTo(12 + r, 12); x.lineTo(12, 12 + r); x.lineTo(12 - r, 12); x.closePath(); };
+      losango(10); x.fillStyle = "#14082a"; x.fill(); losango(7.5); x.fillStyle = cor("--lt"); x.fill();
+      map.addImage("se", x.getImageData(0, 0, n, n), { pixelRatio: 2 });
+      return;
+    }
     if ((e.id === "uep" || e.id === "uep-prevista") && !map.hasImage(e.id)) {
       /* plataforma: quadrado cheio; prevista: só o contorno */
       const n = 24, c = document.createElement("canvas"); c.width = c.height = n;
@@ -333,7 +347,7 @@ function quintis(vals) {
 
   const G = { zee: ["zee-fill", "zee-line", "zee-rotulo", "ilhas-ponto", "ilhas-rotulo"], mt: ["mt-fill", "mt-line", "mt-base"], zc: ["zc-fill", "zc-line"],
     pce: ["pce-fill-rec", "pce-fill-ana", "pce-line-rec", "pce-line-ana", "pce-rotulo"], rod: ["rodovias", "rodovias-terra", "rodovias-rotulo"], rodest: ["rodovias-est"],
-    oil: ["pocos"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi"], lav: ["lav"], usinas: ["usinas"], dutos: ["dutos"], refin: ["refin"], lt: ["lt"], celm: ["celm"], g5: ["g5"],
+    oil: ["pocos"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi"], lav: ["lav"], usinas: ["usinas"], dutos: ["dutos"], refin: ["refin"], se: ["se"], lt: ["lt"], celm: ["celm"], g5: ["g5"],
     rail: ["ferrovias", "ferrovias-obra"], ports: ["portos"], air: ["aeroportos"] };
 
   /* ---------- painel e enquadramento ---------- */
@@ -468,6 +482,14 @@ function quintis(vals) {
         .setHTML(`<b>${esc(p.nome)}</b><br>${esc(p.tipo)}${p.operador ? " · " + esc(p.operador) : ""}${p.prevista === true || p.prevista === "true" ? "<br><b>Prevista</b>" : ""}
           ${p.atende ? `<br>Atende: ${esc(p.atende)}` : ""}${p.capacidade_bbl_dia ? `<br>Capacidade: ${fmt(+p.capacidade_bbl_dia)} barris de petróleo/dia` : ""}
           ${p.lamina_m ? `<br>Profundidade da água: ${fmt(+p.lamina_m)} m` : ""}<br><span class="pop-fonte">ANP, cadastro de unidades de produção</span>`).addTo(map);
+      return;
+    }
+    const su = vis("se") && map.getZoom() >= 5 ? map.queryRenderedFeatures(perto, { layers: ["se"] }) : [];
+    if (su.length) {
+      const p = su.reduce((a, b) => b.properties.kv > a.properties.kv ? b : a).properties;
+      new maplibregl.Popup({ closeButton: false, offset: 8, maxWidth: "300px" }).setLngLat(su[0].geometry.coordinates)
+        .setHTML(`<b>${esc(p.n)}</b><br>Subestação · ${esc(p.t)} kV${p.ano ? " · em operação desde " + p.ano : ""}${p.c ? "<br>" + esc(p.c) : ""}
+          <br><span class="pop-fonte">EPE, Webmap (sistema elétrico existente)</span>`).addTo(map);
       return;
     }
     const ri = vis("refin") ? map.queryRenderedFeatures(perto, { layers: ["refin"] }) : [];
@@ -618,6 +640,7 @@ function quintis(vals) {
     usinas: "M13 2L5 14h6l-1 8 8-12h-6z",
     lt: "M12 2l-5 20M12 2l5 20M8 9h8M7 14h10M5 20h14",
     dutos: "M2 9h13a4 4 0 014 4v9M2 14h12M15 22h7M19 13h3",
+    se: "M12 2l9 10-9 10-9-10zM12 7v10M8 12h8",
     refin: "M3 21V12l5 3v-3l5 3V8h3V4h3v17zM3 21h18",
     celm: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
     g5: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0"
@@ -695,7 +718,7 @@ function quintis(vals) {
     lav: ["lav", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { v: m[2], g: m[3], p: m[4], pv: m[5], n: m[6], u: m[7] })))],
     oil: ["pocos", pocosFC], uep: ["uep", d => d], campos: ["campos", d => d], zc: ["zc", d => d], pce: ["pce", d => d], rodest: ["rodest", d => d],
     usinas: ["usinas", d => fc(d.usinas.map(u => ponto([u[0], u[1]], { kw: u[2], t: u[3], n: u[4], uf: u[5], a: u[6] || 0, d: u[7] || "", x: u[8] || "" })))],
-    lt: ["lt", d => d], dutos: ["dutos", d => d],
+    lt: ["lt", d => d], dutos: ["dutos", d => d], se: ["se", d => d],
     celm: ["celm", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { s: m[2], n: m[3], u: m[4], c: m[5] })))],
     g5: ["g5", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { n: m[2], u: m[3], o: m[4], c: m[5] })))] };
   /* município (código do IBGE) → linha do arquivo, para a janelinha do celular juntar as duas camadas */

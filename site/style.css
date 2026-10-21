@@ -270,3 +270,4 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .duto.gas{stroke:var(--gasd)}.duto.oleo{stroke:var(--oleod)}.duto.fino{stroke-width:.8}
 .inst{stroke:#1a0505;stroke-width:.8;vector-effect:non-scaling-stroke;cursor:pointer}
 .inst.k-refinaria{fill:var(--refin)}.inst.k-upgn{fill:var(--upgn)}.inst.k-gnl{fill:var(--gnl);stroke:#ffffff}
+.se{fill:var(--lt);stroke:#14082a;stroke-width:.8;vector-effect:non-scaling-stroke;cursor:default}
