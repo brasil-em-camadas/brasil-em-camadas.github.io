@@ -130,7 +130,99 @@ def atualizar_municipios(c=MUNICIPIOS):
     return True
 
 
+# Pecuária e aquicultura: IBGE, Pesquisa da Pecuária Municipal (PPM). Códigos conferidos na API em 2026-10-21:
+# - tabela 3939 = efetivo dos rebanhos (variável 105, em cabeças); classificação 79 = tipo de rebanho;
+# - tabela 3940 = aquicultura (variável 215 = valor da produção, em mil R$); classificação 654 = tipo de produto (0 = Total).
+# A aquicultura vai em valor porque cada produto tem uma unidade (peixe em kg, alevino em milheiros etc.): não dá para somar quantidades.
+REBANHOS = {"2670": "bovino", "32794": "suino", "32796": "galinaceos", "2677": "ovino", "2681": "caprino"}
+PECUARIA = {
+    "estados": "/t/3939/n3/all/v/105/p/last%201/c79/" + ",".join(REBANHOS),
+    "aquicultura": "/t/3940/n3/all/v/215/p/last%201/c654/all",
+    "municipios": "/t/3939/n6/all/v/105/p/last%201/c79/2670",
+}
+AQUI_SOMAS = {"0", "79366"}  # "Total" e "Peixes" (soma de várias espécies) ficam fora da escolha do produto principal
+FONTE_PPM = "IBGE, Pesquisa da Pecuária Municipal (tabelas SIDRA 3939 e 3940)"
+
+
+def coluna(cab, nome):
+    return next(k for k, v in cab.items() if v == nome)
+
+
+def numero(v):
+    try:
+        return int(float(v))
+    except (TypeError, ValueError):
+        return None  # "-" (zero), "..." e "X" (sigiloso) da SIDRA: sem número
+
+
+def atualizar_pecuaria():
+    """Grava pecuaria/estados.json (pintura e ficha de cada estado) e pecuaria/municipios.json (pontos do mapa).
+    Cada arquivo só é trocado se a resposta da API parecer completa."""
+    pasta = DADOS / "pecuaria"
+    pasta.mkdir(parents=True, exist_ok=True)
+    hoje = date.today().isoformat()
+    ok_estados = ok_mun = False
+    try:
+        reb, aq = baixar(PECUARIA["estados"]), baixar(PECUARIA["aquicultura"])
+        cab = reb[0]
+        c_uf, c_tipo, c_ano = coluna(cab, "Unidade da Federação (Código)"), coluna(cab, "Tipo de rebanho (Código)"), coluna(cab, "Ano")
+        val, ano = {}, None
+        for l in reb[1:]:
+            s, t = UF.get(l[c_uf]), REBANHOS.get(l[c_tipo])
+            if s and t:
+                val.setdefault(s, {})[t] = numero(l["V"])
+                ano = l[c_ano]
+        cab = aq[0]
+        a_uf, a_cod, a_nome, a_ano = (coluna(cab, "Unidade da Federação (Código)"), coluna(cab, "Tipo de produto da aquicultura (Código)"),
+                                      coluna(cab, "Tipo de produto da aquicultura"), coluna(cab, "Ano"))
+        ano_aq = None
+        for l in aq[1:]:
+            s, n = UF.get(l[a_uf]), numero(l["V"])
+            if not s or s not in val or n is None:
+                continue
+            ano_aq = l[a_ano]
+            if l[a_cod] == "0":
+                val[s]["aquicultura_mil_rs"] = n
+            elif l[a_cod] not in AQUI_SOMAS and n > val[s].get("aquicultura_principal_mil_rs", 0):
+                val[s]["aquicultura_principal"], val[s]["aquicultura_principal_mil_rs"] = l[a_nome], n
+        for v in val.values():
+            v["valor"] = v.get("bovino")
+        if sum(1 for v in val.values() if v.get("bovino")) < 27:
+            raise ValueError(f"só {len(val)} estados com rebanho bovino")
+        novo = {"titulo": "Rebanho bovino", "unidade": "cabeças", "referencia": ano or "", "aquicultura_referencia": ano_aq or "",
+                "fonte": FONTE_PPM, "nivel": "api", "atualizado_em": hoje,
+                "consulta": [SIDRA + PECUARIA["estados"], SIDRA + PECUARIA["aquicultura"]],
+                "total_bovino": sum(v["bovino"] for v in val.values()), "valores": val}
+        (pasta / "estados.json").write_text(json.dumps(novo, ensure_ascii=False, indent=1), encoding="utf-8")
+        print(f"[pecuaria/estados.json] ok: 27 estados, rebanhos de {ano}, aquicultura de {ano_aq}")
+        ok_estados = True
+    except Exception as e:
+        print(f"[pecuaria/estados.json] falhou, mantendo o anterior: {e}")
+    try:
+        linhas = baixar(PECUARIA["municipios"])
+        cab = linhas[0]
+        c_mun, c_ano = coluna(cab, "Município (Código)"), coluna(cab, "Ano")
+        bois = {l[c_mun]: numero(l["V"]) for l in linhas[1:]}
+        ano = linhas[1][c_ano] if len(linhas) > 1 else ""
+        sedes = {r["codigo_ibge"]: r for r in csv.DictReader(SEDES.open(encoding="utf-8"))}
+        m = [[round(float(sedes[k]["longitude"]), 4), round(float(sedes[k]["latitude"]), 4), v, sedes[k]["nome"], UF.get(k[:2], "")]
+             for k, v in bois.items() if v and k in sedes]
+        if len(m) < 5000:  # quase todo município tem algum gado; bem menos que isso = resposta incompleta
+            raise ValueError(f"só {len(m)} municípios")
+        m.sort(key=lambda x: -x[2])  # os maiores primeiro: os pequenos ficam desenhados por cima e continuam visíveis
+        novo = {"meta": {"titulo": "Rebanho bovino por município", "referencia": ano, "fonte": "IBGE, Pesquisa da Pecuária Municipal (tabela SIDRA 3939)",
+                         "posicao": MUNICIPIOS["posicao"], "nivel": "api", "atualizado_em": hoje, "consulta": SIDRA + PECUARIA["municipios"],
+                         "total": sum(x[2] for x in m), "municipios_com_gado": len(m)},
+                "campos": ["lon", "lat", "cabecas", "nome", "uf"], "municipios": m}
+        (pasta / "municipios.json").write_text(json.dumps(novo, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        print(f"[pecuaria/municipios.json] ok: {len(m)} municípios, {novo['meta']['total']} cabeças, ano {ano}")
+        ok_mun = True
+    except Exception as e:
+        print(f"[pecuaria/municipios.json] falhou, mantendo o anterior: {e}")
+    return [ok_estados, ok_mun]
+
+
 if __name__ == "__main__":
-    ok = [atualizar(c) for c in CAMADAS] + [atualizar_municipios()]
+    ok = [atualizar(c) for c in CAMADAS] + [atualizar_municipios()] + atualizar_pecuaria()
     # Só falha o robô se NADA atualizou, para alguém ser avisado por e-mail pelo GitHub.
     sys.exit(0 if any(ok) else 1)

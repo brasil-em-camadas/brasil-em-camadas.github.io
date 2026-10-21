@@ -1,0 +1,313 @@
+{
+ "titulo": "Rebanho bovino",
+ "unidade": "cabeças",
+ "referencia": "2025",
+ "aquicultura_referencia": "2025",
+ "fonte": "IBGE, Pesquisa da Pecuária Municipal (tabelas SIDRA 3939 e 3940)",
+ "nivel": "api",
+ "atualizado_em": "2026-10-21",
+ "consulta": [
+  "https://apisidra.ibge.gov.br/values/t/3939/n3/all/v/105/p/last%201/c79/2670,32794,32796,2677,2681",
+  "https://apisidra.ibge.gov.br/values/t/3940/n3/all/v/215/p/last%201/c654/all"
+ ],
+ "total_bovino": 234251041,
+ "valores": {
+  "RO": {
+   "bovino": 17089633,
+   "suino": 197962,
+   "galinaceos": 10712100,
+   "ovino": 119936,
+   "caprino": 7222,
+   "aquicultura_mil_rs": 791839,
+   "aquicultura_principal": "Tambaqui",
+   "aquicultura_principal_mil_rs": 682508,
+   "valor": 17089633
+  },
+  "AC": {
+   "bovino": 5191559,
+   "suino": 159233,
+   "galinaceos": 2925564,
+   "ovino": 77208,
+   "caprino": 9599,
+   "aquicultura_mil_rs": 38998,
+   "aquicultura_principal": "Tambaqui",
+   "aquicultura_principal_mil_rs": 12795,
+   "valor": 5191559
+  },
+  "AM": {
+   "bovino": 2686769,
+   "suino": 90257,
+   "galinaceos": 5867531,
+   "ovino": 45446,
+   "caprino": 17256,
+   "aquicultura_mil_rs": 202147,
+   "aquicultura_principal": "Tambaqui",
+   "aquicultura_principal_mil_rs": 116396,
+   "valor": 2686769
+  },
+  "RR": {
+   "bovino": 1231062,
+   "suino": 75430,
+   "galinaceos": 1412570,
+   "ovino": 42888,
+   "caprino": 20253,
+   "aquicultura_mil_rs": 182068,
+   "aquicultura_principal": "Tambaqui",
+   "aquicultura_principal_mil_rs": 175104,
+   "valor": 1231062
+  },
+  "PA": {
+   "bovino": 25559452,
+   "suino": 532967,
+   "galinaceos": 24219454,
+   "ovino": 270205,
+   "caprino": 61005,
+   "aquicultura_mil_rs": 311601,
+   "aquicultura_principal": "Tambaqui",
+   "aquicultura_principal_mil_rs": 144084,
+   "valor": 25559452
+  },
+  "AP": {
+   "bovino": 61413,
+   "suino": 27139,
+   "galinaceos": 73543,
+   "ovino": 5695,
+   "caprino": 3521,
+   "aquicultura_mil_rs": 17021,
+   "aquicultura_principal": "Tambaqui",
+   "aquicultura_principal_mil_rs": 10480,
+   "valor": 61413
+  },
+  "TO": {
+   "bovino": 11532757,
+   "suino": 186990,
+   "galinaceos": 6763859,
+   "ovino": 87133,
+   "caprino": 8360,
+   "aquicultura_mil_rs": 246844,
+   "aquicultura_principal": "Tambaqui",
+   "aquicultura_principal_mil_rs": 123022,
+   "valor": 11532757
+  },
+  "MA": {
+   "bovino": 10323144,
+   "suino": 898165,
+   "galinaceos": 13718948,
+   "ovino": 312493,
+   "caprino": 348700,
+   "aquicultura_mil_rs": 374916,
+   "aquicultura_principal": "Tambacu, tambatinga",
+   "aquicultura_principal_mil_rs": 118173,
+   "valor": 10323144
+  },
+  "PI": {
+   "bovino": 1363083,
+   "suino": 1094004,
+   "galinaceos": 12526909,
+   "ovino": 1885056,
+   "caprino": 2094626,
+   "aquicultura_mil_rs": 244681,
+   "aquicultura_principal": "Camarão",
+   "aquicultura_principal_mil_rs": 94643,
+   "valor": 1363083
+  },
+  "CE": {
+   "bovino": 2989015,
+   "suino": 1410841,
+   "galinaceos": 36375012,
+   "ovino": 2616875,
+   "caprino": 1114107,
+   "aquicultura_mil_rs": 2251616,
+   "aquicultura_principal": "Camarão",
+   "aquicultura_principal_mil_rs": 1929703,
+   "valor": 2989015
+  },
+  "RN": {
+   "bovino": 1495747,
+   "suino": 540038,
+   "galinaceos": 13590613,
+   "ovino": 787324,
+   "caprino": 600971,
+   "aquicultura_mil_rs": 1008265,
+   "aquicultura_principal": "Camarão",
+   "aquicultura_principal_mil_rs": 782871,
+   "valor": 1495747
+  },
+  "PB": {
+   "bovino": 1559195,
+   "suino": 343312,
+   "galinaceos": 15756944,
+   "ovino": 872377,
+   "caprino": 858137,
+   "aquicultura_mil_rs": 506059,
+   "aquicultura_principal": "Camarão",
+   "aquicultura_principal_mil_rs": 444866,
+   "valor": 1559195
+  },
+  "PE": {
+   "bovino": 2779499,
+   "suino": 864972,
+   "galinaceos": 67684464,
+   "ovino": 3857506,
+   "caprino": 3272199,
+   "aquicultura_mil_rs": 567972,
+   "aquicultura_principal": "Tilápia",
+   "aquicultura_principal_mil_rs": 422664,
+   "valor": 2779499
+  },
+  "AL": {
+   "bovino": 1485386,
+   "suino": 202932,
+   "galinaceos": 5544064,
+   "ovino": 357109,
+   "caprino": 61226,
+   "aquicultura_mil_rs": 256813,
+   "aquicultura_principal": "Tilápia",
+   "aquicultura_principal_mil_rs": 149477,
+   "valor": 1485386
+  },
+  "SE": {
+   "bovino": 1479203,
+   "suino": 186728,
+   "galinaceos": 6657610,
+   "ovino": 223537,
+   "caprino": 25960,
+   "aquicultura_mil_rs": 100117,
+   "aquicultura_principal": "Camarão",
+   "aquicultura_principal_mil_rs": 84200,
+   "valor": 1479203
+  },
+  "BA": {
+   "bovino": 13792045,
+   "suino": 1162940,
+   "galinaceos": 48079333,
+   "ovino": 5987470,
+   "caprino": 4693784,
+   "aquicultura_mil_rs": 319401,
+   "aquicultura_principal": "Tilápia",
+   "aquicultura_principal_mil_rs": 144118,
+   "valor": 13792045
+  },
+  "MG": {
+   "bovino": 22102505,
+   "suino": 5760042,
+   "galinaceos": 133185104,
+   "ovino": 175004,
+   "caprino": 69474,
+   "aquicultura_mil_rs": 632552,
+   "aquicultura_principal": "Tilápia",
+   "aquicultura_principal_mil_rs": 574410,
+   "valor": 22102505
+  },
+  "ES": {
+   "bovino": 2164541,
+   "suino": 160780,
+   "galinaceos": 28790958,
+   "ovino": 31291,
+   "caprino": 5346,
+   "aquicultura_mil_rs": 84451,
+   "aquicultura_principal": "Tilápia",
+   "aquicultura_principal_mil_rs": 77653,
+   "valor": 2164541
+  },
+  "RJ": {
+   "bovino": 2783227,
+   "suino": 52135,
+   "galinaceos": 20040118,
+   "ovino": 40065,
+   "caprino": 11998,
+   "aquicultura_mil_rs": 43424,
+   "aquicultura_principal": "Tilápia",
+   "aquicultura_principal_mil_rs": 30277,
+   "valor": 2783227
+  },
+  "SP": {
+   "bovino": 10291548,
+   "suino": 1465535,
+   "galinaceos": 196363079,
+   "ovino": 262139,
+   "caprino": 46165,
+   "aquicultura_mil_rs": 726432,
+   "aquicultura_principal": "Tilápia",
+   "aquicultura_principal_mil_rs": 606759,
+   "valor": 10291548
+  },
+  "PR": {
+   "bovino": 8472972,
+   "suino": 7047439,
+   "galinaceos": 463493696,
+   "ovino": 463418,
+   "caprino": 51670,
+   "aquicultura_mil_rs": 2137179,
+   "aquicultura_principal": "Tilápia",
+   "aquicultura_principal_mil_rs": 1921436,
+   "valor": 8472972
+  },
+  "SC": {
+   "bovino": 4250624,
+   "suino": 9350304,
+   "galinaceos": 143165477,
+   "ovino": 345130,
+   "caprino": 32158,
+   "aquicultura_mil_rs": 650788,
+   "aquicultura_principal": "Tilápia",
+   "aquicultura_principal_mil_rs": 405279,
+   "valor": 4250624
+  },
+  "RS": {
+   "bovino": 11403760,
+   "suino": 6375913,
+   "galinaceos": 166194733,
+   "ovino": 2679974,
+   "caprino": 49004,
+   "aquicultura_mil_rs": 164337,
+   "aquicultura_principal": "Carpa",
+   "aquicultura_principal_mil_rs": 73203,
+   "valor": 11403760
+  },
+  "MS": {
+   "bovino": 17946309,
+   "suino": 1961957,
+   "galinaceos": 35548106,
+   "ovino": 275374,
+   "caprino": 12458,
+   "aquicultura_mil_rs": 221265,
+   "aquicultura_principal": "Tilápia",
+   "aquicultura_principal_mil_rs": 166917,
+   "valor": 17946309
+  },
+  "MT": {
+   "bovino": 31645874,
+   "suino": 2092539,
+   "galinaceos": 45531968,
+   "ovino": 377557,
+   "caprino": 23937,
+   "aquicultura_mil_rs": 856244,
+   "aquicultura_principal": "Tambacu, tambatinga",
+   "aquicultura_principal_mil_rs": 379994,
+   "valor": 31645874
+  },
+  "GO": {
+   "bovino": 22494716,
+   "suino": 1606294,
+   "galinaceos": 95101239,
+   "ovino": 95576,
+   "caprino": 22244,
+   "aquicultura_mil_rs": 203399,
+   "aquicultura_principal": "Tilápia",
+   "aquicultura_principal_mil_rs": 139717,
+   "valor": 22494716
+  },
+  "DF": {
+   "bovino": 76003,
+   "suino": 146753,
+   "galinaceos": 8164577,
+   "ovino": 15156,
+   "caprino": 3327,
+   "aquicultura_mil_rs": 31929,
+   "aquicultura_principal": "Tilápia",
+   "aquicultura_principal_mil_rs": 27530,
+   "valor": 76003
+  }
+ }
+}

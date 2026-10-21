@@ -5,7 +5,7 @@
   --land:#1d4a2c; --land-hi:#28603a; --edge:#5f9a6a;
   --ink:#ece9de; --muted:#a3ab9c; --dim:#6c7466; --hair:rgba(214,198,150,.16);
   --glass:rgba(10,18,20,.8); --bar:rgba(9,15,17,.94);
-  --accent:#e6b450; --road:#e9dfc4; --mt:#9fe6f2; --sea-line:#58cfe0; --rail:#e39a58; --port:#f4f7f5; --air:#a9bdf7; --cla:#ff7a6b; --zc:#5fd0a8; --pce:#e58fd3; --oil:#f6c945; --uep:#ff6b4a; --campo:#d9902b; --presal:#fff0a8; --sem:#3e433f;
+  --accent:#e6b450; --road:#e9dfc4; --mt:#9fe6f2; --sea-line:#58cfe0; --rail:#e39a58; --port:#f4f7f5; --air:#a9bdf7; --cla:#ff7a6b; --zc:#5fd0a8; --pce:#e58fd3; --oil:#f6c945; --uep:#ff6b4a; --campo:#d9902b; --presal:#fff0a8; --sem:#3e433f; --boi:#d9a66b;
   --q1:#1d4a2c; --q2:#2b6338; --q3:#3f7e44; --q4:#6aa055; --q5:#a8c97a;
   --t-api:#7fd6c9; --t-manual:#b7d98a; --t-entidade:#e8b75a; --t-base:#a9bdf7; --t-calculado:#c9a2ff; --t-pendente:#ff8f80;
   --f-display:"Big Shoulders Display","Arial Narrow",sans-serif;
@@ -231,3 +231,5 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 }
 /* telas médias (tablet deitado): abas do ministério um pouco mais juntas, para não sobrar uma aba sozinha numa linha */
 @media (min-width:901px) and (max-width:1180px){.mins{gap:4px 10px}.tab{font-size:.85rem}}
+/* rebanho bovino por município (versão leve) */
+.boi{fill:var(--boi);fill-opacity:.72;stroke:#2b1a0c;stroke-width:.4;vector-effect:non-scaling-stroke;cursor:pointer}

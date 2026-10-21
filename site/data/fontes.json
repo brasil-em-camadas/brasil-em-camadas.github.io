@@ -25,6 +25,13 @@
    "por": "total"
   },
   {
+   "id": "reb",
+   "nome": "Rebanho bovino",
+   "arquivo": "pecuaria/estados.json",
+   "ministerio": "agri",
+   "por": "total"
+  },
+  {
    "id": "evpc",
    "nome": "Eletropostos / 100 mil hab.",
    "arquivo": "eletropostos.json",
@@ -254,11 +261,22 @@
    "fonte": "Anatel, dados abertos a confirmar"
   },
   {
-   "id": "p-pec",
-   "nome": "Rebanhos e aquicultura",
+   "id": "boi",
+   "nome": "Rebanho bovino por município",
+   "tipo": "pontos",
+   "arquivo": "pecuaria/municipios.json",
+   "sob_demanda": true,
    "ministerio": "agri",
-   "nivel": "pendente",
-   "fonte": "IBGE PPM, API SIDRA"
+   "nivel": "api",
+   "fonte": "IBGE, Pesquisa da Pecuária Municipal (tabela SIDRA 3939): cabeças de gado em cada município, no ponto da sede (a cidade). O tamanho do ponto mostra o rebanho. Clique num ponto para ver os números",
+   "ligada": false,
+   "cor": "--boi",
+   "legenda": [
+    {
+     "nome": "Rebanho bovino por município (tamanho = cabeças)",
+     "forma": "pt"
+    }
+   ]
   },
   {
    "id": "p-rod",

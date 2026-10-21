@@ -47,7 +47,8 @@ function rewind(f) {
 
   /* carrega cada camada; arquivo ausente vira "em apuração" */
   const DATA = {};
-  await Promise.all([...F.pintura, ...F.camadas].filter(l => l.arquivo).map(async l => {
+  /* camadas "sob_demanda" (arquivos grandes que começam desligados) só são baixadas quando alguém liga a camada */
+  await Promise.all([...F.pintura, ...F.camadas].filter(l => l.arquivo && !l.sob_demanda).map(async l => {
     DATA[l.id] = await getJSON("../data/" + l.arquivo);
     if (!DATA[l.id] && l.nivel) l.nivel = "pendente";
   }));
@@ -154,6 +155,18 @@ function rewind(f) {
   /* poços em produção: [lon, lat, boe/dia, barris/dia, mil m³ de gás/dia, poço, campo, UF, mar/terra] */
   const POCOS = DATA.oil && DATA.oil.pocos ? DATA.oil.pocos.map(p => ({ c: [p[0], p[1]], b: p[2], o: p[3], g: p[4], n: p[5], campo: p[6], u: p[7], a: p[8],
     r0: Math.max(0.9, Math.min(9, 0.9 + Math.sqrt(p[2]) * 0.034)) })) : [];
+  /* rebanho bovino por município: desenhado quando o arquivo chega (camada sob demanda) */
+  const gBoi = root.append("g");
+  let boiC = gBoi.selectAll("circle");
+  const posBoi = () => boiC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
+  function desenharBoi() {
+    const M = DATA.boi;
+    boiC = gBoi.selectAll("circle").data(M.municipios.map(m => ({ c: [m[0], m[1]], b: m[2], n: m[3], u: m[4],
+      r0: Math.max(0.6, Math.min(8, 0.6 + Math.sqrt(m[2]) * 0.0045)) }))).join("circle").attr("class", "boi");
+    boiC.on("click", (e, d) => { e.stopPropagation(); select(d.u); });   /* clicar num ponto abre o estado dele */
+    boiC.append("title").text(d => `${d.n} · ${d.u}: ${fmt(d.b)} cabeças de gado bovino (IBGE, Pesquisa da Pecuária Municipal ${M.meta.referencia}). O ponto fica na sede do município.`);
+    if (proj) { posBoi(); raioPocos(); }
+  }
   const gPocos = root.append("g");
   const pocosC = gPocos.selectAll("circle").data(POCOS).join("circle").attr("class", "poco");
   pocosC.append("title").text(d => `Poço ${d.n} · campo ${d.campo} · ${d.a === "M" ? "mar" : "terra"}${d.u ? " · " + d.u : ""}. Petróleo: ${fmt(Math.round(d.o))} barris/dia; gás: ${fmt1(d.g)} mil m³/dia; total ${fmt(Math.round(d.b))} boe/dia (ANP, média de ${DATA.oil.meta.referencia}).`);
@@ -182,7 +195,7 @@ function rewind(f) {
   caps.append("circle").attr("r", d => d.pais ? 3.6 : 2.6);
   caps.append("text").attr("x", 6).attr("y", 4).text(d => d.n);
   const G = { zee: gZee, mt: gMt, zc: gZc, pce: gPce, rod: gRod, rail: gRail, ports: gPorts, air: gAir, cla: gCla,
-    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal };
+    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi };
 
   let proj, path, W, H, head = 0, k = 1;
   const zoom = d3.zoom().scaleExtent([0.8, 12]).on("zoom", e => {
@@ -220,6 +233,7 @@ function rewind(f) {
     MAR.forEach(sel => sel.attr("d", path));
     camposP.attr("d", path); presalP.attr("d", path);
     pocosC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
+    posBoi();
     raioPocos();
     roads.attr("d", path);
     states.attr("d", path);
@@ -249,7 +263,7 @@ function rewind(f) {
     }
     return d;
   }
-  function raioPocos() { const s = 1 / Math.sqrt(k); pocosC.attr("r", d => d.r0 * s); }
+  function raioPocos() { const s = 1 / Math.sqrt(k); pocosC.attr("r", d => d.r0 * s); boiC.attr("r", d => d.r0 * s); }
   /* pontos mantêm tamanho legível em qualquer zoom */
   function place() {
     const s = 1 / Math.sqrt(k);
@@ -308,6 +322,7 @@ function rewind(f) {
     "p-def": "M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z",
     "p-cel": "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
     "p-pec": "M4 10h14l2 3v4h-2M4 10v7h2M8 17h8M4 10l-1-3M16 10l1-3",
+    boi: "M4 10h14l2 3v4h-2M4 10v7h2M8 17h8M4 10l-1-3M16 10l1-3",
     "p-rod": "M8 21L10 3M16 21L14 3M12 6v2M12 11v2M12 16v2",
     "p-ene": "M13 2L5 14h6l-1 8 8-12h-6z"
   };
@@ -337,7 +352,7 @@ function rewind(f) {
       <label class="layer ${l.nivel === "pendente" ? "pend" : ""}">
         <input type="checkbox" id="ly-${l.id}" ${l.on ? "checked" : ""} ${l.nivel === "pendente" ? "disabled" : ""}>${icon(l.id)}
         <span><span class="nm">${l.cor ? `<i class="key" style="background:var(${l.cor})"></i>` : ""}${l.nome} ${pill(l.nivel)}</span>
-        <span class="src">${l.fonte}${quando(l.id)} · ${F.ministerios[l.ministerio]}</span></span>
+        <span class="src">${l.fonte}${quando(l.id)} · ${F.ministerios[l.ministerio]}${l.baixando ? " · <b>carregando…</b>" : ""}${l.falhou ? " · <b>não foi possível carregar agora; tente de novo</b>" : ""}</span></span>
       </label>`).join("") : `<p class="note">Este ministério ainda não tem camadas de mapa.</p>`;
     lv.filter(l => l.nivel !== "pendente").forEach(l => document.getElementById("ly-" + l.id).onchange = e => { l.on = e.target.checked; render(); });
     /* ligar ou desligar de uma vez todas as camadas da lista (respeita o ministério escolhido) */
@@ -360,7 +375,20 @@ function rewind(f) {
     render();
   };
   /* ---------- desenho ---------- */
+  /* camadas sob demanda: o arquivo é baixado na primeira vez que a camada é ligada */
+  function baixarSobDemanda() {
+    LAYERS.filter(l => l.on && l.sob_demanda && !DATA[l.id] && !l.baixando).forEach(async l => {
+      l.baixando = true; l.falhou = false;
+      const d = await getJSON("../data/" + l.arquivo);
+      l.baixando = false;
+      if (!d) { l.on = false; l.falhou = true; render(); return; }
+      DATA[l.id] = d;
+      if (l.id === "boi") desenharBoi();
+      render();
+    });
+  }
   function render() {
+    baixarSobDemanda();
     controls();
     LAYERS.filter(l => G[l.id]).forEach(l => G[l.id].attr("display", l.on ? null : "none"));
     const P = PAINT.find(p => p.id === paint);
@@ -406,6 +434,27 @@ function rewind(f) {
       ${pill(O.nivel)} <span class="note">${esc(O.fonte)}; média de ${esc(O.referencia)} · atualizado em ${O.atualizado_em}</span></div>`;
   }
 
+  /* pecuária e aquicultura do estado (IBGE, PPM) */
+  function fichaPecuaria(s) {
+    const R = DATA.reb;
+    if (!R) return "";
+    const v = R.valores[s];
+    if (!v) return "";
+    const rk = Object.entries(R.valores).sort((a, b) => (b[1].bovino || 0) - (a[1].bovino || 0)).findIndex(e => e[0] === s) + 1;
+    const n = x => x == null ? "—" : fmt(x);
+    return `<div class="sec"><h3>Pecuária e aquicultura</h3>
+      <div class="kv"><span>Bois e vacas</span><span class="v">${n(v.bovino)}</span></div>
+      <div class="kv"><span>Posição no país (bovinos)</span><span class="v">${rk}º · ${fmt1(v.bovino / R.total_bovino * 100)}%</span></div>
+      <div class="kv"><span>Porcos</span><span class="v">${n(v.suino)}</span></div>
+      <div class="kv"><span>Galinhas e frangos</span><span class="v">${n(v.galinaceos)}</span></div>
+      <div class="kv"><span>Ovelhas</span><span class="v">${n(v.ovino)}</span></div>
+      <div class="kv"><span>Cabras</span><span class="v">${n(v.caprino)}</span></div>
+      ${v.aquicultura_mil_rs != null ? `<div class="kv"><span>Aquicultura (valor da produção)</span><span class="v">${reais(v.aquicultura_mil_rs)}</span></div>
+        ${v.aquicultura_principal ? `<div class="list">Principal produto: ${esc(v.aquicultura_principal)} (${reais(v.aquicultura_principal_mil_rs)}).</div>` : ""}` : ""}
+      <div class="list">Animais contados pelo IBGE em 31 de dezembro.</div>
+      ${pill(R.nivel)} <span class="note">${esc(R.fonte)}, ref. ${esc(R.referencia)} · atualizado em ${R.atualizado_em}</span></div>`;
+  }
+
   function ficha() {
     const el = document.getElementById("ficha");
     const popInfo = DATA.pop ? `${pill(DATA.pop.nivel)} <span class="note">${DATA.pop.fonte} · atualizado em ${DATA.pop.atualizado_em}</span>` : pill("pendente");
@@ -432,6 +481,7 @@ function rewind(f) {
         ${ag != null ? `<div class="kv"><span>${DATA.agro.titulo}</span><span class="v">${reais(ag)}</span></div>
           ${pill(DATA.agro.nivel)} <span class="note">${DATA.agro.fonte}, ref. ${DATA.agro.referencia} · atualizado em ${DATA.agro.atualizado_em}</span>`
         : `${pill("pendente")} <span class="note">O robô de atualização ainda não rodou.</span>`}</div>
+      ${fichaPecuaria(s)}
       <div class="sec"><h3>Logística</h3>
         <div class="kv"><span>Ferrovias no mapa</span><span class="v">${km ? "≈ " + fmt(km) + " km" : "nenhuma na base"}</span></div>
         <div class="kv"><span>Portos na base</span><span class="v">${Pt.length}</span></div>

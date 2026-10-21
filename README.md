@@ -32,7 +32,7 @@ scripts/
 
 ## Como o site se atualiza
 
-Todo dia 3 de cada mês o GitHub executa o robô. Ele busca população (por estado e por município) e produção agrícola na API SIDRA do IBGE, e petróleo e gás na ANP: a produção de cada poço no último mês que já tem dados de terra e de mar (o mar sai todo mês, a terra por trimestre), a posição dos poços, os campos, as plataformas e o polígono do pré-sal. Se a ANP falhar, os arquivos antigos ficam e o site é publicado mesmo assim, com a data antiga à vista. Se a busca der certo, os arquivos de dados são trocados e o site é republicado. Se der errado, o dado antigo fica, com a data antiga, e o GitHub avisa por e-mail.
+Todo dia 3 de cada mês o GitHub executa o robô. Ele busca população (por estado e por município), produção agrícola, rebanhos (por estado e o gado bovino de cada município) e aquicultura na API SIDRA do IBGE, e petróleo e gás na ANP: a produção de cada poço no último mês que já tem dados de terra e de mar (o mar sai todo mês, a terra por trimestre), a posição dos poços, os campos, as plataformas e o polígono do pré-sal. Se a ANP falhar, os arquivos antigos ficam e o site é publicado mesmo assim, com a data antiga à vista. Se a busca der certo, os arquivos de dados são trocados e o site é republicado. Se der errado, o dado antigo fica, com a data antiga, e o GitHub avisa por e-mail.
 
 Para rodar na hora: aba **Actions** → **Atualizar dados e publicar** → **Run workflow**.
 
@@ -57,7 +57,7 @@ Os limites do mar não entram no robô mensal, porque mudam raramente. Para refa
 
 ## Fontes e licenças dos dados
 
-- IBGE (população, agricultura, contornos dos estados): dados públicos oficiais.
+- IBGE (população, agricultura, pecuária e aquicultura, contornos dos estados): dados públicos oficiais. Pecuária: Pesquisa da Pecuária Municipal, tabelas SIDRA 3939 (rebanhos) e 3940 (aquicultura).
 - Natural Earth (ferrovias, portos, aeroportos, contorno dos países e imagens de relevo): domínio público.
 - Eletropostos: números da ABVE citados por veículos de imprensa, com a fonte indicada em cada estado.
 - Petróleo e gás: ANP. Produção por poço nos dados abertos (página "Fase de Desenvolvimento e Produção") e posição dos poços, campos, unidades de produção e polígono do pré-sal no servidor de mapas do GeoMapsANP. Dados abertos do governo federal: uso livre, citando a fonte (Decreto 8.777/2016, art. 2º, III). A soma nacional foi conferida com o Boletim Mensal da Produção da ANP; o polígono do pré-sal foi conferido com o Anexo da Lei 12.351/2010. Óleo equivalente (boe) pela convenção da ANP: 1.000 m³ de gás = 1 m³ de petróleo = 6,2898 barris.
