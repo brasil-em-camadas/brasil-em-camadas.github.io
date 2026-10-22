@@ -41,6 +41,8 @@ scripts/
   gerar_sedes_municipais.py   gera a posição oficial das sedes municipais (IBGE, Localidades do Brasil 2022; roda só à mão)
   gerar_transportes_ibge.py   gera rodovias, ferrovias e portos a partir da base cartográfica 1:250.000 do IBGE (BC250; roda só à mão)
   dados/              arquivos de apoio dos robôs (ex.: posição da sede de cada município)
+  estudos/            estudos de visual que não vão para o ar: texturas.py (laboratório de texturas) e relevo_em_ondas.js
+                      (relevo dos estados em ondas, testado e descartado em 22/10/2026, guardado como referência)
 .github/workflows/
   site.yml            agenda do robô e publicação automática no GitHub Pages
 ```
