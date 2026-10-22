@@ -68,9 +68,11 @@ def titulo(t):
     t = re.sub(r"\s+", " ", (t or "").strip())
     if t != t.upper():
         return t
+    def cap(p):   # maiúscula no começo e depois de "/" e "-" ("galeão/val de cans" → "Galeão/Val de Cans")
+        return re.sub(r"(^|[/\-(])(\w)", lambda m: m.group(1) + m.group(2).upper(), p)
     palavras = []
     for i, p in enumerate(t.lower().split(" ")):
-        palavras.append(p if (i and p in MINUSCULAS) else p[:1].upper() + p[1:])
+        palavras.append(p if (i and p in MINUSCULAS) else cap(p))
     return " ".join(palavras)
 
 

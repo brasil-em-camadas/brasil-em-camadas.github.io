@@ -54,7 +54,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .rail{fill:none;stroke:var(--rail);stroke-width:1.2;vector-effect:non-scaling-stroke;opacity:.85;transition:opacity .4s,stroke-width .4s}
 .rail.off{opacity:.1}.rail.hi{stroke-width:2.4;opacity:1;filter:drop-shadow(0 0 3px rgba(227,154,88,.8))}
 .port{fill:var(--port);stroke:var(--night);stroke-width:1;vector-effect:non-scaling-stroke}
-.air{fill:var(--air);stroke:var(--night);stroke-width:1;vector-effect:non-scaling-stroke}
+.air{fill:var(--air);stroke:var(--night);stroke-width:1;vector-effect:non-scaling-stroke;cursor:pointer}.air.sem{fill-opacity:.45;stroke-width:.5}
 .cla{fill:none;stroke:var(--cla);stroke-width:2;vector-effect:non-scaling-stroke}
 .cla-dot{fill:var(--cla)}
 .pulse{fill:none;stroke:var(--cla);vector-effect:non-scaling-stroke;animation:pulse 2.2s ease-out infinite;transform-box:fill-box;transform-origin:center}

@@ -96,7 +96,8 @@ function quintis(vals) {
   const ilhaPts = fc((ROT ? ROT.ilhas : []).map(i => ponto(i.c, { n: i.n, nome: i.nome_completo })));
   const trilhos = fc(DATA.rail ? DATA.rail.trechos.map(t => ({ type: "Feature", properties: { uf: t.uf, op: t.op, obra: t.obra || 0, si: t.si || 0, b: t.b || "" }, geometry: { type: "LineString", coordinates: t.l } })) : []);
   const portos = fc((DATA.ports || []).map(p => ponto(p.c, { n: p.n, uf: p.uf, org: p.org || 0, obra: p.obra || 0 })));
-  const aeros = fc((DATA.air || []).map(a => ponto(a.c, { n: a.n + (a.i ? " (" + a.i + ")" : ""), uf: a.uf })));
+  /* aeroportos (ANAC): [lon, lat, código OACI, nome, município servido, UF, passageiros em 12 meses, carga em t] */
+  const aeros = fc(DATA.air && DATA.air.aeroportos ? DATA.air.aeroportos.map((a, i) => ponto([a[0], a[1]], { p: a[6], i })) : []);
   /* poços em produção: [lon, lat, boe/dia, barris de petróleo/dia, mil m³ de gás/dia, poço, campo, UF, mar/terra] */
   const pocosFC = d => fc(d.pocos.map(p => ponto([p[0], p[1]], { b: p[2], o: p[3], g: p[4], n: p[5], c: p[6], u: p[7], a: p[8] })));
   /* pedágios federais (ANTT): [lon, lat, praça, concessionária, rodovia, km, município, UF, veículos/dia, % comerciais,
@@ -111,7 +112,7 @@ function quintis(vals) {
   const map = new maplibregl.Map({
     container: "map",
     locale: { "AttributionControl.ToggleAttribution": "Mostrar ou ocultar os créditos do mapa" },
-    attributionControl: { compact: true, customAttribution: "NASA Blue Marble · Terrain Tiles (AWS) · Natural Earth · IBGE · Marine Regions · ANP · EPE · Anatel · ANTT · Ministério da Defesa" },
+    attributionControl: { compact: true, customAttribution: "NASA Blue Marble · Terrain Tiles (AWS) · Natural Earth · IBGE · Marine Regions · ANP · ANEEL · EPE · Anatel · ANTT · ANAC · Ministério da Defesa" },
     style: {
       version: 8,
       projection: { type: "globe" },
@@ -229,7 +230,7 @@ function quintis(vals) {
               3, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 0.5, 100, 1, 300, 2, 700, 3.6, 1700, 7],
               6, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 0.9, 100, 1.9, 300, 3.8, 700, 7, 1700, 13],
               9, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 1.6, 100, 3.4, 300, 6.8, 700, 12, 1700, 22]] } },
-        /* usinas (EPE): cor pela fonte, tamanho pela raiz quadrada da potência (a área do ponto acompanha os MW) */
+        /* usinas (ANEEL, SIGA; 1 MW ou mais): cor pela fonte, tamanho pela raiz quadrada da potência (a área do ponto acompanha os MW) */
         { id: "usinas", type: "circle", source: "usinas", layout: { "circle-sort-key": ["-", 0, ["get", "kw"]] },
           paint: { "circle-color": ["match", ["get", "t"], ["uhe", "pch", "cgh"], cor("--hid"), "eol", cor("--eol"), "sol", cor("--sol"), "bio", cor("--bio"), "fos", cor("--fos"), "nuc", cor("--nuc"), "#ffffff"],
             "circle-opacity": 0.88, "circle-stroke-color": "#0d1712", "circle-stroke-width": 0.6,
@@ -292,8 +293,14 @@ function quintis(vals) {
           paint: { "text-color": "rgba(159,230,242,.75)", ...halo } },
         { id: "portos", type: "circle", source: "portos",
           paint: { "circle-color": cor("--port"), "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 3, 8, 6], "circle-stroke-color": "#05101a", "circle-stroke-width": 1 } },
-        { id: "aeroportos", type: "circle", source: "aeros",
-          paint: { "circle-color": cor("--air"), "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 3, 8, 6], "circle-stroke-color": "#05101a", "circle-stroke-width": 1 } },
+        /* aeroportos (ANAC): tamanho pela raiz dos passageiros de 12 meses; os sem voos de passageiros ficam pequenos e mais claros */
+        { id: "aeroportos", type: "circle", source: "aeros", layout: { "circle-sort-key": ["-", 0, ["get", "p"]] },
+          paint: { "circle-color": cor("--air"), "circle-opacity": ["case", ["<", ["get", "p"], 1000], 0.45, 0.92],
+            "circle-stroke-color": "#05101a", "circle-stroke-width": ["case", ["<", ["get", "p"], 1000], 0.5, 1],
+            "circle-radius": ["interpolate", ["linear"], ["zoom"],
+              3, ["interpolate", ["linear"], ["sqrt", ["get", "p"]], 0, 1.6, 300, 2.8, 1500, 5, 6600, 11],
+              6, ["interpolate", ["linear"], ["sqrt", ["get", "p"]], 0, 2.4, 300, 4, 1500, 8, 6600, 18],
+              9, ["interpolate", ["linear"], ["sqrt", ["get", "p"]], 0, 3.4, 300, 5.5, 1500, 11, 6600, 25]] } },
         { id: "ilhas-ponto", type: "circle", source: "ilhas", paint: { "circle-color": cor("--sea-line"), "circle-radius": 2.6, "circle-stroke-color": "#05101a", "circle-stroke-width": 1 } },
         { id: "ilhas-rotulo", type: "symbol", source: "ilhas", filter: ["!=", ["get", "n"], ""],
           layout: { "text-field": ["get", "n"], "text-font": fonte(REG), "text-size": 11, "text-anchor": "left", "text-offset": [0.7, 0] },
@@ -566,8 +573,8 @@ function quintis(vals) {
       const hidro = ["uhe", "pch", "cgh"].includes(p.t), obs = (M.observacoes || {})[p.n];
       new maplibregl.Popup({ closeButton: false, offset: 8, maxWidth: "300px" }).setLngLat(f.geometry.coordinates)
         .setHTML(`<b>${esc(p.n)}</b><br>${esc(M.tipos[p.t])} · ${fmt1(p.kw / 1000)} MW${p.uf ? " · " + esc(p.uf) : ""}${p.a ? "<br>Em operação desde " + p.a : ""}
-          ${p.x ? "<br>" + (hidro ? "Rio: " : "Combustível: ") + esc(p.x) : ""}${p.d ? "<br>" + esc(p.d) : ""}${obs ? "<br><i>" + esc(obs) + "</i>" : ""}
-          <br><span class="pop-fonte">EPE, Webmap; ${esc(M.referencia)}</span>`).addTo(map);
+          ${p.x ? "<br>" + (hidro ? "Bacia: " : "Combustível: ") + esc(p.x) : ""}${p.d ? "<br>" + esc(p.d) : ""}${obs ? "<br><i>" + esc(obs) + "</i>" : ""}
+          <br><span class="pop-fonte">${esc(M.fonte)}; ${esc(M.referencia)}</span>`).addTo(map);
       return;
     }
     /* de longe os pontos do gado cobrem os estados: o clique abre o estado; a partir do zoom 4,5 abre o município */
@@ -611,6 +618,15 @@ function quintis(vals) {
       return;
     }
     const pts = map.queryRenderedFeatures(e.point, { layers: ["portos", "aeroportos", "capitais"].filter(l => map.getLayoutProperty(l, "visibility") !== "none") });
+    const ae = pts.filter(f => f.layer.id === "aeroportos");
+    if (ae.length && DATA.air && DATA.air.aeroportos) {
+      const f = ae.reduce((a, b) => b.properties.p < a.properties.p ? b : a), a = DATA.air.aeroportos[f.properties.i], M = DATA.air.meta;
+      new maplibregl.Popup({ closeButton: false, offset: 10, maxWidth: "300px" }).setLngLat(f.geometry.coordinates)
+        .setHTML(`<b>${esc(a[3])} (${esc(a[2])})</b><br>Aeródromo público · ${esc(a[4])} (${esc(a[5])})
+          <br>${a[6] >= 1000 ? `${passageiros(a[6])} em 12 meses (${esc(M.referencia)}), embarcados e desembarcados${a[7] >= 1 ? `<br>Carga e correio: ${fmt(a[7])} t` : ""}` : `Sem voos de passageiros nos dados estatísticos da ANAC (${esc(M.referencia)})`}
+          <br><span class="pop-fonte">ANAC, dados abertos</span>`).addTo(map);
+      return;
+    }
     if (pts.length) {
       const f = pts[0], tipo = f.layer.id === "portos" ? "Porto" : f.layer.id === "aeroportos" ? "Aeroporto" : "Capital";
       const extra = f.layer.id === "portos" ? (f.properties.org == 1 ? "<br>Porto organizado" : "") + (f.properties.obra == 1 ? "<br>Em obras" : "") : "";
@@ -936,12 +952,12 @@ function quintis(vals) {
       ${pill(I.meta.nivel)} <span class="note">ANP, servidor de mapas · atualizado em ${I.meta.atualizado_em}</span>`;
   }
 
-  /* energia elétrica do estado (EPE): potência instalada por fonte */
+  /* energia elétrica do estado (ANEEL, SIGA): potência instalada por fonte */
   function fichaEnergia(s) {
     const E = DATA.ene;
     if (!E) return "";
     const v = E.valores[s], fonte = `${pill(E.nivel)} <span class="note">${esc(E.fonte)}; ${esc(E.referencia)} · atualizado em ${E.atualizado_em}</span>`;
-    if (!v) return `<div class="sec"><h3>Energia elétrica</h3><div class="list">Nenhuma usina deste estado na base da EPE (geração centralizada).</div>${fonte}</div>`;
+    if (!v) return `<div class="sec"><h3>Energia elétrica</h3><div class="list">Nenhuma usina deste estado no cadastro da ANEEL (geração centralizada).</div>${fonte}</div>`;
     const NOM = { hid: "Hidrelétricas", eol: "Eólicas", sol: "Solares", bio: "Térmicas a biomassa", fos: "Térmicas fósseis", nuc: "Nucleares" };
     const partes = [["hid", (v.uhe || 0) + (v.pch || 0) + (v.cgh || 0)], ["eol", v.eol], ["sol", v.sol], ["bio", v.bio], ["fos", v.fos], ["nuc", v.nuc]]
       .filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]);
@@ -950,7 +966,7 @@ function quintis(vals) {
       <div class="kv"><span>Potência instalada</span><span class="v">${fmt(Math.round(v.valor))} MW</span></div>
       <div class="kv"><span>Posição no país</span><span class="v">${rk}º · ${fmt1(v.valor / E.total_mw * 100)}%</span></div>
       ${partes.map(([k, mw]) => `<div class="kv"><span>${NOM[k]}</span><span class="v">${fmt(Math.round(mw))} MW · ${mw / v.valor < 0.001 ? "menos de 0,1" : fmt1(mw / v.valor * 100)}%</span></div>`).join("")}
-      <div class="list">${fmt(v.usinas)} usinas na base. Só a geração centralizada: os painéis solares de telhado não entram.</div>
+      <div class="list">${fmt(v.usinas)} usinas no cadastro da ANEEL (no mapa, só as de 1 MW ou mais). Só a geração centralizada: os painéis solares de telhado e a micro e minigeração distribuída não entram.</div>
       ${(v.obs || []).map(o => `<div class="list"><i>${esc(o)}</i></div>`).join("")}
       ${fonte}</div>`;
   }
@@ -982,6 +998,16 @@ function quintis(vals) {
       <div class="list">O sinal é estimado pela Anatel a partir das antenas licenciadas, não medido no local. Fibra óptica: a rede que leva a internet até a cidade (backhaul). O índice vai de 0 a 100 e junta sinal, acessos, antenas, fibra e concorrência.</div>
       ${pill(C.nivel)} <span class="note">${esc(C.fonte)} · atualizado em ${C.atualizado_em}</span>
       ${G5 ? `<br>${pill(C.nivel)} <span class="note">5G: Anatel, presença da telefonia móvel (RQUAL), ${esc(G5.referencia)} · atualizado em ${G5.atualizado_em}</span>` : ""}</div>`;
+  }
+
+  /* aeroportos do estado (ANAC): aeródromos públicos, quantos têm voos de passageiros e os mais movimentados */
+  const passageiros = n => n >= 1e6 ? `${milhoes(n / 1e6)} de passageiros` : `${fmt(Math.round(n / 1e3))} mil passageiros`;
+  function fichaAeroportos(s) {
+    const A = DATA.air, v = A && A.meta && A.meta.por_uf[s];
+    if (!v) return "";
+    return `<div class="kv" style="margin-top:8px"><span>Aeródromos públicos</span><span class="v">${fmt(v.aerodromos)}</span></div>
+      <div class="list">${v.com_passageiros ? `${fmt(v.com_passageiros)} com voos de passageiros: ${passageiros(v.passageiros)} em 12 meses. Os mais movimentados: ${v.maiores.map(m => `${esc(m[0])} (${esc(m[1])}), ${passageiros(m[2])}`).join("; ")}.` : "Nenhum com voos de passageiros nos dados estatísticos da ANAC."}</div>
+      ${pill(A.meta.nivel)} <span class="note">ANAC, aeródromos públicos e dados estatísticos do transporte aéreo, ${esc(A.meta.referencia)} · atualizado em ${A.meta.atualizado_em}. Embarcados e desembarcados.</span>`;
   }
 
   /* pedágios federais do estado (ANTT): quantas praças e a mais movimentada */
@@ -1046,7 +1072,7 @@ function quintis(vals) {
         ${DATA.oleo ? `<div class="kv" style="margin-top:8px"><span>Petróleo e gás</span><span class="v">${fmt1(DATA.oleo.total_boe_dia / 1e6)} milhões de boe/dia</span></div>
           ${pill(DATA.oleo.nivel)} <span class="note">ANP, média de ${esc(DATA.oleo.referencia)} · atualizado em ${DATA.oleo.atualizado_em}. boe = barril de óleo equivalente.</span>` : ""}
         ${DATA.ene ? `<div class="kv" style="margin-top:8px"><span>Energia elétrica</span><span class="v">${fmt(Math.round(DATA.ene.total_mw / 1000))} mil MW</span></div>
-          ${pill(DATA.ene.nivel)} <span class="note">EPE, potência instalada (${esc(DATA.ene.referencia)}) · atualizado em ${DATA.ene.atualizado_em}. Sem os painéis solares de telhado.</span>` : ""}
+          ${pill(DATA.ene.nivel)} <span class="note">${esc(DATA.ene.fonte)}, potência instalada (${esc(DATA.ene.referencia)}) · atualizado em ${DATA.ene.atualizado_em}. Sem os painéis solares de telhado.</span>` : ""}
         ${DATA.cel && DATA.cel.cinco_g ? `<div class="kv" style="margin-top:8px"><span>Municípios com 5G</span><span class="v">${fmt(DATA.cel.cinco_g.municipios)} de ${fmt(DATA.cel.cinco_g.total)}</span></div>
           ${pill(DATA.cel.nivel)} <span class="note">Anatel, presença da telefonia móvel (RQUAL), ${esc(DATA.cel.cinco_g.referencia)} · atualizado em ${DATA.cel.cinco_g.atualizado_em}. Pelo menos uma operadora com 5G no município.</span>` : ""}
         ${DATA.defesa ? `<div class="kv" style="margin-top:8px"><span>Indústria de defesa</span><span class="v">${fmt(DATA.defesa.total)} empresas</span></div>
@@ -1056,7 +1082,7 @@ function quintis(vals) {
     }
     const s = sel;
     const rk = Object.entries(POP).sort((a, b) => b[1] - a[1]).findIndex(e => e[0] === s) + 1;
-    const Pt = (DATA.ports || []).filter(p => p.uf === s), A = (DATA.air || []).filter(a => a.uf === s);
+    const Pt = (DATA.ports || []).filter(p => p.uf === s);
     /* ferrovias por estado: [existentes, em operação segundo o IBGE] (arquivo antigo: um número só) */
     const fv = DATA.rail ? DATA.rail.km_por_uf[s] || 0 : 0, fr = typeof fv === "number" ? [fv, fv] : fv;
     const kr = DATA.rod && DATA.rod.meta && DATA.rod.meta.km_por_uf ? DATA.rod.meta.km_por_uf[s] : null;
@@ -1081,9 +1107,7 @@ function quintis(vals) {
         <div class="kv"><span>Portos e terminais</span><span class="v">${Pt.length}</span></div>
         ${Pt.length ? `<div class="list">${Pt.map(p => esc(p.n)).join(", ")}</div>` : ""}
         ${pill("manual")} <span class="note">IBGE, base cartográfica 1:250.000 (BC250, 2025); medidas no desenho do mapa.</span>
-        <div class="kv" style="margin-top:8px"><span>Aeroportos na base</span><span class="v">${A.length}</span></div>
-        ${A.length ? `<div class="list">${A.map(a => a.n + (a.i ? " (" + a.i + ")" : "")).join(", ")}</div>` : ""}
-        ${pill("base")} <span class="note">Natural Earth, só os maiores. Ausência na base não significa ausência real.</span>
+        ${fichaAeroportos(s)}
         ${fichaPedagio(s)}</div>
       ${fichaOleo(s)}
       ${fichaEnergia(s)}

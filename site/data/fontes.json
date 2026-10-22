@@ -96,7 +96,7 @@
    "arquivo": "energia/estados.json",
    "ministerio": "mme",
    "por": "total",
-   "vazio": "sem usina na base"
+   "vazio": "sem usina no cadastro"
   },
   {
    "id": "cel",
@@ -260,13 +260,20 @@
   {
    "id": "air",
    "nome": "Aeroportos",
-   "tipo": "triangulos",
-   "arquivo": "geo/aeroportos.json",
+   "tipo": "pontos",
+   "arquivo": "aeroportos/aeroportos.json",
    "ministerio": "portaer",
-   "nivel": "base",
-   "fonte": "Natural Earth, só os maiores",
+   "nivel": "api",
+   "fonte": "ANAC, dados abertos: os aeródromos públicos em funcionamento (lista da ANAC), com os passageiros embarcados e desembarcados nos 12 meses mais recentes (dados estatísticos do transporte aéreo); maior = mais passageiros; os sem voos de passageiros ficam pequenos e mais claros. Clique num aeroporto para ver os números",
    "ligada": false,
-   "cor": "--air"
+   "cor": "--air",
+   "legenda": [
+    {
+     "nome": "Aeroporto (maior = mais passageiros em 12 meses)",
+     "forma": "pt",
+     "cor": "--air"
+    }
+   ]
   },
   {
    "id": "cla",
@@ -597,7 +604,7 @@
    "sob_demanda": true,
    "ministerio": "mme",
    "nivel": "api",
-   "fonte": "EPE, Webmap (sistema elétrico existente): usinas em operação, por fonte; o tamanho do ponto mostra a potência. É a geração centralizada: os painéis solares de telhado não entram. Clique numa usina para ver os números",
+   "fonte": "ANEEL, SIGA (cadastro de geração, atualizado todo dia): usinas em operação de 1 MW ou mais, por fonte; o tamanho do ponto mostra a potência. É a geração centralizada: os painéis solares de telhado e a micro e minigeração distribuída não entram. Clique numa usina para ver os números",
    "ligada": false,
    "cor": "--hid",
    "legenda": [

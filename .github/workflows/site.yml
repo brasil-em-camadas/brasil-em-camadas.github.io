@@ -1,5 +1,5 @@
 # Robô do Brasil em Camadas
-# - Todo dia 3 de cada mês (e quando você clicar em "Run workflow"): busca dados novos do IBGE, da ANP, da EPE, da Anatel, da ANTT e do Ministério da Defesa e salva no repositório.
+# - Todo dia 3 de cada mês (e quando você clicar em "Run workflow"): busca dados novos do IBGE, da ANP, da ANEEL, da EPE, da Anatel, da ANTT, da ANAC e do Ministério da Defesa e salva no repositório.
 # - Depois de cada mudança: publica o site no GitHub Pages.
 # Versões das ações conferidas em 21/10/2026 (todas em Node 24; o Node 20 foi descontinuado pelo GitHub).
 name: Atualizar dados e publicar
@@ -35,8 +35,13 @@ jobs:
       - name: Buscar dados da ANP (petróleo e gás)
         continue-on-error: true
         run: python scripts/atualizar_anp.py
-      # Energia elétrica (usinas e linhas de transmissão) do Webmap da EPE; se falhar, ficam os arquivos antigos.
-      - name: Buscar dados da EPE (energia elétrica)
+      # Energia elétrica: usinas e soma por estado do SIGA da ANEEL (atualizado todo dia); se falhar, ficam os arquivos antigos.
+      - name: Buscar as usinas (ANEEL, SIGA)
+        continue-on-error: true
+        timeout-minutes: 20
+        run: python scripts/atualizar_aneel.py
+      # Linhas de transmissão e subestações do Webmap da EPE; se falhar, ficam os arquivos antigos.
+      - name: Buscar dados da EPE (linhas de transmissão e subestações)
         continue-on-error: true
         run: python scripts/atualizar_epe.py
       # Telefonia celular (sinal 4G/5G e municípios com 5G) dos dados abertos da Anatel; se falhar, ficam os arquivos antigos.
@@ -48,6 +53,11 @@ jobs:
         continue-on-error: true
         timeout-minutes: 25
         run: python scripts/atualizar_antt.py
+      # Aeroportos: aeródromos públicos e passageiros de 12 meses (ANAC; o arquivo de estatísticas tem ~360 MB e é lido aos poucos).
+      - name: Buscar os aeroportos (ANAC)
+        continue-on-error: true
+        timeout-minutes: 30
+        run: python scripts/atualizar_anac.py
       # Indústria de defesa: lista das empresas credenciadas pelo Ministério da Defesa (planilha do gov.br); se falhar, ficam os arquivos antigos.
       - name: Buscar a lista da indústria de defesa (Ministério da Defesa)
         continue-on-error: true
@@ -57,7 +67,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add site/data
-          git diff --cached --quiet || (git commit -m "Atualiza dados do IBGE, da ANP, da EPE, da Anatel, da ANTT e da Defesa" && git push)
+          git diff --cached --quiet || (git commit -m "Atualiza dados do IBGE, da ANP, da ANEEL, da EPE, da Anatel, da ANTT, da ANAC e da Defesa" && git push)
 
   publicar:
     needs: atualizar
