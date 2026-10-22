@@ -1044,6 +1044,21 @@ function quintis(vals) {
       ${pill(P.meta.nivel)} <span class="note">ANTT, média de ${esc(P.meta.referencia)} · atualizado em ${P.meta.atualizado_em}. Só as concessões federais.</span>`;
   }
 
+  /* eletropostos do estado (ABVE e Tupi): o número do estado quando foi divulgado; se não, o total da região */
+  function fichaEletropostos(s) {
+    const E = DATA.evpc;
+    if (!E) return "";
+    const v = E.valores[s], R = Object.entries(E.regioes || {}).find(([, r]) => r.ufs.includes(s));
+    const corpo = v
+      ? `<div class="kv"><span>Pontos de recarga</span><span class="v">${fmt(v.valor)}</span></div>
+        ${POP[s] ? `<div class="kv"><span>Por 100 mil habitantes</span><span class="v">${fmt1(v.valor / POP[s] * 1e5)}</span></div>` : ""}
+        ${pill(E.nivel)} <span class="note">${esc(v.fonte)}, ${esc(v.referencia)}${v.via ? ` · via ${esc(v.via)}` : ""}. Pontos públicos e semipúblicos.</span>`
+      : `<div class="kv"><span>Pontos de recarga</span><span class="v">—</span></div>
+        <div class="list">A ABVE não divulgou o número deste estado.${R ? ` A região ${R[0]} inteira soma ${fmt(R[1].valor)} pontos (${esc(E.referencia)}).` : ""}</div>
+        ${pill("pendente")} <span class="note">${R && E.regioes_fonte ? esc(E.regioes_fonte) : "Nenhum número publicado encontrado."}</span>`;
+    return `<div class="sec"><h3>Mobilidade elétrica</h3>${corpo}</div>`;
+  }
+
   /* defesa do estado: empresas credenciadas pelo Ministério da Defesa (EED e ED) e, no Maranhão, o Centro de Alcântara */
   function fichaDefesa(s) {
     const D = DATA.defesa, v = D && D.valores[s], cla = CLA && s === CLA.uf;
@@ -1101,6 +1116,8 @@ function quintis(vals) {
           ${pill(DATA.cel.nivel)} <span class="note">Anatel, presença da telefonia móvel (RQUAL), ${esc(DATA.cel.cinco_g.referencia)} · atualizado em ${DATA.cel.cinco_g.atualizado_em}. Pelo menos uma operadora com 5G no município.</span>` : ""}
         ${DATA.defesa ? `<div class="kv" style="margin-top:8px"><span>Indústria de defesa</span><span class="v">${fmt(DATA.defesa.total)} empresas</span></div>
           ${pill(DATA.defesa.nivel)} <span class="note">Ministério da Defesa, empresas credenciadas: ${fmt(DATA.defesa.eed)} estratégicas de defesa (EED) e ${fmt(DATA.defesa.ed)} de defesa (ED); ${esc(DATA.defesa.referencia)} · atualizado em ${DATA.defesa.atualizado_em}</span>` : ""}
+        ${DATA.evpc && DATA.evpc.brasil ? `<div class="kv" style="margin-top:8px"><span>Eletropostos</span><span class="v">≈ ${fmt1(DATA.evpc.brasil.valor / 1000)} mil</span></div>
+          ${pill(DATA.evpc.nivel)} <span class="note">${esc(DATA.evpc.fonte)}, pontos públicos e semipúblicos, ${esc(DATA.evpc.referencia)}; ${esc(DATA.evpc.brasil.nota)} · atualizado em ${DATA.evpc.atualizado_em}</span>` : ""}
         <p class="lede">Clique num estado para aproximar. Arraste para girar o globo, role para aproximar e use o botão "Relevo 3D" para ver as montanhas em altura.</p>`;
       return;
     }
@@ -1110,7 +1127,6 @@ function quintis(vals) {
     /* ferrovias por estado: [existentes, em operação segundo o IBGE] (arquivo antigo: um número só) */
     const fv = DATA.rail ? DATA.rail.km_por_uf[s] || 0 : 0, fr = typeof fv === "number" ? [fv, fv] : fv;
     const kr = DATA.rod && DATA.rod.meta && DATA.rod.meta.km_por_uf ? DATA.rod.meta.km_por_uf[s] : null;
-    const ev = DATA.evpc && DATA.evpc.valores[s];
     const ag = DATA.agro && DATA.agro.valores[s];
     el.innerHTML = `
       <h2>${s} · ficha do estado</h2><div class="fname">${NAME[s]}</div>
@@ -1137,9 +1153,7 @@ function quintis(vals) {
       ${fichaEnergia(s)}
       ${fichaCelular(s)}
       ${fichaDefesa(s)}
-      <div class="sec"><h3>Mobilidade elétrica</h3>
-        <div class="kv"><span>Eletropostos</span><span class="v">${ev ? fmt(ev.valor) : "—"}</span></div>
-        ${ev ? `${pill("entidade")} <span class="note">${ev.fonte}, ref. ${ev.referencia}</span>` : `${pill("pendente")} <span class="note">Nenhum número publicado encontrado.</span>`}</div>`;
+      ${fichaEletropostos(s)}`;
   }
 
   const AP = F.apoio, apoio = document.getElementById("apoio");

@@ -1,53 +1,160 @@
 {
  "titulo": "Eletropostos públicos e semipúblicos",
+ "unidade": "pontos de recarga",
  "nivel": "entidade",
- "atualizado_em": "2026-10-16",
- "obs": "Só entram números publicados com fonte. Estados sem número ficam em branco.",
+ "fonte": "ABVE (Associação Brasileira do Veículo Elétrico) e plataforma Tupi",
+ "referencia": "ago/2026",
+ "atualizado_em": "2026-10-22",
+ "obs": "Só entram números publicados com fonte. A ABVE divulgou o total de cada região, mas o número por estado só saiu para parte deles; os outros ficam sem cor.",
+ "brasil": {
+  "valor": 29896,
+  "nota": "a ABVE divulgou 29.866 no texto e 29.896 na tabela; as cinco regiões da tabela somam 29.879"
+ },
+ "regioes": {
+  "Norte": {
+   "valor": 1015,
+   "ufs": [
+    "AC",
+    "AP",
+    "AM",
+    "PA",
+    "RO",
+    "RR",
+    "TO"
+   ]
+  },
+  "Nordeste": {
+   "valor": 5581,
+   "ufs": [
+    "AL",
+    "BA",
+    "CE",
+    "MA",
+    "PB",
+    "PE",
+    "PI",
+    "RN",
+    "SE"
+   ]
+  },
+  "Centro-Oeste": {
+   "valor": 3340,
+   "ufs": [
+    "DF",
+    "GO",
+    "MT",
+    "MS"
+   ]
+  },
+  "Sudeste": {
+   "valor": 12673,
+   "ufs": [
+    "ES",
+    "MG",
+    "RJ",
+    "SP"
+   ]
+  },
+  "Sul": {
+   "valor": 7270,
+   "ufs": [
+    "PR",
+    "RS",
+    "SC"
+   ]
+  }
+ },
+ "regioes_fonte": "ABVE e Tupi, tabela por região de ago/2026, via AutoData (24/09/2026)",
  "valores": {
   "SP": {
    "valor": 7864,
    "referencia": "ago/2026",
-   "fonte": "ABVE, via Canal VE"
+   "fonte": "ABVE e Tupi",
+   "via": "Canal VE, O Tempo e AutoData (set/2026)"
   },
   "PR": {
    "valor": 2513,
    "referencia": "ago/2026",
-   "fonte": "ABVE, via Canal VE"
+   "fonte": "ABVE e Tupi",
+   "via": "Canal VE, O Tempo e AutoData (set/2026)"
   },
   "RS": {
    "valor": 2422,
    "referencia": "ago/2026",
-   "fonte": "ABVE, via Canal VE"
+   "fonte": "ABVE e Tupi",
+   "via": "Canal VE, O Tempo e AutoData (set/2026)"
   },
   "SC": {
    "valor": 2333,
    "referencia": "ago/2026",
-   "fonte": "ABVE, via Canal VE"
+   "fonte": "ABVE e Tupi",
+   "via": "Canal VE, O Tempo e AutoData (set/2026)"
   },
   "MG": {
    "valor": 2295,
    "referencia": "ago/2026",
-   "fonte": "ABVE, via Canal VE"
+   "fonte": "ABVE e Tupi",
+   "via": "Canal VE, O Tempo e AutoData (set/2026)"
+  },
+  "PA": {
+   "valor": 381,
+   "referencia": "ago/2026",
+   "fonte": "ABVE e Tupi",
+   "via": "Acre Agora (15/10/2026)"
+  },
+  "AM": {
+   "valor": 304,
+   "referencia": "ago/2026",
+   "fonte": "ABVE e Tupi",
+   "via": "Acre Agora (15/10/2026)"
+  },
+  "RO": {
+   "valor": 127,
+   "referencia": "ago/2026",
+   "fonte": "ABVE e Tupi",
+   "via": "Acre Agora (15/10/2026)"
+  },
+  "TO": {
+   "valor": 91,
+   "referencia": "ago/2026",
+   "fonte": "ABVE e Tupi",
+   "via": "Acre Agora (15/10/2026)"
+  },
+  "AC": {
+   "valor": 42,
+   "referencia": "ago/2026",
+   "fonte": "ABVE e Tupi",
+   "via": "Acre Agora (15/10/2026)"
+  },
+  "RR": {
+   "valor": 38,
+   "referencia": "ago/2026",
+   "fonte": "ABVE e Tupi",
+   "via": "Acre Agora (15/10/2026)"
+  },
+  "AP": {
+   "valor": 32,
+   "referencia": "ago/2026",
+   "fonte": "ABVE e Tupi",
+   "via": "Acre Agora (15/10/2026)"
   },
   "BA": {
-   "valor": 640,
-   "referencia": "2025",
-   "fonte": "ABVE, via Movimento Econômico"
-  },
-  "CE": {
-   "valor": 592,
-   "referencia": "2025",
-   "fonte": "ABVE, via Movimento Econômico"
+   "valor": 1188,
+   "referencia": "divulgado em out/2026, sem o mês do levantamento",
+   "fonte": "ABVE e Tupi",
+   "via": "URB News (13/10/2026)"
   },
   "PE": {
-   "valor": 483,
-   "referencia": "2025",
-   "fonte": "ABVE, via Movimento Econômico"
+   "valor": 1101,
+   "referencia": "divulgado em out/2026, sem o mês do levantamento",
+   "fonte": "ABVE e Tupi",
+   "via": "URB News (13/10/2026)"
   },
-  "MA": {
-   "valor": 188,
-   "referencia": "2025",
-   "fonte": "levantamento citado por consultadeplaca.net"
+  "CE": {
+   "valor": 896,
+   "referencia": "divulgado em out/2026, sem o mês do levantamento",
+   "fonte": "ABVE e Tupi",
+   "via": "URB News (13/10/2026)"
   }
  }
 }
