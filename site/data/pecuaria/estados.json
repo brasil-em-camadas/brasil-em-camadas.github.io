@@ -5,7 +5,7 @@
  "aquicultura_referencia": "2025",
  "fonte": "IBGE, Pesquisa da Pecuária Municipal (tabelas SIDRA 3939 e 3940)",
  "nivel": "api",
- "atualizado_em": "2026-10-21",
+ "atualizado_em": "2026-10-22",
  "consulta": [
   "https://apisidra.ibge.gov.br/values/t/3939/n3/all/v/105/p/last%201/c79/2670,32794,32796,2677,2681",
   "https://apisidra.ibge.gov.br/values/t/3940/n3/all/v/215/p/last%201/c654/all"
