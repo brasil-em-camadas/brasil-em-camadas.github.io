@@ -188,7 +188,7 @@ function quintis(vals) {
       layers: [
         { id: "fundo", type: "background", paint: { "background-color": "#0a1d2a" } },
         { id: "nasa", type: "raster", source: "nasa", paint: TESTE
-            ? { "raster-brightness-max": 0.34, "raster-saturation": -0.75, "raster-hue-rotate": 160, "raster-contrast": 0.1, "raster-fade-duration": 200 }
+            ? { "raster-brightness-max": 0.62, "raster-saturation": -0.15, "raster-contrast": 0.08, "raster-fade-duration": 200 }
             : { "raster-brightness-max": 0.62, "raster-saturation": -0.15, "raster-contrast": 0.08, "raster-fade-duration": 200 } },
         ...(TESTE ? [{ id: "holo", type: "raster", source: "holo", paint: { "raster-fade-duration": 0, "raster-resampling": "linear" } }] : []),
         { id: "paises-borda", type: "line", source: "mundo", paint: { "line-color": "rgba(214,198,150,.35)", "line-width": 0.6 } },
@@ -946,6 +946,10 @@ function quintis(vals) {
     if (TESTE && map.getLayer("estados-fill")) {
       const fade = ["boolean", ["feature-state", "fade"], false], hov = ["boolean", ["feature-state", "hover"], false];
       if (!L) map.setPaintProperty("estados-fill", "fill-opacity", P && P.val ? ["case", fade, 0.12, hov, 0.75, 0.52] : ["case", fade, 0.5, hov, 0.14, 0]);
+      /* holograma só com pintura ou luz acesa; em "Sem cor", o mapa natural (pedido do Edu em 22/10/2026) */
+      const holo = !!L || !!(P && P.val);
+      if (map.getLayer("holo")) map.setLayoutProperty("holo", "visibility", holo ? "visible" : "none");
+      if (!L) { map.setPaintProperty("nasa", "raster-brightness-max", holo ? 0.34 : 0.62); map.setPaintProperty("nasa", "raster-saturation", holo ? -0.6 : -0.15); }
     }
     /* legenda completa (escala de cores + símbolos das camadas ligadas): sempre no rodapé, ao lado dos níveis de confiança;
        sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
