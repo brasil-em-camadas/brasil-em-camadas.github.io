@@ -179,13 +179,16 @@ def estados(r_ibc, r_rqual):
     g5 = ({k: v for k, v in r_rqual.items() if k != "por_uf"} if r_rqual else antigo.get("cinco_g"))
     por_uf = r_rqual["por_uf"] if r_rqual else {u: v.get("g5") for u, v in antigo.get("valores", {}).items()}
     valores = {u: {**v, "g5": por_uf.get(u)} for u, v in base["valores"].items()}
+    for v in valores.values():   # parte dos municípios do estado com 5G (pintura "Celular 5G")
+        g = v.get("g5")
+        v["g5_pct"] = round(g[0] / g[1] * 100, 1) if g and g[1] else None
     gravar("estados.json", {
         "titulo": "Sinal de celular 4G/5G", "unidade": "% da população com sinal", "referencia": base["referencia"],
         "fonte": FONTE_IBC + f" {base['referencia']}", "nivel": "api", "atualizado_em": base["atualizado_em"], "nota": NOTA,
         "consulta": [BASE + IBC_ZIP, BASE + RQUAL_ZIP], "catalogo": list(CATALOGO.values()),
         "campos": {"valor": "% dos moradores com sinal 4G ou 5G", "ibc": "Índice Brasileiro de Conectividade (0 a 100)",
                    "fibra": "% dos municípios com fibra óptica de transporte (backhaul)", "erb_10mil": "antenas (estações rádio base) por 10 mil habitantes",
-                   "g5": "[municípios com 5G, municípios do estado]"},
+                   "g5": "[municípios com 5G, municípios do estado]", "g5_pct": "% dos municípios do estado com 5G"},
         "cinco_g": g5, "valores": valores})
     return True
 

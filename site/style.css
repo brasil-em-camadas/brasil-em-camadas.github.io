@@ -83,6 +83,9 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .chip{font:500 .9rem var(--f-body);color:var(--muted);background:rgba(255,255,255,.03);border:1px solid var(--hair);padding:5px 11px;border-radius:999px;cursor:pointer}
 .chip[aria-pressed="true"]{color:var(--night);background:var(--accent);border-color:var(--accent)}
 .chip[disabled]{opacity:.45;cursor:not-allowed}
+/* pintura com as camadas dela ligadas (2º clique): um ponto ao lado do nome */
+.chip[data-cam="1"]::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-left:7px;vertical-align:middle}
+.note.dica{margin:2px 0 10px}
 .layer{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;padding:8px 0}
 .layer input{width:15px;height:15px;accent-color:var(--accent);margin:3px 0 0}
 .layer .nm{font-weight:500;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}

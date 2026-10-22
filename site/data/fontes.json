@@ -22,7 +22,10 @@
    "nome": "Produção agrícola",
    "arquivo": "agricultura.json",
    "ministerio": "agri",
-   "por": "total"
+   "por": "total",
+   "camadas": [
+    "lav"
+   ]
   },
   {
    "id": "soja",
@@ -33,7 +36,10 @@
    "ministerio": "agri",
    "por": "total",
    "vazio": "sem produção",
-   "so_no_ministerio": true
+   "so_no_ministerio": true,
+   "camadas": [
+    "lav"
+   ]
   },
   {
    "id": "milho",
@@ -44,7 +50,10 @@
    "ministerio": "agri",
    "por": "total",
    "vazio": "sem produção",
-   "so_no_ministerio": true
+   "so_no_ministerio": true,
+   "camadas": [
+    "lav"
+   ]
   },
   {
    "id": "cana",
@@ -55,7 +64,10 @@
    "ministerio": "agri",
    "por": "total",
    "vazio": "sem produção",
-   "so_no_ministerio": true
+   "so_no_ministerio": true,
+   "camadas": [
+    "lav"
+   ]
   },
   {
    "id": "cafe",
@@ -66,14 +78,20 @@
    "ministerio": "agri",
    "por": "total",
    "vazio": "sem produção",
-   "so_no_ministerio": true
+   "so_no_ministerio": true,
+   "camadas": [
+    "lav"
+   ]
   },
   {
    "id": "reb",
    "nome": "Rebanho bovino",
    "arquivo": "pecuaria/estados.json",
    "ministerio": "agri",
-   "por": "total"
+   "por": "total",
+   "camadas": [
+    "boi"
+   ]
   },
   {
    "id": "evpc",
@@ -88,7 +106,11 @@
    "arquivo": "petroleo/producao_estados.json",
    "ministerio": "mme",
    "por": "total",
-   "vazio": "sem produção"
+   "vazio": "sem produção",
+   "camadas": [
+    "oil",
+    "uep"
+   ]
   },
   {
    "id": "ene",
@@ -96,14 +118,32 @@
    "arquivo": "energia/estados.json",
    "ministerio": "mme",
    "por": "total",
-   "vazio": "sem usina no cadastro"
+   "vazio": "sem usina no cadastro",
+   "camadas": [
+    "usinas"
+   ]
   },
   {
    "id": "cel",
    "nome": "Celular 4G/5G",
    "arquivo": "celular/estados.json",
    "ministerio": "com",
-   "por": "percentual"
+   "por": "percentual",
+   "camadas": [
+    "celm"
+   ]
+  },
+  {
+   "id": "g5p",
+   "nome": "Celular 5G",
+   "arquivo": "celular/estados.json",
+   "campo": "g5_pct",
+   "unidade": "% dos municípios com 5G",
+   "ministerio": "com",
+   "por": "percentual",
+   "camadas": [
+    "g5"
+   ]
   },
   {
    "id": "defesa",
@@ -111,7 +151,10 @@
    "arquivo": "defesa/estados.json",
    "ministerio": "def",
    "por": "total",
-   "vazio": "nenhuma empresa credenciada"
+   "vazio": "nenhuma empresa credenciada",
+   "camadas": [
+    "empdef"
+   ]
   }
  ],
  "luzes": [
@@ -166,7 +209,7 @@
    "ministerio": "def",
    "nivel": "base",
    "fonte": "Marine Regions (VLIZ), versão 4 de 2023: das 12 às 24 milhas, faixa em que o Brasil fiscaliza alfândega, impostos, imigração e saúde (Lei 8.617/1993), ≈ 167 mil km²",
-   "ligada": false,
+   "ligada": true,
    "cor": "--zc"
   },
   {
@@ -223,7 +266,7 @@
    "ministerio": "trans",
    "nivel": "manual",
    "fonte": "IBGE, base cartográfica 1:250.000 (BC250, versão 2025): rodovias com sigla do estado (ex.: SP-330) e pavimentadas, 136 mil km",
-   "ligada": false,
+   "ligada": true,
    "cor": "--road-est"
   },
   {

@@ -81,6 +81,12 @@ function quintis(vals) {
     unidade: p.unidade || (DATA[p.id] && DATA[p.id].unidade) || ""
   }))];
   const LAYERS = F.camadas.map(l => ({ ...l, on: !!l.ligada && l.nivel !== "pendente" }));
+  /* camadas ligadas a uma pintura (ex.: Rebanho bovino → rebanho por município): clicar de novo na pintura liga e desliga */
+  const camadasDa = id => { const P = PAINT.find(p => p.id === id);
+    return ((P && P.camadas) || []).map(c => LAYERS.find(l => l.id === c)).filter(l => l && l.nivel !== "pendente"); };
+  /* o que o ministério escolhido liga sozinho (em "Todos", as camadas que começam ligadas) */
+  const padrao = l => minF === "todos" ? !!l.ligada : l.ministerio === minF && l.no_filtro !== false;
+  let proxima = "ligar";   /* botão das camadas: ligar todas → desligar todas → padrão */
   const CLA = F.camadas.find(l => l.id === "cla");
   const LUZ = (F.luzes || []).map(l => ({ ...l }));
   let paint = "pop", sel = null, minF = "todos", modo3d = false, luz = "off", luzPop = null, guardadas = null;
@@ -731,7 +737,8 @@ function quintis(vals) {
     minF = b.dataset.m; guardadas = null;
     mins.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-pressed", x === b));
     /* o filtro liga as camadas do ministério, menos as marcadas com "no_filtro": false (ficam na lista, desligadas) */
-    LAYERS.forEach(l => { if (l.nivel !== "pendente") l.on = minF === "todos" ? !!l.ligada : l.ministerio === minF && l.no_filtro !== false; });
+    LAYERS.forEach(l => { if (l.nivel !== "pendente") l.on = padrao(l); });
+    proxima = "ligar";
     const p = PAINT.find(p => p.ministerio === minF && p.ok);
     paint = minF === "todos" ? "pop" : (p ? p.id : "none");
     const lz = LUZ.find(l => l.id === luz);
@@ -741,9 +748,18 @@ function quintis(vals) {
     /* pinturas marcadas "so_no_ministerio" (as lavouras) só aparecem com o filtro do ministério, para não lotar "Todos" */
     const pv = PAINT.filter(p => p.id === "none" || (minF === "todos" ? !p.so_no_ministerio : p.ministerio === minF));
     document.getElementById("paint").innerHTML = pv.map(p =>
-      `<button class="chip" data-p="${p.id}" aria-pressed="${paint === p.id}" ${p.id !== "none" && !p.ok ? "disabled title=\"Em apuração\"" : ""}>${p.nome}</button>`).join("");
+      `<button class="chip" data-p="${p.id}" aria-pressed="${paint === p.id}"${paint === p.id && camadasDa(p.id).length && camadasDa(p.id).every(l => l.on) ? ' data-cam="1"' : ""} ${p.id !== "none" && !p.ok ? "disabled title=\"Em apuração\"" : ""}>${p.nome}</button>`).join("");
+    /* dica: clicar de novo na pintura escolhida liga ou desliga as camadas dela */
+    let dica = document.getElementById("paint-dica");
+    if (!dica) { dica = document.createElement("p"); dica.id = "paint-dica"; dica.className = "note dica"; document.getElementById("paint").after(dica); }
+    const Pa = PAINT.find(p => p.id === paint), cs = camadasDa(paint);
+    dica.hidden = !cs.length;
+    dica.textContent = cs.length ? `Clique de novo em “${Pa.nome}” para ${cs.every(l => l.on) ? "desligar" : "ligar também"} ${cs.length > 1 ? "as camadas" : "a camada"} ${cs.map(l => "“" + l.nome + "”").join(" e ")}.` : "";
     document.querySelectorAll("#paint .chip:not([disabled])").forEach(b => b.onclick = () => {
-      paint = b.dataset.p;
+      /* 1º clique pinta os estados; os seguintes, na mesma pintura, ligam e desligam as camadas dela */
+      const id = b.dataset.p, cs = camadasDa(id);
+      if (paint !== id) paint = id;
+      else if (cs.length) { const tudo = cs.every(l => l.on); cs.forEach(l => { l.on = !tudo; }); }
       if (luz !== "off" && paint !== "none") definirLuz("off"); else render();
     });
     document.getElementById("paint").classList.toggle("apagado", luz !== "off");
@@ -775,8 +791,16 @@ function quintis(vals) {
     if (todas) {
       const tudo = lig.length > 0 && lig.every(l => l.on);
       todas.hidden = !lig.length;
-      todas.textContent = tudo ? "Desligar todas" : "Ligar todas";
-      todas.onclick = () => { lig.forEach(l => { l.on = !tudo; }); guardadas = null; render(); };
+      if (proxima === "ligar" && tudo) proxima = "desligar";
+      todas.textContent = { ligar: "Ligar todas", desligar: "Desligar todas", padrao: "Padrão" }[proxima];
+      todas.title = proxima === "padrao" ? "Volta às camadas que começam ligadas" : "";
+      /* ligar todas → desligar todas → padrão, nessa ordem */
+      todas.onclick = () => {
+        if (proxima === "ligar") { lig.forEach(l => { l.on = true; }); proxima = "desligar"; }
+        else if (proxima === "desligar") { lig.forEach(l => { l.on = false; }); proxima = "padrao"; }
+        else { lig.forEach(l => { l.on = padrao(l); }); proxima = "ligar"; }
+        guardadas = null; render();
+      };
     }
   }
 
