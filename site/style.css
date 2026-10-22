@@ -287,7 +287,8 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 /* ---------- versão de teste (endereço com ?teste), em avaliação ----------
    escala "mais escuro = mais"; estado sem dado e "Sem cor" sem pintura, como os países vizinhos; contorno do Brasil
    em destaque e divisas tracejadas; painel em duas abas (Mapa e Ficha); aviãozinho nos aeroportos */
-html.teste{--q1:#e6f0b0;--q2:#b5d98b;--q3:#7cbd6a;--q4:#3f9450;--q5:#14612f}
+/* holograma: mais brilho = mais (azul-petróleo escuro → ciano claro) */
+html.teste{--q1:#0d3347;--q2:#12597a;--q3:#1a88b0;--q4:#2fbde6;--q5:#9eefff}
 .selo-teste{font:600 .7rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--night);background:var(--accent);
   padding:3px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;align-self:center}
 .abas{display:flex;gap:2px;width:max-content;max-width:100%;margin:-6px 0 14px;padding:3px;border:1px solid var(--hair);border-radius:999px;background:rgba(255,255,255,.03)}

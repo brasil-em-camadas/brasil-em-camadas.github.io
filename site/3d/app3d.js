@@ -152,6 +152,8 @@ function quintis(vals) {
           tiles: ["https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png"] },
         estados: { type: "geojson", data: estados, promoteId: "sigla" },
         brasil: { type: "geojson", data: TESTE ? contornoBrasil(estados) : fc([]) },
+        /* versão de teste: textura "holograma" da terra do Brasil (fundo transparente; mesmo recorte do relevo do site) */
+        ...(TESTE ? { holo: { type: "image", url: D + "relevo/holograma.webp", coordinates: [[-75, 6], [-28, 6], [-28, -34.5], [-75, -34.5]] } } : {}),
         mundo: { type: "geojson", data: mundo || fc([]) },
         zee: { type: "geojson", data: DATA.zee || fc([]) },
         mt: { type: "geojson", data: DATA.mt || fc([]) },
@@ -185,7 +187,10 @@ function quintis(vals) {
       },
       layers: [
         { id: "fundo", type: "background", paint: { "background-color": "#0a1d2a" } },
-        { id: "nasa", type: "raster", source: "nasa", paint: { "raster-brightness-max": 0.62, "raster-saturation": -0.15, "raster-contrast": 0.08, "raster-fade-duration": 200 } },
+        { id: "nasa", type: "raster", source: "nasa", paint: TESTE
+            ? { "raster-brightness-max": 0.34, "raster-saturation": -0.75, "raster-hue-rotate": 160, "raster-contrast": 0.1, "raster-fade-duration": 200 }
+            : { "raster-brightness-max": 0.62, "raster-saturation": -0.15, "raster-contrast": 0.08, "raster-fade-duration": 200 } },
+        ...(TESTE ? [{ id: "holo", type: "raster", source: "holo", paint: { "raster-fade-duration": 0, "raster-resampling": "linear" } }] : []),
         { id: "paises-borda", type: "line", source: "mundo", paint: { "line-color": "rgba(214,198,150,.35)", "line-width": 0.6 } },
         /* mar: cada arquivo traz a área ("area") e as linhas de limite separadas ("limite", "base") */
         { id: "pce-fill-rec", type: "fill", source: "pce", filter: ["all", AREA, ["==", ["get", "status"], "reconhecida"]],
@@ -208,14 +213,14 @@ function quintis(vals) {
         { id: "pce-line-ana", type: "line", source: "pce", filter: ["all", LIMITE, ["==", ["get", "status"], "em_analise"]],
           paint: { "line-color": cor("--pce"), "line-width": 1.2, "line-opacity": 0.85, "line-dasharray": [3, 2] } },
         { id: "estados-line", type: "line", source: "estados", paint: TESTE
-            ? { "line-color": "rgba(240,236,220,.62)", "line-width": 0.8, "line-dasharray": [2.5, 2] }
+            ? { "line-color": "rgba(150,236,255,.75)", "line-width": 0.9 }
             : { "line-color": "rgba(220,240,225,.55)", "line-width": 0.8 } },
         /* versão de teste: contorno do Brasil em destaque (brilho dourado por baixo de uma linha cheia) */
         ...(TESTE ? [
           { id: "brasil-brilho", type: "line", source: "brasil", layout: { "line-join": "round", "line-cap": "round" },
-            paint: { "line-color": "rgba(240,190,90,.4)", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 6, 8, 10], "line-blur": 4 } },
+            paint: { "line-color": "rgba(40,200,255,.45)", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 7, 8, 12], "line-blur": 5 } },
           { id: "brasil-linha", type: "line", source: "brasil", layout: { "line-join": "round", "line-cap": "round" },
-            paint: { "line-color": "#f2c96a", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1.6, 8, 2.6] } }] : []),
+            paint: { "line-color": "#c8f6ff", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1.5, 8, 2.4] } }] : []),
         { id: "campos-fill", type: "fill", source: "campos", paint: { "fill-color": "rgba(217,144,43,.2)" } },
         { id: "campos-line", type: "line", source: "campos", paint: { "line-color": cor("--campo"), "line-width": 0.8, "line-opacity": 0.85 } },
         { id: "presal-line", type: "line", source: "presal", filter: AREA,
@@ -940,7 +945,7 @@ function quintis(vals) {
     /* versão de teste: em "Sem cor" os estados ficam sem pintura (só o realce do mouse e o escurecido em volta do estado escolhido) */
     if (TESTE && map.getLayer("estados-fill")) {
       const fade = ["boolean", ["feature-state", "fade"], false], hov = ["boolean", ["feature-state", "hover"], false];
-      if (!L) map.setPaintProperty("estados-fill", "fill-opacity", P && P.val ? ["case", fade, 0.18, hov, 0.95, 0.86] : ["case", fade, 0.5, hov, 0.14, 0]);
+      if (!L) map.setPaintProperty("estados-fill", "fill-opacity", P && P.val ? ["case", fade, 0.12, hov, 0.75, 0.52] : ["case", fade, 0.5, hov, 0.14, 0]);
     }
     /* legenda completa (escala de cores + símbolos das camadas ligadas): sempre no rodapé, ao lado dos níveis de confiança;
        sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
