@@ -11,6 +11,11 @@ const NIVEL = {
   pendente:  ["n-pendente", "Em apuração", "Ainda sem dado. O campo fica vazio, sem estimativa."]
 };
 const RAMP = ["--q1", "--q2", "--q3", "--q4", "--q5"];
+/* versão de teste (endereço com ?teste): visual novo em avaliação, sem mudar o site normal */
+const TESTE = new URLSearchParams(location.search).has("teste");
+if (TESTE) document.documentElement.classList.add("teste");
+/* aviãozinho (desenho em 24 × 24), usado no ícone dos aeroportos da versão de teste e na lista de camadas */
+const AVIAO = "M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z";
 const fmt = n => n.toLocaleString("pt-BR");
 const fmt1 = n => n.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
 const kmTxt = a => a >= 1e6 ? `${(a / 1e6).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} milhão de km²` : `${fmt(Math.round(a / 1e3))} mil km²`;
@@ -48,6 +53,22 @@ function caixa(g) {
   let x0 = 180, y0 = 90, x1 = -180, y1 = -90;
   const v = c => { if (typeof c[0] === "number") { x0 = Math.min(x0, c[0]); x1 = Math.max(x1, c[0]); y0 = Math.min(y0, c[1]); y1 = Math.max(y1, c[1]); } else c.forEach(v); };
   v(g.coordinates); return [[x0, y0], [x1, y1]];
+}
+/* contorno do Brasil: os trechos de divisa que aparecem num estado só (a costa e a fronteira com os vizinhos);
+   os que aparecem em dois estados são divisa entre estados. Os trechos seguem a ordem dos anéis de cada estado. */
+function contornoBrasil(geo) {
+  const chave = (a, b) => (a[0] < b[0] || (a[0] === b[0] && a[1] < b[1])) ? a + ";" + b : b + ";" + a;
+  const aneis = [], usos = new Map(), linhas = [];
+  geo.features.forEach(f => { const g = f.geometry; (g.type === "Polygon" ? [g.coordinates] : g.coordinates).forEach(pl => pl.forEach(r => aneis.push(r))); });
+  for (const r of aneis) for (let i = 0; i < r.length - 1; i++) { const k = chave(r[i], r[i + 1]); usos.set(k, (usos.get(k) || 0) + 1); }
+  for (const r of aneis) {
+    let atual = null;
+    for (let i = 0; i < r.length - 1; i++) {
+      if (usos.get(chave(r[i], r[i + 1])) === 1) { if (!atual) { atual = [r[i]]; linhas.push(atual); } atual.push(r[i + 1]); }
+      else atual = null;
+    }
+  }
+  return { type: "Feature", properties: {}, geometry: { type: "MultiLineString", coordinates: linhas } };
 }
 /* faixas por quintil (5 grupos de tamanho igual) */
 function quintis(vals) {
@@ -130,6 +151,7 @@ function quintis(vals) {
         dem: { type: "raster-dem", encoding: "terrarium", tileSize: 256, maxzoom: 13,
           tiles: ["https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png"] },
         estados: { type: "geojson", data: estados, promoteId: "sigla" },
+        brasil: { type: "geojson", data: TESTE ? contornoBrasil(estados) : fc([]) },
         mundo: { type: "geojson", data: mundo || fc([]) },
         zee: { type: "geojson", data: DATA.zee || fc([]) },
         mt: { type: "geojson", data: DATA.mt || fc([]) },
@@ -185,7 +207,15 @@ function quintis(vals) {
           paint: { "line-color": cor("--pce"), "line-width": 1.3 } },
         { id: "pce-line-ana", type: "line", source: "pce", filter: ["all", LIMITE, ["==", ["get", "status"], "em_analise"]],
           paint: { "line-color": cor("--pce"), "line-width": 1.2, "line-opacity": 0.85, "line-dasharray": [3, 2] } },
-        { id: "estados-line", type: "line", source: "estados", paint: { "line-color": "rgba(220,240,225,.55)", "line-width": 0.8 } },
+        { id: "estados-line", type: "line", source: "estados", paint: TESTE
+            ? { "line-color": "rgba(240,236,220,.62)", "line-width": 0.8, "line-dasharray": [2.5, 2] }
+            : { "line-color": "rgba(220,240,225,.55)", "line-width": 0.8 } },
+        /* versão de teste: contorno do Brasil em destaque (brilho dourado por baixo de uma linha cheia) */
+        ...(TESTE ? [
+          { id: "brasil-brilho", type: "line", source: "brasil", layout: { "line-join": "round", "line-cap": "round" },
+            paint: { "line-color": "rgba(240,190,90,.4)", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 6, 8, 10], "line-blur": 4 } },
+          { id: "brasil-linha", type: "line", source: "brasil", layout: { "line-join": "round", "line-cap": "round" },
+            paint: { "line-color": "#f2c96a", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1.6, 8, 2.6] } }] : []),
         { id: "campos-fill", type: "fill", source: "campos", paint: { "fill-color": "rgba(217,144,43,.2)" } },
         { id: "campos-line", type: "line", source: "campos", paint: { "line-color": cor("--campo"), "line-width": 0.8, "line-opacity": 0.85 } },
         { id: "presal-line", type: "line", source: "presal", filter: AREA,
@@ -300,6 +330,13 @@ function quintis(vals) {
         { id: "portos", type: "circle", source: "portos",
           paint: { "circle-color": cor("--port"), "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 3, 8, 6], "circle-stroke-color": "#05101a", "circle-stroke-width": 1 } },
         /* aeroportos (ANAC): tamanho pela raiz dos passageiros de 12 meses; os sem voos de passageiros ficam pequenos e mais claros */
+        TESTE ? { id: "aeroportos", type: "symbol", source: "aeros",
+          layout: { "symbol-sort-key": ["-", 0, ["get", "p"]], "icon-image": "aviao", "icon-allow-overlap": true, "icon-ignore-placement": true,
+            "icon-size": ["interpolate", ["linear"], ["zoom"],
+              3, ["interpolate", ["linear"], ["sqrt", ["get", "p"]], 0, 0.36, 300, 0.5, 1500, 0.78, 6600, 1.3],
+              6, ["interpolate", ["linear"], ["sqrt", ["get", "p"]], 0, 0.5, 300, 0.7, 1500, 1.1, 6600, 1.9],
+              9, ["interpolate", ["linear"], ["sqrt", ["get", "p"]], 0, 0.7, 300, 0.95, 1500, 1.45, 6600, 2.5]] },
+          paint: { "icon-opacity": ["case", ["<", ["get", "p"], 1000], 0.55, 1] } } :
         { id: "aeroportos", type: "circle", source: "aeros", layout: { "circle-sort-key": ["-", 0, ["get", "p"]] },
           paint: { "circle-color": cor("--air"), "circle-opacity": ["case", ["<", ["get", "p"], 1000], 0.45, 0.92],
             "circle-stroke-color": "#05101a", "circle-stroke-width": ["case", ["<", ["get", "p"], 1000], 0.5, 1],
@@ -341,6 +378,17 @@ function quintis(vals) {
         x.quadraticCurveTo(26 - m, 25 - m, 16, 30 - m * 1.4); x.quadraticCurveTo(6 + m, 25 - m, 5 + m, 15); x.closePath(); };
       escudo(0); x.fillStyle = "#0b1622"; x.fill(); escudo(2.6); x.fillStyle = cor("--def"); x.fill();
       map.addImage("escudo", x.getImageData(0, 0, n, n), { pixelRatio: 2 });
+      return;
+    }
+    if (e.id === "aviao" && !map.hasImage("aviao")) {
+      /* versão de teste: aviãozinho com sombra e brilho, para parecer em relevo (desenho de 24 px em dobro, nítido em tela fina) */
+      const n = 54, c = document.createElement("canvas"); c.width = c.height = n;
+      const x = c.getContext("2d"), P = new Path2D(AVIAO);
+      x.translate(2, 2); x.scale(2, 2);
+      x.save(); x.translate(0.9, 1.3); x.fillStyle = "rgba(0,0,0,.55)"; x.fill(P); x.restore();
+      const g = x.createLinearGradient(5, 3, 19, 22); g.addColorStop(0, "#f2f5ff"); g.addColorStop(1, "#7d95df");
+      x.lineJoin = "round"; x.lineWidth = 1.5; x.strokeStyle = "#0b1626"; x.stroke(P); x.fillStyle = g; x.fill(P);
+      map.addImage("aviao", x.getImageData(0, 0, n, n), { pixelRatio: 2 });
       return;
     }
     if (e.id === "se" && !map.hasImage("se")) {
@@ -464,6 +512,23 @@ function quintis(vals) {
   document.getElementById("menos").onclick = () => letra(-1);
   document.getElementById("mais").onclick = () => letra(1);
   letra(0);
+  /* versão de teste: painel em duas abas, "Mapa" (pinturas e camadas) e "Ficha" (o Brasil ou o estado escolhido) */
+  let abas = null;
+  if (TESTE) {
+    abas = document.createElement("div"); abas.className = "abas"; abas.setAttribute("role", "tablist"); abas.setAttribute("aria-label", "Painel");
+    abas.innerHTML = `<button role="tab" data-aba="mapa">Mapa</button><button role="tab" data-aba="ficha">Ficha · Brasil</button>`;
+    conteudo.before(abas);
+    abas.querySelectorAll("button").forEach(b => b.onclick = () => aba(b.dataset.aba));
+    aba("mapa");
+  }
+  if (TESTE) document.querySelector(".brand").insertAdjacentHTML("beforeend",
+    `<a class="selo-teste" href="${location.pathname}" title="Versão de teste. Clique para abrir o site normal, sem as mudanças">Teste</a>`);
+  function aba(nome) {
+    if (!abas) return;
+    dock.dataset.aba = nome;
+    abas.querySelectorAll("button").forEach(b => b.setAttribute("aria-selected", b.dataset.aba === nome));
+    dock.scrollTop = 0;
+  }
 
   /* contorno detalhado do IBGE (desvio máximo ≈ 1,7 km, contra ≈ 5 km do contorno leve da abertura):
      baixado na primeira vez que alguém aproxima o mapa ou escolhe um estado */
@@ -475,6 +540,7 @@ function quintis(vals) {
     if (!d) { detalhe = "nao"; return; }
     const aplicar = () => {
       map.getSource("estados").setData(d); detalhe = "ok";
+      if (TESTE && map.getSource("brasil")) map.getSource("brasil").setData(contornoBrasil(d));
       estados.features.forEach(f => { const u = f.properties.sigla; map.setFeatureState({ source: "estados", id: u }, { fade: !!sel && u !== sel, hover: u === hover }); });
     };
     map.getSource("estados") ? aplicar() : map.once("load", aplicar);
@@ -484,7 +550,7 @@ function quintis(vals) {
   function selecionar(s) {
     if (sel) { map.setFeatureState({ source: "estados", id: sel }, { sel: false }); }
     sel = (sel === s) ? null : s;
-    if (sel) detalhar();
+    if (sel) { detalhar(); aba("ficha"); }
     estados.features.forEach(f => map.setFeatureState({ source: "estados", id: f.properties.sigla }, { fade: !!sel && f.properties.sigla !== sel }));
     map.setFilter("estado-sel", ["==", ["get", "sigla"], sel || ""]);
     linhasTrem();
@@ -499,7 +565,6 @@ function quintis(vals) {
     map.setTerrain(modo3d ? { source: "dem", exaggeration: 1.6 } : null);
     map.easeTo({ pitch: modo3d ? (sel ? 55 : 45) : 0, duration: reduce ? 0 : 1200 });
   };
-
   /* passar o mouse e clicar nos estados */
   let hover = null;
   map.on("mousemove", "estados-fill", e => {
@@ -863,18 +928,24 @@ function quintis(vals) {
       const q = quintis(vals), cores = RAMP.map(cor);
       const m = ["match", ["get", "sigla"]];
       /* sem valor: cor da terra; quando a falta tem significado ("sem produção"), cinza, para não parecer o grupo mais baixo */
-      Object.keys(NAME).forEach(s => { const v = P.val(s); m.push(s, v == null ? cor(P.vazio ? "--sem" : "--land") : cores[q(v)]); });
-      m.push(cor("--land"));
+      Object.keys(NAME).forEach(s => { const v = P.val(s); m.push(s, v == null ? (P.vazio ? cor("--sem") : TESTE ? "rgba(0,0,0,0)" : cor("--land")) : cores[q(v)]); });
+      m.push(TESTE ? "rgba(0,0,0,0)" : cor("--land"));
       if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", m);
       const DD = DATA[P.id];
       leg = `<span>${P.nome}${P.unidade ? " (" + P.unidade + ")" : ""}</span><span class="faixa"><span>${P.fmt(Math.min(...vals))}</span>
         <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(Math.max(...vals))}</span></span>
-        ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : "<span>sem cor = sem dado</span>") : ""}`;
-    } else if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", cor("--land"));
+        ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : `<span>${TESTE ? "sem pintura = sem dado" : "sem cor = sem dado"}</span>`) : ""}`;
+    } else if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", TESTE
+      ? ["case", ["boolean", ["feature-state", "fade"], false], "#02070b", ["boolean", ["feature-state", "hover"], false], "#ffffff", "rgba(0,0,0,0)"] : cor("--land"));
+    /* versão de teste: em "Sem cor" os estados ficam sem pintura (só o realce do mouse e o escurecido em volta do estado escolhido) */
+    if (TESTE && map.getLayer("estados-fill")) {
+      const fade = ["boolean", ["feature-state", "fade"], false], hov = ["boolean", ["feature-state", "hover"], false];
+      if (!L) map.setPaintProperty("estados-fill", "fill-opacity", P && P.val ? ["case", fade, 0.18, hov, 0.95, 0.86] : ["case", fade, 0.5, hov, 0.14, 0]);
+    }
     /* legenda completa (escala de cores + símbolos das camadas ligadas): sempre no rodapé, ao lado dos níveis de confiança;
        sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
-      const forma = k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
+      const forma = TESTE && l.id === "air" ? "aviao" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
     }).join("")}</span>`).join("");
     document.getElementById("legend").innerHTML = legMapa ? leg + itens : "";
@@ -884,8 +955,8 @@ function quintis(vals) {
     if (lr) lr.innerHTML = (leg ? `<span class="item escala">${leg}</span>` : "") + (itens || `<span class="note">Nenhuma camada ligada. Escolha as camadas no painel.</span>`);
     document.getElementById("back").hidden = !sel;
     document.getElementById("where").textContent = sel ? `${NAME[sel]} · ${sel}` : "Brasil · 27 UFs";
+    if (abas) abas.querySelector('[data-aba="ficha"]').textContent = sel ? `Ficha · ${sel}` : "Ficha · Brasil";
   }
-
   /* ---------- luzes à noite ---------- */
   const FADE = ["boolean", ["feature-state", "fade"], false], HOVER = ["boolean", ["feature-state", "hover"], false];
   const COR_POP_LEG = ["#6e370a", "#d77d23", "#ffbe50", "#ffe8aa", "#fffceb"];

@@ -11,6 +11,27 @@ const NIVEL = {
   pendente:  ["n-pendente", "Em apuração", "Ainda sem dado. O campo fica vazio, sem estimativa."]
 };
 const RAMP = ["--q1", "--q2", "--q3", "--q4", "--q5"];
+/* versão de teste (endereço com ?teste): visual novo em avaliação, sem mudar o site normal */
+const TESTE = new URLSearchParams(location.search).has("teste");
+if (TESTE) document.documentElement.classList.add("teste");
+/* aviãozinho (desenho em 24 × 24), usado nos aeroportos da versão de teste */
+const AVIAO = "M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z";
+/* contorno do Brasil: os trechos de divisa que aparecem num estado só (a costa e a fronteira com os vizinhos);
+   os que aparecem em dois estados são divisa entre estados */
+function contornoBrasil(geo) {
+  const chave = (a, b) => (a[0] < b[0] || (a[0] === b[0] && a[1] < b[1])) ? a + ";" + b : b + ";" + a;
+  const aneis = [], usos = new Map(), linhas = [];
+  geo.features.forEach(f => { const g = f.geometry; (g.type === "Polygon" ? [g.coordinates] : g.coordinates).forEach(pl => pl.forEach(r => aneis.push(r))); });
+  for (const r of aneis) for (let i = 0; i < r.length - 1; i++) { const k = chave(r[i], r[i + 1]); usos.set(k, (usos.get(k) || 0) + 1); }
+  for (const r of aneis) {
+    let atual = null;
+    for (let i = 0; i < r.length - 1; i++) {
+      if (usos.get(chave(r[i], r[i + 1])) === 1) { if (!atual) { atual = [r[i]]; linhas.push(atual); } atual.push(r[i + 1]); }
+      else atual = null;
+    }
+  }
+  return { type: "Feature", properties: {}, geometry: { type: "MultiLineString", coordinates: linhas } };
+}
 const fmt = n => n.toLocaleString("pt-BR");
 const fmt1 = n => n.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -155,6 +176,10 @@ function rewind(f) {
   const imgSombra = REL && REL.sombra ? root.append("image").attr("class", "relevo-sombra").attr("href", "../data/relevo/" + REL.sombra.arquivo)
     .attr("preserveAspectRatio", "none").attr("clip-path", "url(#clip-br)") : null;
   states.append("title").text(d => d.properties.name);
+  /* versão de teste: contorno do Brasil em destaque (brilho dourado por baixo de uma linha cheia) */
+  const contornoBr = TESTE ? contornoBrasil(estados) : null;
+  const gBr = root.append("g");
+  if (contornoBr) { gBr.append("path").attr("class", "contorno-br-brilho"); gBr.append("path").attr("class", "contorno-br"); }
   const gCampos = root.append("g");
   let camposP = gCampos.selectAll("path");
   function desenharCampos() {
@@ -312,8 +337,8 @@ function rewind(f) {
   /* aeroportos (ANAC): triângulo maior quanto mais passageiros; os sem voos de passageiros ficam pequenos e mais claros */
   const AERO = DATA.air && DATA.air.aeroportos ? DATA.air.aeroportos : [];
   const paxTxt = n => n >= 1e6 ? `${fmt1(n / 1e6)} ${n < 1.95e6 ? "milhão" : "milhões"} de passageiros` : `${fmt(Math.round(n / 1e3))} mil passageiros`;
-  const airs = gAir.selectAll("path").data(AERO.map(a => ({ c: [a[0], a[1]], a }))).join("path").attr("class", d => "air" + (d.a[6] < 1000 ? " sem" : ""))
-    .attr("d", d => d3.symbol(d3.symbolTriangle, 22 + Math.sqrt(d.a[6]) * 0.06)());
+  const airs = gAir.selectAll("path").data(AERO.map(a => ({ c: [a[0], a[1]], a, f: 0.38 + Math.sqrt(a[6]) / 6600 * 0.85 }))).join("path").attr("class", d => "air" + (d.a[6] < 1000 ? " sem" : ""))
+    .attr("d", d => TESTE ? AVIAO : d3.symbol(d3.symbolTriangle, 22 + Math.sqrt(d.a[6]) * 0.06)());
   airs.on("click", (e, d) => { e.stopPropagation(); select(d.a[5]); });
   airs.append("title").text(d => `${d.a[3]} (${d.a[2]}) · aeródromo público · ${d.a[4]}/${d.a[5]}: ` + (d.a[6] >= 1000
     ? `${paxTxt(d.a[6])} em 12 meses (${DATA.air.meta.referencia}), embarcados e desembarcados.` : `sem voos de passageiros nos dados estatísticos (${DATA.air.meta.referencia}).`) + " Fonte: ANAC.");
@@ -351,6 +376,23 @@ function rewind(f) {
   }
   document.getElementById("fold").onclick = () => mostrarPainel(false);
   unfold.onclick = () => mostrarPainel(true);
+  /* versão de teste: painel em duas abas, "Mapa" (pinturas e camadas) e "Ficha" (o Brasil ou o estado escolhido) */
+  let abas = null;
+  if (TESTE) {
+    abas = document.createElement("div"); abas.className = "abas"; abas.setAttribute("role", "tablist"); abas.setAttribute("aria-label", "Painel");
+    abas.innerHTML = `<button role="tab" data-aba="mapa">Mapa</button><button role="tab" data-aba="ficha">Ficha · Brasil</button>`;
+    document.getElementById("ficha").before(abas);
+    abas.querySelectorAll("button").forEach(b => b.onclick = () => aba(b.dataset.aba));
+    aba("mapa");
+  }
+  if (TESTE) document.querySelector(".brand").insertAdjacentHTML("beforeend",
+    `<a class="selo-teste" href="${location.pathname}" title="Versão de teste. Clique para abrir o site normal, sem as mudanças">Teste</a>`);
+  function aba(nome) {
+    if (!abas) return;
+    dock.dataset.aba = nome;
+    abas.querySelectorAll("button").forEach(b => b.setAttribute("aria-selected", b.dataset.aba === nome));
+    dock.scrollTop = 0;
+  }
   try { if (innerWidth > 900 && localStorage.getItem("bec-painel") === "recolhido") { dock.hidden = true; unfold.hidden = false; } } catch (e) {}
 
   function layout() {
@@ -374,6 +416,7 @@ function rewind(f) {
     posCel(); raioPocos();
     roads.attr("d", path); rodEstP.attr("d", path);
     states.attr("d", path);
+    if (contornoBr) gBr.selectAll("path").attr("d", path(contornoBr));
     vizP.attr("d", path); vizB.attr("d", path);
     clipBr.attr("d", path(estados));
     const encaixa = (img, r) => { if (!img) return; const [x0, y0] = proj([r.oeste, r.norte]), [x1, y1] = proj([r.leste, r.sul]);
@@ -433,7 +476,7 @@ function rewind(f) {
     pedC.attr("r", d => d.r0 * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     seP.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
     defP.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
-    airs.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
+    airs.attr("transform", d => TESTE ? `translate(${proj(d.c)}) scale(${s * d.f}) translate(-12,-12)` : `translate(${proj(d.c)}) scale(${s})`);
     if (CLA) { const p = proj(CLA.ponto); gCla.selectAll("circle").attr("cx", 0).attr("cy", 0); gCla.attr("transform", `translate(${p}) scale(${s})`); }
   }
   /* enquadramento pelo continente: a "caixa" de cada estado não inclui as ilhas oceânicas (ver gerar_contorno_estados.py) */
@@ -453,7 +496,7 @@ function rewind(f) {
   }
   function select(s) {
     if (sel === s) { reset(); return; }
-    sel = s; zoomTo(estados.features.find(f => f.properties.sigla === s)); render(); ficha();
+    sel = s; aba("ficha"); zoomTo(estados.features.find(f => f.properties.sigla === s)); render(); ficha();
   }
   document.getElementById("back").onclick = reset;
   document.getElementById("center").onclick = () => {
@@ -592,12 +635,12 @@ function rewind(f) {
       const D = DATA[P.id];
       leg = `<span>${P.nome}${P.unidade ? " (" + P.unidade + ")" : ""}</span><span class="faixa"><span>${P.fmt(d3.min(vals))}</span>
         <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(d3.max(vals))}</span></span>
-        ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : "<span>sem cor = sem dado</span>") : ""}`;
+        ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : `<span>${TESTE ? "sem pintura = sem dado" : "sem cor = sem dado"}</span>`) : ""}`;
     } else states.style("fill", null);
     /* legenda completa (escala de cores + símbolos das camadas ligadas): sempre no rodapé, ao lado dos níveis de confiança;
        sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
-      const forma = k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
+      const forma = TESTE && l.id === "air" ? "aviao" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
     }).join("")}</span>`).join("");
     document.getElementById("legend").innerHTML = legMapa ? leg + itens : "";
@@ -610,6 +653,7 @@ function rewind(f) {
     rails.classed("hi", d => sel && d.uf === sel).classed("off", d => sel && d.uf !== sel);
     document.getElementById("back").hidden = !sel;
     document.getElementById("where").textContent = sel ? `${NAME[sel]} · ${sel}` : "Brasil · 27 UFs";
+    if (abas) abas.querySelector('[data-aba="ficha"]').textContent = sel ? `Ficha · ${sel}` : "Ficha · Brasil";
   }
 
   function fichaOleo(s) {

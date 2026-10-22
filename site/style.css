@@ -283,3 +283,27 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .ped{stroke:#1a0d05;stroke-width:.6;vector-effect:non-scaling-stroke;fill-opacity:.9;cursor:pointer}
 .ped.f1{fill:var(--tr1)}.ped.f2{fill:var(--tr2)}.ped.f3{fill:var(--tr3)}.ped.f4{fill:var(--tr4)}
 .ped.sem{fill:none;stroke:var(--tr0);stroke-width:1.3;pointer-events:visibleStroke}
+
+/* ---------- versão de teste (endereço com ?teste), em avaliação ----------
+   escala "mais escuro = mais"; estado sem dado e "Sem cor" sem pintura, como os países vizinhos; contorno do Brasil
+   em destaque e divisas tracejadas; painel em duas abas (Mapa e Ficha); aviãozinho nos aeroportos */
+html.teste{--q1:#e6f0b0;--q2:#b5d98b;--q3:#7cbd6a;--q4:#3f9450;--q5:#14612f}
+.selo-teste{font:600 .7rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--night);background:var(--accent);
+  padding:3px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;align-self:center}
+.abas{display:flex;gap:2px;width:max-content;max-width:100%;margin:-6px 0 14px;padding:3px;border:1px solid var(--hair);border-radius:999px;background:rgba(255,255,255,.03)}
+.abas button{font:600 .88rem var(--f-body);color:var(--muted);background:none;border:0;border-radius:999px;padding:5px 16px;cursor:pointer;white-space:nowrap}
+.abas button:hover{color:var(--ink)}
+.abas button[aria-selected="true"]{color:var(--night);background:var(--accent)}
+.dock[data-aba="mapa"] #ficha{display:none}
+.dock[data-aba="ficha"] .blk:not(#ficha){display:none}
+.dock[data-aba] .blk+.blk{margin-top:0;padding-top:0;border-top:0}
+.teste .st{fill:transparent;stroke:rgba(240,236,220,.6);stroke-width:.7;stroke-dasharray:3 2.5}
+.teste .st:hover{fill:rgba(255,255,255,.12)}
+.teste .st.sel{stroke:var(--accent);stroke-width:2;stroke-dasharray:none}
+.teste .st.fade{opacity:1;fill:rgba(2,7,11,.5)}
+.contorno-br-brilho{fill:none;stroke:rgba(240,190,90,.35);stroke-width:6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
+.contorno-br{fill:none;stroke:#f2c96a;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
+.teste .air{fill:#d4defc;stroke:#0b1626;stroke-width:.9}
+.key.aviao{width:13px;height:13px;border-radius:0;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z'/%3E%3C/svg%3E") center/contain no-repeat}
