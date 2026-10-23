@@ -15,7 +15,18 @@
 @keyframes cla{from{opacity:.9;transform:scale(.6)}to{opacity:0;transform:scale(2.8)}}
 .sem3d{position:absolute;inset:40% 20% auto;z-index:5;text-align:center;background:var(--glass);padding:20px;border-radius:12px}
 .sem3d a{color:var(--accent)}
-@media (prefers-reduced-motion:reduce){.mk-cla i.p,.carregando span{animation:none}}
+/* versão de teste: Alcântara como foguete, com a base no ponto, um pouco maior que os outros ícones (é único);
+   vapor saindo para os lados na base e uma chama pequena que tremula */
+.mk-foguete{position:relative;width:26px;height:37px;cursor:pointer;filter:drop-shadow(0 1px 2px rgba(0,0,0,.65))}
+.mk-foguete svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.mk-foguete .vapor{position:absolute;left:50%;bottom:-2px;width:11px;height:11px;margin-left:-5.5px;border-radius:50%;
+  background:radial-gradient(circle,rgba(246,242,234,.9) 0,rgba(246,242,234,.45) 45%,rgba(246,242,234,0) 70%);opacity:0;animation:vapor 2.8s ease-out infinite}
+.mk-foguete .v1{--dx:-17px;animation-delay:0s}.mk-foguete .v2{--dx:16px;animation-delay:.7s}
+.mk-foguete .v3{--dx:-10px;animation-delay:1.4s}.mk-foguete .v4{--dx:11px;animation-delay:2.1s}
+@keyframes vapor{0%{opacity:0;transform:translate(0,0) scale(.45)}15%{opacity:.95}100%{opacity:0;transform:translate(var(--dx),-5px) scale(2.3)}}
+.mk-foguete .chama{transform-box:fill-box;transform-origin:50% 0;animation:chama .32s ease-in-out infinite alternate}
+@keyframes chama{from{transform:scaleY(1)}to{transform:scaleY(.62)}}
+@media (prefers-reduced-motion:reduce){.mk-cla i.p,.carregando span,.mk-foguete .vapor,.mk-foguete .chama{animation:none}}
 
 /* painel mais largo. "Recolher" fica fixo no mesmo ponto ao rolar (top = margem negativa, então não pula);
    A− / A+ ficam logo abaixo e sobem junto com o conteúdo */

@@ -75,10 +75,9 @@ function quintis(vals) {
   const s = [...vals].sort((a, b) => a - b), q = [0.2, 0.4, 0.6, 0.8].map(p => s[Math.floor(p * (s.length - 1))]);
   return v => q.filter(t => v > t).length;
 }
-/* atmosfera do globo: a de sempre e a da versão de teste em ouro (céu quase preto, horizonte âmbar) */
+/* atmosfera do globo */
 const ATMOS = ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 1, 7, 0];
 const CEU = { "sky-color": "#06121c", "horizon-color": "#1d4b5e", "fog-color": "#0b2233", "atmosphere-blend": ATMOS };
-const CEU_OURO = { "sky-color": "#050403", "horizon-color": "#3a2a12", "fog-color": "#0a0805", "atmosphere-blend": ATMOS };
 /* versão de teste (escolha do Edu em 23/10/2026): cinza forte = sem número; cinza fraco = nenhum (ex.: "sem produção")
    ou, nas pinturas de total, menos de 0,1% do Brasil (soma dos estados). Esses estados saem da escala, e as 5 faixas
    (quintis) são feitas só com os outros. Em taxas e porcentagens (por habitante, % da população), só o zero é "nenhum". */
@@ -93,11 +92,17 @@ function classesTeste(P, ufs) {
   return { c, escala, forte: ufs.some(s => c[s] === "forte"),
     fraco: [ufs.some(nada) ? (P.vazio || "zero") : "", ufs.some(pouco) ? "menos de 0,1% do Brasil" : ""].filter(Boolean).join(" ou ") };
 }
-/* cor um pouco mais clara (realce do mouse): mistura com branco */
-function clarear(hex, t) {
-  const n = parseInt(hex.replace("#", ""), 16), m = x => Math.round(x + (255 - x) * t);
-  return `rgb(${m(n >> 16 & 255)},${m(n >> 8 & 255)},${m(n & 255)})`;
-}
+/* versão de teste: realce do estado sob o mouse: contorno dourado aceso e tracinhos claros que correm em volta
+   (sequência de tracejados que, trocada a cada 50 ms, faz o traço andar; método do exemplo "linha animada" do Mapbox) */
+const TRACOS = [[0, 4, 3], [0.5, 4, 2.5], [1, 4, 2], [1.5, 4, 1.5], [2, 4, 1], [2.5, 4, 0.5], [3, 4, 0],
+  [0, 0.5, 3, 3.5], [0, 1, 3, 3], [0, 1.5, 3, 2.5], [0, 2, 3, 2], [0, 2.5, 3, 1.5], [0, 3, 3, 1], [0, 3.5, 3, 0.5]];
+/* versão de teste: foguete de Alcântara (desenho em 24 × 34; a base fica no ponto), com chama e vapor animados no CSS */
+const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/>
+  <path d="M7.6 17.5L3.4 24.4v2.6l4.2-3.4zM16.4 17.5l4.2 6.9v2.6l-4.2-3.4z" fill="#ff7a6b" stroke="#1a1206" stroke-width="1"/>
+  <path d="M9.6 23h4.8l.8 4.2H8.8z" fill="#7a7064" stroke="#1a1206" stroke-width="1"/>
+  <path d="M12 2c4 4 5.2 9.4 4.6 21H7.4C6.8 11.4 8 6 12 2z" fill="#f3efe6" stroke="#1a1206" stroke-width="1.2"/>
+  <path d="M12 2.6c2.4 2.4 3.6 5 4.1 7.6H7.9c.5-2.6 1.7-5.2 4.1-7.6z" fill="#e6b450"/>
+  <circle cx="12" cy="14.2" r="2.1" fill="#2b3c4d" stroke="#1a1206" stroke-width=".9"/><circle cx="11.3" cy="13.5" r=".6" fill="#cfe6ff"/>`;
 
 (async function main() {
   const temGL = (() => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch { return false; } })();
@@ -178,6 +183,8 @@ function clarear(hex, t) {
         estados: { type: "geojson", data: estados, promoteId: "sigla" },
         brasil: { type: "geojson", data: TESTE ? contornoBrasil(estados) : fc([]) },
         /* versão de teste: relevo da terra do Brasil por cima da cor dos estados (sombra e luz translúcidas; ver scripts/estudos/terra_ouro.py) */
+        /* versão de teste: contorno do estado sob o mouse */
+        ...(TESTE ? { "contorno-hover": { type: "geojson", data: fc([]) } } : {}),
         ...(TESTE ? { "relevo-ouro": { type: "image", url: D + "relevo/ouro_relevo.webp", coordinates: [[-75, 6], [-28, 6], [-28, -34.5], [-75, -34.5]] } } : {}),
         mundo: { type: "geojson", data: mundo || fc([]) },
         zee: { type: "geojson", data: DATA.zee || fc([]) },
@@ -248,7 +255,16 @@ function clarear(hex, t) {
           { id: "brasil-brilho", type: "line", source: "brasil", layout: { "line-join": "round", "line-cap": "round" },
             paint: { "line-color": "rgba(255,184,70,.45)", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 7, 8, 12], "line-blur": 5 } },
           { id: "brasil-linha", type: "line", source: "brasil", layout: { "line-join": "round", "line-cap": "round" },
-            paint: { "line-color": "#ffe2a6", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1.5, 8, 2.4] } }] : []),
+            paint: { "line-color": "#ffe2a6", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1.5, 8, 2.4] } },
+          /* realce do estado sob o mouse: brilho dourado e uma luz que corre pelo contorno (no lugar do realce esbranquiçado) */
+          { id: "hover-brilho", type: "line", source: "contorno-hover", layout: { "line-join": "round", "line-cap": "round" },
+            paint: { "line-color": "rgba(255,176,60,.6)", "line-width": 10, "line-blur": 6 } },
+          { id: "hover-sombra", type: "line", source: "contorno-hover", layout: { "line-join": "round", "line-cap": "round" },
+            paint: { "line-color": "rgba(10,6,2,.8)", "line-width": 5.2 } },
+          { id: "hover-linha", type: "line", source: "contorno-hover", layout: { "line-join": "round", "line-cap": "round" },
+            paint: { "line-color": "#f5b64a", "line-width": 3 } },
+          { id: "hover-tracos", type: "line", source: "contorno-hover", layout: { "line-join": "round" },
+            paint: { "line-color": "#fff6dc", "line-width": 3, "line-dasharray": TRACOS[0] } }] : []),
         { id: "campos-fill", type: "fill", source: "campos", paint: { "fill-color": "rgba(217,144,43,.2)" } },
         { id: "campos-line", type: "line", source: "campos", paint: { "line-color": cor("--campo"), "line-width": 0.8, "line-opacity": 0.85 } },
         { id: "presal-line", type: "line", source: "presal", filter: AREA,
@@ -259,9 +275,16 @@ function clarear(hex, t) {
           paint: { "line-color": cor("--road-est"), "line-opacity": 0.5, "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.4, 8, 1.3] } },
         { id: "rodovias-terra", type: "line", source: "rod", filter: ["==", ["get", "p"], 0],
           paint: { "line-color": ["case", ["==", ["get", "e"], 1], cor("--road-est"), cor("--road")], "line-opacity": 0.5, "line-dasharray": [2, 2], "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.6, 8, 1.4] } },
+        /* versão de teste: borda escura por baixo das rodovias federais pavimentadas, para a linha clara aparecer sobre o ouro */
+        ...(TESTE ? [{ id: "rodovias-borda", type: "line", source: "rod", filter: ["==", ["get", "p"], 1], layout: { "line-cap": "round", "line-join": "round" },
+          paint: { "line-color": "rgba(14,9,4,.7)", "line-opacity": 1,
+            "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "e"], 1], 1.7, 2.1], 8, ["case", ["==", ["get", "e"], 1], 3.1, 3.8]] } }] : []),
         { id: "rodovias", type: "line", source: "rod", filter: ["==", ["get", "p"], 1], layout: { "line-cap": "round", "line-join": "round" },
-          paint: { "line-color": ["case", ["==", ["get", "e"], 1], cor("--road-est"), cor("--road")], "line-opacity": 0.62,
+          paint: { "line-color": ["case", ["==", ["get", "e"], 1], cor("--road-est"), cor("--road")], "line-opacity": TESTE ? 0.92 : 0.62,
             "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "e"], 1], 0.6, 0.8], 8, ["case", ["==", ["get", "e"], 1], 1.5, 2]] } },
+        /* versão de teste: borda escura por baixo das ferrovias (a linha laranja some sobre o ouro sem ela) */
+        ...(TESTE ? [{ id: "ferrovias-borda", type: "line", source: "trilhos", layout: { "line-join": "round" },
+          paint: { "line-color": "rgba(14,9,4,.75)", "line-opacity": 0.9, "line-width": ["interpolate", ["linear"], ["zoom"], 3, 2.4, 8, 4.4] } }] : []),
         { id: "ferrovias", type: "line", source: "trilhos", filter: ["!=", ["get", "obra"], 1],
           paint: { "line-color": cor("--rail"), "line-opacity": 0.9, "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1, 8, 2.6] } },
         { id: "ferrovias-obra", type: "line", source: "trilhos", filter: ["==", ["get", "obra"], 1],
@@ -474,15 +497,17 @@ function clarear(hex, t) {
   /* Alcântara: marcador HTML que pisca */
   let mkCla = null;
   if (CLA) {
-    const el = document.createElement("div"); el.className = "mk-cla"; el.title = CLA.nome;
-    el.innerHTML = '<i class="p"></i><i></i><b></b>';
-    mkCla = new maplibregl.Marker({ element: el }).setLngLat(CLA.ponto);
+    const el = document.createElement("div"); el.className = TESTE ? "mk-foguete" : "mk-cla"; el.title = CLA.nome;
+    el.innerHTML = TESTE ? '<i class="vapor v1"></i><i class="vapor v2"></i><i class="vapor v3"></i><i class="vapor v4"></i>' +
+      `<svg viewBox="0 0 24 34" aria-hidden="true">${FOGUETE}</svg>` : '<i class="p"></i><i></i><b></b>';
+    /* versão de teste: foguete em pé, com a base no ponto */
+    mkCla = new maplibregl.Marker({ element: el, anchor: TESTE ? "bottom" : "center" }).setLngLat(CLA.ponto);
   }
 
   const G = { zee: ["zee-fill", "zee-line", "zee-rotulo", "ilhas-ponto", "ilhas-rotulo"], mt: ["mt-fill", "mt-line", "mt-base"], zc: ["zc-fill", "zc-line"],
-    pce: ["pce-fill-rec", "pce-fill-ana", "pce-line-rec", "pce-line-ana", "pce-rotulo"], rod: ["rodovias", "rodovias-terra", "rodovias-rotulo"], rodest: ["rodovias-est"],
+    pce: ["pce-fill-rec", "pce-fill-ana", "pce-line-rec", "pce-line-ana", "pce-rotulo"], rod: ["rodovias", "rodovias-terra", "rodovias-rotulo", ...(TESTE ? ["rodovias-borda"] : [])], rodest: ["rodovias-est"],
     oil: ["pocos"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi"], lav: ["lav"], usinas: ["usinas"], dutos: ["dutos"], refin: ["refin"], se: ["se"], lt: ["lt"], celm: ["celm"], g5: ["g5"], empdef: ["empdef"], pedagio: ["pedagio"],
-    rail: ["ferrovias", "ferrovias-obra"], ports: ["portos"], air: ["aeroportos"] };
+    rail: ["ferrovias", "ferrovias-obra", ...(TESTE ? ["ferrovias-borda"] : [])], ports: ["portos"], air: ["aeroportos"] };
 
   /* ---------- painel e enquadramento ---------- */
   const stage = document.getElementById("stage");
@@ -580,7 +605,7 @@ function clarear(hex, t) {
     const d = await getJSON(D + "geo/estados_detalhe.json");
     if (!d) { detalhe = "nao"; return; }
     const aplicar = () => {
-      map.getSource("estados").setData(d); detalhe = "ok";
+      map.getSource("estados").setData(d); detalhe = "ok"; geoAtual = d;
       if (TESTE && map.getSource("brasil")) map.getSource("brasil").setData(contornoBrasil(d));
       estados.features.forEach(f => { const u = f.properties.sigla; map.setFeatureState({ source: "estados", id: u }, { fade: !!sel && u !== sel, hover: u === hover }); });
     };
@@ -611,9 +636,30 @@ function clarear(hex, t) {
   map.on("mousemove", "estados-fill", e => {
     map.getCanvas().style.cursor = "pointer";
     const s = e.features[0].properties.sigla;
-    if (hover !== s) { if (hover) map.setFeatureState({ source: "estados", id: hover }, { hover: false }); hover = s; map.setFeatureState({ source: "estados", id: s }, { hover: true }); }
+    if (hover !== s) { if (hover) map.setFeatureState({ source: "estados", id: hover }, { hover: false }); hover = s; map.setFeatureState({ source: "estados", id: s }, { hover: true }); realceTeste(); }
   });
-  map.on("mouseleave", "estados-fill", () => { map.getCanvas().style.cursor = ""; if (hover) map.setFeatureState({ source: "estados", id: hover }, { hover: false }); hover = null; });
+  map.on("mouseleave", "estados-fill", () => { map.getCanvas().style.cursor = ""; if (hover) map.setFeatureState({ source: "estados", id: hover }, { hover: false }); hover = null; realceTeste(); });
+  /* versão de teste: o estado sob o mouse ganha o contorno dourado com a luz correndo (sem movimento para quem pede menos animação) */
+  let geoAtual = estados, animHover = 0;
+  function realceTeste() {
+    const src = TESTE && map.getSource("contorno-hover");
+    if (!src) return;
+    cancelAnimationFrame(animHover);
+    const f = hover && geoAtual.features.find(x => x.properties.sigla === hover);
+    if (!f) { src.setData(fc([])); return; }
+    const g = f.geometry, aneis = (g.type === "Polygon" ? [g.coordinates] : g.coordinates).flatMap(pl => pl);
+    src.setData(fc(aneis.map(r => ({ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: r } }))));
+    map.setLayoutProperty("hover-tracos", "visibility", reduce ? "none" : "visible");
+    if (reduce) return;
+    const dono = hover; let ult = -1;
+    const passo = t => {
+      if (hover !== dono) return;
+      const k = Math.floor(t / 50) % TRACOS.length;
+      if (k !== ult) { ult = k; map.setPaintProperty("hover-tracos", "line-dasharray", TRACOS[k]); }
+      animHover = requestAnimationFrame(passo);
+    };
+    animHover = requestAnimationFrame(passo);
+  }
   map.on("click", e => {
     if (luz === "pop" && map.getLayer("luz-pop-ponto") && map.getZoom() >= 5) {
       const { x, y } = e.point, m = map.queryRenderedFeatures([[x - 5, y - 5], [x + 5, y + 5]], { layers: ["luz-pop-ponto"] });
@@ -975,10 +1021,10 @@ function clarear(hex, t) {
       /* versão de teste: luz de fundo (brasa → ouro) e os dois cinzas; o relevo sombreado fica por cima (camada "relevo") */
       const K = classesTeste(P, Object.keys(NAME)), vals = K.escala;
       const base = s => K.c[s] === "forte" ? cor("--sem-forte") : K.c[s] === "fraco" ? cor("--sem-fraco") : cor(RAMP[K.c[s]]);
-      const m = ["match", ["get", "sigla"]], mh = ["match", ["get", "sigla"]];
-      Object.keys(NAME).forEach(s => { m.push(s, base(s)); mh.push(s, clarear(base(s), 0.22)); });
-      m.push("rgba(0,0,0,0)"); mh.push("rgba(0,0,0,0)");
-      if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", ["case", ["boolean", ["feature-state", "hover"], false], mh, m]);
+      const m = ["match", ["get", "sigla"]];
+      Object.keys(NAME).forEach(s => m.push(s, base(s)));
+      m.push("rgba(0,0,0,0)");
+      if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", m);
       leg = `<span>${P.nome}${P.unidade ? " (" + P.unidade + ")" : ""}</span><span class="faixa"><span>${P.fmt(Math.min(...vals))}</span>
         <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(Math.max(...vals))}</span></span>
         ${K.forte ? `<span><i class="key sq" style="background:var(--sem-forte)"></i>sem número</span>` : ""}
@@ -1001,7 +1047,7 @@ function clarear(hex, t) {
     /* legenda completa (escala de cores + símbolos das camadas ligadas): sempre no rodapé, ao lado dos níveis de confiança;
        sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
-      const forma = TESTE && l.id === "air" ? "aviao" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
+      const forma = TESTE && l.id === "air" ? "aviao" : TESTE && l.id === "cla" ? "foguete" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
     }).join("")}</span>`).join("");
     document.getElementById("legend").innerHTML = legMapa ? leg + itens : "";
@@ -1019,7 +1065,7 @@ function clarear(hex, t) {
   const COR_NOITE_LEG = ["#0a0c1c", "#2c2a44", "#a8823f", "#f2d083", "#fffbe8"];
   /* ---------- versão de teste: ouro sobre preto, versão D (escolha do Edu em 23/10/2026) ----------
      Com uma pintura, a "luz de fundo": cada estado acende conforme o valor, de brasa (pouco) a ouro (muito), com o relevo
-     sombreado por cima em tons quentes, e o planeta quase preto. Com a luz "População", a terra em ouro apagado, com as
+     sombreado por cima em tons quentes, e o planeta em azul-noite. Com a luz "População", a terra em ouro apagado, com as
      luzes por cima. Em "Sem cor" e na "Iluminação noturna" (a imagem da NASA), o mapa natural. */
   const RELEVO_NATURAL = { "hillshade-exaggeration": 0.5, "hillshade-shadow-color": "#04100a", "hillshade-highlight-color": "rgba(255,255,240,.55)", "hillshade-accent-color": "#0c2a18" };
   /* no ouro, o relevo de altitude mais suave (aparece de perto, onde a imagem do relevo da terra some) */
@@ -1030,19 +1076,17 @@ function clarear(hex, t) {
     const pinta = !L && !!(P && P.val), pop = !!L && L.id === "pop";
     if (pinta) map.setPaintProperty("estados-fill", "fill-opacity", ["case", FADE, 0.22, 1]);
     else if (pop) {
-      map.setPaintProperty("estados-fill", "fill-color", ["case", HOVER, "#3b3122", "#1d1810"]);
+      map.setPaintProperty("estados-fill", "fill-color", "#1d1810");
       map.setPaintProperty("estados-fill", "fill-opacity", ["case", FADE, 0.35, 1]);
-    } else if (!L) map.setPaintProperty("estados-fill", "fill-opacity", ["case", FADE, 0.5, HOVER, 0.14, 0]);
+    } else map.setPaintProperty("estados-fill", "fill-opacity", ["case", FADE, L ? 0.6 : 0.5, 0]);   /* o realce do mouse é o contorno */
     const ouro = pinta || pop;
-    map.setPaintProperty("nasa", "raster-brightness-max", ouro ? 0.24 : L ? 0.2 : 0.62);
-    map.setPaintProperty("nasa", "raster-saturation", ouro ? -0.9 : L ? -0.55 : -0.15);
+    /* planeta "azul-noite" com o ouro: o natural, mais escuro e um pouco menos colorido (o quase preto foi reprovado
+       pelo Edu em 23/10/2026); com a luz População, um pouco mais escuro, para as luzes aparecerem */
+    map.setPaintProperty("nasa", "raster-brightness-max", pinta ? 0.42 : pop ? 0.32 : L ? 0.2 : 0.62);
+    map.setPaintProperty("nasa", "raster-saturation", pinta ? -0.3 : pop ? -0.45 : L ? -0.55 : -0.15);
     /* divisas: escuras entre estados acesos; douradas sobre o mapa natural e sobre a terra apagada */
     map.setPaintProperty("estados-line", "line-color", pinta ? "rgba(18,11,4,.62)" : "rgba(240,200,130,.55)");
-    if (ouro !== emOuro) {
-      emOuro = ouro;
-      map.setSky(ouro ? CEU_OURO : CEU);
-      map.setPaintProperty("fundo", "background-color", ouro ? "#050403" : "#0a1d2a");
-    }
+    emOuro = ouro;
     if (map.getLayer("relevo-ouro")) map.setLayoutProperty("relevo-ouro", "visibility", ouro ? "visible" : "none");
     relevoTeste();
   }
@@ -1054,7 +1098,7 @@ function clarear(hex, t) {
   }
   function linhasTrem() {
     const n = luz !== "off";
-    for (const id of ["ferrovias", "ferrovias-obra"]) map.setPaintProperty(id, "line-opacity", sel ? ["case", ["==", ["get", "uf"], sel], n ? 0.6 : 1, n ? 0.06 : 0.15] : (n ? 0.35 : 0.9));
+    for (const id of ["ferrovias", "ferrovias-obra", ...(TESTE ? ["ferrovias-borda"] : [])]) map.setPaintProperty(id, "line-opacity", sel ? ["case", ["==", ["get", "uf"], sel], n ? 0.6 : 1, n ? 0.06 : 0.15] : (n ? 0.35 : 0.9));
   }
   function aplicarNoite() {
     if (!map.getLayer("estados-fill")) return;
@@ -1065,7 +1109,8 @@ function clarear(hex, t) {
     if (map.getLayer("relevo")) map.setLayoutProperty("relevo", "visibility", n ? "none" : "visible");
     map.setPaintProperty("estados-fill", "fill-opacity", n ? ["case", FADE, 0.6, HOVER, 0.07, 0] : ["case", FADE, 0.18, HOVER, 0.95, 0.82]);
     map.setPaintProperty("estados-line", "line-opacity", n ? 0.55 : 1);
-    map.setPaintProperty("rodovias", "line-opacity", n ? 0.22 : 0.62);
+    map.setPaintProperty("rodovias", "line-opacity", n ? 0.22 : TESTE ? 0.92 : 0.62);
+    if (map.getLayer("rodovias-borda")) map.setPaintProperty("rodovias-borda", "line-opacity", n ? 0.25 : 1);
     map.setPaintProperty("rodovias-terra", "line-opacity", n ? 0.18 : 0.5);
     map.setPaintProperty("rodovias-est", "line-opacity", n ? 0.18 : 0.5);
     linhasTrem();

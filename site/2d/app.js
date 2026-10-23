@@ -16,6 +16,13 @@ const TESTE = new URLSearchParams(location.search).has("teste");
 if (TESTE) document.documentElement.classList.add("teste");
 /* aviãozinho (desenho em 24 × 24), usado nos aeroportos da versão de teste */
 const AVIAO = "M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z";
+/* foguete de Alcântara na versão de teste (desenho em 24 × 34, igual ao do globo; a base fica no ponto) */
+const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/>
+  <path d="M7.6 17.5L3.4 24.4v2.6l4.2-3.4zM16.4 17.5l4.2 6.9v2.6l-4.2-3.4z" fill="#ff7a6b" stroke="#1a1206" stroke-width="1"/>
+  <path d="M9.6 23h4.8l.8 4.2H8.8z" fill="#7a7064" stroke="#1a1206" stroke-width="1"/>
+  <path d="M12 2c4 4 5.2 9.4 4.6 21H7.4C6.8 11.4 8 6 12 2z" fill="#f3efe6" stroke="#1a1206" stroke-width="1.2"/>
+  <path d="M12 2.6c2.4 2.4 3.6 5 4.1 7.6H7.9c.5-2.6 1.7-5.2 4.1-7.6z" fill="#e6b450"/>
+  <circle cx="12" cy="14.2" r="2.1" fill="#2b3c4d" stroke="#1a1206" stroke-width=".9"/><circle cx="11.3" cy="13.5" r=".6" fill="#cfe6ff"/>`;
 /* versão de teste (escolha do Edu em 23/10/2026), igual ao globo: cinza forte = sem número; cinza fraco = nenhum (ex.:
    "sem produção") ou, nas pinturas de total, menos de 0,1% do Brasil (soma dos estados). Esses estados saem da escala,
    e as 5 faixas (quintis, a mesma conta do globo) são feitas só com os outros. Em taxas e porcentagens, só o zero é "nenhum". */
@@ -196,6 +203,8 @@ function rewind(f) {
   const imgSombra = REL && REL.sombra ? root.append("image").attr("class", "relevo-sombra").attr("href", "../data/relevo/" + REL.sombra.arquivo)
     .attr("preserveAspectRatio", "none").attr("clip-path", "url(#clip-br)") : null;
   states.append("title").text(d => d.properties.name);
+  /* versão de teste: o estado sob o mouse vai para cima dos vizinhos, para o contorno realçado aparecer inteiro */
+  if (TESTE) states.on("mouseenter.realce", function () { if (this.nextElementSibling) this.parentNode.appendChild(this); });
   /* versão de teste: contorno do Brasil em destaque (brilho dourado por baixo de uma linha cheia) */
   const contornoBr = TESTE ? contornoBrasil(estados) : null;
   const gBr = root.append("g");
@@ -364,9 +373,16 @@ function rewind(f) {
     ? `${paxTxt(d.a[6])} em 12 meses (${DATA.air.meta.referencia}), embarcados e desembarcados.` : `sem voos de passageiros nos dados estatísticos (${DATA.air.meta.referencia}).`) + " Fonte: ANAC.");
   const CLA = F.camadas.find(l => l.id === "cla");
   const gCla = root.append("g");
-  gCla.append("circle").attr("class", "pulse").attr("r", 9);
-  gCla.append("circle").attr("class", "cla").attr("r", 7);
-  gCla.append("circle").attr("class", "cla-dot").attr("r", 2.5);
+  if (TESTE) {
+    /* versão de teste: foguete em pé, com vapor saindo para os lados na base */
+    gCla.attr("class", "foguete");
+    ["v1", "v2", "v3", "v4"].forEach(v => gCla.append("circle").attr("class", "vapor " + v).attr("r", 4.5));
+    gCla.append("g").attr("transform", "translate(-12.5,-35) scale(1.04)").html(FOGUETE);
+  } else {
+    gCla.append("circle").attr("class", "pulse").attr("r", 9);
+    gCla.append("circle").attr("class", "cla").attr("r", 7);
+    gCla.append("circle").attr("class", "cla-dot").attr("r", 2.5);
+  }
   gCla.append("title").text(CLA ? CLA.nome : "");
   /* nomes: sigla dos estados (nome completo com zoom) e capitais (nome com zoom) */
   const gNomes = root.append("g").attr("class", "nomes");
@@ -499,7 +515,7 @@ function rewind(f) {
     seP.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
     defP.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
     airs.attr("transform", d => TESTE ? `translate(${proj(d.c)}) scale(${s * d.f}) translate(-12,-12)` : `translate(${proj(d.c)}) scale(${s})`);
-    if (CLA) { const p = proj(CLA.ponto); gCla.selectAll("circle").attr("cx", 0).attr("cy", 0); gCla.attr("transform", `translate(${p}) scale(${s})`); }
+    if (CLA) { const p = proj(CLA.ponto); gCla.selectAll(":scope > circle").attr("cx", 0).attr("cy", 0); gCla.attr("transform", `translate(${p}) scale(${s})`); }
   }
   /* enquadramento pelo continente: a "caixa" de cada estado não inclui as ilhas oceânicas (ver gerar_contorno_estados.py) */
   const limites = f => { const c = f.properties && f.properties.caixa; if (!c) return path.bounds(f);
@@ -672,7 +688,7 @@ function rewind(f) {
     /* legenda completa (escala de cores + símbolos das camadas ligadas): sempre no rodapé, ao lado dos níveis de confiança;
        sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
-      const forma = TESTE && l.id === "air" ? "aviao" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
+      const forma = TESTE && l.id === "air" ? "aviao" : TESTE && l.id === "cla" ? "foguete" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
     }).join("")}</span>`).join("");
     document.getElementById("legend").innerHTML = legMapa ? leg + itens : "";

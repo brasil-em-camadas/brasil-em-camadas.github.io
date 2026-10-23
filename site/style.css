@@ -289,7 +289,9 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
    Brasil em destaque e divisas tracejadas (versão leve); painel em duas abas (Mapa e Ficha); aviãozinho nos aeroportos */
 /* ouro sobre preto, versão D (escolha do Edu em 23/10/2026): luz de fundo, de brasa (pouco) a ouro (muito);
    cinza forte = sem número; cinza fraco = nenhum ou quase nada (menos de 0,1% do Brasil) */
-html.teste{--q1:#2e1107;--q2:#64280c;--q3:#9c5016;--q4:#cc822a;--q5:#e6b252;--sem-forte:#7a7a7a;--sem-fraco:#363534}
+html.teste{--q1:#2e1107;--q2:#64280c;--q3:#9c5016;--q4:#cc822a;--q5:#e6b252;--sem-forte:#7a7a7a;--sem-fraco:#363534;
+  /* rodovias claras (federais com borda escura no globo) e estaduais em tom frio, para aparecerem sobre o ouro */
+  --road:#f6f3ec;--road-est:#a9bdcc;--rail:#ffad66}
 .selo-teste{font:600 .7rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--night);background:var(--accent);
   padding:3px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;align-self:center}
 .abas{display:flex;gap:2px;width:max-content;max-width:100%;margin:-6px 0 14px;padding:3px;border:1px solid var(--hair);border-radius:999px;background:rgba(255,255,255,.03)}
@@ -300,15 +302,17 @@ html.teste{--q1:#2e1107;--q2:#64280c;--q3:#9c5016;--q4:#cc822a;--q5:#e6b252;--se
 .dock[data-aba="ficha"] .blk:not(#ficha){display:none}
 .dock[data-aba] .blk+.blk{margin-top:0;padding-top:0;border-top:0}
 .teste .st{fill:transparent;stroke:rgba(240,236,220,.6);stroke-width:.7;stroke-dasharray:3 2.5}
-.teste .st:hover{fill:rgba(255,255,255,.12)}
+/* realce do estado sob o mouse (no lugar do realce esbranquiçado): contorno dourado com brilho e tracinhos que correm */
+.teste .st:hover{stroke:#ffd27a;stroke-width:2.2;stroke-dasharray:10 6;animation:contorno-corre 1.4s linear infinite;
+  filter:drop-shadow(0 0 3px rgba(255,190,80,.85))}
+@keyframes contorno-corre{to{stroke-dashoffset:-32}}
+@media (prefers-reduced-motion:reduce){.teste .st:hover{animation:none;stroke-dasharray:none}}
 .teste .st.sel{stroke:var(--accent);stroke-width:2;stroke-dasharray:none}
 .teste .st.fade{opacity:1;fill:rgba(2,7,11,.5)}
-/* versão leve de teste: com pintura, o planeta quase preto, como no globo */
-.teste #map.ouro{background:#050403}
-.teste #map.ouro .relevo-cor{filter:brightness(.22) saturate(.1) contrast(1.05)}
-.teste #map.ouro .viz{opacity:.4}
-/* estado pintado (cor vinda da pintura): realce do mouse mais claro; em volta do estado escolhido, apagado */
-.teste .st[style*="fill"]:hover{filter:brightness(1.3)}
+/* versão leve de teste: com pintura, o planeta em azul-noite (mais escuro e menos colorido), como no globo */
+.teste #map.ouro .relevo-cor{filter:brightness(.36) saturate(.7) contrast(1.05)}
+.teste #map.ouro .viz{opacity:.7}
+/* estado pintado (cor vinda da pintura): em volta do estado escolhido, apagado */
 .teste .st.fade[style*="fill"]{opacity:.3}
 .contorno-br-brilho{fill:none;stroke:rgba(240,190,90,.35);stroke-width:6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
 .contorno-br{fill:none;stroke:#f2c96a;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
@@ -316,6 +320,21 @@ html.teste{--q1:#2e1107;--q2:#64280c;--q3:#9c5016;--q4:#cc822a;--q5:#e6b252;--se
 /* capitais dos países vizinhos (versão leve de teste): anel claro, nome sempre visível no tom dos países */
 .cap.viz circle{fill:rgba(10,8,5,.55);stroke:#e8e1cc;stroke-width:1.2}
 .cap.viz text{display:inline;font-weight:400;fill:rgba(236,232,220,.8)}
+/* rodovias da versão leve de teste: mais fortes, para aparecerem sobre o ouro */
+.teste .road{stroke-opacity:.8;stroke-width:.85}
+.teste .road.est{stroke-opacity:.55}
+/* Alcântara como foguete (versão leve de teste), com vapor na base */
+.foguete .vapor{fill:rgba(246,242,234,.85);opacity:0;transform-box:fill-box;transform-origin:center;animation:vapor2d 2.8s ease-out infinite}
+.foguete .v1{--dx:-15px;animation-delay:0s}.foguete .v2{--dx:14px;animation-delay:.7s}.foguete .v3{--dx:-9px;animation-delay:1.4s}.foguete .v4{--dx:10px;animation-delay:2.1s}
+@keyframes vapor2d{0%{opacity:0;transform:translate(0,0) scale(.45)}15%{opacity:.8}100%{opacity:0;transform:translate(var(--dx),-4px) scale(2.2)}}
+.foguete .chama{transform-box:fill-box;transform-origin:50% 0;animation:chama2d .32s ease-in-out infinite alternate}
+@keyframes chama2d{from{transform:scaleY(1)}to{transform:scaleY(.62)}}
+.foguete path,.foguete circle{vector-effect:non-scaling-stroke}
+@media (prefers-reduced-motion:reduce){.foguete .vapor,.foguete .chama{animation:none}}
+/* chave da legenda: foguete */
+.key.foguete{width:12px;height:14px;border-radius:0;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2c3 3 4 7 3 12h-6C8 9 9 5 12 2zM9 14l-3 4h3M15 14l3 4h-3M11 18h2v3h-2z'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2c3 3 4 7 3 12h-6C8 9 9 5 12 2zM9 14l-3 4h3M15 14l3 4h-3M11 18h2v3h-2z'/%3E%3C/svg%3E") center/contain no-repeat}
 .key.aviao{width:13px;height:13px;border-radius:0;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z'/%3E%3C/svg%3E") center/contain no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z'/%3E%3C/svg%3E") center/contain no-repeat}
