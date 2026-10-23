@@ -96,6 +96,10 @@ function classesTeste(P, ufs) {
    (sequência de tracejados que, trocada a cada 50 ms, faz o traço andar; método do exemplo "linha animada" do Mapbox) */
 const TRACOS = [[0, 4, 3], [0.5, 4, 2.5], [1, 4, 2], [1.5, 4, 1.5], [2, 4, 1], [2.5, 4, 0.5], [3, 4, 0],
   [0, 0.5, 3, 3.5], [0, 1, 3, 3], [0, 1.5, 3, 2.5], [0, 2, 3, 2], [0, 2.5, 3, 1.5], [0, 3, 3, 1], [0, 3.5, 3, 0.5]];
+/* versão de teste: ícones por município que só aparecem dentro do estado escolhido (direção do Edu em 23/10/2026),
+   uma camada por vez. Boi: silhueta clara num medalhão escuro com aro dourado (desenho em 24 × 24). */
+const NO_ESTADO = new Set(["boi"]);
+const BOI = "M2.6 10.4Q3.4 8.4 5.2 8.1L4.3 5.9 5.7 7.8 6.6 7.7 7.3 5.9 7.4 8.1Q8.2 8.5 9.4 8.5L18.2 8.4Q20.6 8.4 20.9 10.6L21.5 14 20.8 14.1 20.4 11.8Q20.2 13.2 19.6 14L19.7 19.6 18.1 19.6 17.8 15.2 10.4 15.2 10 19.6 8.4 19.6 8.1 14.6Q7.1 13.7 6.8 12.7 5.6 12.9 4.3 12.6 3 12.3 2.6 11.6Z";
 /* versão de teste: foguete de Alcântara (desenho em 24 × 34; a base fica no ponto), com chama e vapor animados no CSS */
 const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/>
   <path d="M7.6 17.5L3.4 24.4v2.6l4.2-3.4zM16.4 17.5l4.2 6.9v2.6l-4.2-3.4z" fill="#ff7a6b" stroke="#1a1206" stroke-width="1"/>
@@ -316,6 +320,11 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
               9, ["interpolate", ["linear"], ["sqrt", ["get", "v"]], 0, 1.8, 100, 3.6, 500, 8, 1500, 15, 3000, 24]] } },
         /* rebanho bovino por município: tamanho pela raiz quadrada das cabeças (a área do ponto acompanha o rebanho);
            os maiores vêm primeiro no arquivo e ficam por baixo, para os pequenos continuarem visíveis */
+        TESTE ? { id: "boi", type: "symbol", source: "boi", filter: ["==", ["get", "u"], ""],
+          layout: { "symbol-sort-key": ["-", 0, ["get", "b"]], "icon-image": "boi", "icon-allow-overlap": true, "icon-ignore-placement": true,
+            "icon-size": ["interpolate", ["linear"], ["zoom"],
+              4, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 0.3, 100, 0.4, 300, 0.55, 700, 0.75, 1700, 1.05],
+              8, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 0.45, 100, 0.6, 300, 0.82, 700, 1.1, 1700, 1.5]] } } :
         { id: "boi", type: "circle", source: "boi", layout: { "circle-sort-key": ["-", 0, ["get", "b"]] },
           paint: { "circle-color": cor("--boi"), "circle-opacity": 0.72, "circle-stroke-color": "#2b1a0c", "circle-stroke-width": 0.4,
             "circle-radius": ["interpolate", ["linear"], ["zoom"],
@@ -442,6 +451,16 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         x.quadraticCurveTo(26 - m, 25 - m, 16, 30 - m * 1.4); x.quadraticCurveTo(6 + m, 25 - m, 5 + m, 15); x.closePath(); };
       escudo(0); x.fillStyle = "#0b1622"; x.fill(); escudo(2.6); x.fillStyle = cor("--def"); x.fill();
       map.addImage("escudo", x.getImageData(0, 0, n, n), { pixelRatio: 2 });
+      return;
+    }
+    if (e.id === "boi" && !map.hasImage("boi")) {
+      /* versão de teste: boi em medalhão escuro com aro dourado (64 px em dobro: 32 px no tamanho 1) */
+      const n = 64, c = document.createElement("canvas"); c.width = c.height = n;
+      const x = c.getContext("2d");
+      x.beginPath(); x.arc(32, 32, 29.5, 0, 2 * Math.PI); x.fillStyle = "rgba(16,10,4,.88)"; x.fill();
+      x.lineWidth = 3; x.strokeStyle = "#e6b450"; x.stroke();
+      x.translate(9.6, 7.7); x.scale(1.87, 1.87); x.fillStyle = "#f3dfae"; x.fill(new Path2D(BOI));
+      map.addImage("boi", x.getImageData(0, 0, n, n), { pixelRatio: 2 });
       return;
     }
     if (e.id === "aviao" && !map.hasImage("aviao")) {
@@ -617,6 +636,8 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     if (sel) { map.setFeatureState({ source: "estados", id: sel }, { sel: false }); }
     sel = (sel === s) ? null : s;
     if (sel) { detalhar(); aba("ficha"); }
+    /* versão de teste: escolher um estado com a pintura Rebanho liga os ícones dos municípios dele */
+    if (TESTE && sel) camadasDa(paint).filter(l => NO_ESTADO.has(l.id)).forEach(l => { l.on = true; });
     estados.features.forEach(f => map.setFeatureState({ source: "estados", id: f.properties.sigla }, { fade: !!sel && f.properties.sigla !== sel }));
     map.setFilter("estado-sel", ["==", ["get", "sigla"], sel || ""]);
     linhasTrem();
@@ -914,6 +935,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     const Pa = PAINT.find(p => p.id === paint), cs = camadasDa(paint);
     dica.hidden = !cs.length;
     dica.textContent = cs.length ? `Clique de novo em “${Pa.nome}” para ${cs.every(l => l.on) ? "desligar" : "ligar também"} ${cs.length > 1 ? "as camadas" : "a camada"} ${cs.map(l => "“" + l.nome + "”").join(" e ")}.` : "";
+    if (TESTE && cs.some(l => NO_ESTADO.has(l.id))) dica.textContent += " Escolha um estado no mapa para ver os municípios dele.";
     document.querySelectorAll("#paint .chip:not([disabled])").forEach(b => b.onclick = () => {
       /* 1º clique pinta os estados; os seguintes, na mesma pintura, ligam e desligam as camadas dela */
       const id = b.dataset.p, cs = camadasDa(id);
@@ -942,7 +964,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       <label class="layer ${l.nivel === "pendente" ? "pend" : ""}">
         <input type="checkbox" id="ly-${l.id}" ${l.on ? "checked" : ""} ${l.nivel === "pendente" ? "disabled" : ""}>${icon(l.id)}
         <span><span class="nm">${l.cor ? `<i class="key" style="background:var(${l.cor})"></i>` : ""}${l.nome} ${pill(l.nivel)}</span>
-        <span class="src">${l.fonte}${quando(l.id)} · ${F.ministerios[l.ministerio]}${l.baixando ? " · <b>carregando…</b>" : ""}${l.falhou ? " · <b>não foi possível carregar agora; tente de novo</b>" : ""}</span></span>
+        <span class="src">${l.fonte}${quando(l.id)} · ${F.ministerios[l.ministerio]}${l.baixando ? " · <b>carregando…</b>" : ""}${l.falhou ? " · <b>não foi possível carregar agora; tente de novo</b>" : ""}${TESTE && NO_ESTADO.has(l.id) ? " · <b>aparece ao escolher um estado</b>" : ""}</span></span>
       </label>`).join("") : `<p class="note">Este ministério ainda não tem camadas de mapa.</p>`;
     lv.filter(l => l.nivel !== "pendente").forEach(l => document.getElementById("ly-" + l.id).onchange = e => { l.on = e.target.checked; render(); });
     /* ligar ou desligar de uma vez todas as camadas da lista (respeita o ministério escolhido) */
@@ -1009,6 +1031,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       const lc = LAYERS.find(l => l.id === "cla");
       if (mkCla) { if (lc && lc.on) mkCla.addTo(map); else mkCla.remove(); }
     }
+    if (TESTE) NO_ESTADO.forEach(id => map.getLayer(id) && map.setFilter(id, ["==", ["get", "u"], sel || ""]));
     const P = PAINT.find(p => p.id === paint);
     let leg = "";
     const L = LUZ.find(l => l.id === luz);
@@ -1047,7 +1070,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     /* legenda completa (escala de cores + símbolos das camadas ligadas): sempre no rodapé, ao lado dos níveis de confiança;
        sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
-      const forma = TESTE && l.id === "air" ? "aviao" : TESTE && l.id === "cla" ? "foguete" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
+      const forma = TESTE && l.id === "air" ? "aviao" : TESTE && l.id === "cla" ? "foguete" : TESTE && l.id === "boi" ? "boi" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
     }).join("")}</span>`).join("");
     document.getElementById("legend").innerHTML = legMapa ? leg + itens : "";
