@@ -1003,8 +1003,9 @@ function clarear(hex, t) {
      Com uma pintura, a "luz de fundo": cada estado acende conforme o valor, de brasa (pouco) a ouro (muito), com o relevo
      sombreado por cima em tons quentes, e o planeta quase preto. Com a luz "População", a terra em ouro apagado, com as
      luzes por cima. Em "Sem cor" e na "Iluminação noturna" (a imagem da NASA), o mapa natural. */
-  const RELEVO_NATURAL = { "hillshade-shadow-color": "#04100a", "hillshade-highlight-color": "rgba(255,255,240,.55)", "hillshade-accent-color": "#0c2a18" };
-  const RELEVO_OURO = { "hillshade-shadow-color": "#0b0603", "hillshade-highlight-color": "rgba(255,222,160,.32)", "hillshade-accent-color": "#140d06" };
+  const RELEVO_NATURAL = { "hillshade-exaggeration": 0.5, "hillshade-shadow-color": "#04100a", "hillshade-highlight-color": "rgba(255,255,240,.55)", "hillshade-accent-color": "#0c2a18" };
+  /* no ouro, o relevo de altitude mais suave (aparece de perto, onde a imagem do relevo da terra some) */
+  const RELEVO_OURO = { "hillshade-exaggeration": 0.38, "hillshade-shadow-color": "#0b0603", "hillshade-highlight-color": "rgba(255,222,160,.2)", "hillshade-accent-color": "#140d06" };
   let emOuro = false;
   function visualTeste(L, P) {
     if (!map.getLayer("estados-fill")) return;
