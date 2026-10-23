@@ -285,10 +285,11 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .ped.sem{fill:none;stroke:var(--tr0);stroke-width:1.3;pointer-events:visibleStroke}
 
 /* ---------- versão de teste (endereço com ?teste), em avaliação ----------
-   escala "mais escuro = mais"; estado sem dado e "Sem cor" sem pintura, como os países vizinhos; contorno do Brasil
-   em destaque e divisas tracejadas; painel em duas abas (Mapa e Ficha); aviãozinho nos aeroportos */
-/* holograma: mais brilho = mais (azul-petróleo escuro → ciano claro) */
-html.teste{--q1:#0d3347;--q2:#12597a;--q3:#1a88b0;--q4:#2fbde6;--q5:#9eefff}
+   ouro sobre preto com a escala de luz ("mais ouro = mais"); "Sem cor" sem pintura, como os países vizinhos; contorno do
+   Brasil em destaque e divisas tracejadas (versão leve); painel em duas abas (Mapa e Ficha); aviãozinho nos aeroportos */
+/* ouro sobre preto, versão D (escolha do Edu em 23/10/2026): luz de fundo, de brasa (pouco) a ouro (muito);
+   cinza forte = sem número; cinza fraco = nenhum ou quase nada (menos de 0,1% do Brasil) */
+html.teste{--q1:#2e1107;--q2:#64280c;--q3:#9c5016;--q4:#cc822a;--q5:#e6b252;--sem-forte:#7a7a7a;--sem-fraco:#363534}
 .selo-teste{font:600 .7rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--night);background:var(--accent);
   padding:3px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;align-self:center}
 .abas{display:flex;gap:2px;width:max-content;max-width:100%;margin:-6px 0 14px;padding:3px;border:1px solid var(--hair);border-radius:999px;background:rgba(255,255,255,.03)}
@@ -302,6 +303,13 @@ html.teste{--q1:#0d3347;--q2:#12597a;--q3:#1a88b0;--q4:#2fbde6;--q5:#9eefff}
 .teste .st:hover{fill:rgba(255,255,255,.12)}
 .teste .st.sel{stroke:var(--accent);stroke-width:2;stroke-dasharray:none}
 .teste .st.fade{opacity:1;fill:rgba(2,7,11,.5)}
+/* versão leve de teste: com pintura, o planeta quase preto, como no globo */
+.teste #map.ouro{background:#050403}
+.teste #map.ouro .relevo-cor{filter:brightness(.22) saturate(.1) contrast(1.05)}
+.teste #map.ouro .viz{opacity:.4}
+/* estado pintado (cor vinda da pintura): realce do mouse mais claro; em volta do estado escolhido, apagado */
+.teste .st[style*="fill"]:hover{filter:brightness(1.3)}
+.teste .st.fade[style*="fill"]{opacity:.3}
 .contorno-br-brilho{fill:none;stroke:rgba(240,190,90,.35);stroke-width:6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
 .contorno-br{fill:none;stroke:#f2c96a;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
 .teste .air{fill:#d4defc;stroke:#0b1626;stroke-width:.9}

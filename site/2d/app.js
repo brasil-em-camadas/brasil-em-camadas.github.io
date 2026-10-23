@@ -16,6 +16,24 @@ const TESTE = new URLSearchParams(location.search).has("teste");
 if (TESTE) document.documentElement.classList.add("teste");
 /* aviãozinho (desenho em 24 × 24), usado nos aeroportos da versão de teste */
 const AVIAO = "M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z";
+/* versão de teste (escolha do Edu em 23/10/2026), igual ao globo: cinza forte = sem número; cinza fraco = nenhum (ex.:
+   "sem produção") ou, nas pinturas de total, menos de 0,1% do Brasil (soma dos estados). Esses estados saem da escala,
+   e as 5 faixas (quintis, a mesma conta do globo) são feitas só com os outros. Em taxas e porcentagens, só o zero é "nenhum". */
+function quintis(vals) {
+  const s = [...vals].sort((a, b) => a - b), q = [0.2, 0.4, 0.6, 0.8].map(p => s[Math.floor(p * (s.length - 1))]);
+  return v => q.filter(t => v > t).length;
+}
+function classesTeste(P, ufs) {
+  const v = {}; ufs.forEach(s => { v[s] = P.val(s); });
+  const total = P.por === "total" ? ufs.reduce((a, s) => a + (v[s] > 0 ? v[s] : 0), 0) : 0;
+  const nada = s => (v[s] == null && !!P.vazio) || v[s] === 0;
+  const pouco = s => !nada(s) && v[s] != null && P.por === "total" && v[s] < total * 0.001;
+  const escala = ufs.filter(s => v[s] != null && !nada(s) && !pouco(s)).map(s => v[s]);
+  const q = quintis(escala), c = {};
+  ufs.forEach(s => { c[s] = v[s] == null && !P.vazio ? "forte" : nada(s) || pouco(s) ? "fraco" : q(v[s]); });
+  return { c, escala, forte: ufs.some(s => c[s] === "forte"),
+    fraco: [ufs.some(nada) ? (P.vazio || "zero") : "", ufs.some(pouco) ? "menos de 0,1% do Brasil" : ""].filter(Boolean).join(" ou ") };
+}
 /* contorno do Brasil: os trechos de divisa que aparecem num estado só (a costa e a fronteira com os vizinhos);
    os que aparecem em dois estados são divisa entre estados */
 function contornoBrasil(geo) {
@@ -628,7 +646,15 @@ function rewind(f) {
     LAYERS.filter(l => G[l.id]).forEach(l => G[l.id].attr("display", l.on ? null : "none"));
     const P = PAINT.find(p => p.id === paint);
     let leg = "";
-    if (P && P.val) {
+    if (P && P.val && TESTE) {
+      /* versão de teste: escala de luz (brasa → ouro) e os dois cinzas */
+      const K = classesTeste(P, Object.keys(NAME)), vals = K.escala;
+      states.style("fill", d => { const c = K.c[d.properties.sigla]; return c === "forte" ? "var(--sem-forte)" : c === "fraco" ? "var(--sem-fraco)" : `var(${RAMP[c]})`; });
+      leg = `<span>${P.nome}${P.unidade ? " (" + P.unidade + ")" : ""}</span><span class="faixa"><span>${P.fmt(d3.min(vals))}</span>
+        <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(d3.max(vals))}</span></span>
+        ${K.forte ? `<span><i class="key sq" style="background:var(--sem-forte)"></i>sem número</span>` : ""}
+        ${K.fraco ? `<span><i class="key sq" style="background:var(--sem-fraco)"></i>${K.fraco}</span>` : ""}`;
+    } else if (P && P.val) {
       const vals = Object.keys(NAME).map(P.val).filter(v => v != null);
       const q = d3.scaleQuantile().domain(vals).range(RAMP);
       states.style("fill", d => { const v = P.val(d.properties.sigla); return v == null ? (P.vazio ? "var(--sem)" : null) : `var(${q(v)})`; });
@@ -637,6 +663,8 @@ function rewind(f) {
         <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(d3.max(vals))}</span></span>
         ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : `<span>${TESTE ? "sem pintura = sem dado" : "sem cor = sem dado"}</span>`) : ""}`;
     } else states.style("fill", null);
+    /* versão de teste: com pintura, o planeta quase preto (ouro sobre preto, como no globo) */
+    if (TESTE) svg.classed("ouro", !!(P && P.val));
     /* legenda completa (escala de cores + símbolos das camadas ligadas): sempre no rodapé, ao lado dos níveis de confiança;
        sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
