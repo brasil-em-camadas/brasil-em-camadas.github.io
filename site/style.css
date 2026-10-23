@@ -313,6 +313,9 @@ html.teste{--q1:#2e1107;--q2:#64280c;--q3:#9c5016;--q4:#cc822a;--q5:#e6b252;--se
 .contorno-br-brilho{fill:none;stroke:rgba(240,190,90,.35);stroke-width:6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
 .contorno-br{fill:none;stroke:#f2c96a;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
 .teste .air{fill:#d4defc;stroke:#0b1626;stroke-width:.9}
+/* capitais dos países vizinhos (versão leve de teste): anel claro, nome sempre visível no tom dos países */
+.cap.viz circle{fill:rgba(10,8,5,.55);stroke:#e8e1cc;stroke-width:1.2}
+.cap.viz text{display:inline;font-weight:400;fill:rgba(236,232,220,.8)}
 .key.aviao{width:13px;height:13px;border-radius:0;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z'/%3E%3C/svg%3E") center/contain no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z'/%3E%3C/svg%3E") center/contain no-repeat}

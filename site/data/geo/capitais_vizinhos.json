@@ -1,0 +1,128 @@
+{
+ "meta": {
+  "fonte": "Natural Earth, Populated Places 1:10 milhões (domínio público)",
+  "nivel": "base",
+  "endereco": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_populated_places_simple.geojson",
+  "atualizado_em": "2026-10-23",
+  "nota": "Bolívia: La Paz é a sede do governo e Sucre a capital constitucional. Caiena é a capital da Guiana Francesa, região ultramarina da França. Chile e Equador não fazem fronteira com o Brasil."
+ },
+ "capitais": [
+  {
+   "n": "Caracas",
+   "c": [
+    -66.919,
+    10.503
+   ],
+   "d": "Capital da Venezuela",
+   "fronteira": true
+  },
+  {
+   "n": "Georgetown",
+   "c": [
+    -58.167,
+    6.802
+   ],
+   "d": "Capital da Guiana",
+   "fronteira": true
+  },
+  {
+   "n": "Paramaribo",
+   "c": [
+    -55.167,
+    5.835
+   ],
+   "d": "Capital do Suriname",
+   "fronteira": true
+  },
+  {
+   "n": "Caiena",
+   "c": [
+    -52.33,
+    4.933
+   ],
+   "d": "Capital da Guiana Francesa, região ultramarina da França (não é um país)",
+   "fronteira": true
+  },
+  {
+   "n": "Bogotá",
+   "c": [
+    -74.085,
+    4.598
+   ],
+   "d": "Capital da Colômbia",
+   "fronteira": true
+  },
+  {
+   "n": "Quito",
+   "c": [
+    -78.502,
+    -0.213
+   ],
+   "d": "Capital do Equador",
+   "fronteira": false
+  },
+  {
+   "n": "Lima",
+   "c": [
+    -77.052,
+    -12.046
+   ],
+   "d": "Capital do Peru",
+   "fronteira": true
+  },
+  {
+   "n": "La Paz",
+   "c": [
+    -68.152,
+    -16.496
+   ],
+   "d": "Sede do governo da Bolívia (a capital constitucional é Sucre)",
+   "fronteira": true
+  },
+  {
+   "n": "Sucre",
+   "c": [
+    -65.26,
+    -19.041
+   ],
+   "d": "Capital constitucional da Bolívia (o governo fica em La Paz)",
+   "fronteira": true
+  },
+  {
+   "n": "Assunção",
+   "c": [
+    -57.626,
+    -25.291
+   ],
+   "d": "Capital do Paraguai",
+   "fronteira": true
+  },
+  {
+   "n": "Santiago",
+   "c": [
+    -70.651,
+    -33.44
+   ],
+   "d": "Capital do Chile",
+   "fronteira": false
+  },
+  {
+   "n": "Buenos Aires",
+   "c": [
+    -58.433,
+    -34.611
+   ],
+   "d": "Capital da Argentina",
+   "fronteira": true
+  },
+  {
+   "n": "Montevidéu",
+   "c": [
+    -56.187,
+    -34.905
+   ],
+   "d": "Capital do Uruguai",
+   "fronteira": true
+  }
+ ]
+}

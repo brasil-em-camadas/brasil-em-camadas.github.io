@@ -153,6 +153,8 @@ function rewind(f) {
     .join("text").attr("class", d => "viz-lbl" + (d.mar ? " mar" : "") + (d.peq ? " peq" : ""))
     .each(function (d) { const p = d.n.split("\n"); d3.select(this).selectAll("tspan").data(p).join("tspan").attr("x", 0).attr("dy", (_, i) => i ? "1.15em" : (p.length > 1 ? "-0.3em" : 0)).text(s => s); });
   const ROT = await getJSON("../data/geo/rotulos.json") || { capitais: [], estados: [], ilhas: [] };
+  /* versão de teste: capitais dos países vizinhos (Natural Earth) */
+  const CAPVIZ = TESTE ? await getJSON("../data/geo/capitais_vizinhos.json") : null;
   const gPce = root.append("g");
   /* camadas sob demanda (zona contígua, plataforma estendida, poços, plataformas, campos, rebanho): começam vazias
      e são desenhadas quando o arquivo chega (ver baixarSobDemanda e DESENHA, mais abaixo) */
@@ -371,9 +373,11 @@ function rewind(f) {
   const ufLbl = gNomes.selectAll("text.uf").data(ROT.estados).join("text").attr("class", d => "uf uf-" + d.s);
   ufLbl.append("tspan").attr("class", "s").text(d => d.s);
   ufLbl.append("tspan").attr("class", "n").text(d => d.n);
-  const caps = gNomes.selectAll("g.cap").data(ROT.capitais).join("g").attr("class", d => d.pais ? "cap pais" : "cap");
-  caps.append("circle").attr("r", d => d.pais ? 3.6 : 2.6);
+  const caps = gNomes.selectAll("g.cap").data([...ROT.capitais, ...(CAPVIZ ? CAPVIZ.capitais.map(c => ({ ...c, viz: true })) : [])]).join("g")
+    .attr("class", d => d.viz ? "cap viz" : d.pais ? "cap pais" : "cap");
+  caps.append("circle").attr("r", d => d.pais ? 3.6 : d.viz ? 3.2 : 2.6);
   caps.append("text").attr("x", 6).attr("y", 4).text(d => d.n);
+  caps.filter(d => d.viz).append("title").text(d => `${d.n}: ${d.d}. Fonte: Natural Earth (base aberta).`);
   const G = { zee: gZee, mt: gMt, zc: gZc, pce: gPce, rod: gRod, rail: gRail, ports: gPorts, air: gAir, cla: gCla,
     oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt, celm: gCelm, g5: gG5, lav: gLav, dutos: gDutos, refin: gRefin, se: gSe, empdef: gDef, pedagio: gPed };
 

@@ -102,9 +102,11 @@ function clarear(hex, t) {
 (async function main() {
   const temGL = (() => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch { return false; } })();
   if (!temGL) { document.getElementById("sem3d").hidden = false; return; }
-  const [F, estados, mundo, ROT, REL] = await Promise.all([
+  const [F, estados, mundo, ROT, REL, CAPVIZ] = await Promise.all([
     getJSON(D + "fontes.json"), getJSON(D + "geo/estados.json"), getJSON(D + "geo/mundo.json"),
-    getJSON(D + "geo/rotulos.json"), getJSON(D + "relevo/relevo.json")]);
+    getJSON(D + "geo/rotulos.json"), getJSON(D + "relevo/relevo.json"),
+    /* versão de teste: capitais dos países vizinhos (Natural Earth) */
+    TESTE ? getJSON(D + "geo/capitais_vizinhos.json") : null]);
   if (!F || !estados) { document.getElementById("ficha").innerHTML = `<p class="note">Não foi possível carregar os dados. Recarregue a página.</p>`; return; }
   const NAME = {}; estados.features.forEach(f => NAME[f.properties.sigla] = f.properties.name);
 
@@ -206,7 +208,8 @@ function clarear(hex, t) {
         oceanos: { type: "geojson", data: oceanos },
         uf: { type: "geojson", data: ufPts },
         caps: { type: "geojson", data: capPts },
-        ilhas: { type: "geojson", data: ilhaPts }
+        ilhas: { type: "geojson", data: ilhaPts },
+        ...(TESTE ? { capviz: { type: "geojson", data: fc(CAPVIZ ? CAPVIZ.capitais.map(c => ponto(c.c, { n: c.n, d: c.d })) : []) } } : {})
       },
       layers: [
         { id: "fundo", type: "background", paint: { "background-color": "#0a1d2a" } },
@@ -384,6 +387,14 @@ function clarear(hex, t) {
         { id: "paises", type: "symbol", source: "paises",
           layout: { "text-field": ["get", "n"], "text-font": fonte(SEMI), "text-size": 10, "text-letter-spacing": 0.2, "text-transform": "uppercase" },
           paint: { "text-color": "rgba(236,233,222,.6)", ...halo } },
+        /* versão de teste: capitais dos países vizinhos: anel claro com um ponto no meio, nome no tom dos países */
+        ...(TESTE ? [
+          { id: "capviz", type: "circle", source: "capviz",
+            paint: { "circle-radius": 3.6, "circle-color": "rgba(10,8,5,.55)", "circle-stroke-color": "#e8e1cc", "circle-stroke-width": 1.3 } },
+          { id: "capviz-ponto", type: "circle", source: "capviz", paint: { "circle-radius": 1.3, "circle-color": "#e8e1cc" } },
+          { id: "capviz-rotulo", type: "symbol", source: "capviz",
+            layout: { "text-field": ["get", "n"], "text-font": fonte(REG), "text-size": 11, "text-anchor": "left", "text-offset": [0.75, 0], "text-optional": true },
+            paint: { "text-color": "rgba(236,232,220,.8)", ...halo } }] : []),
         { id: "capitais", type: "circle", source: "caps",
           paint: { "circle-color": ["case", ["get", "pais"], cor("--accent"), "#ffffff"], "circle-radius": ["case", ["get", "pais"], 4, 3], "circle-stroke-color": "#081408", "circle-stroke-width": 1.2 } },
         { id: "capitais-rotulo", type: "symbol", source: "caps",
@@ -716,6 +727,13 @@ function clarear(hex, t) {
       new maplibregl.Popup({ closeButton: false, offset: 8, maxWidth: "300px" }).setLngLat(f.geometry.coordinates)
         .setHTML(`<b>${p[13] ? "Validador do pedágio" : "Praça de pedágio"} ${esc(p[2])}</b><br>${esc(p[3])} · ${esc(p[4])}, km ${esc(p[5])}<br>${esc(p[6])}${p[7] ? " (" + esc(p[7]) + ")" : ""}
           <br>${num}<br><span class="pop-fonte">ANTT, dados abertos (números informados pelas concessionárias)</span>`).addTo(map);
+      return;
+    }
+    const cv = TESTE && map.getLayer("capviz") ? map.queryRenderedFeatures([[px - 4, py - 4], [px + 4, py + 4]], { layers: ["capviz"] }) : [];
+    if (cv.length) {
+      const p = cv[0].properties;
+      new maplibregl.Popup({ closeButton: false, offset: 10, maxWidth: "280px" }).setLngLat(cv[0].geometry.coordinates)
+        .setHTML(`<b>${esc(p.n)}</b><br>${esc(p.d)}<br><span class="pop-fonte">Natural Earth (base aberta, domínio público)</span>`).addTo(map);
       return;
     }
     const pts = map.queryRenderedFeatures(e.point, { layers: ["portos", "aeroportos", "capitais"].filter(l => map.getLayoutProperty(l, "visibility") !== "none") });
