@@ -175,6 +175,8 @@ function clarear(hex, t) {
           tiles: ["https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png"] },
         estados: { type: "geojson", data: estados, promoteId: "sigla" },
         brasil: { type: "geojson", data: TESTE ? contornoBrasil(estados) : fc([]) },
+        /* versão de teste: relevo da terra do Brasil por cima da cor dos estados (sombra e luz translúcidas; ver scripts/estudos/terra_ouro.py) */
+        ...(TESTE ? { "relevo-ouro": { type: "image", url: D + "relevo/ouro_relevo.webp", coordinates: [[-75, 6], [-28, 6], [-28, -34.5], [-75, -34.5]] } } : {}),
         mundo: { type: "geojson", data: mundo || fc([]) },
         zee: { type: "geojson", data: DATA.zee || fc([]) },
         mt: { type: "geojson", data: DATA.mt || fc([]) },
@@ -223,6 +225,9 @@ function clarear(hex, t) {
         { id: "estados-fill", type: "fill", source: "estados",
           paint: { "fill-color": cor("--land"),
             "fill-opacity": ["case", ["boolean", ["feature-state", "fade"], false], 0.18, ["boolean", ["feature-state", "hover"], false], 0.95, 0.82] } },
+        /* versão de teste: o relevo vale até o zoom 5 e some até o 7, onde o relevo sombreado de altitude mostra mais detalhe */
+        ...(TESTE ? [{ id: "relevo-ouro", type: "raster", source: "relevo-ouro", layout: { visibility: "none" },
+          paint: { "raster-opacity": ["interpolate", ["linear"], ["zoom"], 5, 1, 7, 0], "raster-fade-duration": 0, "raster-resampling": "linear" } }] : []),
         { id: "zee-line", type: "line", source: "zee", filter: LIMITE, paint: { "line-color": cor("--sea-line"), "line-width": 1.4, "line-dasharray": [3, 2] } },
         { id: "zc-line", type: "line", source: "zc", filter: LIMITE, paint: { "line-color": cor("--zc"), "line-width": 0.8, "line-opacity": 0.7 } },
         { id: "mt-line", type: "line", source: "mt", filter: LIMITE, paint: { "line-color": cor("--mt"), "line-width": 0.8, "line-opacity": 0.7 } },
@@ -1019,6 +1024,7 @@ function clarear(hex, t) {
       map.setSky(ouro ? CEU_OURO : CEU);
       map.setPaintProperty("fundo", "background-color", ouro ? "#050403" : "#0a1d2a");
     }
+    if (map.getLayer("relevo-ouro")) map.setLayoutProperty("relevo-ouro", "visibility", ouro ? "visible" : "none");
     relevoTeste();
   }
   /* o relevo sombreado chega depois da primeira imagem; na versão de teste, em tons quentes sobre o ouro */
