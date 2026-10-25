@@ -16,7 +16,7 @@ const RAMP = ["--q1", "--q2", "--q3", "--q4", "--q5"];
 const TESTE = new URLSearchParams(location.search).has("teste");
 if (TESTE) document.documentElement.classList.add("teste");
 /* versão de teste: fundo inteiro com profundidade (icones.js, fundoTeste; ?teste&fundo=a, b ou c) */
-if (TESTE) fundoTeste("");
+const FUNDO = TESTE ? fundoTeste("") : null;
 /* aviãozinho (desenho em 24 × 24), usado no ícone dos aeroportos e na lista de camadas */
 const AVIAO = "M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z";
 const fmt = n => n.toLocaleString("pt-BR");
@@ -1510,4 +1510,9 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     const at = document.querySelector(".maplibregl-ctrl-attrib"); if (at) ro.observe(at);
   }
   window.__mapa = map;
+  /* versão de teste: fundo B com distorção gravitacional em volta do globo (3d/fundo3d.js, carregado só aqui) */
+  if (FUNDO === "funil" || FUNDO === "lente") {
+    const sc = document.createElement("script"); sc.src = "3d/fundo3d.js?v=1";
+    sc.onload = () => fundoGravidade(map, FUNDO); document.head.append(sc);
+  }
 })();

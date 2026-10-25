@@ -247,17 +247,20 @@ const IMG_ICO = { "us-hid": ["hid", "--hid"], "us-eol": ["eol", "--eol"], "us-so
 /* chave da legenda com o medalhão do mapa: camada → desenho, pela cor do item da legenda */
 const ICO_LEG = { lav: c => c.replace("--lav-", ""), usinas: c => ({ "--hid": "hid", "--eol": "eol", "--sol": "sol", "--bio": "bio", "--fos": "fos", "--nuc": "nuc" })[c],
   oil: () => "poco", refin: c => ({ "--refin": "refinaria", "--upgn": "upgn", "--gnl": "gnl" })[c], celm: () => "antena", pedagio: () => "pedagio", ports: () => "ancora" };
-/* versão de teste (pedido do Edu em 25/10/2026): fundo inteiro na página toda, com profundidade. Três opções, escolhidas
-   no endereço: ?teste&fundo=a (facetas), b (chão de hexágonos; padrão) ou c (camadas de vidro). O fundo fica parado atrás
-   da página e anda um pouco ao rolar e ao mexer o mouse (paralaxe); quem pede menos movimento no sistema vê o fundo parado.
-   Imagens em site/fundos/, geradas por scripts/estudos/fundos.py */
+/* versão de teste (pedido do Edu em 25/10/2026): fundo inteiro na página toda, com profundidade. Opções, escolhidas no
+   endereço: ?teste&fundo=a (facetas), b (chão de hexágonos), c (camadas de vidro) e, depois que o Edu escolheu o B,
+   funil e lente (o B com distorção gravitacional em volta do globo, desenhado pela placa de vídeo: 3d/fundo3d.js; na
+   versão leve, sem globo, fica a imagem do B). O fundo fica parado atrás da página e anda um pouco ao rolar e ao mexer
+   o mouse (paralaxe); quem pede menos movimento no sistema vê o fundo parado. Imagens em site/fundos/, geradas por
+   scripts/estudos/fundos.py. Devolve a opção escolhida */
 function fundoTeste(base) {
-  const k = (new URLSearchParams(location.search).get("fundo") || "b").toLowerCase();
-  if (!["a", "b", "c"].includes(k)) return;
+  const k = (new URLSearchParams(location.search).get("fundo") || "lente").toLowerCase();
+  if (!["a", "b", "c", "funil", "lente"].includes(k)) return null;
   const h = document.documentElement;
   h.classList.add("fundo");
-  h.style.setProperty("--fundo-img", `url("${new URL(base + "fundos/fundo_" + k + ".webp", location.href).href}")`);
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const img = ["funil", "lente"].includes(k) ? "b" : k;
+  h.style.setProperty("--fundo-img", `url("${new URL(base + "fundos/fundo_" + img + ".webp", location.href).href}")`);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return k;
   let mx = 0, my = 0, pendente = false;
   const aplicar = () => {
     pendente = false;
@@ -267,6 +270,7 @@ function fundoTeste(base) {
   const pedir = () => { if (!pendente) { pendente = true; requestAnimationFrame(aplicar); } };
   addEventListener("pointermove", e => { mx = e.clientX / innerWidth - 0.5; my = e.clientY / innerHeight - 0.5; pedir(); }, { passive: true });
   addEventListener("scroll", pedir, { passive: true });
+  return k;
 }
 /* moedas de ouro caindo (botão "Apoie este projeto"; pedido do Edu em 25/10/2026: quatro, em alturas diferentes, como se
    estivessem caindo). Cada moeda: [x, y, raio, giro em graus, achatamento] — achatamento 1 = de frente; menos = de lado,

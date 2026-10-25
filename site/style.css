@@ -378,3 +378,6 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .teste.fundo body::before{content:"";position:fixed;inset:-6%;z-index:-1;pointer-events:none;
   background:#03080d var(--fundo-img) center/cover no-repeat;transform:translate3d(var(--fx,0px),var(--fy,0px),0)}
 .teste.fundo #map.maplibregl-map{background:transparent}
+/* fundo desenhado pela placa de vídeo (3d/fundo3d.js): no lugar da imagem */
+canvas.fundo-vivo{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;display:block}
+.fundo-vivo body::before{display:none}
