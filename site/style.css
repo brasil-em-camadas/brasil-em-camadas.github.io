@@ -371,3 +371,10 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
    experimentos (pôr as regras novas atrás de .teste) */
 .selo-teste{font:600 .7rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--night);background:var(--accent);
   padding:3px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;align-self:center}
+/* fundo inteiro com profundidade (icones.js, fundoTeste): imagem parada atrás da página toda (em volta do globo e no
+   rodapé), um pouco maior que a tela para poder andar com o mouse e a rolagem sem mostrar a borda */
+.teste.fundo{background:#03080d}
+.teste.fundo body{background:transparent}
+.teste.fundo body::before{content:"";position:fixed;inset:-6%;z-index:-1;pointer-events:none;
+  background:#03080d var(--fundo-img) center/cover no-repeat;transform:translate3d(var(--fx,0px),var(--fy,0px),0)}
+.teste.fundo #map.maplibregl-map{background:transparent}

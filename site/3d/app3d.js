@@ -15,6 +15,8 @@ const RAMP = ["--q1", "--q2", "--q3", "--q4", "--q5"];
    Em 25/10/2026 tudo o que estava em teste foi para o site normal, a pedido do Edu; hoje o teste não tem nada a mais */
 const TESTE = new URLSearchParams(location.search).has("teste");
 if (TESTE) document.documentElement.classList.add("teste");
+/* versão de teste: fundo inteiro com profundidade (icones.js, fundoTeste; ?teste&fundo=a, b ou c) */
+if (TESTE) fundoTeste("");
 /* aviãozinho (desenho em 24 × 24), usado no ícone dos aeroportos e na lista de camadas */
 const AVIAO = "M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z";
 const fmt = n => n.toLocaleString("pt-BR");
