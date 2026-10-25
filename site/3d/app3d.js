@@ -11,10 +11,12 @@ const NIVEL = {
   pendente:  ["n-pendente", "Em apuração", "Ainda sem dado. O campo fica vazio, sem estimativa."]
 };
 const RAMP = ["--q1", "--q2", "--q3", "--q4", "--q5"];
-/* versão de teste (endereço com ?teste): visual novo em avaliação, sem mudar o site normal */
+/* versão de teste (endereço com ?teste): visual novo em avaliação, sem mudar o site normal. Desde 25/10/2026 (o resto
+   foi para o site normal a pedido do Edu), o teste só tem a cor: ouro sobre preto (escala B), os dois cinzas, o relevo
+   dourado e o planeta azul-noite */
 const TESTE = new URLSearchParams(location.search).has("teste");
 if (TESTE) document.documentElement.classList.add("teste");
-/* aviãozinho (desenho em 24 × 24), usado no ícone dos aeroportos da versão de teste e na lista de camadas */
+/* aviãozinho (desenho em 24 × 24), usado no ícone dos aeroportos e na lista de camadas */
 const AVIAO = "M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z";
 const fmt = n => n.toLocaleString("pt-BR");
 const fmt1 = n => n.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
@@ -92,16 +94,16 @@ function classesTeste(P, ufs) {
   return { c, escala, forte: ufs.some(s => c[s] === "forte"),
     fraco: [ufs.some(nada) ? (P.vazio || "zero") : "", ufs.some(pouco) ? "menos de 0,1% do Brasil" : ""].filter(Boolean).join(" ou ") };
 }
-/* versão de teste: realce do estado sob o mouse: contorno dourado aceso e tracinhos claros que correm em volta
+/* realce do estado sob o mouse (pedido do Edu em 23/10/2026): contorno dourado aceso e tracinhos claros que correm em volta
    (sequência de tracejados que, trocada a cada 50 ms, faz o traço andar; método do exemplo "linha animada" do Mapbox) */
 const TRACOS = [[0, 4, 3], [0.5, 4, 2.5], [1, 4, 2], [1.5, 4, 1.5], [2, 4, 1], [2.5, 4, 0.5], [3, 4, 0],
   [0, 0.5, 3, 3.5], [0, 1, 3, 3], [0, 1.5, 3, 2.5], [0, 2, 3, 2], [0, 2.5, 3, 1.5], [0, 3, 3, 1], [0, 3.5, 3, 0.5]];
-/* versão de teste: ícones por município que só aparecem dentro do estado escolhido (direção do Edu em 23/10/2026),
+/* ícones por município que só aparecem dentro do estado escolhido (direção do Edu em 23/10/2026),
    uma camada por vez; no mapa do Brasil (nenhum estado escolhido), os círculos de antes (pedido do Edu em 24/10/2026).
    Boi: silhueta clara num medalhão escuro com aro dourado (desenho em 24 × 24). Lavouras: um ícone por lavoura (icones.js). */
 const NO_ESTADO = new Set(["boi", "lav"]);
 const BOI = "M2.6 10.4Q3.4 8.4 5.2 8.1L4.3 5.9 5.7 7.8 6.6 7.7 7.3 5.9 7.4 8.1Q8.2 8.5 9.4 8.5L18.2 8.4Q20.6 8.4 20.9 10.6L21.5 14 20.8 14.1 20.4 11.8Q20.2 13.2 19.6 14L19.7 19.6 18.1 19.6 17.8 15.2 10.4 15.2 10 19.6 8.4 19.6 8.1 14.6Q7.1 13.7 6.8 12.7 5.6 12.9 4.3 12.6 3 12.3 2.6 11.6Z";
-/* versão de teste: foguete de Alcântara (desenho em 24 × 34; a base fica no ponto), com chama e vapor animados no CSS */
+/* foguete de Alcântara (desenho em 24 × 34; a base fica no ponto), com chama e vapor animados no CSS */
 const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/>
   <path d="M7.6 17.5L3.4 24.4v2.6l4.2-3.4zM16.4 17.5l4.2 6.9v2.6l-4.2-3.4z" fill="#ff7a6b" stroke="#1a1206" stroke-width="1"/>
   <path d="M9.6 23h4.8l.8 4.2H8.8z" fill="#7a7064" stroke="#1a1206" stroke-width="1"/>
@@ -116,7 +118,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     getJSON(D + "fontes.json"), getJSON(D + "geo/estados.json"), getJSON(D + "geo/mundo.json"),
     getJSON(D + "geo/rotulos.json"), getJSON(D + "relevo/relevo.json"),
     /* versão de teste: capitais dos países vizinhos (Natural Earth) */
-    TESTE ? getJSON(D + "geo/capitais_vizinhos.json") : null]);
+    getJSON(D + "geo/capitais_vizinhos.json")]);
   if (!F || !estados) { document.getElementById("ficha").innerHTML = `<p class="note">Não foi possível carregar os dados. Recarregue a página.</p>`; return; }
   const NAME = {}; estados.features.forEach(f => NAME[f.properties.sigla] = f.properties.name);
 
@@ -186,10 +188,10 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         dem: { type: "raster-dem", encoding: "terrarium", tileSize: 256, maxzoom: 13,
           tiles: ["https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png"] },
         estados: { type: "geojson", data: estados, promoteId: "sigla" },
-        brasil: { type: "geojson", data: TESTE ? contornoBrasil(estados) : fc([]) },
+        brasil: { type: "geojson", data: contornoBrasil(estados) },
+        /* contorno do estado sob o mouse */
+        "contorno-hover": { type: "geojson", data: fc([]) },
         /* versão de teste: relevo da terra do Brasil por cima da cor dos estados (sombra e luz translúcidas; ver scripts/estudos/terra_ouro.py) */
-        /* versão de teste: contorno do estado sob o mouse */
-        ...(TESTE ? { "contorno-hover": { type: "geojson", data: fc([]) } } : {}),
         ...(TESTE ? { "relevo-ouro": { type: "image", url: D + "relevo/ouro_relevo.webp", coordinates: [[-75, 6], [-28, 6], [-28, -34.5], [-75, -34.5]] } } : {}),
         mundo: { type: "geojson", data: mundo || fc([]) },
         zee: { type: "geojson", data: DATA.zee || fc([]) },
@@ -221,13 +223,11 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         uf: { type: "geojson", data: ufPts },
         caps: { type: "geojson", data: capPts },
         ilhas: { type: "geojson", data: ilhaPts },
-        ...(TESTE ? { capviz: { type: "geojson", data: fc(CAPVIZ ? CAPVIZ.capitais.map(c => ponto(c.c, { n: c.n, d: c.d })) : []) } } : {})
+        capviz: { type: "geojson", data: fc(CAPVIZ ? CAPVIZ.capitais.map(c => ponto(c.c, { n: c.n, d: c.d })) : []) }
       },
       layers: [
         { id: "fundo", type: "background", paint: { "background-color": "#0a1d2a" } },
-        { id: "nasa", type: "raster", source: "nasa", paint: TESTE
-            ? { "raster-brightness-max": 0.62, "raster-saturation": -0.15, "raster-contrast": 0.08, "raster-fade-duration": 200 }
-            : { "raster-brightness-max": 0.62, "raster-saturation": -0.15, "raster-contrast": 0.08, "raster-fade-duration": 200 } },
+        { id: "nasa", type: "raster", source: "nasa", paint: { "raster-brightness-max": 0.62, "raster-saturation": -0.15, "raster-contrast": 0.08, "raster-fade-duration": 200 } },
         { id: "paises-borda", type: "line", source: "mundo", paint: { "line-color": "rgba(214,198,150,.35)", "line-width": 0.6 } },
         /* mar: cada arquivo traz a área ("area") e as linhas de limite separadas ("limite", "base") */
         { id: "pce-fill-rec", type: "fill", source: "pce", filter: ["all", AREA, ["==", ["get", "status"], "reconhecida"]],
@@ -240,12 +240,13 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         { id: "estados-fill", type: "fill", source: "estados",
           paint: { "fill-color": cor("--land"),
             "fill-opacity": ["case", ["boolean", ["feature-state", "fade"], false], 0.18, ["boolean", ["feature-state", "hover"], false], 0.95, 0.82] } },
-        /* versão de teste (24/10/2026): o estado escolhido "levanta" do mapa, sem apagar os outros (assim dá para comparar
-           as cores): sombra curta embaixo dele e, por cima, o próprio estado de novo, para a sombra só aparecer do lado de fora */
-        ...(TESTE ? [{ id: "sel-sombra", type: "fill", source: "estados", filter: ["==", ["get", "sigla"], ""], layout: { visibility: "none" },
-            paint: { "fill-color": "rgba(6,3,0,.55)", "fill-translate": [7, 9] } },
-          { id: "sel-fill", type: "fill", source: "estados", filter: ["==", ["get", "sigla"], ""], layout: { visibility: "none" },
-            paint: { "fill-color": "rgba(0,0,0,0)" } }] : []),
+        /* estado escolhido "levantado" (24/10/2026, aprovado pelo Edu): com uma pintura, os outros estados mantêm a cor (assim dá
+           para comparar); o escolhido ganha uma sombra curta embaixo e, por cima, ele mesmo de novo, para a sombra só aparecer
+           do lado de fora */
+        { id: "sel-sombra", type: "fill", source: "estados", filter: ["==", ["get", "sigla"], ""], layout: { visibility: "none" },
+          paint: { "fill-color": "rgba(6,3,0,.55)", "fill-translate": [7, 9] } },
+        { id: "sel-fill", type: "fill", source: "estados", filter: ["==", ["get", "sigla"], ""], layout: { visibility: "none" },
+          paint: { "fill-color": "rgba(0,0,0,0)" } },
         /* versão de teste: o relevo vale até o zoom 5 e some até o 7, onde o relevo sombreado de altitude mostra mais detalhe */
         ...(TESTE ? [{ id: "relevo-ouro", type: "raster", source: "relevo-ouro", layout: { visibility: "none" },
           paint: { "raster-opacity": ["interpolate", ["linear"], ["zoom"], 5, 1, 7, 0], "raster-fade-duration": 0, "raster-resampling": "linear" } }] : []),
@@ -261,21 +262,20 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         { id: "estados-line", type: "line", source: "estados", paint: TESTE
             ? { "line-color": "rgba(240,200,130,.55)", "line-width": 0.9 }
             : { "line-color": "rgba(220,240,225,.55)", "line-width": 0.8 } },
-        /* versão de teste: contorno do Brasil em destaque (brilho dourado por baixo de uma linha cheia) */
-        ...(TESTE ? [
-          { id: "brasil-brilho", type: "line", source: "brasil", layout: { "line-join": "round", "line-cap": "round" },
-            paint: { "line-color": "rgba(255,184,70,.45)", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 7, 8, 12], "line-blur": 5 } },
-          { id: "brasil-linha", type: "line", source: "brasil", layout: { "line-join": "round", "line-cap": "round" },
-            paint: { "line-color": "#ffe2a6", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1.5, 8, 2.4] } },
-          /* realce do estado sob o mouse: brilho dourado e uma luz que corre pelo contorno (no lugar do realce esbranquiçado) */
-          { id: "hover-brilho", type: "line", source: "contorno-hover", layout: { "line-join": "round", "line-cap": "round" },
-            paint: { "line-color": "rgba(255,176,60,.6)", "line-width": 10, "line-blur": 6 } },
-          { id: "hover-sombra", type: "line", source: "contorno-hover", layout: { "line-join": "round", "line-cap": "round" },
-            paint: { "line-color": "rgba(10,6,2,.8)", "line-width": 5.2 } },
-          { id: "hover-linha", type: "line", source: "contorno-hover", layout: { "line-join": "round", "line-cap": "round" },
-            paint: { "line-color": "#f5b64a", "line-width": 3 } },
-          { id: "hover-tracos", type: "line", source: "contorno-hover", layout: { "line-join": "round" },
-            paint: { "line-color": "#fff6dc", "line-width": 3, "line-dasharray": TRACOS[0] } }] : []),
+        /* contorno do Brasil em destaque (brilho dourado por baixo de uma linha cheia) */
+        { id: "brasil-brilho", type: "line", source: "brasil", layout: { "line-join": "round", "line-cap": "round" },
+          paint: { "line-color": "rgba(255,184,70,.45)", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 7, 8, 12], "line-blur": 5 } },
+        { id: "brasil-linha", type: "line", source: "brasil", layout: { "line-join": "round", "line-cap": "round" },
+          paint: { "line-color": "#ffe2a6", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1.5, 8, 2.4] } },
+        /* realce do estado sob o mouse: brilho dourado e uma luz que corre pelo contorno (no lugar do realce esbranquiçado) */
+        { id: "hover-brilho", type: "line", source: "contorno-hover", layout: { "line-join": "round", "line-cap": "round" },
+          paint: { "line-color": "rgba(255,176,60,.6)", "line-width": 10, "line-blur": 6 } },
+        { id: "hover-sombra", type: "line", source: "contorno-hover", layout: { "line-join": "round", "line-cap": "round" },
+          paint: { "line-color": "rgba(10,6,2,.8)", "line-width": 5.2 } },
+        { id: "hover-linha", type: "line", source: "contorno-hover", layout: { "line-join": "round", "line-cap": "round" },
+          paint: { "line-color": "#f5b64a", "line-width": 3 } },
+        { id: "hover-tracos", type: "line", source: "contorno-hover", layout: { "line-join": "round" },
+          paint: { "line-color": "#fff6dc", "line-width": 3, "line-dasharray": TRACOS[0] } },
         { id: "campos-fill", type: "fill", source: "campos", paint: { "fill-color": "rgba(217,144,43,.2)" } },
         { id: "campos-line", type: "line", source: "campos", paint: { "line-color": cor("--campo"), "line-width": 0.8, "line-opacity": 0.85 } },
         { id: "presal-line", type: "line", source: "presal", filter: AREA,
@@ -286,27 +286,25 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
           paint: { "line-color": cor("--road-est"), "line-opacity": 0.5, "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.4, 8, 1.3] } },
         { id: "rodovias-terra", type: "line", source: "rod", filter: ["==", ["get", "p"], 0],
           paint: { "line-color": ["case", ["==", ["get", "e"], 1], cor("--road-est"), cor("--road")], "line-opacity": 0.5, "line-dasharray": [2, 2], "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.6, 8, 1.4] } },
-        /* versão de teste: borda escura por baixo das rodovias federais pavimentadas, para a linha clara aparecer sobre o ouro */
-        ...(TESTE ? [{ id: "rodovias-borda", type: "line", source: "rod", filter: ["==", ["get", "p"], 1], layout: { "line-cap": "round", "line-join": "round" },
+        /* borda escura por baixo das rodovias federais pavimentadas, para a linha clara aparecer sobre qualquer cor */
+        { id: "rodovias-borda", type: "line", source: "rod", filter: ["==", ["get", "p"], 1], layout: { "line-cap": "round", "line-join": "round" },
           paint: { "line-color": "rgba(14,9,4,.7)", "line-opacity": 1,
-            "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "e"], 1], 1.7, 2.1], 8, ["case", ["==", ["get", "e"], 1], 3.1, 3.8]] } }] : []),
+            "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "e"], 1], 1.7, 2.1], 8, ["case", ["==", ["get", "e"], 1], 3.1, 3.8]] } },
         { id: "rodovias", type: "line", source: "rod", filter: ["==", ["get", "p"], 1], layout: { "line-cap": "round", "line-join": "round" },
-          paint: { "line-color": ["case", ["==", ["get", "e"], 1], cor("--road-est"), cor("--road")], "line-opacity": TESTE ? 0.92 : 0.62,
+          paint: { "line-color": ["case", ["==", ["get", "e"], 1], cor("--road-est"), cor("--road")], "line-opacity": 0.92,
             "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "e"], 1], 0.6, 0.8], 8, ["case", ["==", ["get", "e"], 1], 1.5, 2]] } },
-        /* versão de teste (24/10/2026): ferrovia no símbolo clássico dos mapas, para aparecer sobre qualquer cor: faixa escura
-           com o miolo claro cortado por "dormentes" escuros; em obras, só os traços (claros com borda escura), sem a faixa */
-        ...(TESTE ? [{ id: "ferrovias-borda", type: "line", source: "trilhos", filter: ["!=", ["get", "obra"], 1], layout: { "line-join": "round" },
+        /* ferrovia no símbolo clássico dos mapas (24/10/2026), para aparecer sobre qualquer cor: faixa escura com o miolo claro
+           cortado por "dormentes" escuros; em obras, só os traços (claros com borda escura), sem a faixa */
+        { id: "ferrovias-borda", type: "line", source: "trilhos", filter: ["!=", ["get", "obra"], 1], layout: { "line-join": "round" },
           paint: { "line-color": "rgba(12,8,3,.9)", "line-opacity": 0.9, "line-width": ["interpolate", ["linear"], ["zoom"], 3, 3, 8, 5.6] } },
           /* a borda dos traços em obras tem o dobro da largura do miolo: o tracejado (medido em larguras) fica com metade
              do número para os traços dos dois coincidirem */
           { id: "ferrovias-obra-borda", type: "line", source: "trilhos", filter: ["==", ["get", "obra"], 1],
-          paint: { "line-color": "rgba(12,8,3,.9)", "line-opacity": 0.9, "line-dasharray": [0.8, 1.1], "line-width": ["interpolate", ["linear"], ["zoom"], 3, 2.6, 8, 5] } }] : []),
+          paint: { "line-color": "rgba(12,8,3,.9)", "line-opacity": 0.9, "line-dasharray": [0.8, 1.1], "line-width": ["interpolate", ["linear"], ["zoom"], 3, 2.6, 8, 5] } },
         { id: "ferrovias", type: "line", source: "trilhos", filter: ["!=", ["get", "obra"], 1],
-          paint: TESTE ? { "line-color": "#fbf6ea", "line-opacity": 0.9, "line-dasharray": [3.4, 1.1], "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1.4, 8, 2.6] }
-            : { "line-color": cor("--rail"), "line-opacity": 0.9, "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1, 8, 2.6] } },
+          paint: { "line-color": "#fbf6ea", "line-opacity": 0.9, "line-dasharray": [3.4, 1.1], "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1.4, 8, 2.6] } },
         { id: "ferrovias-obra", type: "line", source: "trilhos", filter: ["==", ["get", "obra"], 1],
-          paint: TESTE ? { "line-color": "#fbf6ea", "line-opacity": 0.9, "line-dasharray": [1.6, 2.2], "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1.3, 8, 2.5] }
-            : { "line-color": cor("--rail"), "line-opacity": 0.9, "line-dasharray": [2, 1.5], "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1, 8, 2.4] } },
+          paint: { "line-color": "#fbf6ea", "line-opacity": 0.9, "line-dasharray": [1.6, 2.2], "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1.3, 8, 2.5] } },
         /* linhas de transmissão (EPE): mais grossas quanto maior a tensão (230 a 800 kV) */
         { id: "lt", type: "line", source: "lt", layout: { "line-join": "round" },
           paint: { "line-color": cor("--lt"), "line-opacity": 0.72,
@@ -325,37 +323,37 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
             "circle-stroke-color": ["match", ["get", "k"], "gnl", "#ffffff", "#1a0505"], "circle-stroke-width": 1,
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "k"], "refinaria"], ["interpolate", ["linear"], ["sqrt", ["coalesce", ["get", "bbl"], 0]], 0, 3.5, 200, 5, 660, 8], 3], 8, ["case", ["==", ["get", "k"], "refinaria"], ["interpolate", ["linear"], ["sqrt", ["coalesce", ["get", "bbl"], 0]], 0, 6, 200, 9, 660, 15], 5]] } },
         /* principal lavoura de cada município (IBGE, PAM): cor pela lavoura de maior valor, tamanho pela raiz do valor de todas
-           as lavouras; os maiores vêm primeiro no arquivo e ficam por baixo */
-        { id: TESTE ? "lav-geral" : "lav", type: "circle", source: "lav", layout: { "circle-sort-key": ["-", 0, ["get", "v"]] },
-          paint: { "circle-color": ["match", ["get", "g"], "soja", cor("--lav-soja"), "milho", cor("--lav-milho"), "cana", cor("--lav-cana"), "cafe", cor("--lav-cafe"), "mandioca", cor("--lav-mandioca"), "banana", cor("--lav-banana"), "feijao", cor("--lav-feijao"), "arroz", cor("--lav-arroz"), cor("--lav-outras")], "circle-opacity": TESTE ? 0.95 : 0.85,
-            /* versão de teste: borda escura mais grossa, para a cor da lavoura não sumir sobre o ouro */
-            "circle-stroke-color": TESTE ? "#140c04" : "#0d1712", "circle-stroke-width": TESTE ? 0.9 : 0.4,
+           as lavouras; os maiores vêm primeiro no arquivo e ficam por baixo. No mapa do Brasil, círculos ("lav-geral");
+           no estado escolhido, o ícone de cada lavoura ("lav") */
+        { id: "lav-geral", type: "circle", source: "lav", layout: { "circle-sort-key": ["-", 0, ["get", "v"]] },
+          paint: { "circle-color": ["match", ["get", "g"], "soja", cor("--lav-soja"), "milho", cor("--lav-milho"), "cana", cor("--lav-cana"), "cafe", cor("--lav-cafe"), "mandioca", cor("--lav-mandioca"), "banana", cor("--lav-banana"), "feijao", cor("--lav-feijao"), "arroz", cor("--lav-arroz"), cor("--lav-outras")], "circle-opacity": 0.95,
+            /* borda escura mais grossa, para a cor da lavoura não sumir sobre a pintura */
+            "circle-stroke-color": "#140c04", "circle-stroke-width": 0.9,
             "circle-radius": ["interpolate", ["linear"], ["zoom"],
               3, ["interpolate", ["linear"], ["sqrt", ["get", "v"]], 0, 0.6, 100, 1.1, 500, 2.4, 1500, 4.6, 3000, 7.5],
               6, ["interpolate", ["linear"], ["sqrt", ["get", "v"]], 0, 1, 100, 2, 500, 4.4, 1500, 8.5, 3000, 14],
               9, ["interpolate", ["linear"], ["sqrt", ["get", "v"]], 0, 1.8, 100, 3.6, 500, 8, 1500, 15, 3000, 24]] } },
-        /* versão de teste: no estado escolhido, o ícone da lavoura principal (tamanho pelo valor de todas as lavouras) */
-        ...(TESTE ? [{ id: "lav", type: "symbol", source: "lav", filter: ["==", ["get", "u"], ""],
+        /* no estado escolhido, o ícone da lavoura principal (tamanho pelo valor de todas as lavouras) */
+        { id: "lav", type: "symbol", source: "lav", filter: ["==", ["get", "u"], ""],
           layout: { "symbol-sort-key": ["-", 0, ["get", "v"]], "icon-image": ["concat", "lav-", ["get", "g"]], "icon-allow-overlap": true, "icon-ignore-placement": true,
             "icon-size": ["interpolate", ["linear"], ["zoom"],
               4, ["interpolate", ["linear"], ["sqrt", ["get", "v"]], 0, 0.3, 100, 0.4, 500, 0.58, 1500, 0.82, 3000, 1.05],
-              8, ["interpolate", ["linear"], ["sqrt", ["get", "v"]], 0, 0.45, 100, 0.6, 500, 0.88, 1500, 1.2, 3000, 1.5]] } }] : []),
+              8, ["interpolate", ["linear"], ["sqrt", ["get", "v"]], 0, 0.45, 100, 0.6, 500, 0.88, 1500, 1.2, 3000, 1.5]] } },
         /* rebanho bovino por município: tamanho pela raiz quadrada das cabeças (a área do ponto acompanha o rebanho);
-           os maiores vêm primeiro no arquivo e ficam por baixo, para os pequenos continuarem visíveis */
-        { id: TESTE ? "boi-geral" : "boi", type: "circle", source: "boi", layout: { "circle-sort-key": ["-", 0, ["get", "b"]] },
-          /* versão de teste: disco escuro com aro claro (o tom do boi some sobre o ouro), como o medalhão sem o desenho */
-          paint: { "circle-color": TESTE ? "rgba(18,11,4,.6)" : cor("--boi"), "circle-opacity": TESTE ? 1 : 0.72,
-            "circle-stroke-color": TESTE ? "#f2d9a0" : "#2b1a0c", "circle-stroke-width": TESTE ? 0.7 : 0.4,
+           os maiores vêm primeiro no arquivo e ficam por baixo, para os pequenos continuarem visíveis. No mapa do Brasil,
+           círculos ("boi-geral": disco escuro com aro claro, como o medalhão sem o desenho); no estado escolhido, o boi ("boi") */
+        { id: "boi-geral", type: "circle", source: "boi", layout: { "circle-sort-key": ["-", 0, ["get", "b"]] },
+          paint: { "circle-color": "rgba(18,11,4,.6)", "circle-opacity": 1, "circle-stroke-color": "#f2d9a0", "circle-stroke-width": 0.7,
             "circle-radius": ["interpolate", ["linear"], ["zoom"],
               3, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 0.5, 100, 1, 300, 2, 700, 3.6, 1700, 7],
               6, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 0.9, 100, 1.9, 300, 3.8, 700, 7, 1700, 13],
               9, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 1.6, 100, 3.4, 300, 6.8, 700, 12, 1700, 22]] } },
-        /* versão de teste: no estado escolhido, o boi em medalhão (tamanho pelo rebanho) */
-        ...(TESTE ? [{ id: "boi", type: "symbol", source: "boi", filter: ["==", ["get", "u"], ""],
+        /* no estado escolhido, o boi em medalhão (tamanho pelo rebanho) */
+        { id: "boi", type: "symbol", source: "boi", filter: ["==", ["get", "u"], ""],
           layout: { "symbol-sort-key": ["-", 0, ["get", "b"]], "icon-image": "boi", "icon-allow-overlap": true, "icon-ignore-placement": true,
             "icon-size": ["interpolate", ["linear"], ["zoom"],
               4, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 0.3, 100, 0.4, 300, 0.55, 700, 0.75, 1700, 1.05],
-              8, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 0.45, 100, 0.6, 300, 0.82, 700, 1.1, 1700, 1.5]] } }] : []),
+              8, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 0.45, 100, 0.6, 300, 0.82, 700, 1.1, 1700, 1.5]] } },
         /* usinas (ANEEL, SIGA; 1 MW ou mais): cor pela fonte, tamanho pela raiz quadrada da potência (a área do ponto acompanha os MW) */
         { id: "usinas", type: "circle", source: "usinas", layout: { "circle-sort-key": ["-", 0, ["get", "kw"]] },
           paint: { "circle-color": ["match", ["get", "t"], ["uhe", "pch", "cgh"], cor("--hid"), "eol", cor("--eol"), "sol", cor("--sol"), "bio", cor("--bio"), "fos", cor("--fos"), "nuc", cor("--nuc"), "#ffffff"],
@@ -402,11 +400,11 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
             "icon-allow-overlap": true, "icon-ignore-placement": true,
             "icon-size": ["interpolate", ["linear"], ["zoom"], 3, ["interpolate", ["linear"], ["sqrt", ["get", "n"]], 1, 0.5, 7.2, 1.45],
               6, ["interpolate", ["linear"], ["sqrt", ["get", "n"]], 1, 0.75, 7.2, 2.1], 9, ["interpolate", ["linear"], ["sqrt", ["get", "n"]], 1, 1, 7.2, 2.7]] } },
-        /* versão de teste: contorno claro com borda escura (o dourado sumia sobre o ouro) */
-        ...(TESTE ? [{ id: "sel-halo", type: "line", source: "estados", filter: ["==", ["get", "sigla"], ""], layout: { "line-join": "round" },
-          paint: { "line-color": "rgba(12,7,2,.9)", "line-width": 8 } }] : []),
+        /* estado escolhido: contorno claro com borda escura (o dourado sumia sobre o ouro) */
+        { id: "sel-halo", type: "line", source: "estados", filter: ["==", ["get", "sigla"], ""], layout: { "line-join": "round" },
+          paint: { "line-color": "rgba(12,7,2,.9)", "line-width": 8 } },
         { id: "estado-sel", type: "line", source: "estados", filter: ["==", ["get", "sigla"], ""], layout: { "line-join": "round" },
-          paint: { "line-color": TESTE ? "#fff3d0" : cor("--accent"), "line-width": TESTE ? 3 : 2.6 } },
+          paint: { "line-color": "#fff3d0", "line-width": 3 } },
         { id: "pce-rotulo", type: "symbol", source: "pce", filter: ["==", ["get", "parte"], "rotulo"],
           layout: { "text-field": ["get", "texto"], "text-font": fonte(SEMI), "text-size": 10, "text-letter-spacing": 0.12, "text-transform": "uppercase", "text-max-width": 14 },
           paint: { "text-color": "rgba(244,196,235,.9)", ...halo } },
@@ -422,21 +420,14 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
           paint: { "text-color": "rgba(159,230,242,.75)", ...halo } },
         { id: "portos", type: "circle", source: "portos",
           paint: { "circle-color": cor("--port"), "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 3, 8, 6], "circle-stroke-color": "#05101a", "circle-stroke-width": 1 } },
-        /* aeroportos (ANAC): tamanho pela raiz dos passageiros de 12 meses; os sem voos de passageiros ficam pequenos e mais claros */
-        TESTE ? { id: "aeroportos", type: "symbol", source: "aeros",
+        /* aeroportos (ANAC): aviãozinho, tamanho pela raiz dos passageiros de 12 meses; os sem voos de passageiros ficam pequenos e mais claros */
+        { id: "aeroportos", type: "symbol", source: "aeros",
           layout: { "symbol-sort-key": ["-", 0, ["get", "p"]], "icon-image": "aviao", "icon-allow-overlap": true, "icon-ignore-placement": true,
             "icon-size": ["interpolate", ["linear"], ["zoom"],
               3, ["interpolate", ["linear"], ["sqrt", ["get", "p"]], 0, 0.36, 300, 0.5, 1500, 0.78, 6600, 1.3],
               6, ["interpolate", ["linear"], ["sqrt", ["get", "p"]], 0, 0.5, 300, 0.7, 1500, 1.1, 6600, 1.9],
               9, ["interpolate", ["linear"], ["sqrt", ["get", "p"]], 0, 0.7, 300, 0.95, 1500, 1.45, 6600, 2.5]] },
-          paint: { "icon-opacity": ["case", ["<", ["get", "p"], 1000], 0.55, 1] } } :
-        { id: "aeroportos", type: "circle", source: "aeros", layout: { "circle-sort-key": ["-", 0, ["get", "p"]] },
-          paint: { "circle-color": cor("--air"), "circle-opacity": ["case", ["<", ["get", "p"], 1000], 0.45, 0.92],
-            "circle-stroke-color": "#05101a", "circle-stroke-width": ["case", ["<", ["get", "p"], 1000], 0.5, 1],
-            "circle-radius": ["interpolate", ["linear"], ["zoom"],
-              3, ["interpolate", ["linear"], ["sqrt", ["get", "p"]], 0, 1.6, 300, 2.8, 1500, 5, 6600, 11],
-              6, ["interpolate", ["linear"], ["sqrt", ["get", "p"]], 0, 2.4, 300, 4, 1500, 8, 6600, 18],
-              9, ["interpolate", ["linear"], ["sqrt", ["get", "p"]], 0, 3.4, 300, 5.5, 1500, 11, 6600, 25]] } },
+          paint: { "icon-opacity": ["case", ["<", ["get", "p"], 1000], 0.55, 1] } },
         { id: "ilhas-ponto", type: "circle", source: "ilhas", paint: { "circle-color": cor("--sea-line"), "circle-radius": 2.6, "circle-stroke-color": "#05101a", "circle-stroke-width": 1 } },
         { id: "ilhas-rotulo", type: "symbol", source: "ilhas", filter: ["!=", ["get", "n"], ""],
           layout: { "text-field": ["get", "n"], "text-font": fonte(REG), "text-size": 11, "text-anchor": "left", "text-offset": [0.7, 0] },
@@ -447,14 +438,13 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         { id: "paises", type: "symbol", source: "paises",
           layout: { "text-field": ["get", "n"], "text-font": fonte(SEMI), "text-size": 10, "text-letter-spacing": 0.2, "text-transform": "uppercase" },
           paint: { "text-color": "rgba(236,233,222,.6)", ...halo } },
-        /* versão de teste: capitais dos países vizinhos: anel claro com um ponto no meio, nome no tom dos países */
-        ...(TESTE ? [
-          { id: "capviz", type: "circle", source: "capviz",
-            paint: { "circle-radius": 3.6, "circle-color": "rgba(10,8,5,.55)", "circle-stroke-color": "#e8e1cc", "circle-stroke-width": 1.3 } },
-          { id: "capviz-ponto", type: "circle", source: "capviz", paint: { "circle-radius": 1.3, "circle-color": "#e8e1cc" } },
-          { id: "capviz-rotulo", type: "symbol", source: "capviz",
-            layout: { "text-field": ["get", "n"], "text-font": fonte(REG), "text-size": 11, "text-anchor": "left", "text-offset": [0.75, 0], "text-optional": true },
-            paint: { "text-color": "rgba(236,232,220,.8)", ...halo } }] : []),
+        /* capitais dos países vizinhos: anel claro com um ponto no meio, nome no tom dos países */
+        { id: "capviz", type: "circle", source: "capviz",
+          paint: { "circle-radius": 3.6, "circle-color": "rgba(10,8,5,.55)", "circle-stroke-color": "#e8e1cc", "circle-stroke-width": 1.3 } },
+        { id: "capviz-ponto", type: "circle", source: "capviz", paint: { "circle-radius": 1.3, "circle-color": "#e8e1cc" } },
+        { id: "capviz-rotulo", type: "symbol", source: "capviz",
+          layout: { "text-field": ["get", "n"], "text-font": fonte(REG), "text-size": 11, "text-anchor": "left", "text-offset": [0.75, 0], "text-optional": true },
+          paint: { "text-color": "rgba(236,232,220,.8)", ...halo } },
         { id: "capitais", type: "circle", source: "caps",
           paint: { "circle-color": ["case", ["get", "pais"], cor("--accent"), "#ffffff"], "circle-radius": ["case", ["get", "pais"], 4, 3], "circle-stroke-color": "#081408", "circle-stroke-width": 1.2 } },
         { id: "capitais-rotulo", type: "symbol", source: "caps",
@@ -547,20 +537,19 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     }
   });
 
-  /* Alcântara: marcador HTML que pisca */
+  /* Alcântara: foguete em pé, com a base no ponto, vapor e chama (marcador HTML) */
   let mkCla = null;
   if (CLA) {
-    const el = document.createElement("div"); el.className = TESTE ? "mk-foguete" : "mk-cla"; el.title = CLA.nome;
-    el.innerHTML = TESTE ? '<i class="vapor v1"></i><i class="vapor v2"></i><i class="vapor v3"></i><i class="vapor v4"></i>' +
-      `<svg viewBox="0 0 24 34" aria-hidden="true">${FOGUETE}</svg>` : '<i class="p"></i><i></i><b></b>';
-    /* versão de teste: foguete em pé, com a base no ponto */
-    mkCla = new maplibregl.Marker({ element: el, anchor: TESTE ? "bottom" : "center" }).setLngLat(CLA.ponto);
+    const el = document.createElement("div"); el.className = "mk-foguete"; el.title = CLA.nome;
+    el.innerHTML = '<i class="vapor v1"></i><i class="vapor v2"></i><i class="vapor v3"></i><i class="vapor v4"></i>' +
+      `<svg viewBox="0 0 24 34" aria-hidden="true">${FOGUETE}</svg>`;
+    mkCla = new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat(CLA.ponto);
   }
 
   const G = { zee: ["zee-fill", "zee-line", "zee-rotulo", "ilhas-ponto", "ilhas-rotulo"], mt: ["mt-fill", "mt-line", "mt-base"], zc: ["zc-fill", "zc-line"],
-    pce: ["pce-fill-rec", "pce-fill-ana", "pce-line-rec", "pce-line-ana", "pce-rotulo"], rod: ["rodovias", "rodovias-terra", "rodovias-rotulo", ...(TESTE ? ["rodovias-borda"] : [])], rodest: ["rodovias-est"],
-    oil: ["pocos"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi", ...(TESTE ? ["boi-geral"] : [])], lav: ["lav", ...(TESTE ? ["lav-geral"] : [])], usinas: ["usinas"], dutos: ["dutos"], refin: ["refin"], se: ["se"], lt: ["lt"], celm: ["celm"], g5: ["g5"], empdef: ["empdef"], pedagio: ["pedagio"],
-    rail: ["ferrovias", "ferrovias-obra", ...(TESTE ? ["ferrovias-borda", "ferrovias-obra-borda"] : [])], ports: ["portos"], air: ["aeroportos"] };
+    pce: ["pce-fill-rec", "pce-fill-ana", "pce-line-rec", "pce-line-ana", "pce-rotulo"], rod: ["rodovias", "rodovias-terra", "rodovias-rotulo", "rodovias-borda"], rodest: ["rodovias-est"],
+    oil: ["pocos"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi", "boi-geral"], lav: ["lav", "lav-geral"], usinas: ["usinas"], dutos: ["dutos"], refin: ["refin"], se: ["se"], lt: ["lt"], celm: ["celm"], g5: ["g5"], empdef: ["empdef"], pedagio: ["pedagio"],
+    rail: ["ferrovias", "ferrovias-obra", "ferrovias-borda", "ferrovias-obra-borda"], ports: ["portos"], air: ["aeroportos"] };
 
   /* ---------- painel e enquadramento ---------- */
   const stage = document.getElementById("stage");
@@ -631,19 +620,15 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   document.getElementById("menos").onclick = () => letra(-1);
   document.getElementById("mais").onclick = () => letra(1);
   letra(0);
-  /* versão de teste: painel em duas abas, "Mapa" (pinturas e camadas) e "Ficha" (o Brasil ou o estado escolhido) */
-  let abas = null;
-  if (TESTE) {
-    abas = document.createElement("div"); abas.className = "abas"; abas.setAttribute("role", "tablist"); abas.setAttribute("aria-label", "Painel");
-    abas.innerHTML = `<button role="tab" data-aba="mapa">Mapa</button><button role="tab" data-aba="ficha">Ficha · Brasil</button>`;
-    conteudo.before(abas);
-    abas.querySelectorAll("button").forEach(b => b.onclick = () => aba(b.dataset.aba));
-    aba("mapa");
-  }
+  /* painel em duas abas, "Mapa" (pinturas e camadas) e "Ficha" (o Brasil ou o estado escolhido) */
+  const abas = document.createElement("div"); abas.className = "abas"; abas.setAttribute("role", "tablist"); abas.setAttribute("aria-label", "Painel");
+  abas.innerHTML = `<button role="tab" data-aba="mapa">Mapa</button><button role="tab" data-aba="ficha">Ficha · Brasil</button>`;
+  conteudo.before(abas);
+  abas.querySelectorAll("button").forEach(b => b.onclick = () => aba(b.dataset.aba));
+  aba("mapa");
   if (TESTE) document.querySelector(".brand").insertAdjacentHTML("beforeend",
     `<a class="selo-teste" href="${location.pathname}" title="Versão de teste. Clique para abrir o site normal, sem as mudanças">Teste</a>`);
   function aba(nome) {
-    if (!abas) return;
     dock.dataset.aba = nome;
     abas.querySelectorAll("button").forEach(b => b.setAttribute("aria-selected", b.dataset.aba === nome));
     dock.scrollTop = 0;
@@ -659,7 +644,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     if (!d) { detalhe = "nao"; return; }
     const aplicar = () => {
       map.getSource("estados").setData(d); detalhe = "ok"; geoAtual = d;
-      if (TESTE && map.getSource("brasil")) map.getSource("brasil").setData(contornoBrasil(d));
+      if (map.getSource("brasil")) map.getSource("brasil").setData(contornoBrasil(d));
       estados.features.forEach(f => { const u = f.properties.sigla; map.setFeatureState({ source: "estados", id: u }, { fade: !!sel && u !== sel, hover: u === hover }); });
     };
     map.getSource("estados") ? aplicar() : map.once("load", aplicar);
@@ -670,10 +655,10 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     if (sel) { map.setFeatureState({ source: "estados", id: sel }, { sel: false }); }
     sel = (sel === s) ? null : s;
     if (sel) { detalhar(); aba("ficha"); }
-    /* versão de teste: escolher um estado com a pintura Rebanho liga os ícones dos municípios dele */
-    if (TESTE && sel) camadasDa(paint).filter(l => NO_ESTADO.has(l.id)).forEach(l => { l.on = true; });
+    /* escolher um estado com a pintura Rebanho (ou uma das lavouras) liga os ícones dos municípios dele */
+    if (sel) camadasDa(paint).filter(l => NO_ESTADO.has(l.id)).forEach(l => { if (!l.on) { l.on = true; l.dono = paint; } });
     estados.features.forEach(f => map.setFeatureState({ source: "estados", id: f.properties.sigla }, { fade: !!sel && f.properties.sigla !== sel }));
-    for (const id of ["estado-sel", "sel-halo", "sel-sombra", "sel-fill"]) if (map.getLayer(id)) map.setFilter(id, ["==", ["get", "sigla"], sel || ""]);
+    for (const id of ["estado-sel", "sel-halo", "sel-sombra", "sel-fill"]) map.setFilter(id, ["==", ["get", "sigla"], sel || ""]);
     linhasTrem();
     sel ? verEstado(sel) : verBrasil(1000);
     render(); ficha();
@@ -691,13 +676,13 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   map.on("mousemove", "estados-fill", e => {
     map.getCanvas().style.cursor = "pointer";
     const s = e.features[0].properties.sigla;
-    if (hover !== s) { if (hover) map.setFeatureState({ source: "estados", id: hover }, { hover: false }); hover = s; map.setFeatureState({ source: "estados", id: s }, { hover: true }); realceTeste(); }
+    if (hover !== s) { if (hover) map.setFeatureState({ source: "estados", id: hover }, { hover: false }); hover = s; map.setFeatureState({ source: "estados", id: s }, { hover: true }); realceContorno(); }
   });
-  map.on("mouseleave", "estados-fill", () => { map.getCanvas().style.cursor = ""; if (hover) map.setFeatureState({ source: "estados", id: hover }, { hover: false }); hover = null; realceTeste(); });
-  /* versão de teste: o estado sob o mouse ganha o contorno dourado com a luz correndo (sem movimento para quem pede menos animação) */
+  map.on("mouseleave", "estados-fill", () => { map.getCanvas().style.cursor = ""; if (hover) map.setFeatureState({ source: "estados", id: hover }, { hover: false }); hover = null; realceContorno(); });
+  /* o estado sob o mouse ganha o contorno dourado com a luz correndo (sem movimento para quem pede menos animação) */
   let geoAtual = estados, animHover = 0;
-  function realceTeste() {
-    const src = TESTE && map.getSource("contorno-hover");
+  function realceContorno() {
+    const src = map.getSource("contorno-hover");
     if (!src) return;
     cancelAnimationFrame(animHover);
     const f = hover && geoAtual.features.find(x => x.properties.sigla === hover);
@@ -830,7 +815,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
           <br>${num}<br><span class="pop-fonte">ANTT, dados abertos (números informados pelas concessionárias)</span>`).addTo(map);
       return;
     }
-    const cv = TESTE && map.getLayer("capviz") ? map.queryRenderedFeatures([[px - 4, py - 4], [px + 4, py + 4]], { layers: ["capviz"] }) : [];
+    const cv = map.getLayer("capviz") ? map.queryRenderedFeatures([[px - 4, py - 4], [px + 4, py + 4]], { layers: ["capviz"] }) : [];
     if (cv.length) {
       const p = cv[0].properties;
       new maplibregl.Popup({ closeButton: false, offset: 10, maxWidth: "280px" }).setLngLat(cv[0].geometry.coordinates)
@@ -961,20 +946,26 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   function controls() {
     /* pinturas marcadas "so_no_ministerio" (as lavouras) só aparecem com o filtro do ministério, para não lotar "Todos" */
     const pv = PAINT.filter(p => p.id === "none" || (minF === "todos" ? !p.so_no_ministerio : p.ministerio === minF));
+    /* bolinha "camada ligada" no botão da pintura dona da camada, mesmo com outra pintura escolhida (pedido do Edu em
+       25/10/2026). Quando várias pinturas têm a mesma camada (as lavouras), a bolinha fica na que ligou a camada; se essa
+       não está na lista, na pintura escolhida ou na primeira da lista */
+    const dono = l => { const ps = pv.filter(p => camadasDa(p.id).includes(l)).map(p => p.id);
+      return ps.includes(l.dono) ? l.dono : ps.includes(paint) ? paint : ps[0]; };
+    const comCamada = p => camadasDa(p.id).some(l => l.on && dono(l) === p.id);
     document.getElementById("paint").innerHTML = pv.map(p =>
-      `<button class="chip" data-p="${p.id}" aria-pressed="${paint === p.id}"${paint === p.id && camadasDa(p.id).length && camadasDa(p.id).every(l => l.on) ? ' data-cam="1"' : ""} ${p.id !== "none" && !p.ok ? "disabled title=\"Em apuração\"" : ""}>${p.nome}</button>`).join("");
+      `<button class="chip" data-p="${p.id}" aria-pressed="${paint === p.id}"${comCamada(p) ? ' data-cam="1"' : ""} ${p.id !== "none" && !p.ok ? "disabled title=\"Em apuração\"" : ""}>${p.nome}</button>`).join("");
     /* dica: clicar de novo na pintura escolhida liga ou desliga as camadas dela */
     let dica = document.getElementById("paint-dica");
     if (!dica) { dica = document.createElement("p"); dica.id = "paint-dica"; dica.className = "note dica"; document.getElementById("paint").after(dica); }
     const Pa = PAINT.find(p => p.id === paint), cs = camadasDa(paint);
     dica.hidden = !cs.length;
     dica.textContent = cs.length ? `Clique de novo em “${Pa.nome}” para ${cs.every(l => l.on) ? "desligar" : "ligar também"} ${cs.length > 1 ? "as camadas" : "a camada"} ${cs.map(l => "“" + l.nome + "”").join(" e ")}.` : "";
-    if (TESTE && cs.some(l => NO_ESTADO.has(l.id))) dica.textContent += " Escolha um estado no mapa para ver os ícones dos municípios dele.";
+    if (cs.some(l => NO_ESTADO.has(l.id))) dica.textContent += " Escolha um estado no mapa para ver os ícones dos municípios dele.";
     document.querySelectorAll("#paint .chip:not([disabled])").forEach(b => b.onclick = () => {
       /* 1º clique pinta os estados; os seguintes, na mesma pintura, ligam e desligam as camadas dela */
       const id = b.dataset.p, cs = camadasDa(id);
       if (paint !== id) paint = id;
-      else if (cs.length) { const tudo = cs.every(l => l.on); cs.forEach(l => { l.on = !tudo; }); }
+      else if (cs.length) { const tudo = cs.every(l => l.on); cs.forEach(l => { l.on = !tudo; l.dono = id; }); }
       if (luz !== "off" && paint !== "none") definirLuz("off"); else render();
     });
     document.getElementById("paint").classList.toggle("apagado", luz !== "off");
@@ -991,14 +982,14 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       info.innerHTML = `<h2 style="margin-top:14px">Luzes à noite</h2><div class="luz-info"><p class="note"><b>${L.titulo}.</b> ${L.explica}</p>
         <div>${dd ? `${pill(dd.nivel)} <span class="note">${dd.fonte} · atualizado em ${dd.atualizado_em}. Posição: ${dd.posicao}.</span>`
              : `${pill(L.nivel)} <span class="note">${L.fonte}.</span>`}</div>
-        <p class="note">Com as luzes acesas, os estados ficam sem cor e as rodovias e ferrovias se apagam, para não se confundirem com as luzes (dá para religar em Camadas). Para apagar, clique de novo no botão da luz, no alto do mapa, ou escolha uma pintura acima.</p></div>`;
+        <p class="note">Com as luzes acesas, os estados ficam sem cor; as rodovias e ferrovias se apagam, para não se confundirem com as luzes, e a Zona Econômica Exclusiva também, para deixar o mapa mais limpo (dá para religar em Camadas). Para apagar, clique de novo no botão da luz, no alto do mapa, ou escolha uma pintura acima.</p></div>`;
     }
     const lv = LAYERS.filter(l => minF === "todos" || l.ministerio === minF);
     document.getElementById("layers").innerHTML = lv.length ? lv.map(l => `
       <label class="layer ${l.nivel === "pendente" ? "pend" : ""}">
         <input type="checkbox" id="ly-${l.id}" ${l.on ? "checked" : ""} ${l.nivel === "pendente" ? "disabled" : ""}>${icon(l.id)}
-        <span><span class="nm">${l.cor ? `<i class="key" style="background:var(${l.cor})"></i>` : ""}${l.nome} ${pill(l.nivel)}</span>
-        <span class="src">${l.fonte}${quando(l.id)} · ${F.ministerios[l.ministerio]}${l.baixando ? " · <b>carregando…</b>" : ""}${l.falhou ? " · <b>não foi possível carregar agora; tente de novo</b>" : ""}${TESTE && NO_ESTADO.has(l.id) ? " · <b>ícones ao escolher um estado</b>" : ""}</span></span>
+        <span><span class="nm">${l.id === "rail" ? '<i class="key trilho"></i>' : l.cor ? `<i class="key" style="background:var(${l.cor})"></i>` : ""}${l.nome} ${pill(l.nivel)}</span>
+        <span class="src">${l.fonte}${quando(l.id)} · ${F.ministerios[l.ministerio]}${l.baixando ? " · <b>carregando…</b>" : ""}${l.falhou ? " · <b>não foi possível carregar agora; tente de novo</b>" : ""}${NO_ESTADO.has(l.id) ? " · <b>ícones ao escolher um estado</b>" : ""}</span></span>
       </label>`).join("") : `<p class="note">Este ministério ainda não tem camadas de mapa.</p>`;
     lv.filter(l => l.nivel !== "pendente").forEach(l => document.getElementById("ly-" + l.id).onchange = e => { l.on = e.target.checked; render(); });
     /* ligar ou desligar de uma vez todas as camadas da lista (respeita o ministério escolhido) */
@@ -1065,8 +1056,8 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       const lc = LAYERS.find(l => l.id === "cla");
       if (mkCla) { if (lc && lc.on) mkCla.addTo(map); else mkCla.remove(); }
     }
-    /* versão de teste: ícones só no estado escolhido; sem estado escolhido, os círculos no Brasil todo */
-    if (TESTE) NO_ESTADO.forEach(id => {
+    /* ícones só no estado escolhido; sem estado escolhido, os círculos no Brasil todo */
+    NO_ESTADO.forEach(id => {
       if (map.getLayer(id)) map.setFilter(id, ["==", ["get", "u"], sel || ""]);
       if (map.getLayer(id + "-geral")) map.setFilter(id + "-geral", sel ? ["==", ["get", "u"], ""] : null);
     });
@@ -1094,23 +1085,24 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       const vals = Object.keys(NAME).map(P.val).filter(v => v != null);
       const q = quintis(vals), cores = RAMP.map(cor);
       const m = ["match", ["get", "sigla"]];
-      /* sem valor: cor da terra; quando a falta tem significado ("sem produção"), cinza, para não parecer o grupo mais baixo */
-      Object.keys(NAME).forEach(s => { const v = P.val(s); m.push(s, v == null ? (P.vazio ? cor("--sem") : TESTE ? "rgba(0,0,0,0)" : cor("--land")) : cores[q(v)]); });
-      m.push(TESTE ? "rgba(0,0,0,0)" : cor("--land"));
+      /* sem valor: sem pintura (o mapa natural); quando a falta tem significado ("sem produção"), cinza, para não parecer o grupo mais baixo */
+      Object.keys(NAME).forEach(s => { const v = P.val(s); m.push(s, v == null ? (P.vazio ? cor("--sem") : "rgba(0,0,0,0)") : cores[q(v)]); });
+      m.push("rgba(0,0,0,0)");
       if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", m);
       const DD = DATA[P.id];
       leg = `<span>${P.nome}${P.unidade ? " (" + P.unidade + ")" : ""}</span><span class="faixa"><span>${P.fmt(Math.min(...vals))}</span>
         <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(Math.max(...vals))}</span></span>
-        ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : `<span>${TESTE ? "sem pintura = sem dado" : "sem cor = sem dado"}</span>`) : ""}`;
-    } else if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", TESTE
-      ? ["case", ["boolean", ["feature-state", "fade"], false], "#02070b", ["boolean", ["feature-state", "hover"], false], "#ffffff", "rgba(0,0,0,0)"] : cor("--land"));
-    if (TESTE) visualTeste(L, P);
+        ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : `<span>sem pintura = sem dado</span>`) : ""}`;
+      /* "Sem cor": os estados sem pintura, como os países vizinhos (o mapa natural); em volta do escolhido, escurecidos */
+    } else if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color",
+      ["case", ["boolean", ["feature-state", "fade"], false], "#02070b", ["boolean", ["feature-state", "hover"], false], "#ffffff", "rgba(0,0,0,0)"]);
+    visualModo(L, P);
     /* legenda completa (escala de cores + símbolos das camadas ligadas): sempre no rodapé, ao lado dos níveis de confiança;
        sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
-      /* versão de teste: as lavouras com o medalhão do mapa */
-      if (TESTE && l.id === "lav" && k.cor && ICONES[k.cor.replace("--lav-", "")]) return `<span>${chaveIcone(k.cor.replace("--lav-", ""), k.cor)}${k.nome}</span>`;
-      const forma = TESTE && l.id === "rail" ? (k.forma === "tr" ? "trilho-obra" : "trilho") : TESTE && l.id === "air" ? "aviao" : TESTE && l.id === "cla" ? "foguete" : TESTE && l.id === "boi" ? "boi" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
+      /* as lavouras com o medalhão do mapa */
+      if (l.id === "lav" && k.cor && ICONES[k.cor.replace("--lav-", "")]) return `<span>${chaveIcone(k.cor.replace("--lav-", ""), k.cor)}${k.nome}</span>`;
+      const forma = l.id === "rail" ? (k.forma === "tr" ? "trilho-obra" : "trilho") : l.id === "air" ? "aviao" : l.id === "cla" ? "foguete" : l.id === "boi" ? "boi" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
     }).join("")}</span>`).join("");
     document.getElementById("legend").innerHTML = legMapa ? leg + itens : "";
@@ -1120,42 +1112,47 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     if (lr) lr.innerHTML = (leg ? `<span class="item escala">${leg}</span>` : "") + (itens || `<span class="note">Nenhuma camada ligada. Escolha as camadas no painel.</span>`);
     document.getElementById("back").hidden = !sel;
     document.getElementById("where").textContent = sel ? `${NAME[sel]} · ${sel}` : "Brasil · 27 UFs";
-    if (abas) abas.querySelector('[data-aba="ficha"]').textContent = sel ? `Ficha · ${sel}` : "Ficha · Brasil";
+    abas.querySelector('[data-aba="ficha"]').textContent = sel ? `Ficha · ${sel}` : "Ficha · Brasil";
   }
   /* ---------- luzes à noite ---------- */
-  const FADE = ["boolean", ["feature-state", "fade"], false], HOVER = ["boolean", ["feature-state", "hover"], false];
+  const FADE = ["boolean", ["feature-state", "fade"], false];
   const COR_POP_LEG = ["#6e370a", "#d77d23", "#ffbe50", "#ffe8aa", "#fffceb"];
   const COR_NOITE_LEG = ["#0a0c1c", "#2c2a44", "#a8823f", "#f2d083", "#fffbe8"];
-  /* ---------- versão de teste: ouro sobre preto, versão D (escolha do Edu em 23/10/2026) ----------
-     Com uma pintura, a "luz de fundo": cada estado acende conforme o valor, de brasa (pouco) a ouro (muito), com o relevo
-     sombreado por cima em tons quentes, e o planeta em azul-noite. Com a luz "População", a terra em ouro apagado, com as
-     luzes por cima. Em "Sem cor" e na "Iluminação noturna" (a imagem da NASA), o mapa natural. */
+  /* ---------- versão de teste: ouro sobre preto (escala B, escolha do Edu em 25/10/2026) ----------
+     Com uma pintura, a "luz de fundo": cada estado acende conforme o valor, do bege fosco (pouco) ao ouro (muito), com o
+     relevo sombreado por cima em tons quentes, e o planeta em azul-noite. Com a luz "População", a terra em ouro apagado,
+     com as luzes por cima. Em "Sem cor" e na "Iluminação noturna" (a imagem da NASA), o mapa natural. */
   const RELEVO_NATURAL = { "hillshade-exaggeration": 0.5, "hillshade-shadow-color": "#04100a", "hillshade-highlight-color": "rgba(255,255,240,.55)", "hillshade-accent-color": "#0c2a18" };
   /* no ouro, o relevo de altitude mais suave (aparece de perto, onde a imagem do relevo da terra some) */
   const RELEVO_OURO = { "hillshade-exaggeration": 0.38, "hillshade-shadow-color": "#0b0603", "hillshade-highlight-color": "rgba(255,222,160,.2)", "hillshade-accent-color": "#140d06" };
   let emOuro = false;
-  function visualTeste(L, P) {
+  /* como a terra aparece em cada modo: com pintura, os estados opacos e o escolhido "levantado" (sem apagar os outros,
+     pedido do Edu em 24/10/2026); com luzes ou "Sem cor", sem pintura, e os estados em volta do escolhido escurecidos
+     (o realce do mouse é o contorno, não um clarão no estado) */
+  function visualModo(L, P) {
     if (!map.getLayer("estados-fill")) return;
     const pinta = !L && !!(P && P.val), pop = !!L && L.id === "pop";
-    if (pinta) map.setPaintProperty("estados-fill", "fill-opacity", 1);   /* sem apagar os outros estados (pedido do Edu em 24/10/2026) */
-    else if (pop) {
+    if (TESTE && pop) {   /* versão de teste: com a luz População, a terra em ouro apagado */
       map.setPaintProperty("estados-fill", "fill-color", "#1d1810");
       map.setPaintProperty("estados-fill", "fill-opacity", ["case", FADE, 0.35, 1]);
-    } else map.setPaintProperty("estados-fill", "fill-opacity", ["case", FADE, L ? 0.6 : 0.5, 0]);   /* o realce do mouse é o contorno */
-    const ouro = pinta || pop;
-    /* estado levantado: só com pintura (sem pintura, os outros estados escurecem, como antes) */
-    if (map.getLayer("sel-fill")) {
-      map.setPaintProperty("sel-fill", "fill-color", map.getPaintProperty("estados-fill", "fill-color"));
-      for (const id of ["sel-fill", "sel-sombra"]) map.setLayoutProperty(id, "visibility", pinta ? "visible" : "none");
-    }
+    } else map.setPaintProperty("estados-fill", "fill-opacity", pinta ? 1 : ["case", FADE, L ? 0.6 : 0.5, 0]);
+    /* estado levantado: só com pintura e se o estado escolhido tem cor (sem dado, ele fica sem pintura e sem sombra) */
+    const cs = map.getPaintProperty("estados-fill", "fill-color"), i = sel && Array.isArray(cs) ? cs.indexOf(sel) : -1;
+    const levanta = pinta && !(i > 1 && cs[i + 1] === "rgba(0,0,0,0)");
+    map.setPaintProperty("sel-fill", "fill-color", cs);
+    for (const id of ["sel-fill", "sel-sombra"]) map.setLayoutProperty(id, "visibility", levanta ? "visible" : "none");
+    if (TESTE) visualOuro(L, pinta, pop);
+  }
+  /* versão de teste: planeta, divisas e relevo do ouro */
+  function visualOuro(L, pinta, pop) {
     /* planeta "azul-noite" com o ouro: o natural, mais escuro e um pouco menos colorido (o quase preto foi reprovado
        pelo Edu em 23/10/2026); com a luz População, um pouco mais escuro, para as luzes aparecerem */
     map.setPaintProperty("nasa", "raster-brightness-max", pinta ? 0.42 : pop ? 0.32 : L ? 0.2 : 0.62);
     map.setPaintProperty("nasa", "raster-saturation", pinta ? -0.3 : pop ? -0.45 : L ? -0.55 : -0.15);
     /* divisas: escuras entre estados acesos; douradas sobre o mapa natural e sobre a terra apagada */
     map.setPaintProperty("estados-line", "line-color", pinta ? "rgba(18,11,4,.62)" : "rgba(240,200,130,.55)");
-    emOuro = ouro;
-    if (map.getLayer("relevo-ouro")) map.setLayoutProperty("relevo-ouro", "visibility", ouro ? "visible" : "none");
+    emOuro = pinta || pop;
+    if (map.getLayer("relevo-ouro")) map.setLayoutProperty("relevo-ouro", "visibility", emOuro ? "visible" : "none");
     relevoTeste();
   }
   /* o relevo sombreado chega depois da primeira imagem; na versão de teste, em tons quentes sobre o ouro */
@@ -1166,7 +1163,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   }
   function linhasTrem() {
     const n = luz !== "off";
-    for (const id of ["ferrovias", "ferrovias-obra", ...(TESTE ? ["ferrovias-borda", "ferrovias-obra-borda"] : [])]) map.setPaintProperty(id, "line-opacity", sel ? ["case", ["==", ["get", "uf"], sel], n ? 0.6 : 1, n ? 0.06 : 0.15] : (n ? 0.35 : 0.9));
+    for (const id of ["ferrovias", "ferrovias-obra", "ferrovias-borda", "ferrovias-obra-borda"]) map.setPaintProperty(id, "line-opacity", sel ? ["case", ["==", ["get", "uf"], sel], n ? 0.6 : 1, n ? 0.06 : 0.15] : (n ? 0.35 : 0.9));
   }
   function aplicarNoite() {
     if (!map.getLayer("estados-fill")) return;
@@ -1175,10 +1172,10 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     map.setPaintProperty("nasa", "raster-saturation", n ? -0.55 : -0.15);
     for (const id of ["rel-mundo", "rel-cor"]) if (map.getLayer(id)) map.setPaintProperty(id, "raster-brightness-max", n ? 0.2 : 0.55);
     if (map.getLayer("relevo")) map.setLayoutProperty("relevo", "visibility", n ? "none" : "visible");
-    map.setPaintProperty("estados-fill", "fill-opacity", n ? ["case", FADE, 0.6, HOVER, 0.07, 0] : ["case", FADE, 0.18, HOVER, 0.95, 0.82]);
+    /* a opacidade dos estados fica com visualModo(), chamada pelo render() logo depois */
     map.setPaintProperty("estados-line", "line-opacity", n ? 0.55 : 1);
-    map.setPaintProperty("rodovias", "line-opacity", n ? 0.22 : TESTE ? 0.92 : 0.62);
-    if (map.getLayer("rodovias-borda")) map.setPaintProperty("rodovias-borda", "line-opacity", n ? 0.25 : 1);
+    map.setPaintProperty("rodovias", "line-opacity", n ? 0.22 : 0.92);
+    map.setPaintProperty("rodovias-borda", "line-opacity", n ? 0.25 : 1);
     map.setPaintProperty("rodovias-terra", "line-opacity", n ? 0.18 : 0.5);
     map.setPaintProperty("rodovias-est", "line-opacity", n ? 0.18 : 0.5);
     linhasTrem();
@@ -1216,8 +1213,9 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     }
     const antes = luz;
     luz = L ? id : "off";
-    /* rodovias e ferrovias se apagam com as luzes (parecem estradas iluminadas) e voltam como estavam depois */
-    const linhas = LAYERS.filter(l => ["rod", "rodest", "rail"].includes(l.id) && l.nivel !== "pendente");
+    /* rodovias e ferrovias se apagam com as luzes (parecem estradas iluminadas) e voltam como estavam depois; a Zona
+       Econômica Exclusiva também (pedido do Edu em 25/10/2026: o mar territorial e a zona contígua ficam) */
+    const linhas = LAYERS.filter(l => ["rod", "rodest", "rail", "zee"].includes(l.id) && l.nivel !== "pendente");
     if (antes === "off" && luz !== "off") { guardadas = {}; linhas.forEach(l => { guardadas[l.id] = l.on; l.on = false; }); }
     if (antes !== "off" && luz === "off" && guardadas) { linhas.forEach(l => { if (l.id in guardadas) l.on = guardadas[l.id]; }); guardadas = null; }
     if (map.getLayer("estados-fill")) { prepararLuzes(); aplicarNoite(); }
@@ -1433,14 +1431,13 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
 
   const AP = F.apoio, apoio = document.getElementById("apoio");
   if (AP && AP.link) {
-    /* versão de teste (pedido do Edu em 24/10/2026): botão retangular, mais largo, com três moedas de ouro no fim do texto,
-       e um segundo botão igual no fim da página, embaixo do texto "Sobre o mapa" */
-    const html = `<a class="apoiar" href="${AP.link}" target="_blank" rel="noopener">${TESTE ? `<span>${AP.texto}</span>${MOEDAS}`
-      : `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg>${AP.texto}`}</a>
+    /* botão retangular, mais largo, com moedas de ouro caindo no fim do texto (pedido do Edu em 24 e 25/10/2026), e um
+       segundo botão igual no fim da página, embaixo do texto "Sobre o mapa" */
+    const html = `<a class="apoiar" href="${AP.link}" target="_blank" rel="noopener"><span>${AP.texto}</span>${MOEDAS}</a>
       ${AP.nota ? `<span class="note">${AP.nota}</span>` : ""}`;
     apoio.innerHTML = html; apoio.hidden = false;
     const fim = document.getElementById("apoio-fim");
-    if (TESTE && fim) { fim.innerHTML = html; fim.hidden = false; }
+    if (fim) { fim.innerHTML = html; fim.hidden = false; }
   }
   document.getElementById("tiers").innerHTML = Object.values(NIVEL)
     .map(([c, t, d]) => `<div><span><span class="pill ${c}">${t}</span></span><span>${d}</span></div>`).join("");

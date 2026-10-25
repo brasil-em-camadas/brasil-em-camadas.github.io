@@ -7,15 +7,9 @@
 .maplibregl-popup-content{background:var(--glass);color:var(--ink);font:13px var(--f-body);border-radius:8px;padding:8px 12px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
 .maplibregl-popup-tip{border-top-color:rgba(10,18,20,.8)!important;border-bottom-color:rgba(10,18,20,.8)!important}
 .back[aria-pressed="true"]{color:var(--night);background:var(--accent);border-color:var(--accent)}
-/* Centro de Lançamento de Alcântara: marcador que pisca */
-.mk-cla{position:relative;width:16px;height:16px;cursor:pointer}
-.mk-cla i{position:absolute;inset:0;border:2px solid var(--cla);border-radius:50%}
-.mk-cla b{position:absolute;inset:5px;background:var(--cla);border-radius:50%}
-.mk-cla i.p{animation:cla 2.2s ease-out infinite}
-@keyframes cla{from{opacity:.9;transform:scale(.6)}to{opacity:0;transform:scale(2.8)}}
 .sem3d{position:absolute;inset:40% 20% auto;z-index:5;text-align:center;background:var(--glass);padding:20px;border-radius:12px}
 .sem3d a{color:var(--accent)}
-/* versão de teste: Alcântara como foguete, com a base no ponto, um pouco maior que os outros ícones (é único);
+/* Centro de Lançamento de Alcântara como foguete, com a base no ponto, um pouco maior que os outros ícones (é único);
    vapor saindo para os lados na base e uma chama pequena que tremula */
 .mk-foguete{position:relative;width:26px;height:37px;cursor:pointer;filter:drop-shadow(0 1px 2px rgba(0,0,0,.65))}
 .mk-foguete svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
@@ -26,7 +20,7 @@
 @keyframes vapor{0%{opacity:0;transform:translate(0,0) scale(.45)}15%{opacity:.95}100%{opacity:0;transform:translate(var(--dx),-5px) scale(2.3)}}
 .mk-foguete .chama{transform-box:fill-box;transform-origin:50% 0;animation:chama .32s ease-in-out infinite alternate}
 @keyframes chama{from{transform:scaleY(1)}to{transform:scaleY(.62)}}
-@media (prefers-reduced-motion:reduce){.mk-cla i.p,.carregando span,.mk-foguete .vapor,.mk-foguete .chama{animation:none}}
+@media (prefers-reduced-motion:reduce){.carregando span,.mk-foguete .vapor,.mk-foguete .chama{animation:none}}
 
 /* painel mais largo. "Recolher" fica fixo no mesmo ponto ao rolar (top = margem negativa, então não pula);
    A− / A+ ficam logo abaixo e sobem junto com o conteúdo */

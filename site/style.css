@@ -5,7 +5,7 @@
   --land:#1d4a2c; --land-hi:#28603a; --edge:#5f9a6a;
   --ink:#ece9de; --muted:#a3ab9c; --dim:#6c7466; --hair:rgba(214,198,150,.16);
   --glass:rgba(10,18,20,.8); --bar:rgba(9,15,17,.94);
-  --accent:#e6b450; --road:#e9dfc4; --mt:#9fe6f2; --sea-line:#58cfe0; --rail:#e39a58; --port:#f4f7f5; --air:#a9bdf7; --cla:#ff7a6b; --zc:#5fd0a8; --pce:#e58fd3; --oil:#f6c945; --uep:#ff6b4a; --campo:#d9902b; --presal:#fff0a8; --sem:#3e433f; --boi:#d9a66b; --road-est:#a9a184; --hid:#4ea3ff; --eol:#e6eefc; --sol:#ffe14d; --bio:#9be15d; --fos:#ff7b7b; --nuc:#ff4fd8; --lt:#b18cff;
+  --accent:#e6b450; --road:#f6f3ec; --mt:#9fe6f2; --sea-line:#58cfe0; --rail:#fbf6ea; --port:#f4f7f5; --air:#a9bdf7; --cla:#ff7a6b; --zc:#5fd0a8; --pce:#e58fd3; --oil:#f6c945; --uep:#ff6b4a; --campo:#d9902b; --presal:#fff0a8; --sem:#3e433f; --boi:#d9a66b; --road-est:#a9bdcc; --hid:#4ea3ff; --eol:#e6eefc; --sol:#ffe14d; --bio:#9be15d; --fos:#ff7b7b; --nuc:#ff4fd8; --lt:#b18cff;
   --cel1:#ff5c4d; --cel2:#ff9b45; --cel3:#f2dc6b; --cel4:#8fe3f0; --g5:#f06bff;
   --lav-soja:#ffd23f; --lav-milho:#ff8c42; --lav-cana:#4ee1c1; --lav-cafe:#c08457; --lav-mandioca:#c77dff; --lav-banana:#ff70a6; --lav-feijao:#e63946; --lav-arroz:#f1faee; --lav-outras:#8d99ae;
   --gasd:#7fdbff; --oleod:#ff8a65; --refin:#ff3d3d; --upgn:#b3ecff; --gnl:#26c6da; --def:#d9e4ec;
@@ -47,18 +47,25 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .viz-lbl{font:500 10px var(--f-mono);letter-spacing:.2em;text-transform:uppercase;fill:rgba(236,233,222,.42);pointer-events:none;text-anchor:middle}
 .flow{fill:none;stroke:var(--flow);stroke-width:.8;vector-effect:non-scaling-stroke;pointer-events:none}
 .grat{fill:none;stroke:var(--hair);stroke-width:.6;vector-effect:non-scaling-stroke}
-.st{fill:var(--land);stroke:var(--edge);stroke-width:.7;vector-effect:non-scaling-stroke;cursor:pointer;transition:fill .5s,opacity .5s}
-.st:hover{fill:var(--land-hi)}
-.st.sel{stroke:var(--accent);stroke-width:2;filter:drop-shadow(0 0 10px rgba(155,227,165,.35))}
-.st.fade{opacity:.3}
-.rail{fill:none;stroke:var(--rail);stroke-width:1.2;vector-effect:non-scaling-stroke;opacity:.85;transition:opacity .4s,stroke-width .4s}
-.rail.off{opacity:.1}.rail.hi{stroke-width:2.4;opacity:1;filter:drop-shadow(0 0 3px rgba(227,154,88,.8))}
+/* estados (versão leve): sem pintura, como os países vizinhos, com divisas tracejadas; o realce do mouse é o contorno
+   dourado com tracinhos que correm (no lugar do realce esbranquiçado); em volta do escolhido, sem pintura, escurecidos;
+   pintados, mantêm a cor (o escolhido "levanta": app.js, levantar) */
+.st{fill:transparent;stroke:rgba(240,236,220,.6);stroke-width:.7;stroke-dasharray:3 2.5;vector-effect:non-scaling-stroke;cursor:pointer;transition:fill .5s,opacity .5s}
+.st:hover{stroke:#ffd27a;stroke-width:2.2;stroke-dasharray:10 6;animation:contorno-corre 1.4s linear infinite;filter:drop-shadow(0 0 3px rgba(255,190,80,.85))}
+@keyframes contorno-corre{to{stroke-dashoffset:-32}}
+@media (prefers-reduced-motion:reduce){.st:hover{animation:none;stroke-dasharray:none}}
+.st.sel{stroke:#fff3d0;stroke-width:2.4;stroke-dasharray:none}
+.st.fade{fill:rgba(2,7,11,.5)}
+/* ferrovias: símbolo clássico dos mapas (faixa escura .rail-borda, miolo claro cortado por "dormentes"); em obras, só os
+   traços, claros com borda escura */
+.rail{fill:none;stroke:var(--rail);stroke-width:1.6;stroke-dasharray:8 2.4;vector-effect:non-scaling-stroke;opacity:.85;transition:opacity .4s,stroke-width .4s}
+.rail.off{opacity:.1}.rail.hi{stroke-width:2.4;opacity:1}
+.rail-borda{fill:none;stroke:rgba(12,8,3,.9);stroke-width:3.4;vector-effect:non-scaling-stroke;opacity:.85;pointer-events:none;transition:opacity .4s,stroke-width .4s}
+.rail-borda.obra{stroke-width:3;stroke-dasharray:4 5}
+.rail-borda.off{opacity:.1}.rail-borda.hi{stroke-width:4.4;opacity:1}
 .port{fill:var(--port);stroke:var(--night);stroke-width:1;vector-effect:non-scaling-stroke}
-.air{fill:var(--air);stroke:var(--night);stroke-width:1;vector-effect:non-scaling-stroke;cursor:pointer}.air.sem{fill-opacity:.45;stroke-width:.5}
-.cla{fill:none;stroke:var(--cla);stroke-width:2;vector-effect:non-scaling-stroke}
-.cla-dot{fill:var(--cla)}
-.pulse{fill:none;stroke:var(--cla);vector-effect:non-scaling-stroke;animation:pulse 2.2s ease-out infinite;transform-box:fill-box;transform-origin:center}
-@keyframes pulse{from{opacity:.9;transform:scale(.6)}to{opacity:0;transform:scale(2.6)}}
+/* aeroportos (versão leve): aviãozinho claro com borda escura */
+.air{fill:#d4defc;stroke:#0b1626;stroke-width:.9;vector-effect:non-scaling-stroke;cursor:pointer}.air.sem{fill-opacity:.45;stroke-width:.5}
 
 .where{position:absolute;top:var(--head,96px);left:max(20px,env(safe-area-inset-left,0px));display:flex;gap:10px;align-items:center;z-index:2}
 .where span{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
@@ -83,8 +90,10 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .chip{font:500 .9rem var(--f-body);color:var(--muted);background:rgba(255,255,255,.03);border:1px solid var(--hair);padding:5px 11px;border-radius:999px;cursor:pointer}
 .chip[aria-pressed="true"]{color:var(--night);background:var(--accent);border-color:var(--accent)}
 .chip[disabled]{opacity:.45;cursor:not-allowed}
-/* pintura com as camadas dela ligadas (2º clique): um ponto ao lado do nome */
-.chip[data-cam="1"]::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-left:7px;vertical-align:middle}
+/* pintura com a camada dela ligada: uma bolinha no canto do botão, sem mudar a largura (antes ela alargava o botão, que
+   pulava para a linha de baixo); fica enquanto a camada estiver ligada, mesmo com outra pintura escolhida */
+.chip{position:relative}
+.chip[data-cam="1"]::after{content:"";position:absolute;top:-4px;right:-3px;width:10px;height:10px;border-radius:50%;background:#fff3d1;box-shadow:0 0 0 2px var(--night)}
 .note.dica{margin:2px 0 10px}
 .layer{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;padding:8px 0}
 .layer input{width:15px;height:15px;accent-color:var(--accent);margin:3px 0 0}
@@ -161,12 +170,12 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .ilha text{font:500 10.5px var(--f-body);fill:#cdeff5;paint-order:stroke;stroke:rgba(4,12,18,.85);stroke-width:3px;pointer-events:none}
 .road{fill:none;stroke:var(--road);stroke-width:.6;stroke-opacity:.35;vector-effect:non-scaling-stroke;pointer-events:none}
 .road.major{stroke-width:1.1;stroke-opacity:.55}
-/* rodovias do IBGE (BC250): federais; sem pavimento tracejada; estaduais pavimentadas mais apagadas */
-.road{stroke-width:1;stroke-opacity:.58}.road.terra{stroke-dasharray:3 3;stroke-opacity:.45}
+/* rodovias do IBGE (BC250): federais; sem pavimento tracejada; estaduais pavimentadas mais apagadas, em tom frio */
+.road{stroke-width:.85;stroke-opacity:.8}.road.terra{stroke-dasharray:3 3}
 /* trecho com sigla BR administrado pelo estado (coincidente com rodovia estadual ou delegado): cor das estaduais, fora da soma federal */
-.road.est-adm{stroke:var(--road-est);stroke-width:.8}
-.road.est{stroke:var(--road-est);stroke-width:.5;stroke-opacity:.45}
-.rail.obra{stroke-dasharray:5 4}
+.road.est-adm{stroke:var(--road-est)}
+.road.est{stroke:var(--road-est);stroke-opacity:.55}
+.rail.obra{stroke-width:1.4;stroke-dasharray:4 5}
 .nomes{pointer-events:none}
 .uf{font:600 11px var(--f-mono);letter-spacing:.08em;fill:#f4f1e6;text-anchor:middle;dominant-baseline:middle;paint-order:stroke;stroke:rgba(8,20,12,.75);stroke-width:3px}
 .uf .n{display:none;font-family:var(--f-body);letter-spacing:.02em;font-size:13px}
@@ -191,11 +200,18 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 /* apoio ao projeto: discreto, no rodapé, à direita (embaixo do painel) */
 .apoio{display:flex;flex-direction:column;align-items:flex-end;gap:6px;align-self:start;padding-top:2px}
 .apoio[hidden]{display:none}
-.apoiar{display:inline-flex;align-items:center;gap:8px;font:500 .88rem var(--f-body);color:var(--muted);text-decoration:none;
-  border:1px solid var(--hair);border-radius:999px;padding:7px 15px;transition:color .2s,border-color .2s;white-space:nowrap}
-.apoiar svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
-.foot .apoiar{color:var(--muted)}
-.foot .apoiar:hover,.foot .apoiar:focus-visible{color:var(--ink);border-color:var(--accent)}
+/* botão retangular de cantos arredondados, com moedas de ouro caindo no fim do texto; um igual no fim da página, embaixo
+   do "Sobre o mapa" (no celular o do rodapé já fica no fim, então o segundo some) */
+.apoiar{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-width:270px;padding:11px 22px;border-radius:10px;
+  font:600 .98rem var(--f-body);color:var(--ink);text-decoration:none;white-space:nowrap;
+  background:rgba(230,180,80,.08);border:1px solid rgba(230,180,80,.5);transition:background .2s,border-color .2s}
+.foot .apoiar{color:var(--ink)}
+.foot .apoiar:hover,.foot .apoiar:focus-visible{background:rgba(230,180,80,.17);border-color:var(--accent)}
+.apoiar .moedas{width:57px;height:26px;margin:-4px 0;flex:none;fill:none;stroke:none;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.55))}
+.apoio-fim{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:26px;border-top:1px solid var(--hair);text-align:center}
+.apoio-fim[hidden]{display:none}
+.apoio-fim .note{font-size:.78rem;opacity:.8}
+@media (max-width:900px){.apoio-fim{display:none}}
 .apoio .note{font-size:.78rem;opacity:.8}
 @media (min-width:901px){.foot{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto}}
 @media (max-width:900px){.apoio{align-items:flex-start}}
@@ -247,7 +263,9 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 /* telas médias (tablet deitado): abas do ministério um pouco mais juntas, para não sobrar uma aba sozinha numa linha */
 @media (min-width:901px) and (max-width:1180px){.mins{gap:4px 10px}.tab{font-size:.85rem}}
 /* rebanho bovino por município (versão leve) */
-.boi{fill:var(--boi);fill-opacity:.72;stroke:#2b1a0c;stroke-width:.4;vector-effect:non-scaling-stroke;cursor:pointer}
+/* rebanho: no mapa do Brasil, disco escuro com aro claro; no estado escolhido, o medalhão com o boi (padrão #pad-boi) */
+.boi{fill:rgba(18,11,4,.6);stroke:#f2d9a0;stroke-width:.7;vector-effect:non-scaling-stroke;cursor:pointer}
+.boi.ico{fill:url(#pad-boi);stroke:#e6b450;stroke-width:1.1}
 /* legenda sobre o mapa com fundo escuro translúcido (no computador), para continuar legível com muitas camadas ligadas;
    a borda da caixa fica na margem de 20 px */
 @media (min-width:901px){
@@ -267,7 +285,9 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .celm.f1{fill:var(--cel1)}.celm.f2{fill:var(--cel2)}.celm.f3{fill:var(--cel3)}.celm.f4{fill:var(--cel4)}
 .g5{fill:none;stroke:var(--g5);stroke-opacity:.85;stroke-width:1;vector-effect:non-scaling-stroke;cursor:pointer;pointer-events:visibleStroke}
 /* principal lavoura de cada município (versão leve): cor pela lavoura, tamanho pelo valor de todas as lavouras */
-.lav{stroke:#0d1712;stroke-width:.4;vector-effect:non-scaling-stroke;fill-opacity:.85;cursor:pointer}
+/* lavouras: no mapa do Brasil, a cor da lavoura com borda escura; no estado escolhido, o medalhão (fundo e aro vêm do app.js) */
+.lav{stroke:#140c04;stroke-width:.9;vector-effect:non-scaling-stroke;fill-opacity:.95;cursor:pointer}
+.lav.ico{fill-opacity:1;stroke-width:1.1}
 .lav.g-soja{fill:var(--lav-soja)}.lav.g-milho{fill:var(--lav-milho)}.lav.g-cana{fill:var(--lav-cana)}.lav.g-cafe{fill:var(--lav-cafe)}
 .lav.g-mandioca{fill:var(--lav-mandioca)}.lav.g-banana{fill:var(--lav-banana)}.lav.g-feijao{fill:var(--lav-feijao)}.lav.g-arroz{fill:var(--lav-arroz)}
 .lav.g-outras{fill:var(--lav-outras)}
@@ -284,16 +304,8 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .ped.f1{fill:var(--tr1)}.ped.f2{fill:var(--tr2)}.ped.f3{fill:var(--tr3)}.ped.f4{fill:var(--tr4)}
 .ped.sem{fill:none;stroke:var(--tr0);stroke-width:1.3;pointer-events:visibleStroke}
 
-/* ---------- versão de teste (endereço com ?teste), em avaliação ----------
-   ouro sobre preto com a escala de luz ("mais ouro = mais"); "Sem cor" sem pintura, como os países vizinhos; contorno do
-   Brasil em destaque e divisas tracejadas (versão leve); painel em duas abas (Mapa e Ficha); aviãozinho nos aeroportos */
-/* ouro sobre preto, versão D (escolha do Edu em 23/10/2026): luz de fundo, de brasa (pouco) a ouro (muito);
-   cinza forte = sem número; cinza fraco = nenhum ou quase nada (menos de 0,1% do Brasil) */
-html.teste{--q1:#2e1107;--q2:#64280c;--q3:#9c5016;--q4:#cc822a;--q5:#e6b252;--sem-forte:#7a7a7a;--sem-fraco:#363534;
-  /* rodovias claras (federais com borda escura no globo) e estaduais em tom frio, para aparecerem sobre o ouro */
-  --road:#f6f3ec;--road-est:#a9bdcc;--rail:#ffad66}
-.selo-teste{font:600 .7rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--night);background:var(--accent);
-  padding:3px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;align-self:center}
+/* ---------- painel em duas abas, contorno do Brasil, capitais vizinhas, foguete, chaves da legenda ----------
+   (vieram da versão de teste e foram para o site normal em 25/10/2026, a pedido do Edu) */
 .abas{display:flex;gap:2px;width:max-content;max-width:100%;margin:-6px 0 14px;padding:3px;border:1px solid var(--hair);border-radius:999px;background:rgba(255,255,255,.03)}
 .abas button{font:600 .88rem var(--f-body);color:var(--muted);background:none;border:0;border-radius:999px;padding:5px 16px;cursor:pointer;white-space:nowrap}
 .abas button:hover{color:var(--ink)}
@@ -301,30 +313,12 @@ html.teste{--q1:#2e1107;--q2:#64280c;--q3:#9c5016;--q4:#cc822a;--q5:#e6b252;--se
 .dock[data-aba="mapa"] #ficha{display:none}
 .dock[data-aba="ficha"] .blk:not(#ficha){display:none}
 .dock[data-aba] .blk+.blk{margin-top:0;padding-top:0;border-top:0}
-.teste .st{fill:transparent;stroke:rgba(240,236,220,.6);stroke-width:.7;stroke-dasharray:3 2.5}
-/* realce do estado sob o mouse (no lugar do realce esbranquiçado): contorno dourado com brilho e tracinhos que correm */
-.teste .st:hover{stroke:#ffd27a;stroke-width:2.2;stroke-dasharray:10 6;animation:contorno-corre 1.4s linear infinite;
-  filter:drop-shadow(0 0 3px rgba(255,190,80,.85))}
-@keyframes contorno-corre{to{stroke-dashoffset:-32}}
-@media (prefers-reduced-motion:reduce){.teste .st:hover{animation:none;stroke-dasharray:none}}
-.teste .st.sel{stroke:#fff3d0;stroke-width:2.4;stroke-dasharray:none}
-.teste .st.fade{opacity:1;fill:rgba(2,7,11,.5)}
-/* versão leve de teste: com pintura, o planeta em azul-noite (mais escuro e menos colorido), como no globo */
-.teste #map.ouro .relevo-cor{filter:brightness(.36) saturate(.7) contrast(1.05)}
-.teste #map.ouro .viz{opacity:.7}
-/* estado pintado (cor vinda da pintura): em volta do estado escolhido, a cor continua a mesma (para comparar);
-   o escolhido levanta com sombra (app.js, place) */
-.teste .st.fade[style*="fill"]{opacity:1}
 .contorno-br-brilho{fill:none;stroke:rgba(240,190,90,.35);stroke-width:6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
 .contorno-br{fill:none;stroke:#f2c96a;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
-.teste .air{fill:#d4defc;stroke:#0b1626;stroke-width:.9}
-/* capitais dos países vizinhos (versão leve de teste): anel claro, nome sempre visível no tom dos países */
+/* capitais dos países vizinhos (versão leve): anel claro, nome sempre visível no tom dos países */
 .cap.viz circle{fill:rgba(10,8,5,.55);stroke:#e8e1cc;stroke-width:1.2}
 .cap.viz text{display:inline;font-weight:400;fill:rgba(236,232,220,.8)}
-/* rodovias da versão leve de teste: mais fortes, para aparecerem sobre o ouro */
-.teste .road{stroke-opacity:.8;stroke-width:.85}
-.teste .road.est{stroke-opacity:.55}
-/* Alcântara como foguete (versão leve de teste), com vapor na base */
+/* Alcântara como foguete (versão leve), com vapor na base */
 .foguete .vapor{fill:rgba(246,242,234,.85);opacity:0;transform-box:fill-box;transform-origin:center;animation:vapor2d 2.8s ease-out infinite}
 .foguete .v1{--dx:-15px;animation-delay:0s}.foguete .v2{--dx:14px;animation-delay:.7s}.foguete .v3{--dx:-9px;animation-delay:1.4s}.foguete .v4{--dx:10px;animation-delay:2.1s}
 @keyframes vapor2d{0%{opacity:0;transform:translate(0,0) scale(.45)}15%{opacity:.8}100%{opacity:0;transform:translate(var(--dx),-4px) scale(2.2)}}
@@ -332,49 +326,28 @@ html.teste{--q1:#2e1107;--q2:#64280c;--q3:#9c5016;--q4:#cc822a;--q5:#e6b252;--se
 @keyframes chama2d{from{transform:scaleY(1)}to{transform:scaleY(.62)}}
 .foguete path,.foguete circle{vector-effect:non-scaling-stroke}
 @media (prefers-reduced-motion:reduce){.foguete .vapor,.foguete .chama{animation:none}}
-/* ícones por município só no estado escolhido (versão leve de teste): boi em medalhão escuro com aro dourado */
-/* chave da legenda com o medalhão do mapa (icones.js) */
+/* chaves da legenda: medalhão do mapa (icones.js), boi, foguete, avião e ferrovia (em operação e em obras) */
 .key.ico{width:17px;height:17px;border-radius:50%;flex:none}
 .key.boi{width:14px;height:14px;border-radius:0;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2 4 20 17'%3E%3Cpath d='M2.6 10.4Q3.4 8.4 5.2 8.1L4.3 5.9 5.7 7.8 6.6 7.7 7.3 5.9 7.4 8.1Q8.2 8.5 9.4 8.5L18.2 8.4Q20.6 8.4 20.9 10.6L21.5 14 20.8 14.1 20.4 11.8Q20.2 13.2 19.6 14L19.7 19.6 18.1 19.6 17.8 15.2 10.4 15.2 10 19.6 8.4 19.6 8.1 14.6Q7.1 13.7 6.8 12.7 5.6 12.9 4.3 12.6 3 12.3 2.6 11.6Z'/%3E%3C/svg%3E") center/contain no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2 4 20 17'%3E%3Cpath d='M2.6 10.4Q3.4 8.4 5.2 8.1L4.3 5.9 5.7 7.8 6.6 7.7 7.3 5.9 7.4 8.1Q8.2 8.5 9.4 8.5L18.2 8.4Q20.6 8.4 20.9 10.6L21.5 14 20.8 14.1 20.4 11.8Q20.2 13.2 19.6 14L19.7 19.6 18.1 19.6 17.8 15.2 10.4 15.2 10 19.6 8.4 19.6 8.1 14.6Q7.1 13.7 6.8 12.7 5.6 12.9 4.3 12.6 3 12.3 2.6 11.6Z'/%3E%3C/svg%3E") center/contain no-repeat}
-/* chave da legenda: foguete */
 .key.foguete{width:12px;height:14px;border-radius:0;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2c3 3 4 7 3 12h-6C8 9 9 5 12 2zM9 14l-3 4h3M15 14l3 4h-3M11 18h2v3h-2z'/%3E%3C/svg%3E") center/contain no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2c3 3 4 7 3 12h-6C8 9 9 5 12 2zM9 14l-3 4h3M15 14l3 4h-3M11 18h2v3h-2z'/%3E%3C/svg%3E") center/contain no-repeat}
 .key.aviao{width:13px;height:13px;border-radius:0;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z'/%3E%3C/svg%3E") center/contain no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z'/%3E%3C/svg%3E") center/contain no-repeat}
-/* versão de teste (24/10/2026): a bolinha "camada ligada" vai para o canto do botão da pintura, sem mudar a largura
-   (antes ela alargava o botão, que pulava para a linha de baixo) */
-.teste .chip{position:relative}
-.teste .chip[data-cam="1"]::after{position:absolute;top:-4px;right:-3px;width:10px;height:10px;margin:0;background:#fff3d1;box-shadow:0 0 0 2px var(--night)}
-/* ferrovias da versão de teste: símbolo clássico dos mapas (faixa escura, miolo claro cortado por "dormentes");
-   em obras, só os traços, claros com borda escura */
-.rail-borda{fill:none;stroke:rgba(12,8,3,.9);stroke-width:3.4;vector-effect:non-scaling-stroke;opacity:.85;pointer-events:none;transition:opacity .4s,stroke-width .4s}
-.rail-borda.obra{stroke-width:3;stroke-dasharray:4 5}
-.rail-borda.off{opacity:.1}.rail-borda.hi{stroke-width:4.4;opacity:1}
-.teste .rail{stroke:#fbf6ea;stroke-width:1.6;stroke-dasharray:8 2.4}
-.teste .rail.obra{stroke-width:1.4;stroke-dasharray:4 5}
-.teste .rail.hi{stroke-width:2.4;filter:none}
 .key.trilho{width:18px;height:5px;border-radius:1px;box-shadow:0 0 0 1.5px rgba(12,8,3,.95);
   background:repeating-linear-gradient(90deg,#fbf6ea 0 6px,rgba(12,8,3,.95) 6px 8px)!important}
 .key.trilho-obra{width:18px;height:3px;border-radius:0;filter:drop-shadow(0 0 1px #0c0803) drop-shadow(0 0 .5px #0c0803);
   background:repeating-linear-gradient(90deg,#fbf6ea 0 3px,transparent 3px 7px)!important}
-/* botão de apoio da versão de teste: retangular de cantos arredondados, mais largo, com três moedas de ouro no fim;
-   um igual no fim da página, embaixo do "Sobre o mapa" (no celular o do rodapé já fica no fim, então o segundo some) */
-.teste .apoiar{gap:12px;justify-content:center;min-width:270px;padding:11px 22px;border-radius:10px;font:600 .98rem var(--f-body);
-  color:var(--ink);background:rgba(230,180,80,.08);border:1px solid rgba(230,180,80,.5);transition:background .2s,border-color .2s}
-.teste .foot .apoiar{color:var(--ink)}
-.teste .foot .apoiar:hover,.teste .foot .apoiar:focus-visible{background:rgba(230,180,80,.17);border-color:var(--accent)}
-.apoiar .moedas{width:52px;height:21px;flex:none;fill:none;stroke:none;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.55))}
-.apoio-fim{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:26px;border-top:1px solid var(--hair);text-align:center}
-.apoio-fim[hidden]{display:none}
-.apoio-fim .note{font-size:.78rem;opacity:.8}
-@media (max-width:900px){.apoio-fim{display:none}}
-/* versão leve de teste: círculos do mapa geral com contraste sobre o ouro (como no globo) */
-.teste .boi{fill:rgba(18,11,4,.6);fill-opacity:1;stroke:#f2d9a0;stroke-width:.7}
-.teste .lav{stroke:#140c04;stroke-width:.9;fill-opacity:.95}
-/* medalhões no estado escolhido: boi; lavouras (o fundo e o aro de cada lavoura vêm do app.js) */
-.teste .lav.ico{fill-opacity:1;stroke-width:1.1}
-.teste .boi.ico{fill:url(#pad-boi);fill-opacity:1;stroke:#e6b450;stroke-width:1.1}
+
+/* ---------- versão de teste (endereço com ?teste): só a cor, em avaliação ----------
+   ouro sobre preto, escala B (escolha do Edu em 25/10/2026): luz de fundo, do bege fosco e opaco (pouco) ao ouro aceso
+   (muito), com o relevo por cima; cinza frio = sem número (frio para não se confundir com o bege da escala); cinza escuro =
+   nenhum ou quase nada (menos de 0,1% do Brasil); com pintura, o planeta em azul-noite */
+html.teste{--q1:#6b5d4c;--q2:#8b6c43;--q3:#ae7f37;--q4:#d29a33;--q5:#f4c552;--sem-forte:#5f6b77;--sem-fraco:#363534}
+.selo-teste{font:600 .7rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--night);background:var(--accent);
+  padding:3px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;align-self:center}
+.teste #map.ouro .relevo-cor{filter:brightness(.36) saturate(.7) contrast(1.05)}
+.teste #map.ouro .viz{opacity:.7}

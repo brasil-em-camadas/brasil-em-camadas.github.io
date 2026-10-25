@@ -117,9 +117,17 @@ function chaveIcone(nome, corVar) {
   return `<svg class="key ico" viewBox="0 0 64 64" style="color:var(${corVar})" aria-hidden="true"><circle cx="32" cy="32" r="29.5" fill="${MEDALHAO}" stroke="currentColor" stroke-width="3"/>`
     + `<g transform="translate(10.4 10.4) scale(1.8)">${iconeSVG(ICONES[nome])}</g></svg>`;
 }
-/* três moedas de ouro (botão "Apoie este projeto", versão de teste): borda grossa embaixo (parece uma moeda de verdade),
-   face dourada com aro, estrela no meio e um brilho no alto */
-const MOEDAS = `<svg class="moedas" viewBox="0 0 56 23" aria-hidden="true">${[11, 28, 45].map(x =>
-  `<g transform="translate(${x} 10.5)"><circle cy="1.9" r="9.4" fill="#7a4806"/><circle r="9.4" fill="#e3a12a"/><circle r="7.9" fill="#f8cd5b"/>`
-  + `<circle r="6.3" fill="none" stroke="#c4861c" stroke-width="1.1"/><path d="M0.00 -3.70L0.94 -1.29L3.52 -1.14L1.52 0.49L2.17 2.99L0.00 1.60L-2.17 2.99L-1.52 0.49L-3.52 -1.14L-0.94 -1.29z" fill="#d9952a"/>`
-  + `<path d="M-6.6-3.2a7.4 7.4 0 0 1 4.4-4.1" fill="none" stroke="#fff6d2" stroke-width="1.4" stroke-linecap="round"/></g>`).join("")}</svg>`;
+/* moedas de ouro caindo (botão "Apoie este projeto"; pedido do Edu em 25/10/2026: quatro, em alturas diferentes, como se
+   estivessem caindo). Cada moeda: [x, y, raio, giro em graus, achatamento] — achatamento 1 = de frente; menos = de lado,
+   girando na queda; a borda grossa aparece embaixo da face */
+const MOEDAS = (() => {
+  const ESTRELA = "M0.00 -3.70L0.94 -1.29L3.52 -1.14L1.52 0.49L2.17 2.99L0.00 1.60L-2.17 2.99L-1.52 0.49L-3.52 -1.14L-0.94 -1.29z";
+  const moeda = ([x, y, r, a, s]) => { const t = 1.3 + 2.2 * (1 - s);
+    return `<g transform="translate(${x} ${y}) rotate(${a})">`
+      + `<rect x="${-r}" y="0" width="${2 * r}" height="${t}" fill="#7a4806"/><ellipse cy="${t}" rx="${r}" ry="${r * s}" fill="#7a4806"/>`
+      + `<g transform="scale(1 ${s})"><circle r="${r}" fill="#e3a12a"/><circle r="${r * 0.84}" fill="#f8cd5b"/>`
+      + `<circle r="${r * 0.66}" fill="none" stroke="#c4861c" stroke-width="1"/><path d="${ESTRELA}" fill="#d9952a" transform="scale(${r / 8.6})"/>`
+      + `<path d="M${-r * 0.7} ${-r * 0.34}a${r * 0.78} ${r * 0.78} 0 0 1 ${r * 0.47} ${-r * 0.44}" fill="none" stroke="#fff6d2" stroke-width="1.3" stroke-linecap="round"/></g></g>`; };
+  return `<svg class="moedas" viewBox="0 0 66 30" aria-hidden="true">`
+    + [[9, 19, 7.6, -12, 1], [24.5, 9.5, 7.2, 24, 0.55], [39.5, 20, 7.4, -8, 0.85], [56, 8, 6.8, -32, 0.42]].map(moeda).join("") + `</svg>`;
+})();
