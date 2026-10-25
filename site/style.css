@@ -345,27 +345,29 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .key.trilho-obra{width:18px;height:3px;border-radius:0;filter:drop-shadow(0 0 1px #0c0803) drop-shadow(0 0 .5px #0c0803);
   background:repeating-linear-gradient(90deg,#fbf6ea 0 3px,transparent 3px 7px)!important}
 
-/* ---------- versão de teste (endereço com ?teste) ----------
-   selo "Teste" no título. Em 25/10/2026 tudo o que estava em teste foi para o site normal. Em avaliação desde então:
-   diretriz God's Eye View (selo "Dados atualizados em", botões de camada coloridos) e ícones de mais camadas */
-.selo-teste{font:600 .7rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--night);background:var(--accent);
-  padding:3px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;align-self:center}
 /* versão leve: com pintura, o planeta em azul-noite (mais escuro e menos colorido), como no globo */
 #map.ouro .relevo-cor{filter:brightness(.36) saturate(.7) contrast(1.05)}
 #map.ouro .viz{opacity:.7}
-/* selo "Dados atualizados em [data]", ao lado do título (icones.js, seloDados) */
+/* ---------- diretriz God's Eye View e ícones das camadas de pontos (no site normal desde 25/10/2026, a pedido do Edu) ----------
+   selo "Dados atualizados em [data]", ao lado do título (icones.js, seloDados) */
 .selo-dados{display:inline-flex;align-items:center;gap:7px;align-self:center;padding:4px 11px;border:1px solid rgba(242,192,105,.45);border-radius:999px;
   font:500 .72rem var(--f-mono);letter-spacing:.04em;color:#f7dfae;background:rgba(242,192,105,.06);white-space:nowrap;cursor:help}
 .selo-dados svg{width:13px;height:13px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 /* camadas como botões coloridos: borda e fundo na cor da camada quando ligada, caixinha na cor dela e um brilho
    discreto na chave (diretriz God's Eye View) */
-.teste .layer{padding:8px 10px;margin:3px 0;border:1px solid var(--hair);border-radius:10px;cursor:pointer;transition:background .2s,border-color .2s}
-.teste .layer:hover{border-color:color-mix(in srgb,var(--cor) 45%,transparent)}
-.teste .layer.on{border-color:color-mix(in srgb,var(--cor) 60%,transparent);background:color-mix(in srgb,var(--cor) 10%,transparent)}
-.teste .layer.pend{cursor:default;border-style:dashed}
-.teste .layer input{accent-color:var(--cor)}
-.teste .layer.on .nm>.key{box-shadow:0 0 8px var(--cor)}
-/* versão de teste: medalhões das outras camadas de pontos na versão leve (usinas, poços, celular, pedágios, refinarias, portos) */
+.layer{padding:8px 10px;margin:3px 0;border:1px solid var(--hair);border-radius:10px;cursor:pointer;transition:background .2s,border-color .2s}
+.layer:hover{border-color:color-mix(in srgb,var(--cor) 45%,transparent)}
+.layer.on{border-color:color-mix(in srgb,var(--cor) 60%,transparent);background:color-mix(in srgb,var(--cor) 10%,transparent)}
+.layer.pend{cursor:default;border-style:dashed}
+.layer input{accent-color:var(--cor)}
+.layer.on .nm>.key{box-shadow:0 0 8px var(--cor)}
+/* medalhões das outras camadas de pontos na versão leve (usinas, poços, celular, pedágios, refinarias, portos) */
 .usina.ico,.poco.ico,.celm.ico,.ped.ico,.inst.ico,.port.ico{fill-opacity:1;stroke-width:1.1;cursor:pointer}
 .ped.sem.ico{pointer-events:visiblePainted}
 .g5.ico{stroke-width:1.7;stroke-opacity:1}
+
+/* ---------- versão de teste (endereço com ?teste) ----------
+   selo "Teste" no título. Em 25/10/2026 tudo o que estava em teste foi para o site normal; fica pronta para os próximos
+   experimentos (pôr as regras novas atrás de .teste) */
+.selo-teste{font:600 .7rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--night);background:var(--accent);
+  padding:3px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;align-self:center}

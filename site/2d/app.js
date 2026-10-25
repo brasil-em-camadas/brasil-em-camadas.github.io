@@ -18,9 +18,9 @@ if (TESTE) document.documentElement.classList.add("teste");
 /* aviãozinho (desenho em 24 × 24), usado nos aeroportos */
 const AVIAO = "M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z";
 /* ícones por município só dentro do estado escolhido (como no globo); boi em 24 × 24 */
-/* versão de teste (diretriz God's Eye View, 25/10/2026): usinas, poços, celular, 5G e pedágios também (círculos no Brasil,
-   medalhões no estado escolhido); portos e refinarias, medalhão no mapa todo (desenhos e cores em icones.js) */
-const NO_ESTADO = new Set(["boi", "lav", ...(TESTE ? ["usinas", "oil", "celm", "g5", "pedagio"] : [])]);
+/* desde 25/10/2026 (diretriz God's Eye View, aprovada pelo Edu): usinas, poços, celular, 5G e pedágios também (círculos no
+   Brasil, medalhões no estado escolhido); portos e refinarias, medalhão no mapa todo (desenhos e cores em icones.js) */
+const NO_ESTADO = new Set(["boi", "lav", "usinas", "oil", "celm", "g5", "pedagio"]);
 /* escolher um estado com a pintura ligada a estas camadas liga os ícones sozinho (só boi e lavouras, como antes) */
 const AUTO_ESTADO = new Set(["boi", "lav"]);
 const BOI = "M2.6 10.4Q3.4 8.4 5.2 8.1L4.3 5.9 5.7 7.8 6.6 7.7 7.3 5.9 7.4 8.1Q8.2 8.5 9.4 8.5L18.2 8.4Q20.6 8.4 20.9 10.6L21.5 14 20.8 14.1 20.4 11.8Q20.2 13.2 19.6 14L19.7 19.6 18.1 19.6 17.8 15.2 10.4 15.2 10 19.6 8.4 19.6 8.1 14.6Q7.1 13.7 6.8 12.7 5.6 12.9 4.3 12.6 3 12.3 2.6 11.6Z";
@@ -137,14 +137,14 @@ function rewind(f) {
   const root = svg.append("g");
   /* textura de solo para os outros países, gerada na hora */
   const defs = svg.append("defs");
-  /* versão de teste: um padrão por medalhão (o desenho acompanha o tamanho de cada círculo, como o das lavouras) */
-  if (TESTE) Object.entries(IMG_ICO).forEach(([nome, [ic, cv]]) => {
+  /* um padrão por medalhão (o desenho acompanha o tamanho de cada círculo, como o das lavouras) */
+  Object.entries(IMG_ICO).forEach(([nome, [ic, cv]]) => {
     const pd = defs.append("pattern").attr("id", "pad-ico-" + nome).attr("patternContentUnits", "objectBoundingBox").attr("width", 1).attr("height", 1);
     pd.append("circle").attr("cx", 0.5).attr("cy", 0.5).attr("r", 0.5).attr("fill", MEDALHAO);
     pd.append("g").attr("transform", "translate(.1625,.1625) scale(.028125)").style("color", `var(${cv})`).html(iconeSVG(ICONES[ic]));
   });
-  /* clicar num ponto abre o estado dele; no teste, dentro do estado escolhido o clique não fecha o estado (como no boi) */
-  const abrir = u => { if (u && (!TESTE || sel !== u)) select(u); };
+  /* clicar num ponto abre o estado dele; dentro do estado escolhido, o clique não fecha o estado (como no boi) */
+  const abrir = u => { if (u && sel !== u) select(u); };
   (function terra() {
     const c = document.createElement("canvas"); c.width = c.height = 160;
     const x = c.getContext("2d"); x.fillStyle = "#2c2a1d"; x.fillRect(0, 0, 160, 160);
@@ -318,7 +318,7 @@ function rewind(f) {
     const M = DATA.usinas.meta;
     usinasC = gUsinas.selectAll("circle").data(DATA.usinas.usinas.map(u => ({ c: [u[0], u[1]], kw: u[2], t: u[3], n: u[4], uf: u[5], a: u[6], d: u[7], x: u[8],
       r0: Math.max(0.8, Math.min(11, 0.8 + Math.sqrt(u[2]) * 0.0028)),
-      ...(TESTE ? { u: u[5], ri: Math.min(10, 2.2 + Math.sqrt(u[2]) * 0.0024), im: "us-" + (["uhe", "pch", "cgh"].includes(u[3]) ? "hid" : u[3]) } : {}) }))).join("circle").attr("class", d => "usina t-" + d.t);
+      u: u[5], ri: Math.min(10, 2.2 + Math.sqrt(u[2]) * 0.0024), im: "us-" + (["uhe", "pch", "cgh"].includes(u[3]) ? "hid" : u[3]) }))).join("circle").attr("class", d => "usina t-" + d.t);
     usinasC.on("click", (e, d) => { e.stopPropagation(); abrir(d.uf); });
     iconesNoEstado();
     usinasC.append("title").text(d => `${d.n} · ${M.tipos[d.t]} · ${fmt1(d.kw / 1000)} MW${d.uf ? " · " + d.uf : ""}${d.a ? ". Em operação desde " + d.a : ""}`
@@ -332,7 +332,7 @@ function rewind(f) {
   function desenharCelm() {
     const M = DATA.celm;
     celmC = gCelm.selectAll("circle").data(M.municipios.map(m => ({ c: [m[0], m[1]], s: m[2], n: m[3], u: m[4], r0: 1.5,
-      ...(TESTE ? { ri: 3.4, im: "cel-" + FAIXA(m[2]) } : {}) }))).join("circle")
+      ri: 3.4, im: "cel-" + FAIXA(m[2]) }))).join("circle")
       .attr("class", d => "celm f" + FAIXA(d.s));
     celmC.on("click", (e, d) => { e.stopPropagation(); abrir(d.u); });
     iconesNoEstado();
@@ -342,8 +342,8 @@ function rewind(f) {
   let g5C = gG5.selectAll("circle");
   function desenharG5() {
     const M = DATA.g5;
-    /* no teste, dentro do estado escolhido o anel fica em volta do medalhão da antena */
-    g5C = gG5.selectAll("circle").data(M.municipios.map(m => ({ c: [m[0], m[1]], n: m[2], u: m[3], o: m[4], r0: 2.3, ...(TESTE ? { ri: 4.3 } : {}) }))).join("circle").attr("class", "g5");
+    /* dentro do estado escolhido, o anel fica em volta do medalhão da antena */
+    g5C = gG5.selectAll("circle").data(M.municipios.map(m => ({ c: [m[0], m[1]], n: m[2], u: m[3], o: m[4], r0: 2.3, ri: 4.3 }))).join("circle").attr("class", "g5");
     g5C.on("click", (e, d) => { e.stopPropagation(); abrir(d.u); });
     iconesNoEstado();
     g5C.append("title").text(d => `${d.n} · ${d.u}: 5G de ${d.o} (Anatel, ${M.meta.referencia}). Não quer dizer sinal 5G em todo o município.`);
@@ -369,7 +369,7 @@ function rewind(f) {
   let pocosC = gPocos.selectAll("circle");
   function desenharPocos() {
     const POCOS = DATA.oil.pocos.map(p => ({ c: [p[0], p[1]], b: p[2], o: p[3], g: p[4], n: p[5], campo: p[6], u: p[7], a: p[8],
-      r0: Math.max(0.9, Math.min(9, 0.9 + Math.sqrt(p[2]) * 0.034)), ...(TESTE ? { ri: Math.min(9, 2 + Math.sqrt(p[2]) * 0.025), im: "poco" } : {}) }));
+      r0: Math.max(0.9, Math.min(9, 0.9 + Math.sqrt(p[2]) * 0.034)), ri: Math.min(9, 2 + Math.sqrt(p[2]) * 0.025), im: "poco" }));
     pocosC = gPocos.selectAll("circle").data(POCOS).join("circle").attr("class", "poco");
     iconesNoEstado();
     pocosC.append("title").text(d => `Poço ${d.n} · campo ${d.campo} · ${d.a === "M" ? "mar" : "terra"}${d.u ? " · " + d.u : ""}. Petróleo: ${fmt(Math.round(d.o))} barris/dia; gás: ${fmt1(d.g)} mil m³/dia; total ${fmt(Math.round(d.b))} boe/dia (ANP, média de ${DATA.oil.meta.referencia}).`);
@@ -388,9 +388,9 @@ function rewind(f) {
   const INST = { refinaria: "Refinaria", upgn: "Unidade de processamento de gás natural", gnl: "Terminal de GNL" };
   const refinC = gRefin.selectAll("circle").data(DATA.refin ? DATA.refin.features.map(f => ({ ...f.properties, c: f.geometry.coordinates,
       r0: f.properties.k === "refinaria" ? 3.2 + Math.sqrt(f.properties.bbl || 0) * 0.008 : 2.6,
-      /* versão de teste: medalhão no mapa todo (refinaria, chama do gás natural, navio do GNL) */
-      ...(TESTE ? { ri: f.properties.k === "refinaria" ? 4.2 + Math.sqrt(f.properties.bbl || 0) * 0.009 : 4 } : {}) })) : []).join("circle").attr("class", d => "inst k-" + d.k);
-  if (TESTE) refinC.classed("ico", true).style("fill", d => `url(#pad-ico-ref-${d.k})`).style("stroke", d => `var(${IMG_ICO["ref-" + d.k][1]})`);
+      /* medalhão no mapa todo (refinaria, chama do gás natural, navio do GNL) */
+      ri: f.properties.k === "refinaria" ? 4.2 + Math.sqrt(f.properties.bbl || 0) * 0.009 : 4 })) : []).join("circle").attr("class", d => "inst k-" + d.k);
+  refinC.classed("ico", true).style("fill", d => `url(#pad-ico-ref-${d.k})`).style("stroke", d => `var(${IMG_ICO["ref-" + d.k][1]})`);
   refinC.on("click", (e, d) => { e.stopPropagation(); abrir(d.uf); });
   refinC.append("title").text(d => `${d.n}${d.s ? " (" + d.s + ")" : ""} · ${INST[d.k]} · ${d.m}/${d.uf}${d.bbl ? ". Capacidade: " + fmt(d.bbl) + " barris de petróleo por dia" : ""}${d.mi_m3 ? ". Capacidade: " + fmt(d.mi_m3) + " milhões de m³ de gás por dia" : ""} (ANP).`);
   /* pedágios federais (ANTT): tamanho pela raiz dos veículos por dia, cor pela parte de caminhões e ônibus;
@@ -399,7 +399,7 @@ function rewind(f) {
   const FX_PED = c => c >= 55 ? 4 : c >= 40 ? 3 : c >= 25 ? 2 : 1;
   const pedC = gPed.selectAll("circle").data(DATA.pedagio ? DATA.pedagio.pracas.map(p => ({ c: [p[0], p[1]], p,
       r0: p[12] ? 2.2 : 1.2 + Math.sqrt(p[8]) * 0.03,
-      ...(TESTE ? { u: p[7] || "", ri: p[12] ? 2.8 : Math.min(9, 2.4 + Math.sqrt(p[8]) * 0.022), im: p[12] ? "ped-0" : "ped-" + FX_PED(p[9]) } : {}) })) : []).join("circle").attr("class", d => d.p[12] ? "ped sem" : "ped f" + FX_PED(d.p[9]));
+      u: p[7] || "", ri: p[12] ? 2.8 : Math.min(9, 2.4 + Math.sqrt(p[8]) * 0.022), im: p[12] ? "ped-0" : "ped-" + FX_PED(p[9]) })) : []).join("circle").attr("class", d => d.p[12] ? "ped sem" : "ped f" + FX_PED(d.p[9]));
   pedC.on("click", (e, d) => { e.stopPropagation(); abrir(d.p[7]); });
   pedC.append("title").text(d => { const p = d.p, M = DATA.pedagio.meta;
     return `${p[13] ? "Validador do pedágio" : "Praça de pedágio"} ${p[2]} · ${p[3]} · ${p[4]}, km ${p[5]} · ${p[6]}${p[7] ? "/" + p[7] : ""}: `
@@ -407,8 +407,8 @@ function rewind(f) {
         : `≈ ${fmt(p[8])} veículos por dia, ${fmt1(p[9])}% caminhões e ônibus (média de ${p[10]} ${p[10] > 1 ? "meses" : "mês"}, ${p[11]}).`) + " Fonte: ANTT."; });
   const gPorts = root.append("g");
   const ports = gPorts.selectAll("circle").data(DATA.ports || []).join("circle").attr("class", "port");
-  /* versão de teste: âncora em medalhão no mapa todo; porto organizado um pouco maior, em obras mais apagado */
-  if (TESTE) ports.classed("ico", true).style("fill", "url(#pad-ico-porto)").style("stroke", "var(--port)").style("opacity", d => d.obra ? 0.6 : null);
+  /* âncora em medalhão no mapa todo; porto organizado um pouco maior, em obras mais apagado */
+  ports.classed("ico", true).style("fill", "url(#pad-ico-porto)").style("stroke", "var(--port)").style("opacity", d => d.obra ? 0.6 : null);
   ports.append("title").text(d => d.n + (d.org ? " · porto organizado" : "") + (d.obra ? " · em obras" : "") + " (IBGE, BC250 2025)");
   const gAir = root.append("g");
   /* aeroportos (ANAC): aviãozinho maior quanto mais passageiros; os sem voos de passageiros ficam pequenos e mais claros */
@@ -464,8 +464,8 @@ function rewind(f) {
   aba("mapa");
   if (TESTE) document.querySelector(".brand").insertAdjacentHTML("beforeend",
     `<a class="selo-teste" href="${location.pathname}" title="Versão de teste. Clique para abrir o site normal, sem as mudanças">Teste</a>`);
-  /* versão de teste: selo com a data da última atualização dos robôs (icones.js) */
-  if (TESTE) seloDados("../data/");
+  /* selo com a data da última atualização dos robôs (icones.js; diretriz God's Eye View) */
+  seloDados("../data/");
   function aba(nome) {
     dock.dataset.aba = nome;
     abas.querySelectorAll("button").forEach(b => b.setAttribute("aria-selected", b.dataset.aba === nome));
@@ -537,8 +537,8 @@ function rewind(f) {
     const no = d => !!sel && d.u === sel;
     for (const c of [boiC, lavC]) c.attr("display", d => !sel || d.u === sel ? null : "none").classed("ico", no);
     lavC.style("fill", d => no(d) ? `url(#pad-lav-${d.g})` : null).style("stroke", d => no(d) ? `var(--lav-${d.g})` : null);
-    /* versão de teste: as outras camadas de pontos do mesmo jeito (o anel do 5G só cresce em volta da antena) */
-    if (TESTE) for (const c of [usinasC, pocosC, celmC, g5C, pedC]) {
+    /* as outras camadas de pontos do mesmo jeito (o anel do 5G só cresce em volta da antena) */
+    for (const c of [usinasC, pocosC, celmC, g5C, pedC]) {
       c.attr("display", d => !sel || d.u === sel ? null : "none").classed("ico", no);
       if (c !== g5C) c.style("fill", d => no(d) ? `url(#pad-ico-${d.im})` : null).style("stroke", d => no(d) ? `var(${IMG_ICO[d.im][1]})` : null);
     }
@@ -570,7 +570,7 @@ function rewind(f) {
     ufLbl.attr("transform", d => `translate(${proj(d.c)}) ${z}`);
     caps.attr("transform", d => `translate(${proj(d.c)}) ${z}`);
     gNomes.classed("z-cap", k >= 1.9).classed("z-nome", k >= 3.2);
-    ports.attr("r", d => (TESTE ? (d.org ? 5.2 : 4.3) : 3.6) * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
+    ports.attr("r", d => (d.org ? 5.2 : 4.3) * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     refinC.attr("r", d => (d.ri || d.r0) * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     pedC.attr("r", d => raio(d) * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     seP.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
@@ -675,7 +675,7 @@ function rewind(f) {
     const Pa = PAINT.find(p => p.id === paint), cs = camadasDa(paint);
     dica.hidden = !cs.length;
     dica.textContent = cs.length ? `Clique de novo em “${Pa.nome}” para ${cs.every(l => l.on) ? "desligar" : "ligar também"} ${cs.length > 1 ? "as camadas" : "a camada"} ${cs.map(l => "“" + l.nome + "”").join(" e ")}.` : "";
-    if (cs.some(l => NO_ESTADO.has(l.id))) dica.textContent += TESTE ? " Escolha um estado no mapa para ver os ícones dentro dele." : " Escolha um estado no mapa para ver os ícones dos municípios dele.";
+    if (cs.some(l => NO_ESTADO.has(l.id))) dica.textContent += " Escolha um estado no mapa para ver os ícones dentro dele.";
     /* 1º clique pinta os estados; os seguintes, na mesma pintura, ligam e desligam as camadas dela */
     document.querySelectorAll("#paint .chip:not([disabled])").forEach(b => b.onclick = () => {
       const id = b.dataset.p, cs = camadasDa(id);
@@ -753,8 +753,8 @@ function rewind(f) {
        sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
       /* as lavouras com o medalhão do mapa */
-      /* versão de teste: as outras camadas de pontos também */
-      const ic = (l.id === "lav" || TESTE) && ICO_LEG[l.id] && ICO_LEG[l.id](k.cor || l.cor);
+      /* as camadas de pontos com o medalhão do mapa (icones.js, ICO_LEG) */
+      const ic = ICO_LEG[l.id] && ICO_LEG[l.id](k.cor || l.cor);
       if (ic && ICONES[ic]) return `<span>${chaveIcone(ic, k.cor || l.cor)}${k.nome}</span>`;
       const forma = l.id === "rail" ? (k.forma === "tr" ? "trilho-obra" : "trilho") : l.id === "air" ? "aviao" : l.id === "cla" ? "foguete" : l.id === "boi" ? "boi" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;

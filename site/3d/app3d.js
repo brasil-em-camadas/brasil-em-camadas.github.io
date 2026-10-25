@@ -100,11 +100,11 @@ const TRACOS = [[0, 4, 3], [0.5, 4, 2.5], [1, 4, 2], [1.5, 4, 1.5], [2, 4, 1], [
 /* ícones por município que só aparecem dentro do estado escolhido (direção do Edu em 23/10/2026),
    uma camada por vez; no mapa do Brasil (nenhum estado escolhido), os círculos de antes (pedido do Edu em 24/10/2026).
    Boi: silhueta clara num medalhão escuro com aro dourado (desenho em 24 × 24). Lavouras: um ícone por lavoura (icones.js). */
-/* versão de teste (diretriz God's Eye View, 25/10/2026): usinas, poços, celular, 5G e pedágios também, com o mesmo jeito
-   (círculos no Brasil, ícones no estado escolhido). Camada → [círculos, ícones, campo da UF] */
+/* desde 25/10/2026 (diretriz God's Eye View, aprovada pelo Edu): usinas, poços, celular, 5G e pedágios também, com o mesmo
+   jeito (círculos no Brasil, ícones no estado escolhido). Camada → [círculos, ícones, campo da UF] */
 const ICO_ESTADO = { boi: ["boi-geral", "boi", "u"], lav: ["lav-geral", "lav", "u"],
-  ...(TESTE ? { usinas: ["usinas", "usinas-ico", "uf"], oil: ["pocos", "pocos-ico", "u"], celm: ["celm", "celm-ico", "u"], g5: ["g5", "g5-ico", "u"],
-    pedagio: ["pedagio", "pedagio-ico", "u"] } : {}) };
+  usinas: ["usinas", "usinas-ico", "uf"], oil: ["pocos", "pocos-ico", "u"], celm: ["celm", "celm-ico", "u"], g5: ["g5", "g5-ico", "u"],
+  pedagio: ["pedagio", "pedagio-ico", "u"] };
 const NO_ESTADO = new Set(Object.keys(ICO_ESTADO));
 /* escolher um estado com a pintura ligada a estas camadas liga os ícones sozinho (só boi e lavouras, como antes) */
 const AUTO_ESTADO = new Set(["boi", "lav"]);
@@ -123,7 +123,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   const [F, estados, mundo, ROT, REL, CAPVIZ] = await Promise.all([
     getJSON(D + "fontes.json"), getJSON(D + "geo/estados.json"), getJSON(D + "geo/mundo.json"),
     getJSON(D + "geo/rotulos.json"), getJSON(D + "relevo/relevo.json"),
-    /* versão de teste: capitais dos países vizinhos (Natural Earth) */
+    /* capitais dos países vizinhos (Natural Earth) */
     getJSON(D + "geo/capitais_vizinhos.json")]);
   if (!F || !estados) { document.getElementById("ficha").innerHTML = `<p class="note">Não foi possível carregar os dados. Recarregue a página.</p>`; return; }
   const NAME = {}; estados.features.forEach(f => NAME[f.properties.sigla] = f.properties.name);
@@ -321,15 +321,11 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
           paint: { "line-color": ["match", ["get", "f"], "gas", cor("--gasd"), cor("--oleod")], "line-opacity": 0.85,
             "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "t"], "transporte"], 1.2, 0.6], 8, ["case", ["==", ["get", "t"], "transporte"], 2.8, 1.5]] } },
         /* refinarias (tamanho pela capacidade), unidades de gás natural e terminais de GNL (ANP) */
-        TESTE ? { id: "refin", type: "symbol", source: "refin",
-          /* versão de teste: refinaria (tamanho pela capacidade), chama (unidade de gás natural) e navio (GNL) em medalhão */
+        { id: "refin", type: "symbol", source: "refin",
+          /* medalhão: refinaria (tamanho pela capacidade), chama (unidade de gás natural) e navio (GNL) */
           layout: { "symbol-sort-key": ["-", 0, ["coalesce", ["get", "bbl"], 0]], "icon-image": ["concat", "ref-", ["get", "k"]], "icon-allow-overlap": true, "icon-ignore-placement": true,
             "icon-size": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "k"], "refinaria"], ["interpolate", ["linear"], ["sqrt", ["coalesce", ["get", "bbl"], 0]], 0, 0.33, 200, 0.42, 660, 0.66], 0.32],
-              8, ["case", ["==", ["get", "k"], "refinaria"], ["interpolate", ["linear"], ["sqrt", ["coalesce", ["get", "bbl"], 0]], 0, 0.6, 200, 0.75, 660, 1.15], 0.6]] } } :
-        { id: "refin", type: "circle", source: "refin",
-          paint: { "circle-color": ["match", ["get", "k"], "refinaria", cor("--refin"), "gnl", cor("--gnl"), cor("--upgn")],
-            "circle-stroke-color": ["match", ["get", "k"], "gnl", "#ffffff", "#1a0505"], "circle-stroke-width": 1,
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "k"], "refinaria"], ["interpolate", ["linear"], ["sqrt", ["coalesce", ["get", "bbl"], 0]], 0, 3.5, 200, 5, 660, 8], 3], 8, ["case", ["==", ["get", "k"], "refinaria"], ["interpolate", ["linear"], ["sqrt", ["coalesce", ["get", "bbl"], 0]], 0, 6, 200, 9, 660, 15], 5]] } },
+              8, ["case", ["==", ["get", "k"], "refinaria"], ["interpolate", ["linear"], ["sqrt", ["coalesce", ["get", "bbl"], 0]], 0, 0.6, 200, 0.75, 660, 1.15], 0.6]] } },
         /* principal lavoura de cada município (IBGE, PAM): cor pela lavoura de maior valor, tamanho pela raiz do valor de todas
            as lavouras; os maiores vêm primeiro no arquivo e ficam por baixo. No mapa do Brasil, círculos ("lav-geral");
            no estado escolhido, o ícone de cada lavoura ("lav") */
@@ -370,33 +366,33 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
               3, ["interpolate", ["linear"], ["sqrt", ["get", "kw"]], 0, 1, 100, 1.4, 300, 2.4, 1000, 4.5, 3800, 12],
               6, ["interpolate", ["linear"], ["sqrt", ["get", "kw"]], 0, 1.8, 100, 2.6, 300, 4.4, 1000, 8, 3800, 20],
               9, ["interpolate", ["linear"], ["sqrt", ["get", "kw"]], 0, 3, 100, 4.4, 300, 7.5, 1000, 13, 3800, 30]] } },
-        /* versão de teste: no estado escolhido, a usina em medalhão com o desenho da fonte (tamanho pela potência) */
-        ...(TESTE ? [{ id: "usinas-ico", type: "symbol", source: "usinas", filter: ["==", ["get", "uf"], ""],
+        /* no estado escolhido, a usina em medalhão com o desenho da fonte (tamanho pela potência) */
+        { id: "usinas-ico", type: "symbol", source: "usinas", filter: ["==", ["get", "uf"], ""],
           layout: { "symbol-sort-key": ["-", 0, ["get", "kw"]], "icon-allow-overlap": true, "icon-ignore-placement": true,
             "icon-image": ["match", ["get", "t"], ["uhe", "pch", "cgh"], "us-hid", "eol", "us-eol", "sol", "us-sol", "bio", "us-bio", "fos", "us-fos", "nuc", "us-nuc", "us-hid"],
             "icon-size": ["interpolate", ["linear"], ["zoom"],
               4, ["interpolate", ["linear"], ["sqrt", ["get", "kw"]], 0, 0.3, 100, 0.36, 300, 0.48, 1000, 0.72, 3400, 1.15],
-              8, ["interpolate", ["linear"], ["sqrt", ["get", "kw"]], 0, 0.44, 100, 0.54, 300, 0.72, 1000, 1.05, 3400, 1.6]] } }] : []),
+              8, ["interpolate", ["linear"], ["sqrt", ["get", "kw"]], 0, 0.44, 100, 0.54, 300, 0.72, 1000, 1.05, 3400, 1.6]] } },
         /* sinal 4G/5G por município (Anatel, IBC): cor pela faixa da população com sinal; os de sinal fraco ficam por cima */
         { id: "celm", type: "circle", source: "celm", layout: { "circle-sort-key": ["-", 0, ["get", "s"]] },
           paint: { "circle-color": ["step", ["get", "s"], cor("--cel1"), 50, cor("--cel2"), 80, cor("--cel3"), 95, cor("--cel4")],
             "circle-opacity": 0.9, "circle-stroke-color": "#06100c", "circle-stroke-width": 0.5,
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 1.5, 6, 3, 9, 5.5] } },
-        /* versão de teste: no estado escolhido, a antena em medalhão, na cor da faixa de sinal (os de sinal fraco por cima) */
-        ...(TESTE ? [{ id: "celm-ico", type: "symbol", source: "celm", filter: ["==", ["get", "u"], ""],
+        /* no estado escolhido, a antena em medalhão, na cor da faixa de sinal (os de sinal fraco por cima) */
+        { id: "celm-ico", type: "symbol", source: "celm", filter: ["==", ["get", "u"], ""],
           layout: { "symbol-sort-key": ["-", 0, ["get", "s"]], "icon-allow-overlap": true, "icon-ignore-placement": true,
             "icon-image": ["step", ["get", "s"], "cel-1", 50, "cel-2", 80, "cel-3", 95, "cel-4"],
-            "icon-size": ["interpolate", ["linear"], ["zoom"], 4, 0.4, 6, 0.52, 8, 0.72] } }] : []),
+            "icon-size": ["interpolate", ["linear"], ["zoom"], 4, 0.4, 6, 0.52, 8, 0.72] } },
         /* 5G (Anatel, RQUAL): anel em volta da sede dos municípios com 5G */
         { id: "g5", type: "circle", source: "g5",
           paint: { "circle-opacity": 0, "circle-stroke-color": cor("--g5"),
             "circle-stroke-opacity": ["interpolate", ["linear"], ["zoom"], 3, 0.7, 5, 0.95],
             "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 3, 0.7, 5, 1.2, 8, 1.8],
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 2, 5, 3.6, 7, 5.6, 9, 8] } },
-        /* versão de teste: no estado escolhido, o anel do 5G em volta do medalhão da antena (raio do medalhão + folga) */
-        ...(TESTE ? [{ id: "g5-ico", type: "circle", source: "g5", filter: ["==", ["get", "u"], ""],
+        /* no estado escolhido, o anel do 5G em volta do medalhão da antena (raio do medalhão + folga) */
+        { id: "g5-ico", type: "circle", source: "g5", filter: ["==", ["get", "u"], ""],
           paint: { "circle-opacity": 0, "circle-stroke-color": cor("--g5"), "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 4, 1.6, 8, 2.4],
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 9, 6, 11, 8, 14.5] } }] : []),
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 9, 6, 11, 8, 14.5] } },
         /* pedágios federais (ANTT): tamanho pela raiz dos veículos por dia, cor pela parte de caminhões e ônibus;
            praça sem número confiável (a > 0) fica só com o contorno */
         { id: "pedagio", type: "circle", source: "pedagio", layout: { "circle-sort-key": ["-", 0, ["get", "v"]] },
@@ -408,14 +404,14 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
               3, ["case", [">", ["get", "a"], 0], 2.4, ["interpolate", ["linear"], ["sqrt", ["get", "v"]], 0, 1.5, 100, 3.5, 280, 8]],
               6, ["case", [">", ["get", "a"], 0], 3.5, ["interpolate", ["linear"], ["sqrt", ["get", "v"]], 0, 2.5, 100, 6, 280, 13]],
               9, ["case", [">", ["get", "a"], 0], 5, ["interpolate", ["linear"], ["sqrt", ["get", "v"]], 0, 4, 100, 9, 280, 20]]] } },
-        /* versão de teste: no estado escolhido, a cabine com cancela em medalhão (cor pela parte de caminhões e ônibus,
+        /* no estado escolhido, a cabine com cancela em medalhão (cor pela parte de caminhões e ônibus,
            tamanho pelos veículos por dia; sem número confiável, cinza e pequeno) */
-        ...(TESTE ? [{ id: "pedagio-ico", type: "symbol", source: "pedagio", filter: ["==", ["get", "u"], ""],
+        { id: "pedagio-ico", type: "symbol", source: "pedagio", filter: ["==", ["get", "u"], ""],
           layout: { "symbol-sort-key": ["-", 0, ["get", "v"]], "icon-allow-overlap": true, "icon-ignore-placement": true,
             "icon-image": ["case", [">", ["get", "a"], 0], "ped-0", ["step", ["get", "c"], "ped-1", 25, "ped-2", 40, "ped-3", 55, "ped-4"]],
             "icon-size": ["interpolate", ["linear"], ["zoom"],
               4, ["case", [">", ["get", "a"], 0], 0.4, ["interpolate", ["linear"], ["sqrt", ["get", "v"]], 0, 0.38, 100, 0.55, 280, 0.9]],
-              8, ["case", [">", ["get", "a"], 0], 0.55, ["interpolate", ["linear"], ["sqrt", ["get", "v"]], 0, 0.52, 100, 0.78, 280, 1.3]]] } }] : []),
+              8, ["case", [">", ["get", "a"], 0], 0.55, ["interpolate", ["linear"], ["sqrt", ["get", "v"]], 0, 0.52, 100, 0.78, 280, 1.3]]] } },
         /* tamanho do poço pela produção (raiz quadrada: a área do ponto acompanha os barris) */
         { id: "pocos", type: "circle", source: "pocos", layout: { "circle-sort-key": ["get", "b"] },
           paint: { "circle-color": cor("--oil"), "circle-opacity": 0.88, "circle-stroke-color": "#2a1d05", "circle-stroke-width": 0.5,
@@ -423,12 +419,12 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
               3, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 0.8, 10, 1.2, 50, 2.4, 150, 4.5, 260, 6.5],
               6, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 1.4, 10, 2.2, 50, 4, 150, 7.5, 260, 10.5],
               9, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 2.4, 10, 3.6, 50, 6.5, 150, 12, 260, 17]] } },
-        /* versão de teste: no estado escolhido, a torre de perfuração em medalhão (tamanho pela produção; os maiores por baixo) */
-        ...(TESTE ? [{ id: "pocos-ico", type: "symbol", source: "pocos", filter: ["==", ["get", "u"], ""],
+        /* no estado escolhido, a torre de perfuração em medalhão (tamanho pela produção; os maiores por baixo) */
+        { id: "pocos-ico", type: "symbol", source: "pocos", filter: ["==", ["get", "u"], ""],
           layout: { "symbol-sort-key": ["-", 0, ["get", "b"]], "icon-image": "poco", "icon-allow-overlap": true, "icon-ignore-placement": true,
             "icon-size": ["interpolate", ["linear"], ["zoom"],
               4, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 0.28, 10, 0.32, 50, 0.45, 150, 0.68, 260, 0.92],
-              8, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 0.4, 10, 0.46, 50, 0.65, 150, 0.98, 260, 1.3]] } }] : []),
+              8, ["interpolate", ["linear"], ["sqrt", ["get", "b"]], 0, 0.4, 10, 0.46, 50, 0.65, 150, 0.98, 260, 1.3]] } },
         { id: "plataformas", type: "symbol", source: "uep",
           layout: { "icon-image": ["case", ["get", "prevista"], "uep-prevista", "uep"], "icon-allow-overlap": true, "icon-ignore-placement": true,
             "icon-size": ["interpolate", ["linear"], ["zoom"], 3, 0.55, 6, 0.85, 9, 1.15] } },
@@ -456,14 +452,12 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         { id: "zee-rotulo", type: "symbol", source: "zee", filter: LIMITE,
           layout: { "symbol-placement": "line", "symbol-spacing": 900, "text-field": "ZONA ECONÔMICA EXCLUSIVA · 200 MILHAS", "text-font": fonte(SEMI), "text-size": 10, "text-letter-spacing": 0.2, "text-max-angle": 30 },
           paint: { "text-color": "rgba(159,230,242,.75)", ...halo } },
-        TESTE ? { id: "portos", type: "symbol", source: "portos",
-          /* versão de teste: âncora em medalhão; porto organizado um pouco maior, em obras mais apagado */
+        { id: "portos", type: "symbol", source: "portos",
+          /* âncora em medalhão; porto organizado um pouco maior, em obras mais apagado */
           layout: { "icon-image": "porto", "icon-allow-overlap": true, "icon-ignore-placement": true,
             "icon-size": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "org"], 1], 0.38, 0.3], 6, ["case", ["==", ["get", "org"], 1], 0.62, 0.5],
               9, ["case", ["==", ["get", "org"], 1], 0.86, 0.7]] },
-          paint: { "icon-opacity": ["case", ["==", ["get", "obra"], 1], 0.6, 1] } } :
-        { id: "portos", type: "circle", source: "portos",
-          paint: { "circle-color": cor("--port"), "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 3, 8, 6], "circle-stroke-color": "#05101a", "circle-stroke-width": 1 } },
+          paint: { "icon-opacity": ["case", ["==", ["get", "obra"], 1], 0.6, 1] } },
         /* aeroportos (ANAC): aviãozinho, tamanho pela raiz dos passageiros de 12 meses; os sem voos de passageiros ficam pequenos e mais claros */
         { id: "aeroportos", type: "symbol", source: "aeros",
           layout: { "symbol-sort-key": ["-", 0, ["get", "p"]], "icon-image": "aviao", "icon-allow-overlap": true, "icon-ignore-placement": true,
@@ -516,7 +510,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       return;
     }
     if (e.id === "boi" && !map.hasImage("boi")) {
-      /* versão de teste: boi em medalhão escuro com aro dourado (64 px em dobro: 32 px no tamanho 1) */
+      /* boi em medalhão escuro com aro dourado (64 px em dobro: 32 px no tamanho 1) */
       const n = 64, c = document.createElement("canvas"); c.width = c.height = n;
       const x = c.getContext("2d");
       x.beginPath(); x.arc(32, 32, 29.5, 0, 2 * Math.PI); x.fillStyle = "rgba(16,10,4,.88)"; x.fill();
@@ -526,19 +520,19 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       return;
     }
     if (IMG_ICO[e.id] && !map.hasImage(e.id)) {
-      /* versão de teste: medalhão das outras camadas de pontos (icones.js) */
+      /* medalhão das outras camadas de pontos (icones.js) */
       const [i, v] = IMG_ICO[e.id];
       map.addImage(e.id, medalhaoCanvas(ICONES[i], cor(v)), { pixelRatio: 2 });
       return;
     }
     if (e.id.startsWith("lav-") && !map.hasImage(e.id)) {
-      /* versão de teste: lavoura em medalhão escuro com aro e desenho na cor da lavoura (icones.js) */
+      /* lavoura em medalhão escuro com aro e desenho na cor da lavoura (icones.js) */
       const g = e.id.slice(4), cv = cor("--lav-" + g) || cor("--lav-outras");
       map.addImage(e.id, medalhaoCanvas(ICONES[g] || ICONES.outras, cv), { pixelRatio: 2 });
       return;
     }
     if (e.id === "aviao" && !map.hasImage("aviao")) {
-      /* versão de teste: aviãozinho com sombra e brilho, para parecer em relevo (desenho de 24 px em dobro, nítido em tela fina) */
+      /* aviãozinho com sombra e brilho, para parecer em relevo (desenho de 24 px em dobro, nítido em tela fina) */
       const n = 54, c = document.createElement("canvas"); c.width = c.height = n;
       const x = c.getContext("2d"), P = new Path2D(AVIAO);
       x.translate(2, 2); x.scale(2, 2);
@@ -678,8 +672,8 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   aba("mapa");
   if (TESTE) document.querySelector(".brand").insertAdjacentHTML("beforeend",
     `<a class="selo-teste" href="${location.pathname}" title="Versão de teste. Clique para abrir o site normal, sem as mudanças">Teste</a>`);
-  /* versão de teste: selo com a data da última atualização dos robôs (icones.js) */
-  if (TESTE) seloDados(D);
+  /* selo com a data da última atualização dos robôs (icones.js; diretriz God's Eye View) */
+  seloDados(D);
   function aba(nome) {
     dock.dataset.aba = nome;
     abas.querySelectorAll("button").forEach(b => b.setAttribute("aria-selected", b.dataset.aba === nome));
@@ -788,8 +782,8 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         return;
       }
     }
-    /* versão de teste: refinarias e portos viraram medalhões, maiores que os círculos; de longe o clique abre o estado */
-    const longe = TESTE && map.getZoom() < 4;
+    /* refinarias e portos são medalhões, maiores que os círculos de antes: de longe, o clique abre o estado */
+    const longe = map.getZoom() < 4;
     const ri = vis("refin") && !longe ? map.queryRenderedFeatures(perto, { layers: ["refin"] }) : [];
     if (ri.length) {
       const p = ri[0].properties;
@@ -1014,7 +1008,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     const Pa = PAINT.find(p => p.id === paint), cs = camadasDa(paint);
     dica.hidden = !cs.length;
     dica.textContent = cs.length ? `Clique de novo em “${Pa.nome}” para ${cs.every(l => l.on) ? "desligar" : "ligar também"} ${cs.length > 1 ? "as camadas" : "a camada"} ${cs.map(l => "“" + l.nome + "”").join(" e ")}.` : "";
-    if (cs.some(l => NO_ESTADO.has(l.id))) dica.textContent += TESTE ? " Escolha um estado no mapa para ver os ícones dentro dele." : " Escolha um estado no mapa para ver os ícones dos municípios dele.";
+    if (cs.some(l => NO_ESTADO.has(l.id))) dica.textContent += " Escolha um estado no mapa para ver os ícones dentro dele.";
     document.querySelectorAll("#paint .chip:not([disabled])").forEach(b => b.onclick = () => {
       /* 1º clique pinta os estados; os seguintes, na mesma pintura, ligam e desligam as camadas dela */
       const id = b.dataset.p, cs = camadasDa(id);
@@ -1143,8 +1137,8 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
        sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
       /* as lavouras com o medalhão do mapa */
-      /* versão de teste: as outras camadas de pontos também */
-      const ic = (l.id === "lav" || TESTE) && ICO_LEG[l.id] && ICO_LEG[l.id](k.cor || l.cor);
+      /* as camadas de pontos com o medalhão do mapa (icones.js, ICO_LEG) */
+      const ic = ICO_LEG[l.id] && ICO_LEG[l.id](k.cor || l.cor);
       if (ic && ICONES[ic]) return `<span>${chaveIcone(ic, k.cor || l.cor)}${k.nome}</span>`;
       const forma = l.id === "rail" ? (k.forma === "tr" ? "trilho-obra" : "trilho") : l.id === "air" ? "aviao" : l.id === "cla" ? "foguete" : l.id === "boi" ? "boi" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;

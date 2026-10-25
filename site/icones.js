@@ -1,7 +1,7 @@
 /* Brasil em Camadas — ícones das camadas de pontos (desenhos em 24 × 24), usados no globo (3d/app3d.js)
-   e na versão leve (2d/app.js), num medalhão escuro com aro na cor da camada. Lavouras e boi: só no estado escolhido
-   (scripts/estudos/icones_lavouras.py). Versão de teste: usinas, poços, celular e pedágios também no estado escolhido;
-   portos, refinarias e unidades de gás no mapa todo (scripts/estudos/icones_camadas.py).
+   e na versão leve (2d/app.js), num medalhão escuro com aro na cor da camada. Lavouras, boi, usinas, poços, celular e pedágios:
+   só no estado escolhido; portos, refinarias e unidades de gás no mapa todo. Desenhos gerados por
+   scripts/estudos/icones_lavouras.py e scripts/estudos/icones_camadas.py.
    Cada ícone é uma lista de partes:
      ["f", caminho]     preenchido na cor da camada
      ["s", caminho, w]  preenchido, com um contorno escuro de w em volta (separa peças que se sobrepõem)
@@ -238,7 +238,7 @@ function chaveIcone(nome, corVar) {
   return `<svg class="key ico" viewBox="0 0 64 64" style="color:var(${corVar})" aria-hidden="true"><circle cx="32" cy="32" r="29.5" fill="${MEDALHAO}" stroke="currentColor" stroke-width="3"/>`
     + `<g transform="translate(10.4 10.4) scale(1.8)">${iconeSVG(ICONES[nome])}</g></svg>`;
 }
-/* versão de teste (diretriz God's Eye View, 25/10/2026): nome da imagem no mapa (globo) e do padrão "pad-ico-<nome>"
+/* desde 25/10/2026 (diretriz God's Eye View): nome da imagem no mapa (globo) e do padrão "pad-ico-<nome>"
    (versão leve) → [desenho, cor da camada] */
 const IMG_ICO = { "us-hid": ["hid", "--hid"], "us-eol": ["eol", "--eol"], "us-sol": ["sol", "--sol"], "us-bio": ["bio", "--bio"], "us-fos": ["fos", "--fos"],
   "us-nuc": ["nuc", "--nuc"], poco: ["poco", "--oil"], "cel-1": ["antena", "--cel1"], "cel-2": ["antena", "--cel2"], "cel-3": ["antena", "--cel3"],
@@ -261,7 +261,7 @@ const MOEDAS = (() => {
   return `<svg class="moedas" viewBox="0 0 66 30" aria-hidden="true">`
     + [[9, 19, 7.6, -12, 1], [24.5, 9.5, 7.2, 24, 0.55], [39.5, 20, 7.4, -8, 0.85], [56, 8, 6.8, -32, 0.42]].map(moeda).join("") + `</svg>`;
 })();
-/* selo "Dados atualizados em [data]" (diretriz God's Eye View; versão de teste desde 25/10/2026): a data da última vez
+/* selo "Dados atualizados em [data]" (diretriz God's Eye View; no site desde 25/10/2026): a data da última vez
    que um robô buscou dados com sucesso nos órgãos oficiais (arquivos robo*.json, gravados pelo robô do GitHub); cada
    camada continua com a própria data no painel. A data é a do registro do robô (em UTC), a mesma que o painel mostra.
    Ao criar um robô novo, acrescentar o arquivo dele em ROBOS */
