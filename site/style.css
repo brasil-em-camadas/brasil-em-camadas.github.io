@@ -381,6 +381,28 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 /* fundo desenhado pela placa de vídeo (3d/fundo3d.js): no lugar da imagem */
 canvas.fundo-vivo{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;display:block}
 .fundo-vivo body::before{display:none}
+/* o globo se afasta ao rolar a página (fundo "lente", computador; 3d/app3d.js, recuoGlobo): o mapa fica numa caixa mais
+   alta que o palco (.palco-mapa) e preso na tela (sticky) enquanto a página rola o trecho --recuo; depois sobe junto com o rodapé.
+   Com a página rolada (recuo-ativo), o mapa não recebe o mouse e as janelinhas e marcadores ficam escondidos */
+.palco-mapa{display:contents}
+@media (min-width:901px){
+  .recuo{--recuo:72vh}
+  .recuo .stage{overflow:visible;margin-bottom:var(--recuo)}
+  .recuo .palco-mapa{display:block;position:absolute;top:0;left:0;right:0;height:calc(100% + var(--recuo));pointer-events:none}
+  .recuo .palco-mapa #map{position:sticky;inset:auto;top:0;height:max(640px,100vh);pointer-events:auto}
+  .recuo-ativo .palco-mapa #map{pointer-events:none}
+  .recuo-ativo .maplibregl-popup,.recuo-ativo .maplibregl-marker{visibility:hidden}
+  /* a legenda sobre o mapa subiria por cima do globo afastado; some enquanto a página está rolada (a completa fica no rodapé) */
+  .recuo .legend{transition:opacity .3s}
+  .recuo-ativo .legend{opacity:0;pointer-events:none}
+}
+/* botão Apoie sobre o fundo com linhas (pedido do Edu em 25/10/2026: "o botão de apoie fica misturado com o fundo"):
+   fundo quase opaco, contorno dourado inteiro e um brilho dourado em volta; a frase embaixo, clara e com sombra */
+.teste.fundo .apoiar{background:rgba(14,11,6,.93);border-color:rgba(242,192,105,.9);
+  box-shadow:0 0 0 1px rgba(0,0,0,.55),0 8px 26px rgba(0,0,0,.6),0 0 22px rgba(230,180,80,.28)}
+.teste.fundo .foot .apoiar:hover,.teste.fundo .foot .apoiar:focus-visible{background:rgba(42,31,12,.96);border-color:var(--accent);
+  box-shadow:0 0 0 1px rgba(0,0,0,.55),0 8px 26px rgba(0,0,0,.6),0 0 32px rgba(230,180,80,.45)}
+.teste.fundo .apoio .note,.teste.fundo .apoio-fim .note{opacity:1;color:var(--ink);text-shadow:0 1px 3px #000,0 0 12px #000}
 /* fronteira terrestre por tipo e passagens de fronteira (versão de teste; scripts/gerar_fronteira.py) */
 :root{--fronteira:#ffcf7a;--fr-agua:#4fb3ff;--fr-seca:#c8874a;--fr-mata:#2fa65e}
 .front-borda{fill:none;stroke:rgba(6,4,2,.85);stroke-width:5;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}

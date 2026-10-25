@@ -26,6 +26,15 @@ const kmTxt = a => a >= 1e6 ? `${(a / 1e6).toLocaleString("pt-BR", { maximumFrac
 const esc = t => String(t ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const reais = mil => mil >= 1e6 ? `R$ ${fmt1(mil / 1e6)} bi` : mil >= 1e3 ? `R$ ${fmt(Math.round(mil / 1e3))} mi` : `R$ ${fmt(Math.round(mil))} mil`;
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* versão de teste, fundo "lente": ao rolar a página para baixo, o globo se afasta e fica no centro da tela (pedido do Edu
+   em 25/10/2026). O mapa entra numa caixa (.palco-mapa) mais alta que o palco e fica preso na tela (CSS sticky) por um trecho da
+   rolagem; a câmera acompanha a rolagem (recuoGlobo, no fim do main). Só no computador (o CSS liga acima de 900 px) */
+const RECUO = { ligado: FUNDO === "lente" && !reduce, ativo: false };
+if (RECUO.ligado) {
+  const mapa = document.getElementById("map"), caixa = document.createElement("div");
+  caixa.className = "palco-mapa"; mapa.before(caixa); caixa.append(mapa);
+  document.documentElement.classList.add("recuo");
+}
 const pill = n => `<span class="pill ${NIVEL[n][0]}">${NIVEL[n][1]}</span>`;
 const cor = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 /* caminhos contados a partir deste arquivo (pasta 3d/), não da página: o site pode mudar de endereço ou de domínio */
@@ -668,6 +677,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
      Visto de cima, o globo fica sempre no centro da tela. O MapLibre aplica o limite ao tamanho do globo,
      que é o mesmo em qualquer latitude (zoom "no equador"). */
   function limitarZoom() {
+    if (RECUO.ativo) return;                       /* com a página rolada, o globo afastado pode ficar menor que o limite */
     const cv = map.getCanvas(), w = cv.clientWidth, h = cv.clientHeight;
     if (!w || !h) return;
     const m = largo() ? 16 : 10;
@@ -1631,9 +1641,90 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     const at = document.querySelector(".maplibregl-ctrl-attrib"); if (at) ro.observe(at);
   }
   window.__mapa = map;
+
+  /* ---------- versão de teste: o globo se afasta ao rolar a página ----------
+     Pedido do Edu em 25/10/2026: "quando rolar a tela para baixo fazer com que o globo se afaste e centralize, para que o
+     efeito de lente fique visível na parte inferior e a tela não fique dividida". Enquanto a página rola o trecho
+     --recuo (margem embaixo do palco, no CSS), o mapa fica preso na tela e a câmera vai de onde a pessoa deixou até o
+     globo inteiro, menor, no meio da tela: sem inclinação, com o norte para cima e com o ponto que estava no meio da
+     área livre (fora do painel) virado para a frente. Depois o mapa sobe junto com o rodapé, já pequeno e inteiro, sem
+     ser cortado pela borda. Voltando ao topo, a câmera volta exatamente para onde estava. Com a página rolada, o mapa não
+     responde ao mouse (a roda rola a página); no topo, com o globo já no zoom mínimo, rolar a roda para baixo sobre ele
+     desce a página em vez de tentar afastar mais. */
+  if (RECUO.ligado) recuoGlobo();
+  function recuoGlobo() {
+    const el = map.getContainer(), raiz = document.documentElement;
+    let base = null, alvo = null, pedido = false, tVolta = 0;
+    const suave = t => t * t * (3 - 2 * t);
+    const giro = (de, para) => ((para - de + 540) % 360) - 180;            /* menor diferença entre dois ângulos */
+    const trecho = () => largo() ? parseFloat(getComputedStyle(stage).marginBottom) || 0 : 0;
+    /* zoom em que o contorno do globo tem raio r px, com o ponto c de frente e sem inclinação: o raio do globo em px é
+       e = 512·2^zoom / (2π·cos lat) (MapLibre 5) e o contorno visto da câmera, a F px, é r = F·e / √(F² + 2F·e) */
+    function zoomPara(r, c) {
+      const F = map.transform.cameraToCenterDistance;
+      const e = (r * r + r * Math.sqrt(r * r + F * F)) / F;
+      return Math.log2(2 * Math.PI * e * Math.cos(c.lat * Math.PI / 180) / 512);
+    }
+    function centroVisto() {
+      const f = folga(), cv = map.getCanvas(), w = cv.clientWidth, h = cv.clientHeight;
+      try {
+        const p = map.unproject([(f.left + w - f.right) / 2, (f.top + h - f.bottom) / 2]);
+        if (p && isFinite(p.lat) && isFinite(p.lng)) return p;
+      } catch (e) { /* ponto fora do globo: fica o centro atual */ }
+      return map.getCenter();
+    }
+    function iniciar() {
+      base = { center: map.getCenter(), zoom: map.getZoom(), pitch: map.getPitch(), bearing: map.getBearing() };
+      const c = centroVisto(), cv = map.getCanvas();
+      const r = Math.max(60, Math.min(0.31 * innerHeight, 0.3 * cv.clientWidth));
+      alvo = { center: c, zoom: Math.max(-2, Math.min(base.zoom, zoomPara(r, c))) };
+      RECUO.ativo = true;
+      map.setMinZoom(-2);
+      clearTimeout(tVolta); raiz.classList.add("recuo-ativo");
+    }
+    function restaurar() {
+      map.jumpTo(base);
+      RECUO.ativo = false; base = alvo = null;
+      limitarZoom();
+      /* o mapa volta a responder ao mouse quando a roda para (senão o resto do giro da roda aproximaria o globo) */
+      clearTimeout(tVolta); tVolta = setTimeout(() => { if (!RECUO.ativo) raiz.classList.remove("recuo-ativo"); }, 350);
+    }
+    function aplicar() {
+      pedido = false;
+      const D = trecho(), s = D > 0 ? Math.max(0, -stage.getBoundingClientRect().top) : 0;
+      if (s < 1) { if (RECUO.ativo) restaurar(); return; }
+      if (!RECUO.ativo) iniciar();
+      const t = suave(Math.min(1, s / (0.85 * D)));
+      const lng = base.center.lng + giro(base.center.lng, alvo.center.lng) * t;
+      const lat = base.center.lat + (alvo.center.lat - base.center.lat) * t;
+      map.jumpTo({ center: [lng, lat], zoom: base.zoom + (alvo.zoom - base.zoom) * t,
+        pitch: base.pitch * (1 - t), bearing: base.bearing + giro(base.bearing, 0) * t });
+    }
+    const pedir = () => { if (!pedido) { pedido = true; requestAnimationFrame(aplicar); } };
+    addEventListener("scroll", pedir, { passive: true });
+    /* mudou o tamanho da janela com a página rolada: refaz o alvo a partir da câmera de antes */
+    map.on("resize", () => { if (RECUO.ativo) { restaurar(); pedir(); } });
+    /* se o site mover a câmera com a página rolada (ex.: Centralizar, Relevo 3D, Recolher o painel), volta ao topo antes */
+    for (const nome of ["easeTo", "flyTo", "fitBounds"]) {
+      const orig = map[nome].bind(map);
+      map[nome] = (...a) => {
+        if (RECUO.ativo) { restaurar(); clearTimeout(tVolta); raiz.classList.remove("recuo-ativo"); scrollTo(0, 0); }
+        return orig(...a);
+      };
+    }
+    /* no topo, com o globo no zoom mínimo: a roda para baixo desce a página (o MapLibre nem recebe o giro) */
+    el.addEventListener("wheel", ev => {
+      if (RECUO.ativo || ev.ctrlKey || ev.deltaY <= 0 || !trecho()) return;
+      if (map.getZoom() > map.getMinZoom() + 0.01) return;
+      ev.stopPropagation();
+    }, { capture: true, passive: true });
+    map.once("load", pedir);
+    pedir();
+  }
+
   /* versão de teste: fundo B com distorção gravitacional em volta do globo (3d/fundo3d.js, carregado só aqui) */
   if (FUNDO === "funil" || FUNDO === "lente") {
-    const sc = document.createElement("script"); sc.src = "3d/fundo3d.js?v=1";
+    const sc = document.createElement("script"); sc.src = "3d/fundo3d.js?v=2";
     sc.onload = () => fundoGravidade(map, FUNDO); document.head.append(sc);
   }
 })();
