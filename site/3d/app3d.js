@@ -248,7 +248,10 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       layers: [
         { id: "fundo", type: "background", paint: { "background-color": "#0a1d2a" } },
         { id: "nasa", type: "raster", source: "nasa", paint: { "raster-brightness-max": 0.62, "raster-saturation": -0.15, "raster-contrast": 0.08, "raster-fade-duration": 200 } },
-        { id: "paises-borda", type: "line", source: "mundo", paint: { "line-color": "rgba(214,198,150,.35)", "line-width": 0.6 } },
+        /* a base mundial é simplificada: de perto, as divisas entre os vizinhos viram retas que não seguem os rios
+           (ex.: Argentina e Uruguai); na versão de teste elas somem a partir do zoom 6 */
+        { id: "paises-borda", type: "line", source: "mundo", paint: { "line-color": "rgba(214,198,150,.35)", "line-width": 0.6,
+          ...(TESTE ? { "line-opacity": ["interpolate", ["linear"], ["zoom"], 4.8, 1, 6, 0] } : {}) } },
         /* mar: cada arquivo traz a área ("area") e as linhas de limite separadas ("limite", "base") */
         { id: "pce-fill-rec", type: "fill", source: "pce", filter: ["all", AREA, ["==", ["get", "status"], "reconhecida"]],
           paint: { "fill-color": "rgba(229,143,211,.17)" } },

@@ -488,6 +488,8 @@ function rewind(f) {
   let proj, path, W, H, head = 0, k = 1;
   const zoom = d3.zoom().scaleExtent([0.8, 12]).on("zoom", e => {
     root.attr("transform", e.transform); k = e.transform.k; place();
+    /* base mundial simplificada: de perto, as divisas entre os vizinhos somem (versão de teste; como no globo, zoom 4,8 a 6) */
+    if (TESTE) vizB.style("opacity", Math.max(0, Math.min(1, (5.7 - k) / 3.2)));
   }).on("end", raioPocos);   /* são milhares de poços: o tamanho deles só é refeito quando o zoom termina */
   svg.call(zoom).on("dblclick.zoom", null);
 
