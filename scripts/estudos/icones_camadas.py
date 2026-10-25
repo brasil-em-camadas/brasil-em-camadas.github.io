@@ -104,10 +104,14 @@ I["upgn"]=[["f","M12 2.2c.8 3.6 6.4 6.6 6.4 12.4a6.4 6.4 0 0 1-12.8 0c0-3.2 1.7-
 I["gnl"]=[["f","M1.8 14.2h20.4l-2.8 5.6H4.6z"],["s",ell((6.6,14.2),2.6,2.6,0),0.8],["s",ell((11.6,14.2),2.6,2.6,0),0.8],["s",ell((16.6,14.2),2.6,2.6,0),0.8],
   ["f","M18.8 9.6h2.6v4.6h-2.6z"],["l","M2.4 22.2q2-1.4 4 0t4 0 4 0 4 0 4 0",1.2]]
 
+# passagem de fronteira: duas setas em sentidos opostos cruzando a linha da fronteira (tracejada) (25/10/2026)
+I["passagem"]=[["l","M12 2.6v3.4M12 10.9v2.2M12 17.9v3.5",1.5],["l","M3.4 8.5h11.8",2.1],["f","M14.4 5l6.2 3.5-6.2 3.5z"],
+  ["l","M20.6 15.5H8.8",2.1],["f","M9.6 12l-6.2 3.5 6.2 3.5z"]]
+
 NOMES = {"hid": "hidrelétrica: gota com raio", "eol": "eólica: cata-vento de três pás", "sol": "solar: sol e painel",
   "bio": "térmica a biomassa: folha com nervuras", "fos": "térmica fóssil: fábrica com chaminé e fumaça", "nuc": "nuclear: átomo",
   "poco": "poço de petróleo: torre de perfuração", "antena": "celular: torre com ondas", "pedagio": "pedágio: cabine e cancela",
   "ancora": "porto: âncora", "refinaria": "refinaria: torres de destilação e tanque", "upgn": "unidade de processamento de gás natural: chama",
-  "gnl": "terminal de GNL: navio com os tanques esféricos"}
+  "gnl": "terminal de GNL: navio com os tanques esféricos", "passagem": "passagem de fronteira: setas cruzando a linha"}
 for k in NOMES:
     print(f"  /* {NOMES[k]} */\n  {k}: [\n    " + ",\n    ".join(json.dumps(p, ensure_ascii=False) for p in I[k]) + "],")

@@ -110,6 +110,9 @@ const ICO_ESTADO = { boi: ["boi-geral", "boi", "u"], lav: ["lav-geral", "lav", "
 const NO_ESTADO = new Set(Object.keys(ICO_ESTADO));
 /* escolher um estado com a pintura ligada a estas camadas liga os ícones sozinho (só boi e lavouras, como antes) */
 const AUTO_ESTADO = new Set(["boi", "lav"]);
+/* "fronteira com ..." (versão de teste) */
+const COM_PAIS = { URU: "o Uruguai", ARG: "a Argentina", PAR: "o Paraguai", BOL: "a Bolívia", PER: "o Peru", COL: "a Colômbia", VEN: "a Venezuela",
+  GUY: "a Guiana", SUR: "o Suriname", GUF: "a Guiana Francesa (França)" };
 const BOI = "M2.6 10.4Q3.4 8.4 5.2 8.1L4.3 5.9 5.7 7.8 6.6 7.7 7.3 5.9 7.4 8.1Q8.2 8.5 9.4 8.5L18.2 8.4Q20.6 8.4 20.9 10.6L21.5 14 20.8 14.1 20.4 11.8Q20.2 13.2 19.6 14L19.7 19.6 18.1 19.6 17.8 15.2 10.4 15.2 10 19.6 8.4 19.6 8.1 14.6Q7.1 13.7 6.8 12.7 5.6 12.9 4.3 12.6 3 12.3 2.6 11.6Z";
 /* foguete de Alcântara (desenho em 24 × 34; a base fica no ponto), com chama e vapor animados no CSS */
 const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/>
@@ -132,6 +135,8 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
 
   const DATA = {}, UNICO = {};
   /* camadas "sob_demanda" (arquivos grandes que começam desligados) só são baixadas quando alguém liga a camada */
+  /* camadas marcadas "teste" no fontes.json só existem na versão de teste */
+  F.camadas = F.camadas.filter(l => TESTE || !l.teste);
   await Promise.all([...F.pintura, ...F.camadas].filter(l => l.arquivo && !l.sob_demanda).map(async l => {
     DATA[l.id] = await (UNICO[l.arquivo] || (UNICO[l.arquivo] = getJSON(D + l.arquivo)));
     if (!DATA[l.id] && l.nivel) l.nivel = "pendente";
@@ -218,6 +223,13 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         g5: { type: "geojson", data: fc([]) },
         empdef: { type: "geojson", data: fc([]) },
         pedagio: { type: "geojson", data: DATA.pedagio ? pedFC(DATA.pedagio) : fc([]) },
+        /* versão de teste: fronteira terrestre por tipo e passagens de fronteira (scripts/gerar_fronteira.py); as estradas do
+           outro lado esmaecem a partir da fronteira (line-progress) */
+        fronttipo: { type: "geojson", data: DATA.fronttipo || fc([]) },
+        passa: { type: "geojson", data: DATA.passa || fc([]), lineMetrics: true },
+        /* versão de teste: pista dupla (DNIT, SNV de out/2026) e fluxo nas rodovias federais (DNIT, VMDa 2025, sob demanda) */
+        dup: { type: "geojson", data: DATA.dup || fc([]) },
+        vmda: { type: "geojson", data: fc([]) },
         uep: { type: "geojson", data: DATA.uep || fc([]) },
         campos: { type: "geojson", data: DATA.campos || fc([]) },
         presal: { type: "geojson", data: DATA.presal || fc([]) },
@@ -272,6 +284,13 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
           paint: { "line-color": "rgba(255,184,70,.45)", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 7, 8, 12], "line-blur": 5 } },
         { id: "brasil-linha", type: "line", source: "brasil", layout: { "line-join": "round", "line-cap": "round" },
           paint: { "line-color": "#ffe2a6", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1.5, 8, 2.4] } },
+        /* versão de teste: a fronteira terrestre na cor do tipo (em rio ou lagoa, seca, seca na mata), por cima do contorno
+           dourado (a costa continua dourada); borda escura para a cor aparecer sobre o ouro e sobre os vizinhos */
+        { id: "front-borda", type: "line", source: "fronttipo", layout: { "line-join": "round", "line-cap": "round", visibility: "none" },
+          paint: { "line-color": "rgba(6,4,2,.85)", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 4.2, 8, 7.4] } },
+        { id: "front-linha", type: "line", source: "fronttipo", layout: { "line-join": "round", "line-cap": "round", visibility: "none" },
+          paint: { "line-color": ["match", ["get", "t"], ["rio", "lagoa"], cor("--fr-agua"), "mata", cor("--fr-mata"), cor("--fr-seca")],
+            "line-width": ["interpolate", ["linear"], ["zoom"], 3, 2, 8, 3.8] } },
         /* realce do estado sob o mouse: brilho dourado e uma luz que corre pelo contorno (no lugar do realce esbranquiçado) */
         { id: "hover-brilho", type: "line", source: "contorno-hover", layout: { "line-join": "round", "line-cap": "round" },
           paint: { "line-color": "rgba(255,176,60,.6)", "line-width": 10, "line-blur": 6 } },
@@ -295,9 +314,33 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         { id: "rodovias-borda", type: "line", source: "rod", filter: ["==", ["get", "p"], 1], layout: { "line-cap": "round", "line-join": "round" },
           paint: { "line-color": "rgba(14,9,4,.7)", "line-opacity": 1,
             "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "e"], 1], 1.7, 2.1], 8, ["case", ["==", ["get", "e"], 1], 3.1, 3.8]] } },
+        /* versão de teste: estradas do outro lado da fronteira (Natural Earth), claras e esmaecendo até sumir (~45 km) */
+        { id: "passa-estrada-borda", type: "line", source: "passa", filter: ["==", ["get", "k"], "estrada"],
+          layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
+          paint: { "line-width": ["interpolate", ["linear"], ["zoom"], 3, 2.2, 8, 4.2],
+            "line-gradient": ["interpolate", ["linear"], ["line-progress"], 0, "rgba(14,9,4,.7)", 1, "rgba(14,9,4,0)"] } },
+        { id: "passa-estrada", type: "line", source: "passa", filter: ["==", ["get", "k"], "estrada"],
+          layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
+          paint: { "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.8, 8, 2],
+            "line-gradient": ["interpolate", ["linear"], ["line-progress"], 0, "rgba(246,243,236,.95)", 0.55, "rgba(246,243,236,.5)", 1, "rgba(246,243,236,0)"] } },
         { id: "rodovias", type: "line", source: "rod", filter: ["==", ["get", "p"], 1], layout: { "line-cap": "round", "line-join": "round" },
           paint: { "line-color": ["case", ["==", ["get", "e"], 1], cor("--road-est"), cor("--road")], "line-opacity": 0.92,
             "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "e"], 1], 0.6, 0.8], 8, ["case", ["==", ["get", "e"], 1], 1.5, 2]] } },
+        /* versão de teste: pista dupla (DNIT, SNV): duas linhas finas com a rodovia no meio (line-gap-width); em obra, tracejada */
+        { id: "dup", type: "line", source: "dup", filter: ["==", ["get", "d"], 1], layout: { "line-join": "round", visibility: "none" },
+          paint: { "line-color": cor("--dup"), "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.7, 8, 1.3],
+            "line-gap-width": ["interpolate", ["linear"], ["zoom"], 3, 1.3, 8, 2.8] } },
+        { id: "dup-obra", type: "line", source: "dup", filter: ["==", ["get", "d"], 2], layout: { "line-join": "round", visibility: "none" },
+          paint: { "line-color": cor("--dup"), "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.7, 8, 1.3],
+            "line-gap-width": ["interpolate", ["linear"], ["zoom"], 3, 1.3, 8, 2.8], "line-dasharray": [2, 1.6] } },
+        /* versão de teste: fluxo nas rodovias federais (DNIT, VMDa 2025): largura pelos veículos por dia (raiz quadrada),
+           cor pela parte de ônibus e caminhões (as mesmas faixas dos pedágios); os de mais tráfego por cima */
+        { id: "vmda-borda", type: "line", source: "vmda", layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
+          paint: { "line-color": "rgba(12,8,3,.75)",
+            "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["+", 1.6, ["*", 0.012, ["sqrt", ["get", "v"]]]], 8, ["+", 3.2, ["*", 0.032, ["sqrt", ["get", "v"]]]]] } },
+        { id: "vmda", type: "line", source: "vmda", layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
+          paint: { "line-color": ["case", ["<", ["get", "p"], 0], cor("--tr0"), ["step", ["get", "p"], cor("--tr1"), 25, cor("--tr2"), 40, cor("--tr3"), 55, cor("--tr4")]],
+            "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["+", 0.4, ["*", 0.012, ["sqrt", ["get", "v"]]]], 8, ["+", 1, ["*", 0.032, ["sqrt", ["get", "v"]]]]] } },
         /* ferrovia no símbolo clássico dos mapas (24/10/2026), para aparecer sobre qualquer cor: faixa escura com o miolo claro
            cortado por "dormentes" escuros; em obras, só os traços (claros com borda escura), sem a faixa */
         { id: "ferrovias-borda", type: "line", source: "trilhos", filter: ["!=", ["get", "obra"], 1], layout: { "line-join": "round" },
@@ -460,6 +503,10 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
             "icon-size": ["interpolate", ["linear"], ["zoom"], 3, ["case", ["==", ["get", "org"], 1], 0.38, 0.3], 6, ["case", ["==", ["get", "org"], 1], 0.62, 0.5],
               9, ["case", ["==", ["get", "org"], 1], 0.86, 0.7]] },
           paint: { "icon-opacity": ["case", ["==", ["get", "obra"], 1], 0.6, 1] } },
+        /* versão de teste: passagens de fronteira (cidades gêmeas), setas cruzando a linha num medalhão */
+        { id: "passa-ico", type: "symbol", source: "passa", filter: ["==", ["get", "k"], "passagem"],
+          layout: { visibility: "none", "icon-image": "passagem", "icon-allow-overlap": true, "icon-ignore-placement": true,
+            "icon-size": ["interpolate", ["linear"], ["zoom"], 3, 0.34, 6, 0.56, 9, 0.82] } },
         /* aeroportos (ANAC): aviãozinho, tamanho pela raiz dos passageiros de 12 meses; os sem voos de passageiros ficam pequenos e mais claros */
         { id: "aeroportos", type: "symbol", source: "aeros",
           layout: { "symbol-sort-key": ["-", 0, ["get", "p"]], "icon-image": "aviao", "icon-allow-overlap": true, "icon-ignore-placement": true,
@@ -595,7 +642,8 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   const G = { zee: ["zee-fill", "zee-line", "zee-rotulo", "ilhas-ponto", "ilhas-rotulo"], mt: ["mt-fill", "mt-line", "mt-base"], zc: ["zc-fill", "zc-line"],
     pce: ["pce-fill-rec", "pce-fill-ana", "pce-line-rec", "pce-line-ana", "pce-rotulo"], rod: ["rodovias", "rodovias-terra", "rodovias-rotulo", "rodovias-borda"], rodest: ["rodovias-est"],
     oil: ["pocos", "pocos-ico"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi", "boi-geral"], lav: ["lav", "lav-geral"], usinas: ["usinas", "usinas-ico"], dutos: ["dutos"], refin: ["refin"], se: ["se"], lt: ["lt"], celm: ["celm", "celm-ico"], g5: ["g5", "g5-ico"], empdef: ["empdef"], pedagio: ["pedagio", "pedagio-ico"],
-    rail: ["ferrovias", "ferrovias-obra", "ferrovias-borda", "ferrovias-obra-borda"], ports: ["portos"], air: ["aeroportos"] };
+    rail: ["ferrovias", "ferrovias-obra", "ferrovias-borda", "ferrovias-obra-borda"], ports: ["portos"], air: ["aeroportos"],
+    fronttipo: ["front-borda", "front-linha"], passa: ["passa-estrada-borda", "passa-estrada", "passa-ico"], vmda: ["vmda-borda", "vmda"], dup: ["dup", "dup-obra"] };
 
   /* ---------- painel e enquadramento ---------- */
   const stage = document.getElementById("stage");
@@ -784,6 +832,28 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         return;
       }
     }
+    /* versão de teste: passagens de fronteira e a fronteira por tipo */
+    const pa = vis("passa-ico") ? map.queryRenderedFeatures(perto, { layers: ["passa-ico"] }) : [];
+    if (pa.length && DATA.passa) {
+      const p = pa[0].properties, M = DATA.passa.meta, FC = M.fontes_curtas || {};
+      const tipo = p.t === "rio" || p.t === "lagoa" ? (p.rio ? esc(p.rio) : "em " + p.t) : p.t === "mata" ? "fronteira seca, na mata" : "fronteira seca";
+      new maplibregl.Popup({ closeButton: false, offset: 12, maxWidth: "320px" }).setLngLat(pa[0].geometry.coordinates)
+        .setHTML(`<b>Passagem de fronteira</b><br>${esc(p.br)} ↔ ${esc(p.viz)}${p.lig ? `<br>Ligação: ${esc(p.lig)}` : `<br>A fronteira ali: ${tipo}`}
+          ${p.rod ? `<br>Rodovia que chega à fronteira: ${esc(p.rod)}` : ""}${p.nota ? `<br>${esc(p.nota)}` : ""}<br>Cidade gêmea (Portaria MDR nº 2.507/2021)
+          <br><span class="pop-fonte">IBGE (cidades gêmeas e BC250); cidade do outro lado${p.lig ? " e ligação" : ""}: ${String(p.f).split(",").map(k => esc(FC[k] || k)).join("; ")}${p.estradas > 0 ? "; estrada do outro lado: Natural Earth, desenho aproximado" : ""}</span>`).addTo(map);
+      return;
+    }
+    const ft = vis("front-linha") && map.getZoom() >= 4.5 ? map.queryRenderedFeatures([[px - 4, py - 4], [px + 4, py + 4]], { layers: ["front-linha"] }) : [];
+    if (ft.length && DATA.fronttipo) {
+      const p = ft[0].properties, M = DATA.fronttipo.meta, k = p.p, d = M.km_desenho[k] || {};
+      const tot = Object.values(d).reduce((a, b) => a + b, 0) || 1, pc = v => Math.round((v || 0) / tot * 100) + "%";
+      const tipo = p.t === "rio" ? "em rio" : p.t === "lagoa" ? "em lagoa" : p.t === "mata" ? "seca, na mata" : "seca";
+      new maplibregl.Popup({ closeButton: false, offset: 6, maxWidth: "320px" }).setLngLat(e.lngLat)
+        .setHTML(`<b>Fronteira com ${COM_PAIS[k] || esc(M.paises[k])}</b><br>${p.n ? esc(p.n) + " · " : ""}fronteira ${tipo}
+          <br>Extensão oficial: ${fmt(M.km_oficial[k])} km. No desenho, ${pc((d.rio || 0) + (d.lagoa || 0))} em rios e lagoas, ${pc(d.seca)} seca e ${pc(d.mata)} seca na mata.
+          <br><span class="pop-fonte">Extensão: ${esc(M.km_oficial_fonte)}. Tipo: classificação do projeto com a BC250 e a cobertura da terra do IBGE (2020), aproximada.</span>`).addTo(map);
+      return;
+    }
     /* refinarias e portos são medalhões, maiores que os círculos de antes: de longe, o clique abre o estado */
     const longe = map.getZoom() < 4;
     const ri = vis("refin") && !longe ? map.queryRenderedFeatures(perto, { layers: ["refin"] }) : [];
@@ -886,6 +956,24 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       const f = pts[0], tipo = f.layer.id === "portos" ? "Porto" : f.layer.id === "aeroportos" ? "Aeroporto" : "Capital";
       const extra = f.layer.id === "portos" ? (f.properties.org == 1 ? "<br>Porto organizado" : "") + (f.properties.obra == 1 ? "<br>Em obras" : "") : "";
       new maplibregl.Popup({ closeButton: false, offset: 10 }).setLngLat(f.geometry.coordinates).setHTML(`<b>${tipo}</b><br>${esc(f.properties.n)}${extra}`).addTo(map);
+      return;
+    }
+    /* versão de teste: fluxo (DNIT, VMDa) e pista dupla (SNV), de perto */
+    const vm = vis("vmda") && map.getZoom() >= 5 ? map.queryRenderedFeatures([[px - 4, py - 4], [px + 4, py + 4]], { layers: ["vmda"] }) : [];
+    if (vm.length && DATA.vmda) {
+      const p = vm.reduce((a, b) => b.properties.v > a.properties.v ? b : a).properties, M = DATA.vmda.meta;
+      new maplibregl.Popup({ closeButton: false, offset: 6, maxWidth: "300px" }).setLngLat(e.lngLat)
+        .setHTML(`<b>${p.br ? "BR-" + esc(p.br) : "Rodovia federal"}${p.u ? " (" + esc(p.u) + ")" : ""}</b><br>≈ ${fmt(p.v)} veículos por dia, nos dois sentidos
+          ${p.p >= 0 ? `<br>Ônibus e caminhões: ${p.p}%` : ""}${p.r ? "<br>Trecho com contagem usada como referência" : ""}
+          <br><span class="pop-fonte">${esc(M.fonte)}; ${esc(M.nota)}</span>`).addTo(map);
+      return;
+    }
+    const du = map.getZoom() >= 6 ? map.queryRenderedFeatures([[px - 4, py - 4], [px + 4, py + 4]], { layers: ["dup", "dup-obra"].filter(vis) }) : [];
+    if (du.length && DATA.dup) {
+      const p = du[0].properties;
+      new maplibregl.Popup({ closeButton: false, offset: 6, maxWidth: "280px" }).setLngLat(e.lngLat)
+        .setHTML(`<b>${esc(p.br)}${p.u ? " (" + esc(p.u) + ")" : ""}</b><br>${p.d == 1 ? "Pista dupla" : "Em obra de duplicação"}
+          <br><span class="pop-fonte">${esc(DATA.dup.meta.fonte)}</span>`).addTo(map);
       return;
     }
     /* rodovias e ferrovias: de perto (zoom 6), para não atrapalhar o clique nos estados */
@@ -1029,9 +1117,11 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     if (!L) info.innerHTML = "";
     else {
       const dd = L.id === "pop" ? luzPop : null;
-      info.innerHTML = `<h2 style="margin-top:14px">Luzes à noite</h2><div class="luz-info"><p class="note"><b>${L.titulo}.</b> ${L.explica}</p>
+      const explica = TESTE && L.id === "pop" ? "O brilho mostra quantas pessoas moram em cada pedaço do país, em quadrados de 1 km, inclusive na zona rural; os pontos são os municípios (clique num deles, de perto, para ver a população)." : L.explica;
+      info.innerHTML = `<h2 style="margin-top:14px">Luzes à noite</h2><div class="luz-info"><p class="note"><b>${L.titulo}.</b> ${explica}</p>
         <div>${dd ? `${pill(dd.nivel)} <span class="note">${dd.fonte} · atualizado em ${dd.atualizado_em}. Posição: ${dd.posicao}.</span>`
              : `${pill(L.nivel)} <span class="note">${L.fonte}.</span>`}</div>
+        ${TESTE && L.id === "pop" ? `<div>${pill("manual")} <span class="note">Brilho: IBGE, Grade Estatística do Censo Demográfico 2022, quadrados de 1 km (versão de 02/10/2025).</span></div>` : ""}
         <p class="note">Com as luzes acesas, os estados ficam sem cor; as rodovias e ferrovias se apagam, para não se confundirem com as luzes, e a Zona Econômica Exclusiva também, para deixar o mapa mais limpo (dá para religar em Camadas). Para apagar, clique de novo no botão da luz, no alto do mapa, ou escolha uma pintura acima.</p></div>`;
     }
     const lv = LAYERS.filter(l => minF === "todos" || l.ministerio === minF);
@@ -1079,7 +1169,8 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     celm: ["celm", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { s: m[2], n: m[3], u: m[4], c: m[5] })))],
     g5: ["g5", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { n: m[2], u: m[3], o: m[4], c: m[5] })))],
     /* indústria de defesa: [lon, lat, município, UF, código do IBGE, [[empresa, EED ou ED], ...]]; a lista fica fora do mapa */
-    empdef: ["empdef", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { n: m[5].length, c: m[4] })))] };
+    empdef: ["empdef", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { n: m[5].length, c: m[4] })))],
+    vmda: ["vmda", d => d] };
   /* município (código do IBGE) → linha do arquivo, para a janelinha do celular juntar as duas camadas */
   const INDICE = {};
   const indice = id => DATA[id] ? (INDICE[id] || (INDICE[id] = Object.fromEntries(DATA[id].municipios.map(m => [m[5], m])))) : {};
@@ -1142,7 +1233,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       /* as camadas de pontos com o medalhão do mapa (icones.js, ICO_LEG) */
       const ic = ICO_LEG[l.id] && ICO_LEG[l.id](k.cor || l.cor);
       if (ic && ICONES[ic]) return `<span>${chaveIcone(ic, k.cor || l.cor)}${k.nome}</span>`;
-      const forma = l.id === "rail" ? (k.forma === "tr" ? "trilho-obra" : "trilho") : l.id === "air" ? "aviao" : l.id === "cla" ? "foguete" : l.id === "boi" ? "boi" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
+      const forma = l.id === "rail" ? (k.forma === "tr" ? "trilho-obra" : "trilho") : l.id === "air" ? "aviao" : l.id === "cla" ? "foguete" : l.id === "boi" ? "boi" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel", "dup"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
     }).join("")}</span>`).join("");
     document.getElementById("legend").innerHTML = legMapa ? leg + itens : "";
@@ -1225,6 +1316,12 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       map.addSource("luz-noite", { type: "raster", tileSize: 256, maxzoom: 8, tiles: [LUZ.find(l => l.id === "noite").ladrilhos], attribution: "NASA Black Marble" });
       map.addLayer({ id: "luz-noite", type: "raster", source: "luz-noite", paint: { "raster-fade-duration": 300 } }, "paises-borda");
     }
+    /* versão de teste: a população em quadrados de 1 km (IBGE, grade estatística do Censo 2022), no lugar do brilho
+       espalhado dos municípios (scripts/gerar_grade_populacao.py; imagem em Mercator com os cantos do recorte) */
+    if (TESTE && luz === "pop" && !map.getSource("luz-grade")) {
+      map.addSource("luz-grade", { type: "image", url: D + "luzes/grade_populacao.webp", coordinates: [[-74.2, 5.6], [-28.6, 5.6], [-28.6, -34], [-74.2, -34]] });
+      map.addLayer({ id: "luz-grade", type: "raster", source: "luz-grade", paint: { "raster-opacity": 0.95, "raster-fade-duration": 0, "raster-resampling": "linear" } }, "estados-line");
+    }
     if (luz === "pop" && !map.getSource("luz-pop")) {
       map.addSource("luz-pop", { type: "geojson", data: fc(luzPop.municipios.map(m => ponto([m[0], m[1]], { p: m[2], n: m[3], u: m[4] }))) });
       /* brilho espalhado: soma os municípios vizinhos (escala em logaritmo, para as cidades pequenas também aparecerem) */
@@ -1239,10 +1336,11 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       const RAIO = ["interpolate", ["linear"], ["sqrt", ["get", "p"]], 0, 0.6, 100, 1.1, 300, 1.8, 1000, 3.4, 3500, 6.5];
       map.addLayer({ id: "luz-pop-ponto", type: "circle", source: "luz-pop", paint: {
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, ["*", 0.6, RAIO], 5, ["*", 0.9, RAIO], 8, ["*", 1.6, RAIO]],
-        "circle-color": "#ffe4a8", "circle-blur": 0.6, "circle-opacity": 0.9 } }, "estados-line");
+        "circle-color": "#ffe4a8", "circle-blur": 0.6, "circle-opacity": TESTE ? 0.28 : 0.9 } }, "estados-line");
     }
     const vis = (id, on) => map.getLayer(id) && map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
-    vis("luz-noite", luz === "noite"); vis("luz-pop-calor", luz === "pop"); vis("luz-pop-ponto", luz === "pop");
+    vis("luz-noite", luz === "noite"); vis("luz-pop-calor", luz === "pop" && !TESTE); vis("luz-pop-ponto", luz === "pop");
+    vis("luz-grade", luz === "pop");
   }
   async function definirLuz(id) {
     const L = LUZ.find(l => l.id === id);
@@ -1255,7 +1353,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     luz = L ? id : "off";
     /* rodovias e ferrovias se apagam com as luzes (parecem estradas iluminadas) e voltam como estavam depois; a Zona
        Econômica Exclusiva também (pedido do Edu em 25/10/2026: o mar territorial e a zona contígua ficam) */
-    const linhas = LAYERS.filter(l => ["rod", "rodest", "rail", "zee"].includes(l.id) && l.nivel !== "pendente");
+    const linhas = LAYERS.filter(l => ["rod", "rodest", "rail", "zee", "vmda", "dup"].includes(l.id) && l.nivel !== "pendente");
     if (antes === "off" && luz !== "off") { guardadas = {}; linhas.forEach(l => { guardadas[l.id] = l.on; l.on = false; }); }
     if (antes !== "off" && luz === "off" && guardadas) { linhas.forEach(l => { if (l.id in guardadas) l.on = guardadas[l.id]; }); guardadas = null; }
     if (map.getLayer("estados-fill")) { prepararLuzes(); aplicarNoite(); }
@@ -1337,6 +1435,24 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       ${G5 ? `<br>${pill(C.nivel)} <span class="note">5G: Anatel, presença da telefonia móvel (RQUAL), ${esc(G5.referencia)} · atualizado em ${G5.atualizado_em}</span>` : ""}</div>`;
   }
 
+  /* versão de teste: pista dupla do estado (DNIT, SNV) */
+  function fichaDupla(s) {
+    if (!DATA.dup) return "";
+    const M = DATA.dup.meta, k = M.km_por_uf[s];
+    return `<div class="kv"><span>Pista dupla (rodovias federais)</span><span class="v">${k && k[0] ? "≈ " + fmt(k[0]) + " km" : "nenhuma"}</span></div>
+      ${k && k[1] ? `<div class="list">Mais ≈ ${fmt(k[1])} km em obra de duplicação.</div>` : ""}
+      ${pill(DATA.dup.nivel || "manual")} <span class="note">${esc(M.fonte)}.</span>`;
+  }
+  /* versão de teste: passagens de fronteira do estado (cidades gêmeas) */
+  function fichaPassagens(s) {
+    if (!DATA.passa) return "";
+    const ps = DATA.passa.features.filter(f => f.properties.k === "passagem" && f.properties.br.includes("(" + s + ")"));
+    if (!ps.length) return "";
+    return `<div class="kv"><span>Passagens de fronteira</span><span class="v">${ps.length}</span></div>
+      <div class="list">${ps.map(f => { const p = f.properties;
+        return `${esc(p.br.replace(/ \([A-Z]{2}\)/g, ""))} ↔ ${esc(p.viz)}${p.lig ? ": " + esc(p.lig) : ""}`; }).join("<br>")}</div>
+      ${pill("manual")} <span class="note">Cidades gêmeas: IBGE e Portaria MDR nº 2.507/2021; cidade do outro lado e ligação: artigos e reportagens (detalhes no clique, no mapa).</span>`;
+  }
   /* aeroportos do estado (ANAC): aeródromos públicos, quantos têm voos de passageiros e os mais movimentados */
   const passageiros = n => n >= 1e6 ? `${milhoes(n / 1e6)} de passageiros` : `${fmt(Math.round(n / 1e3))} mil passageiros`;
   function fichaAeroportos(s) {
@@ -1461,7 +1577,9 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         ${Pt.length ? `<div class="list">${Pt.map(p => esc(p.n)).join(", ")}</div>` : ""}
         ${pill("manual")} <span class="note">IBGE, base cartográfica 1:250.000 (BC250, 2025); medidas no desenho do mapa.</span>
         ${fichaAeroportos(s)}
-        ${fichaPedagio(s)}</div>
+        ${fichaPedagio(s)}
+        ${fichaDupla(s)}
+        ${fichaPassagens(s)}</div>
       ${fichaOleo(s)}
       ${fichaEnergia(s)}
       ${fichaCelular(s)}

@@ -104,6 +104,8 @@ function rewind(f) {
   /* carrega cada camada; arquivo ausente vira "em apuração" */
   const DATA = {}, UNICO = {};
   /* camadas "sob_demanda" (arquivos grandes que começam desligados) só são baixadas quando alguém liga a camada */
+  /* camadas marcadas "teste" no fontes.json só existem na versão de teste */
+  F.camadas = F.camadas.filter(l => TESTE || !l.teste);
   await Promise.all([...F.pintura, ...F.camadas].filter(l => l.arquivo && !l.sob_demanda).map(async l => {
     DATA[l.id] = await (UNICO[l.arquivo] || (UNICO[l.arquivo] = getJSON("../data/" + l.arquivo)));
     if (!DATA[l.id] && l.nivel) l.nivel = "pendente";
@@ -227,6 +229,17 @@ function rewind(f) {
   const contornoBr = contornoBrasil(estados);
   const gBr = root.append("g");
   if (contornoBr) { gBr.append("path").attr("class", "contorno-br-brilho"); gBr.append("path").attr("class", "contorno-br"); }
+  /* versão de teste: fronteira terrestre na cor do tipo (em rio ou lagoa, seca, seca na mata), por cima do contorno dourado */
+  const COM_PAIS = { URU: "o Uruguai", ARG: "a Argentina", PAR: "o Paraguai", BOL: "a Bolívia", PER: "o Peru", COL: "a Colômbia", VEN: "a Venezuela",
+    GUY: "a Guiana", SUR: "o Suriname", GUF: "a Guiana Francesa (França)" };
+  const gFront = root.append("g");
+  const FT = DATA.fronttipo ? DATA.fronttipo.features : [];
+  const frontB = gFront.selectAll("path.front-borda").data(FT).join("path").attr("class", "front-borda");
+  const frontL = gFront.selectAll("path.front").data(FT).join("path").attr("class", d => "front t-" + d.properties.t);
+  frontL.append("title").text(d => { const p = d.properties, M = DATA.fronttipo.meta;
+    const tipo = p.t === "rio" ? "em rio" : p.t === "lagoa" ? "em lagoa" : p.t === "mata" ? "seca, na mata" : "seca";
+    return `Fronteira com ${COM_PAIS[p.p] || M.paises[p.p]}${p.n ? " · " + p.n : ""}: fronteira ${tipo}. Extensão oficial: ${fmt(M.km_oficial[p.p])} km (${M.km_oficial_fonte}). `
+      + "Tipo: classificação do projeto com a BC250 e a cobertura da terra do IBGE (2020), aproximada."; });
   const gCampos = root.append("g");
   let camposP = gCampos.selectAll("path");
   function desenharCampos() {
@@ -246,6 +259,26 @@ function rewind(f) {
   const gRod = root.append("g");
   const roads = gRod.selectAll("path").data(DATA.rod ? DATA.rod.features : []).join("path")
     .attr("class", d => "road" + (d.properties.p ? "" : " terra") + (d.properties.e ? " est-adm" : ""));
+  /* versão de teste: pista dupla (DNIT, SNV de out/2026): uma linha larga na cor e uma escura no meio = duas linhas finas */
+  const gDup = root.append("g");
+  const DUP = DATA.dup ? DATA.dup.features : [];
+  const dupL = gDup.selectAll("path.dup").data(DUP).join("path").attr("class", d => "dup" + (d.properties.d === 2 ? " obra" : ""));
+  const dupM = gDup.selectAll("path.dup-meio").data(DUP).join("path").attr("class", "dup-meio");
+  dupL.append("title").text(d => `${d.properties.br}${d.properties.u ? " (" + d.properties.u + ")" : ""}: ${d.properties.d === 1 ? "pista dupla" : "em obra de duplicação"} (${DATA.dup.meta.fonte}).`);
+  /* versão de teste: fluxo nas rodovias federais (DNIT, VMDa 2025), sob demanda: largura pelos veículos por dia, cor pela
+     parte de ônibus e caminhões */
+  const gVmda = root.append("g");
+  let vmdaP = gVmda.selectAll("path");
+  const FX_VM = p => p < 0 ? 0 : p >= 55 ? 4 : p >= 40 ? 3 : p >= 25 ? 2 : 1;
+  function desenharVmda() {
+    const M = DATA.vmda.meta;
+    vmdaP = gVmda.selectAll("path").data(DATA.vmda.features).join("path").attr("class", d => "vmda f" + FX_VM(d.properties.p))
+      .style("stroke-width", d => (0.5 + 0.011 * Math.sqrt(d.properties.v)).toFixed(2) + "px");
+    vmdaP.append("title").text(d => { const p = d.properties;
+      return `${p.br ? "BR-" + p.br : "Rodovia federal"}${p.u ? " (" + p.u + ")" : ""}: ≈ ${fmt(p.v)} veículos por dia, nos dois sentidos`
+        + `${p.p >= 0 ? "; ônibus e caminhões: " + p.p + "%" : ""}. ${M.fonte}; ${M.nota}.`; });
+    if (path) vmdaP.attr("d", path);
+  }
   const RAIL = DATA.rail ? DATA.rail.trechos : [];
   const gRail = root.append("g");
   /* ferrovia no símbolo clássico (24/10/2026): faixa escura por baixo, miolo claro com "dormentes" */
@@ -384,7 +417,7 @@ function rewind(f) {
       return `${p.nome} · ${p.tipo}${p.operador ? " · " + p.operador : ""}${p.prevista ? " · prevista" : ""}${p.atende ? ". Atende: " + p.atende : ""}${p.capacidade_bbl_dia ? ". Capacidade: " + fmt(p.capacidade_bbl_dia) + " barris de petróleo/dia" : ""}. Fonte: ANP.`; });
   }
   const DESENHA = { boi: desenharBoi, oil: desenharPocos, uep: desenharUep, campos: desenharCampos, zc: desenharZc, pce: desenharPce, rodest: desenharRodEst, usinas: desenharUsinas, lt: desenharLt,
-    celm: desenharCelm, g5: desenharG5, lav: desenharLav, dutos: desenharDutos, se: desenharSe, empdef: desenharDef };
+    celm: desenharCelm, g5: desenharG5, lav: desenharLav, dutos: desenharDutos, se: desenharSe, empdef: desenharDef, vmda: desenharVmda };
   /* refinarias (tamanho pela capacidade), unidades de gás natural e terminais de GNL (ANP); clicar abre o estado */
   const gRefin = root.append("g");
   const INST = { refinaria: "Refinaria", upgn: "Unidade de processamento de gás natural", gnl: "Terminal de GNL" };
@@ -407,6 +440,17 @@ function rewind(f) {
     return `${p[13] ? "Validador do pedágio" : "Praça de pedágio"} ${p[2]} · ${p[3]} · ${p[4]}, km ${p[5]} · ${p[6]}${p[7] ? "/" + p[7] : ""}: `
       + (p[12] === 1 ? `sem volume informado à ANTT em ${M.referencia}.` : p[12] === 2 ? "o volume informado à ANTT não fecha (mais de 40% aparece como motos); o número não é mostrado."
         : `≈ ${fmt(p[8])} veículos por dia, ${fmt1(p[9])}% caminhões e ônibus (média de ${p[10]} ${p[10] > 1 ? "meses" : "mês"}, ${p[11]}).`) + " Fonte: ANTT."; });
+  /* versão de teste: passagens de fronteira (cidades gêmeas) e as estradas do outro lado (tracejadas, esmaecendo) */
+  const gPassa = root.append("g");
+  const PA = DATA.passa ? DATA.passa.features : [];
+  const passaE = gPassa.selectAll("path").data(PA.filter(f => f.properties.k === "estrada")).join("path").attr("class", "passa-estrada");
+  const passaC = gPassa.selectAll("circle").data(PA.filter(f => f.properties.k === "passagem").map(f => ({ ...f.properties, c: f.geometry.coordinates })))
+    .join("circle").attr("class", "passa ico").style("fill", "url(#pad-ico-passagem)").style("stroke", "var(--fronteira)");
+  passaC.append("title").text(d => { const FC = (DATA.passa.meta.fontes_curtas || {});
+    const tipo = d.t === "rio" || d.t === "lagoa" ? (d.rio || "em " + d.t) : d.t === "mata" ? "fronteira seca, na mata" : "fronteira seca";
+    return `Passagem de fronteira: ${d.br} ↔ ${d.viz}.${d.lig ? " Ligação: " + d.lig + "." : " A fronteira ali: " + tipo + "."}${d.rod ? " Rodovia que chega à fronteira: " + d.rod + "." : ""}${d.nota ? " " + d.nota + "." : ""}`
+      + ` Cidade gêmea (Portaria MDR nº 2.507/2021). Fontes: IBGE; ${String(d.f).split(",").map(k => FC[k] || k).join("; ")}${d.estradas > 0 ? "; estrada do outro lado: Natural Earth, desenho aproximado" : ""}.`; });
+  passaC.on("click", (e, d) => { e.stopPropagation(); const u = (d.br.match(/\(([A-Z]{2})\)/) || [])[1]; abrir(u); });
   const gPorts = root.append("g");
   const ports = gPorts.selectAll("circle").data(DATA.ports || []).join("circle").attr("class", "port");
   /* âncora em medalhão no mapa todo; porto organizado um pouco maior, em obras mais apagado */
@@ -438,7 +482,7 @@ function rewind(f) {
   caps.append("circle").attr("r", d => d.pais ? 3.6 : d.viz ? 3.2 : 2.6);
   caps.append("text").attr("x", 6).attr("y", 4).text(d => d.n);
   caps.filter(d => d.viz).append("title").text(d => `${d.n}: ${d.d}. Fonte: Natural Earth (base aberta).`);
-  const G = { zee: gZee, mt: gMt, zc: gZc, pce: gPce, rod: gRod, rail: gRail, ports: gPorts, air: gAir, cla: gCla,
+  const G = { zee: gZee, mt: gMt, zc: gZc, pce: gPce, rod: gRod, rail: gRail, ports: gPorts, air: gAir, cla: gCla, fronttipo: gFront, passa: gPassa, dup: gDup, vmda: gVmda,
     oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt, celm: gCelm, g5: gG5, lav: gLav, dutos: gDutos, refin: gRefin, se: gSe, empdef: gDef, pedagio: gPed };
 
   let proj, path, W, H, head = 0, k = 1;
@@ -494,7 +538,8 @@ function rewind(f) {
     pocosC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     posBoi(); ltP.attr("d", path); usinasC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     posCel(); raioPocos();
-    roads.attr("d", path); rodEstP.attr("d", path);
+    roads.attr("d", path); rodEstP.attr("d", path); frontB.attr("d", path); frontL.attr("d", path); passaE.attr("d", path);
+    dupL.attr("d", path); dupM.attr("d", path); vmdaP.attr("d", path);
     states.attr("d", path);
     if (contornoBr) gBr.selectAll("path").attr("d", path(contornoBr));
     vizP.attr("d", path); vizB.attr("d", path);
@@ -528,7 +573,7 @@ function rewind(f) {
   function geoSobDemanda() {
     if (!path) return;
     MAR().forEach(sel => sel.attr("d", path));
-    camposP.attr("d", path); rodEstP.attr("d", path); ltP.attr("d", path); dutosP.attr("d", path);
+    camposP.attr("d", path); rodEstP.attr("d", path); ltP.attr("d", path); dutosP.attr("d", path); vmdaP.attr("d", path);
     usinasC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     pocosC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     posBoi(); posCel(); raioPocos(); place();
@@ -573,6 +618,7 @@ function rewind(f) {
     caps.attr("transform", d => `translate(${proj(d.c)}) ${z}`);
     gNomes.classed("z-cap", k >= 1.9).classed("z-nome", k >= 3.2);
     ports.attr("r", d => (d.org ? 5.2 : 4.3) * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
+    passaC.attr("r", 4.6 * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     refinC.attr("r", d => (d.ri || d.r0) * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     pedC.attr("r", d => raio(d) * s).attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     seP.attr("transform", d => `translate(${proj(d.c)}) scale(${s})`);
@@ -758,7 +804,7 @@ function rewind(f) {
       /* as camadas de pontos com o medalhão do mapa (icones.js, ICO_LEG) */
       const ic = ICO_LEG[l.id] && ICO_LEG[l.id](k.cor || l.cor);
       if (ic && ICONES[ic]) return `<span>${chaveIcone(ic, k.cor || l.cor)}${k.nome}</span>`;
-      const forma = l.id === "rail" ? (k.forma === "tr" ? "trilho-obra" : "trilho") : l.id === "air" ? "aviao" : l.id === "cla" ? "foguete" : l.id === "boi" ? "boi" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
+      const forma = l.id === "rail" ? (k.forma === "tr" ? "trilho-obra" : "trilho") : l.id === "air" ? "aviao" : l.id === "cla" ? "foguete" : l.id === "boi" ? "boi" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel", "dup"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
     }).join("")}</span>`).join("");
     document.getElementById("legend").innerHTML = legMapa ? leg + itens : "";
@@ -854,6 +900,24 @@ function rewind(f) {
 
   /* aeroportos do estado (ANAC): aeródromos públicos, quantos têm voos de passageiros e os mais movimentados */
   const passageiros = n => n >= 1e6 ? `${milhoes(n / 1e6)} de passageiros` : `${fmt(Math.round(n / 1e3))} mil passageiros`;
+  /* versão de teste: pista dupla do estado (DNIT, SNV) */
+  function fichaDupla(s) {
+    if (!DATA.dup) return "";
+    const M = DATA.dup.meta, k = M.km_por_uf[s];
+    return `<div class="kv"><span>Pista dupla (rodovias federais)</span><span class="v">${k && k[0] ? "≈ " + fmt(k[0]) + " km" : "nenhuma"}</span></div>
+      ${k && k[1] ? `<div class="list">Mais ≈ ${fmt(k[1])} km em obra de duplicação.</div>` : ""}
+      ${pill("manual")} <span class="note">${esc(M.fonte)}.</span>`;
+  }
+  /* versão de teste: passagens de fronteira do estado (cidades gêmeas) */
+  function fichaPassagens(s) {
+    if (!DATA.passa) return "";
+    const ps = DATA.passa.features.filter(f => f.properties.k === "passagem" && f.properties.br.includes("(" + s + ")"));
+    if (!ps.length) return "";
+    return `<div class="kv"><span>Passagens de fronteira</span><span class="v">${ps.length}</span></div>
+      <div class="list">${ps.map(f => { const p = f.properties;
+        return `${esc(p.br.replace(/ \([A-Z]{2}\)/g, ""))} ↔ ${esc(p.viz)}${p.lig ? ": " + esc(p.lig) : ""}`; }).join("<br>")}</div>
+      ${pill("manual")} <span class="note">Cidades gêmeas: IBGE e Portaria MDR nº 2.507/2021; cidade do outro lado e ligação: artigos e reportagens (detalhes ao passar o mouse, no mapa).</span>`;
+  }
   function fichaAeroportos(s) {
     const A = DATA.air, v = A && A.meta && A.meta.por_uf[s];
     if (!v) return "";
@@ -976,7 +1040,9 @@ function rewind(f) {
         ${Pt.length ? `<div class="list">${Pt.map(p => esc(p.n)).join(", ")}</div>` : ""}
         ${pill("manual")} <span class="note">IBGE, base cartográfica 1:250.000 (BC250, 2025); medidas no desenho do mapa.</span>
         ${fichaAeroportos(s)}
-        ${fichaPedagio(s)}</div>
+        ${fichaPedagio(s)}
+        ${fichaDupla(s)}
+        ${fichaPassagens(s)}</div>
       ${fichaOleo(s)}
       ${fichaEnergia(s)}
       ${fichaCelular(s)}

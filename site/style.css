@@ -381,3 +381,18 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 /* fundo desenhado pela placa de vídeo (3d/fundo3d.js): no lugar da imagem */
 canvas.fundo-vivo{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;display:block}
 .fundo-vivo body::before{display:none}
+/* fronteira terrestre por tipo e passagens de fronteira (versão de teste; scripts/gerar_fronteira.py) */
+:root{--fronteira:#ffcf7a;--fr-agua:#4fb3ff;--fr-seca:#c8874a;--fr-mata:#2fa65e}
+.front-borda{fill:none;stroke:rgba(6,4,2,.85);stroke-width:5;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
+.front{fill:none;stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:visibleStroke}
+.front.t-rio,.front.t-lagoa{stroke:var(--fr-agua)}.front.t-seca{stroke:var(--fr-seca)}.front.t-mata{stroke:var(--fr-mata)}
+.passa-estrada{fill:none;stroke:var(--road);stroke-opacity:.7;stroke-width:1.4;stroke-dasharray:5 3;vector-effect:non-scaling-stroke;pointer-events:none}
+.passa.ico{fill-opacity:1;stroke-width:1.2;cursor:pointer;vector-effect:non-scaling-stroke}
+/* pista dupla (DNIT, SNV) e fluxo nas rodovias federais (DNIT, VMDa 2025) (versão de teste) */
+:root{--dup:#ffd166}
+.dup{fill:none;stroke:var(--dup);stroke-width:3.6;stroke-linejoin:round;vector-effect:non-scaling-stroke;pointer-events:visibleStroke}
+.dup.obra{stroke-dasharray:6 4}
+.dup-meio{fill:none;stroke:var(--road);stroke-width:1.3;stroke-linejoin:round;vector-effect:non-scaling-stroke;pointer-events:none}
+.vmda{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;stroke-opacity:.92}
+.vmda.f0{stroke:var(--tr0)}.vmda.f1{stroke:var(--tr1)}.vmda.f2{stroke:var(--tr2)}.vmda.f3{stroke:var(--tr3)}.vmda.f4{stroke:var(--tr4)}
+.key.dup{height:4px;background:none;border-top:2px solid currentColor;border-bottom:2px solid currentColor;border-radius:0}

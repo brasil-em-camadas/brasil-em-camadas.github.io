@@ -1,0 +1,36 @@
+codigo_ibge,municipio,uf,cidade_vizinha,pais,ligacao,fonte
+4300034,Aceguá,RS,Aceguá,Uruguai,linha seca,UFSM2025
+4301875,Barra do Quaraí,RS,Bella Unión,Uruguai,ponte (rio Quaraí),UFSM2025
+4102604,Barracão,PR,Bernardo de Irigoyen,Argentina,linha seca,UFSM2025
+4305439,Chuí,RS,Chuy,Uruguai,linha seca,UFSM2025
+4205001,Dionísio Cerqueira,SC,Bernardo de Irigoyen,Argentina,linha seca,UFSM2025
+4108304,Foz do Iguaçu,PR,Ciudad del Este,Paraguai,ponte (rio Paraná),UFSM2025
+4108304,Foz do Iguaçu,PR,Puerto Iguazú,Argentina,ponte (rio Iguaçu),UFSM2025
+4108809,Guaíra,PR,Salto del Guairá,Paraguai,"sem ligação direta: ponte até Mundo Novo (MS), e de lá linha seca",UFSM2025
+4310603,Itaqui,RS,Alvear,Argentina,balsa (rio Uruguai),UFSM2025
+4311007,Jaguarão,RS,Río Branco,Uruguai,ponte (rio Jaguarão),UFSM2025
+4315057,Porto Mauá,RS,Alba Posse,Argentina,balsa (rio Uruguai),UFSM2025
+4315107,Porto Xavier,RS,San Javier,Argentina,balsa (rio Uruguai),UFSM2025
+4315305,Quaraí,RS,Artigas,Uruguai,ponte (rio Quaraí),UFSM2025
+4317103,Sant'Ana do Livramento,RS,Rivera,Uruguai,linha seca,UFSM2025
+4124400,Santo Antônio do Sudoeste,PR,San Antonio,Argentina,ponte (rio Santo Antônio),UFSM2025
+4318002,São Borja,RS,Santo Tomé,Argentina,ponte (rio Uruguai),UFSM2025
+4322400,Uruguaiana,RS,Paso de los Libres,Argentina,ponte (rio Uruguai),UFSM2025
+5005681,Mundo Novo,MS,Salto del Guairá,Paraguai,linha seca,UFSM2025
+1400159,Bonfim,RR,Lethem,Guiana,ponte (rio Tacutu),FURB2024
+1400456,Pacaraima,RR,Santa Elena de Uairén,Venezuela,linha seca,FURB2024
+1200054,Assis Brasil,AC,Iñapari,Peru,,AMAZONIA2022
+1200054,Assis Brasil,AC,Bolpebra,Bolívia,,AMAZONIA2022
+1200104,Brasiléia,AC,Cobija,Bolívia,,AMAZONIA2022
+1200252,Epitaciolândia,AC,Cobija,Bolívia,,AMAZONIA2022
+1200435,Santa Rosa do Purus,AC,região de Ucayali,Peru,,AMAZONIA2022
+1600501,Oiapoque,AP,Saint-Georges-de-l'Oyapock,Guiana Francesa (França),,AMAZONIA2022
+1304062,Tabatinga,AM,Leticia,Colômbia,,AMAZONIA2022
+5102504,Cáceres,MT,San Matías,Bolívia,,AMAZONIA2022
+1100106,Guajará-Mirim,RO,Guayaramerín,Bolívia,,AMAZONIA2022
+5003207,Corumbá,MS,Puerto Quijarro e Puerto Suárez,Bolívia,,UFGD2016
+5006606,Ponta Porã,MS,Pedro Juan Caballero,Paraguai,,PONTAPORA2024
+5003157,Coronel Sapucaia,MS,Capitán Bado,Paraguai,,CB2025
+5006358,Paranhos,MS,Ypejhú,Paraguai,,CB2025
+5002100,Bela Vista,MS,Bella Vista Norte,Paraguai,,CB2025
+5006903,Porto Murtinho,MS,Carmelo Peralta,Paraguai,,CB2025

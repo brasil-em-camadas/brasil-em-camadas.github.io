@@ -197,6 +197,13 @@ const ICONES = {
   upgn: [
     ["f", "M12 2.2c.8 3.6 6.4 6.6 6.4 12.4a6.4 6.4 0 0 1-12.8 0c0-3.2 1.7-5.4 3.4-6.8.2 2.2 1 3.6 2.4 4.3C11.6 9.4 11 5.6 12 2.2z"],
     ["h", "M12 12.6c.5 2 3 3.2 3 5.8a3 3 0 0 1-6 0c0-1.6.8-2.7 1.6-3.4.2 1 .6 1.6 1.2 2-.3-1.6-.2-3 .2-4.4z"]],
+  /* passagem de fronteira: duas setas em sentidos opostos cruzando a linha da fronteira (tracejada) */
+  passagem: [
+    ["l", "M12 2.6v3.4M12 10.9v2.2M12 17.9v3.5", 1.5],
+    ["l", "M3.4 8.5h11.8", 2.1],
+    ["f", "M14.4 5l6.2 3.5-6.2 3.5z"],
+    ["l", "M20.6 15.5H8.8", 2.1],
+    ["f", "M9.6 12l-6.2 3.5 6.2 3.5z"]],
   /* terminal de GNL: navio com os tanques esféricos */
   gnl: [
     ["f", "M1.8 14.2h20.4l-2.8 5.6H4.6z"],
@@ -243,10 +250,12 @@ function chaveIcone(nome, corVar) {
 const IMG_ICO = { "us-hid": ["hid", "--hid"], "us-eol": ["eol", "--eol"], "us-sol": ["sol", "--sol"], "us-bio": ["bio", "--bio"], "us-fos": ["fos", "--fos"],
   "us-nuc": ["nuc", "--nuc"], poco: ["poco", "--oil"], "cel-1": ["antena", "--cel1"], "cel-2": ["antena", "--cel2"], "cel-3": ["antena", "--cel3"],
   "cel-4": ["antena", "--cel4"], "ped-0": ["pedagio", "--tr0"], "ped-1": ["pedagio", "--tr1"], "ped-2": ["pedagio", "--tr2"], "ped-3": ["pedagio", "--tr3"],
-  "ped-4": ["pedagio", "--tr4"], porto: ["ancora", "--port"], "ref-refinaria": ["refinaria", "--refin"], "ref-upgn": ["upgn", "--upgn"], "ref-gnl": ["gnl", "--gnl"] };
+  "ped-4": ["pedagio", "--tr4"], porto: ["ancora", "--port"], "ref-refinaria": ["refinaria", "--refin"], "ref-upgn": ["upgn", "--upgn"], "ref-gnl": ["gnl", "--gnl"],
+  passagem: ["passagem", "--fronteira"] };
 /* chave da legenda com o medalhão do mapa: camada → desenho, pela cor do item da legenda */
 const ICO_LEG = { lav: c => c.replace("--lav-", ""), usinas: c => ({ "--hid": "hid", "--eol": "eol", "--sol": "sol", "--bio": "bio", "--fos": "fos", "--nuc": "nuc" })[c],
-  oil: () => "poco", refin: c => ({ "--refin": "refinaria", "--upgn": "upgn", "--gnl": "gnl" })[c], celm: () => "antena", pedagio: () => "pedagio", ports: () => "ancora" };
+  oil: () => "poco", refin: c => ({ "--refin": "refinaria", "--upgn": "upgn", "--gnl": "gnl" })[c], celm: () => "antena", pedagio: () => "pedagio", ports: () => "ancora",
+  passa: c => c === "--fronteira" ? "passagem" : null };
 /* versão de teste (pedido do Edu em 25/10/2026): fundo inteiro na página toda, com profundidade. Opções, escolhidas no
    endereço: ?teste&fundo=a (facetas), b (chão de hexágonos), c (camadas de vidro) e, depois que o Edu escolheu o B,
    funil e lente (o B com distorção gravitacional em volta do globo, desenhado pela placa de vídeo: 3d/fundo3d.js; na

@@ -1,0 +1,33 @@
+{
+ "titulo": "População em quadrados de 1 km",
+ "fonte": "IBGE, Grade Estatística do Censo Demográfico 2022 (quadrados de 1 km, versão de 02/10/2025)",
+ "nivel": "manual",
+ "gerado_em": "2026-10-25",
+ "arquivo": "grade_populacao.webp",
+ "cantos": [
+  [
+   -74.2,
+   5.6
+  ],
+  [
+   -28.6,
+   5.6
+  ],
+  [
+   -28.6,
+   -34.0
+  ],
+  [
+   -74.2,
+   -34.0
+  ]
+ ],
+ "pixels": [
+  2400,
+  2200
+ ],
+ "quadrados": 8860553,
+ "quadrados_com_moradores": 1501555,
+ "moradores": 203002064,
+ "nota": "cada pixel (~2 km) soma os quadrados de 1 km cujo centro cai nele; brilho pelo logaritmo dos moradores"
+}
