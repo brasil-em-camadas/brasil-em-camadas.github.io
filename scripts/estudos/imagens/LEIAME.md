@@ -15,6 +15,8 @@ Todas em Mercator, recorte de -75 a -28 de longitude e de 6 a -34,5 de latitude 
 | `relevo_blocos_rebanho.png` | estados em blocos (descartado: paredes nas divisas) |
 | `relevo_ondas_*.png` | estados em ondas, sem paredes (descartado: "não está ficando bom") |
 | `ouro_rebanho_4_versoes.jpg` | rebanho bovino em ouro no globo de teste, 4 versões (23/10/2026): A translúcida (laboratório), B opacidade crescente, C luz de fundo, D luz de fundo de brasa a ouro. **Escolhida pelo Edu: D**, com cinza forte = sem número e cinza fraco = menos de 0,1% do total do Brasil |
+| `comparar_cores_fraco_fosco.jpg` | escala de cor (24/10/2026): A como está (brasa → ouro); B o mais fraco numa cor fosca e opaca (bege acinzentado) em vez do quase preto; C como B, com as duas faixas mais fracas lisas (sem relevo). Celular 4G/5G e rebanho bovino. **Aguardando a escolha do Edu** |
+| `comparar_destaque_estado.jpg` | estado escolhido (24/10/2026): 1 os outros apagam (como estava); 2 sem apagar, contorno claro; 3 sem apagar, contorno e sombra (estado "levantado"). A 3 foi para a versão de teste |
 
 Para refazer: `python3 scripts/estudos/texturas.py site/data <saída>` (texturas) e
 `python3 scripts/estudos/texturas_luzes.py site/data <saída>` (com as luzes; baixa os ladrilhos da NASA). Precisam de numpy e Pillow.

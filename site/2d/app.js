@@ -17,7 +17,7 @@ if (TESTE) document.documentElement.classList.add("teste");
 /* aviãozinho (desenho em 24 × 24), usado nos aeroportos da versão de teste */
 const AVIAO = "M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z";
 /* versão de teste: ícones por município só dentro do estado escolhido (como no globo); boi em 24 × 24 */
-const NO_ESTADO = new Set(["boi"]);
+const NO_ESTADO = new Set(["boi", "lav"]);
 const BOI = "M2.6 10.4Q3.4 8.4 5.2 8.1L4.3 5.9 5.7 7.8 6.6 7.7 7.3 5.9 7.4 8.1Q8.2 8.5 9.4 8.5L18.2 8.4Q20.6 8.4 20.9 10.6L21.5 14 20.8 14.1 20.4 11.8Q20.2 13.2 19.6 14L19.7 19.6 18.1 19.6 17.8 15.2 10.4 15.2 10 19.6 8.4 19.6 8.1 14.6Q7.1 13.7 6.8 12.7 5.6 12.9 4.3 12.6 3 12.3 2.6 11.6Z";
 /* foguete de Alcântara na versão de teste (desenho em 24 × 34, igual ao do globo; a base fica no ponto) */
 const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/>
@@ -233,7 +233,9 @@ function rewind(f) {
     .attr("class", d => "road" + (d.properties.p ? "" : " terra") + (d.properties.e ? " est-adm" : ""));
   const RAIL = DATA.rail ? DATA.rail.trechos : [];
   const gRail = root.append("g");
-  const rails = gRail.selectAll("path").data(RAIL).join("path").attr("class", d => "rail" + (d.obra ? " obra" : ""));
+  /* versão de teste (24/10/2026): ferrovia no símbolo clássico (faixa escura por baixo, miolo claro com "dormentes") */
+  const railsB = TESTE ? gRail.append("g").selectAll("path").data(RAIL).join("path").attr("class", d => "rail-borda" + (d.obra ? " obra" : "")) : null;
+  const rails = (TESTE ? gRail.append("g") : gRail).selectAll("path").data(RAIL).join("path").attr("class", d => "rail" + (d.obra ? " obra" : ""));
   rails.append("title").text(d => `Ferrovia${d.obra ? " em obras" : ""} · ${d.op}${d.b ? " · bitola " + d.b.toLowerCase() : ""}${d.si ? " · a base não informa se está em operação" : ""} (IBGE, BC250 2025)`);
   /* linhas de transmissão (EPE), sob demanda: mais grossas quanto maior a tensão */
   const gLt = root.append("g");
@@ -270,12 +272,13 @@ function rewind(f) {
       pd.append("circle").attr("cx", 0.5).attr("cy", 0.5).attr("r", 0.5).attr("fill", "rgba(16,10,4,.88)");
       pd.append("path").attr("d", BOI).attr("fill", "#f3dfae").attr("transform", "translate(.15,.12) scale(.0292)");
     }
+    /* r0 = raio do círculo; ri = raio do medalhão (versão de teste, no estado escolhido) */
     boiC = gBoi.selectAll("circle").data(M.municipios.map(m => ({ c: [m[0], m[1]], b: m[2], n: m[3], u: m[4],
-      r0: TESTE ? Math.min(10, 2.4 + Math.sqrt(m[2]) * 0.005) : Math.max(0.6, Math.min(8, 0.6 + Math.sqrt(m[2]) * 0.0045)) })))
+      r0: Math.max(0.6, Math.min(8, 0.6 + Math.sqrt(m[2]) * 0.0045)), ri: Math.min(10, 2.4 + Math.sqrt(m[2]) * 0.005) })))
       .join("circle").attr("class", "boi");
     /* clicar num ponto abre o estado dele; no teste, dentro do estado escolhido, o clique não fecha o estado */
     boiC.on("click", (e, d) => { e.stopPropagation(); if (!(TESTE && sel === d.u)) select(d.u); });
-    if (TESTE) boiC.attr("display", d => sel && d.u === sel ? null : "none");
+    iconesNoEstado();
     boiC.append("title").text(d => `${d.n} · ${d.u}: ${fmt(d.b)} cabeças de gado bovino (IBGE, Pesquisa da Pecuária Municipal ${M.meta.referencia}). O ponto fica na sede do município.`);
   }
   /* principal lavoura de cada município (IBGE, PAM), sob demanda: cor pela lavoura, tamanho pelo valor de todas as lavouras */
@@ -283,9 +286,16 @@ function rewind(f) {
   let lavC = gLav.selectAll("circle");
   function desenharLav() {
     const M = DATA.lav;
+    /* versão de teste: um medalhão por lavoura (desenho em icones.js), com o mesmo encaixe do boi */
+    if (TESTE && !document.getElementById("pad-lav-soja")) Object.keys(ICONES).forEach(g => {
+      const pd = defs.append("pattern").attr("id", "pad-lav-" + g).attr("patternContentUnits", "objectBoundingBox").attr("width", 1).attr("height", 1);
+      pd.append("circle").attr("cx", 0.5).attr("cy", 0.5).attr("r", 0.5).attr("fill", MEDALHAO);
+      pd.append("g").attr("transform", "translate(.1625,.1625) scale(.028125)").style("color", `var(--lav-${g})`).html(iconeSVG(ICONES[g]));
+    });
     lavC = gLav.selectAll("circle").data(M.municipios.map(m => ({ c: [m[0], m[1]], v: m[2], g: m[3], p: m[4], pv: m[5], n: m[6], u: m[7],
-      r0: Math.max(0.6, Math.min(9, 0.6 + Math.sqrt(m[2]) * 0.0028)) }))).join("circle").attr("class", d => "lav g-" + d.g);
-    lavC.on("click", (e, d) => { e.stopPropagation(); select(d.u); });
+      r0: Math.max(0.6, Math.min(9, 0.6 + Math.sqrt(m[2]) * 0.0028)), ri: Math.min(10, 2.4 + Math.sqrt(m[2]) * 0.0028) }))).join("circle").attr("class", d => "lav g-" + d.g);
+    lavC.on("click", (e, d) => { e.stopPropagation(); if (!(TESTE && sel === d.u)) select(d.u); });
+    iconesNoEstado();
     lavC.append("title").text(d => `${d.n} · ${d.u}: principal lavoura ${d.p} (${reais(d.pv)}, ${fmt(Math.round(d.pv / d.v * 100))}% do valor); todas as lavouras ${reais(d.v)} (IBGE, Produção Agrícola Municipal ${M.meta.referencia}). O ponto fica na sede do município.`);
   }
   /* usinas de energia (ANEEL, SIGA; 1 MW ou mais), sob demanda: cor pela fonte, tamanho pela potência; clicar abre o estado */
@@ -477,6 +487,7 @@ function rewind(f) {
     zoom.translateExtent([[wx0 - 60, wy0 - 60], [wx1 + 60, wy1 + 60]]).extent([[0, 0], [W, H]]);
     flowP.attr("d", correntes());
     rails.attr("d", d => path({ type: "LineString", coordinates: d.l }));
+    if (railsB) railsB.attr("d", d => path({ type: "LineString", coordinates: d.l }));
     if (CLA) gCla.attr("data-x", proj(CLA.ponto)[0]).attr("data-y", proj(CLA.ponto)[1]);
     place();
     svg.call(zoom.transform, d3.zoomIdentity);
@@ -502,14 +513,29 @@ function rewind(f) {
     pocosC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     posBoi(); posCel(); raioPocos(); place();
   }
+  /* versão de teste: no estado escolhido, os municípios dele viram medalhões (boi, lavoura); sem estado, círculos no Brasil todo */
+  const raio = d => TESTE && d.ri && sel && d.u === sel ? d.ri : d.r0;
+  function iconesNoEstado() {
+    if (!TESTE) return;
+    for (const c of [boiC, lavC]) c.attr("display", d => !sel || d.u === sel ? null : "none").classed("ico", d => !!sel && d.u === sel);
+    lavC.style("fill", d => sel && d.u === sel ? `url(#pad-lav-${d.g})` : null).style("stroke", d => sel && d.u === sel ? `var(--lav-${d.g})` : null);
+    raioPocos();
+  }
   function posCel() { for (const c of [celmC, g5C, lavC]) c.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]); }
   function raioPocos() {
     const s = 1 / Math.sqrt(k);
-    for (const c of [pocosC, boiC, usinasC, celmC, g5C, lavC]) c.attr("r", d => d.r0 * s);
+    for (const c of [pocosC, boiC, usinasC, celmC, g5C, lavC]) c.attr("r", d => raio(d) * s);
   }
   /* pontos mantêm tamanho legível em qualquer zoom */
+  /* versão de teste: com pintura, o estado escolhido "levanta" (borda escura e sombra curta), sem apagar os outros;
+     os números do filtro vão divididos pelo zoom, para a sombra ficar do mesmo tamanho na tela */
+  function levantar() {
+    if (TESTE) states.style("filter", d => d.properties.sigla === sel && svg.classed("ouro")
+      ? `drop-shadow(0 0 ${(1.6 / k).toFixed(3)}px rgba(10,6,2,.95)) drop-shadow(${(6 / k).toFixed(3)}px ${(8 / k).toFixed(3)}px 0 rgba(6,3,0,.5))` : null);
+  }
   function place() {
     const s = 1 / Math.sqrt(k);
+    levantar();
     lbls.attr("transform", d => `translate(${proj(d.c)}) scale(${1 / k})`);
     const z = `scale(${1 / k})`;
     zeeTxt.attr("transform", `translate(${proj([-31.2, -15.5])}) rotate(-62) ${z}`);
@@ -620,7 +646,7 @@ function rewind(f) {
     const Pa = PAINT.find(p => p.id === paint), cs = camadasDa(paint);
     dica.hidden = !cs.length;
     dica.textContent = cs.length ? `Clique de novo em “${Pa.nome}” para ${cs.every(l => l.on) ? "desligar" : "ligar também"} ${cs.length > 1 ? "as camadas" : "a camada"} ${cs.map(l => "“" + l.nome + "”").join(" e ")}.` : "";
-    if (TESTE && cs.some(l => NO_ESTADO.has(l.id))) dica.textContent += " Escolha um estado no mapa para ver os municípios dele.";
+    if (TESTE && cs.some(l => NO_ESTADO.has(l.id))) dica.textContent += " Escolha um estado no mapa para ver os ícones dos municípios dele.";
     /* 1º clique pinta os estados; os seguintes, na mesma pintura, ligam e desligam as camadas dela */
     document.querySelectorAll("#paint .chip:not([disabled])").forEach(b => b.onclick = () => {
       const id = b.dataset.p, cs = camadasDa(id);
@@ -633,7 +659,7 @@ function rewind(f) {
       <label class="layer ${l.nivel === "pendente" ? "pend" : ""}">
         <input type="checkbox" id="ly-${l.id}" ${l.on ? "checked" : ""} ${l.nivel === "pendente" ? "disabled" : ""}>${icon(l.id)}
         <span><span class="nm">${l.cor ? `<i class="key" style="background:var(${l.cor})"></i>` : ""}${l.nome} ${pill(l.nivel)}</span>
-        <span class="src">${l.fonte}${quando(l.id)} · ${F.ministerios[l.ministerio]}${l.baixando ? " · <b>carregando…</b>" : ""}${l.falhou ? " · <b>não foi possível carregar agora; tente de novo</b>" : ""}${TESTE && NO_ESTADO.has(l.id) ? " · <b>aparece ao escolher um estado</b>" : ""}</span></span>
+        <span class="src">${l.fonte}${quando(l.id)} · ${F.ministerios[l.ministerio]}${l.baixando ? " · <b>carregando…</b>" : ""}${l.falhou ? " · <b>não foi possível carregar agora; tente de novo</b>" : ""}${TESTE && NO_ESTADO.has(l.id) ? " · <b>ícones ao escolher um estado</b>" : ""}</span></span>
       </label>`).join("") : `<p class="note">Este ministério ainda não tem camadas de mapa.</p>`;
     lv.filter(l => l.nivel !== "pendente").forEach(l => document.getElementById("ly-" + l.id).onchange = e => { l.on = e.target.checked; render(); });
     /* ligar ou desligar de uma vez todas as camadas da lista (respeita o ministério escolhido) */
@@ -704,7 +730,9 @@ function rewind(f) {
     /* legenda completa (escala de cores + símbolos das camadas ligadas): sempre no rodapé, ao lado dos níveis de confiança;
        sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
-      const forma = TESTE && l.id === "air" ? "aviao" : TESTE && l.id === "cla" ? "foguete" : TESTE && l.id === "boi" ? "boi" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
+      /* versão de teste: as lavouras com o medalhão do mapa */
+      if (TESTE && l.id === "lav" && k.cor && ICONES[k.cor.replace("--lav-", "")]) return `<span>${chaveIcone(k.cor.replace("--lav-", ""), k.cor)}${k.nome}</span>`;
+      const forma = TESTE && l.id === "rail" ? (k.forma === "tr" ? "trilho-obra" : "trilho") : TESTE && l.id === "air" ? "aviao" : TESTE && l.id === "cla" ? "foguete" : TESTE && l.id === "boi" ? "boi" : k.forma || (k.hachura ? "hach" : ""), contorno = ["hach", "sqv", "tr", "anel"].includes(forma);
       return `<span><i class="key ${forma}" style="${contorno ? "color" : "background"}:var(${k.cor || l.cor})"></i>${k.nome}</span>`;
     }).join("")}</span>`).join("");
     document.getElementById("legend").innerHTML = legMapa ? leg + itens : "";
@@ -713,9 +741,11 @@ function rewind(f) {
     const lr = document.getElementById("legenda");
     if (lr) lr.innerHTML = (leg ? `<span class="item escala">${leg}</span>` : "") + (itens || `<span class="note">Nenhuma camada ligada. Escolha as camadas no painel.</span>`);
     states.classed("sel", d => d.properties.sigla === sel).classed("fade", d => sel && d.properties.sigla !== sel);
-    if (TESTE) boiC.attr("display", d => sel && d.u === sel ? null : "none");
+    iconesNoEstado();
     states.filter(".sel").raise();
+    levantar();
     rails.classed("hi", d => sel && d.uf === sel).classed("off", d => sel && d.uf !== sel);
+    if (railsB) railsB.classed("hi", d => sel && d.uf === sel).classed("off", d => sel && d.uf !== sel);
     document.getElementById("back").hidden = !sel;
     document.getElementById("where").textContent = sel ? `${NAME[sel]} · ${sel}` : "Brasil · 27 UFs";
     if (abas) abas.querySelector('[data-aba="ficha"]').textContent = sel ? `Ficha · ${sel}` : "Ficha · Brasil";
@@ -931,9 +961,13 @@ function rewind(f) {
   /* botão de apoio no rodapé: só aparece quando há link em fontes.json */
   const AP = F.apoio, apoio = document.getElementById("apoio");
   if (AP && AP.link && apoio) {
-    apoio.innerHTML = `<a class="apoiar" href="${esc(AP.link)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg>${esc(AP.texto)}</a>
+    /* versão de teste: botão retangular com três moedas e um segundo botão no fim da página (como no globo) */
+    const html = `<a class="apoiar" href="${esc(AP.link)}" target="_blank" rel="noopener">${TESTE ? `<span>${esc(AP.texto)}</span>${MOEDAS}`
+      : `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg>${esc(AP.texto)}`}</a>
       ${AP.nota ? `<span class="note">${esc(AP.nota)}</span>` : ""}`;
-    apoio.hidden = false;
+    apoio.innerHTML = html; apoio.hidden = false;
+    const fim = document.getElementById("apoio-fim");
+    if (TESTE && fim) { fim.innerHTML = html; fim.hidden = false; }
   }
   document.getElementById("tiers").innerHTML = Object.values(NIVEL)
     .map(([c, t, d]) => `<div><span><span class="pill ${c}">${t}</span></span><span>${d}</span></div>`).join("");
@@ -950,7 +984,7 @@ function rewind(f) {
         .transition().delay(500).duration(2200).ease(d3.easeCubicOut).style("stroke-dashoffset", 0)
         .on("end", () => el.style("stroke-dasharray", null).style("stroke-dashoffset", null));
     });
-    rails.style("opacity", 0).transition().delay(1400).duration(900).style("opacity", 0.85)
+    for (const r of [rails, railsB]) if (r) r.style("opacity", 0).transition().delay(1400).duration(900).style("opacity", 0.85)
       .on("end", function () { d3.select(this).style("opacity", null); });
   }
 })();

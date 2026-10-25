@@ -307,13 +307,14 @@ html.teste{--q1:#2e1107;--q2:#64280c;--q3:#9c5016;--q4:#cc822a;--q5:#e6b252;--se
   filter:drop-shadow(0 0 3px rgba(255,190,80,.85))}
 @keyframes contorno-corre{to{stroke-dashoffset:-32}}
 @media (prefers-reduced-motion:reduce){.teste .st:hover{animation:none;stroke-dasharray:none}}
-.teste .st.sel{stroke:var(--accent);stroke-width:2;stroke-dasharray:none}
+.teste .st.sel{stroke:#fff3d0;stroke-width:2.4;stroke-dasharray:none}
 .teste .st.fade{opacity:1;fill:rgba(2,7,11,.5)}
 /* versão leve de teste: com pintura, o planeta em azul-noite (mais escuro e menos colorido), como no globo */
 .teste #map.ouro .relevo-cor{filter:brightness(.36) saturate(.7) contrast(1.05)}
 .teste #map.ouro .viz{opacity:.7}
-/* estado pintado (cor vinda da pintura): em volta do estado escolhido, apagado */
-.teste .st.fade[style*="fill"]{opacity:.3}
+/* estado pintado (cor vinda da pintura): em volta do estado escolhido, a cor continua a mesma (para comparar);
+   o escolhido levanta com sombra (app.js, place) */
+.teste .st.fade[style*="fill"]{opacity:1}
 .contorno-br-brilho{fill:none;stroke:rgba(240,190,90,.35);stroke-width:6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
 .contorno-br{fill:none;stroke:#f2c96a;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
 .teste .air{fill:#d4defc;stroke:#0b1626;stroke-width:.9}
@@ -332,7 +333,8 @@ html.teste{--q1:#2e1107;--q2:#64280c;--q3:#9c5016;--q4:#cc822a;--q5:#e6b252;--se
 .foguete path,.foguete circle{vector-effect:non-scaling-stroke}
 @media (prefers-reduced-motion:reduce){.foguete .vapor,.foguete .chama{animation:none}}
 /* ícones por município só no estado escolhido (versão leve de teste): boi em medalhão escuro com aro dourado */
-.teste .boi{fill:url(#pad-boi);fill-opacity:1;stroke:#e6b450;stroke-width:1.1}
+/* chave da legenda com o medalhão do mapa (icones.js) */
+.key.ico{width:17px;height:17px;border-radius:50%;flex:none}
 .key.boi{width:14px;height:14px;border-radius:0;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2 4 20 17'%3E%3Cpath d='M2.6 10.4Q3.4 8.4 5.2 8.1L4.3 5.9 5.7 7.8 6.6 7.7 7.3 5.9 7.4 8.1Q8.2 8.5 9.4 8.5L18.2 8.4Q20.6 8.4 20.9 10.6L21.5 14 20.8 14.1 20.4 11.8Q20.2 13.2 19.6 14L19.7 19.6 18.1 19.6 17.8 15.2 10.4 15.2 10 19.6 8.4 19.6 8.1 14.6Q7.1 13.7 6.8 12.7 5.6 12.9 4.3 12.6 3 12.3 2.6 11.6Z'/%3E%3C/svg%3E") center/contain no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2 4 20 17'%3E%3Cpath d='M2.6 10.4Q3.4 8.4 5.2 8.1L4.3 5.9 5.7 7.8 6.6 7.7 7.3 5.9 7.4 8.1Q8.2 8.5 9.4 8.5L18.2 8.4Q20.6 8.4 20.9 10.6L21.5 14 20.8 14.1 20.4 11.8Q20.2 13.2 19.6 14L19.7 19.6 18.1 19.6 17.8 15.2 10.4 15.2 10 19.6 8.4 19.6 8.1 14.6Q7.1 13.7 6.8 12.7 5.6 12.9 4.3 12.6 3 12.3 2.6 11.6Z'/%3E%3C/svg%3E") center/contain no-repeat}
@@ -343,3 +345,36 @@ html.teste{--q1:#2e1107;--q2:#64280c;--q3:#9c5016;--q4:#cc822a;--q5:#e6b252;--se
 .key.aviao{width:13px;height:13px;border-radius:0;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z'/%3E%3C/svg%3E") center/contain no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z'/%3E%3C/svg%3E") center/contain no-repeat}
+/* versão de teste (24/10/2026): a bolinha "camada ligada" vai para o canto do botão da pintura, sem mudar a largura
+   (antes ela alargava o botão, que pulava para a linha de baixo) */
+.teste .chip{position:relative}
+.teste .chip[data-cam="1"]::after{position:absolute;top:-4px;right:-3px;width:10px;height:10px;margin:0;background:#fff3d1;box-shadow:0 0 0 2px var(--night)}
+/* ferrovias da versão de teste: símbolo clássico dos mapas (faixa escura, miolo claro cortado por "dormentes");
+   em obras, só os traços, claros com borda escura */
+.rail-borda{fill:none;stroke:rgba(12,8,3,.9);stroke-width:3.4;vector-effect:non-scaling-stroke;opacity:.85;pointer-events:none;transition:opacity .4s,stroke-width .4s}
+.rail-borda.obra{stroke-width:3;stroke-dasharray:4 5}
+.rail-borda.off{opacity:.1}.rail-borda.hi{stroke-width:4.4;opacity:1}
+.teste .rail{stroke:#fbf6ea;stroke-width:1.6;stroke-dasharray:8 2.4}
+.teste .rail.obra{stroke-width:1.4;stroke-dasharray:4 5}
+.teste .rail.hi{stroke-width:2.4;filter:none}
+.key.trilho{width:18px;height:5px;border-radius:1px;box-shadow:0 0 0 1.5px rgba(12,8,3,.95);
+  background:repeating-linear-gradient(90deg,#fbf6ea 0 6px,rgba(12,8,3,.95) 6px 8px)!important}
+.key.trilho-obra{width:18px;height:3px;border-radius:0;filter:drop-shadow(0 0 1px #0c0803) drop-shadow(0 0 .5px #0c0803);
+  background:repeating-linear-gradient(90deg,#fbf6ea 0 3px,transparent 3px 7px)!important}
+/* botão de apoio da versão de teste: retangular de cantos arredondados, mais largo, com três moedas de ouro no fim;
+   um igual no fim da página, embaixo do "Sobre o mapa" (no celular o do rodapé já fica no fim, então o segundo some) */
+.teste .apoiar{gap:12px;justify-content:center;min-width:270px;padding:11px 22px;border-radius:10px;font:600 .98rem var(--f-body);
+  color:var(--ink);background:rgba(230,180,80,.08);border:1px solid rgba(230,180,80,.5);transition:background .2s,border-color .2s}
+.teste .foot .apoiar{color:var(--ink)}
+.teste .foot .apoiar:hover,.teste .foot .apoiar:focus-visible{background:rgba(230,180,80,.17);border-color:var(--accent)}
+.apoiar .moedas{width:52px;height:21px;flex:none;fill:none;stroke:none;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.55))}
+.apoio-fim{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:26px;border-top:1px solid var(--hair);text-align:center}
+.apoio-fim[hidden]{display:none}
+.apoio-fim .note{font-size:.78rem;opacity:.8}
+@media (max-width:900px){.apoio-fim{display:none}}
+/* versão leve de teste: círculos do mapa geral com contraste sobre o ouro (como no globo) */
+.teste .boi{fill:rgba(18,11,4,.6);fill-opacity:1;stroke:#f2d9a0;stroke-width:.7}
+.teste .lav{stroke:#140c04;stroke-width:.9;fill-opacity:.95}
+/* medalhões no estado escolhido: boi; lavouras (o fundo e o aro de cada lavoura vêm do app.js) */
+.teste .lav.ico{fill-opacity:1;stroke-width:1.1}
+.teste .boi.ico{fill:url(#pad-boi);fill-opacity:1;stroke:#e6b450;stroke-width:1.1}
