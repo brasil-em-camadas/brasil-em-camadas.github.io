@@ -1,4 +1,4 @@
-/* Layout: o mapa do mundo é o palco inteiro; barra de título fina no topo, painel de vidro à direita. Visual de carta náutica noturna: oceano azul-petróleo com correntes, terra em tom de solo, Brasil em verde, acento dourado. Tema único escuro, por escolha. */
+/* Layout: o mapa do mundo é o palco inteiro; barra de título fina no topo, painel de vidro à direita. Visual de carta náutica noturna: oceano azul-petróleo com correntes, terra em tom de solo, Brasil em ouro (desde 25/10/2026; antes, em verde), acento dourado. Tema único escuro, por escolha. */
 :root{
   color-scheme:dark;
   --night:#05101a; --sea-1:#11303c; --sea-2:#061420; --flow:rgba(132,206,196,.22); --terra:#2c2a1d; --terra-edge:rgba(214,198,150,.24);
@@ -10,7 +10,10 @@
   --lav-soja:#ffd23f; --lav-milho:#ff8c42; --lav-cana:#4ee1c1; --lav-cafe:#c08457; --lav-mandioca:#c77dff; --lav-banana:#ff70a6; --lav-feijao:#e63946; --lav-arroz:#f1faee; --lav-outras:#8d99ae;
   --gasd:#7fdbff; --oleod:#ff8a65; --refin:#ff3d3d; --upgn:#b3ecff; --gnl:#26c6da; --def:#d9e4ec;
   --tr0:#cfd8dc; --tr1:#cfe3ea; --tr2:#f3d27a; --tr3:#ec8f3c; --tr4:#c4462b;
-  --q1:#1d4a2c; --q2:#2b6338; --q3:#3f7e44; --q4:#6aa055; --q5:#a8c97a;
+  /* escala da pintura: ouro sobre preto, escala B (escolha do Edu em 25/10/2026): do bege fosco e opaco (pouco) ao ouro
+     aceso (muito); cinza frio = sem número (frio para não se confundir com o bege); cinza escuro = nenhum ou quase nada
+     (menos de 0,1% do Brasil). Antes de 25/10/2026, uma escala verde */
+  --q1:#6b5d4c; --q2:#8b6c43; --q3:#ae7f37; --q4:#d29a33; --q5:#f4c552; --sem-forte:#5f6b77; --sem-fraco:#363534;
   --t-api:#7fd6c9; --t-manual:#b7d98a; --t-entidade:#e8b75a; --t-base:#a9bdf7; --t-calculado:#c9a2ff; --t-pendente:#ff8f80;
   --f-display:"Big Shoulders Display","Arial Narrow",sans-serif;
   --f-body:"Barlow",ui-sans-serif,system-ui,sans-serif;
@@ -342,12 +345,10 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .key.trilho-obra{width:18px;height:3px;border-radius:0;filter:drop-shadow(0 0 1px #0c0803) drop-shadow(0 0 .5px #0c0803);
   background:repeating-linear-gradient(90deg,#fbf6ea 0 3px,transparent 3px 7px)!important}
 
-/* ---------- versão de teste (endereço com ?teste): só a cor, em avaliação ----------
-   ouro sobre preto, escala B (escolha do Edu em 25/10/2026): luz de fundo, do bege fosco e opaco (pouco) ao ouro aceso
-   (muito), com o relevo por cima; cinza frio = sem número (frio para não se confundir com o bege da escala); cinza escuro =
-   nenhum ou quase nada (menos de 0,1% do Brasil); com pintura, o planeta em azul-noite */
-html.teste{--q1:#6b5d4c;--q2:#8b6c43;--q3:#ae7f37;--q4:#d29a33;--q5:#f4c552;--sem-forte:#5f6b77;--sem-fraco:#363534}
+/* ---------- versão de teste (endereço com ?teste) ----------
+   selo "Teste" no título. Em 25/10/2026 tudo o que estava em teste foi para o site normal; hoje o teste não tem nada a mais */
 .selo-teste{font:600 .7rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--night);background:var(--accent);
   padding:3px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;align-self:center}
-.teste #map.ouro .relevo-cor{filter:brightness(.36) saturate(.7) contrast(1.05)}
-.teste #map.ouro .viz{opacity:.7}
+/* versão leve: com pintura, o planeta em azul-noite (mais escuro e menos colorido), como no globo */
+#map.ouro .relevo-cor{filter:brightness(.36) saturate(.7) contrast(1.05)}
+#map.ouro .viz{opacity:.7}

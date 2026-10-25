@@ -11,9 +11,8 @@ const NIVEL = {
   pendente:  ["n-pendente", "Em apuração", "Ainda sem dado. O campo fica vazio, sem estimativa."]
 };
 const RAMP = ["--q1", "--q2", "--q3", "--q4", "--q5"];
-/* versão de teste (endereço com ?teste): visual novo em avaliação, sem mudar o site normal. Desde 25/10/2026 (o resto
-   foi para o site normal a pedido do Edu), o teste só tem a cor: ouro sobre preto (escala B), os dois cinzas, o relevo
-   dourado e o planeta azul-noite */
+/* versão de teste (endereço com ?teste): visual novo em avaliação, sem mudar o site normal (selo "Teste" no título).
+   Em 25/10/2026 tudo o que estava em teste foi para o site normal, a pedido do Edu; hoje o teste não tem nada a mais */
 const TESTE = new URLSearchParams(location.search).has("teste");
 if (TESTE) document.documentElement.classList.add("teste");
 /* aviãozinho (desenho em 24 × 24), usado no ícone dos aeroportos e na lista de camadas */
@@ -80,10 +79,10 @@ function quintis(vals) {
 /* atmosfera do globo */
 const ATMOS = ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 1, 7, 0];
 const CEU = { "sky-color": "#06121c", "horizon-color": "#1d4b5e", "fog-color": "#0b2233", "atmosphere-blend": ATMOS };
-/* versão de teste (escolha do Edu em 23/10/2026): cinza forte = sem número; cinza fraco = nenhum (ex.: "sem produção")
+/* faixas da pintura (escolha do Edu em 23/10/2026): cinza forte = sem número; cinza fraco = nenhum (ex.: "sem produção")
    ou, nas pinturas de total, menos de 0,1% do Brasil (soma dos estados). Esses estados saem da escala, e as 5 faixas
    (quintis) são feitas só com os outros. Em taxas e porcentagens (por habitante, % da população), só o zero é "nenhum". */
-function classesTeste(P, ufs) {
+function classesEscala(P, ufs) {
   const v = {}; ufs.forEach(s => { v[s] = P.val(s); });
   const total = P.por === "total" ? ufs.reduce((a, s) => a + (v[s] > 0 ? v[s] : 0), 0) : 0;
   const nada = s => (v[s] == null && !!P.vazio) || v[s] === 0;
@@ -191,8 +190,8 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         brasil: { type: "geojson", data: contornoBrasil(estados) },
         /* contorno do estado sob o mouse */
         "contorno-hover": { type: "geojson", data: fc([]) },
-        /* versão de teste: relevo da terra do Brasil por cima da cor dos estados (sombra e luz translúcidas; ver scripts/estudos/terra_ouro.py) */
-        ...(TESTE ? { "relevo-ouro": { type: "image", url: D + "relevo/ouro_relevo.webp", coordinates: [[-75, 6], [-28, 6], [-28, -34.5], [-75, -34.5]] } } : {}),
+        /* relevo da terra do Brasil por cima da cor dos estados (sombra e luz translúcidas; ver scripts/estudos/terra_ouro.py) */
+        "relevo-ouro": { type: "image", url: D + "relevo/ouro_relevo.webp", coordinates: [[-75, 6], [-28, 6], [-28, -34.5], [-75, -34.5]] },
         mundo: { type: "geojson", data: mundo || fc([]) },
         zee: { type: "geojson", data: DATA.zee || fc([]) },
         mt: { type: "geojson", data: DATA.mt || fc([]) },
@@ -238,8 +237,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         { id: "zc-fill", type: "fill", source: "zc", filter: AREA, paint: { "fill-color": "rgba(95,208,168,.16)" } },
         { id: "mt-fill", type: "fill", source: "mt", filter: AREA, paint: { "fill-color": "rgba(159,230,242,.2)" } },
         { id: "estados-fill", type: "fill", source: "estados",
-          paint: { "fill-color": cor("--land"),
-            "fill-opacity": ["case", ["boolean", ["feature-state", "fade"], false], 0.18, ["boolean", ["feature-state", "hover"], false], 0.95, 0.82] } },
+          paint: { "fill-color": "rgba(0,0,0,0)", "fill-opacity": 0 } },   /* cor e opacidade vêm do render() (visualModo) */
         /* estado escolhido "levantado" (24/10/2026, aprovado pelo Edu): com uma pintura, os outros estados mantêm a cor (assim dá
            para comparar); o escolhido ganha uma sombra curta embaixo e, por cima, ele mesmo de novo, para a sombra só aparecer
            do lado de fora */
@@ -247,9 +245,9 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
           paint: { "fill-color": "rgba(6,3,0,.55)", "fill-translate": [7, 9] } },
         { id: "sel-fill", type: "fill", source: "estados", filter: ["==", ["get", "sigla"], ""], layout: { visibility: "none" },
           paint: { "fill-color": "rgba(0,0,0,0)" } },
-        /* versão de teste: o relevo vale até o zoom 5 e some até o 7, onde o relevo sombreado de altitude mostra mais detalhe */
-        ...(TESTE ? [{ id: "relevo-ouro", type: "raster", source: "relevo-ouro", layout: { visibility: "none" },
-          paint: { "raster-opacity": ["interpolate", ["linear"], ["zoom"], 5, 1, 7, 0], "raster-fade-duration": 0, "raster-resampling": "linear" } }] : []),
+        /* o relevo da terra vale até o zoom 5 e some até o 7, onde o relevo sombreado de altitude mostra mais detalhe */
+        { id: "relevo-ouro", type: "raster", source: "relevo-ouro", layout: { visibility: "none" },
+          paint: { "raster-opacity": ["interpolate", ["linear"], ["zoom"], 5, 1, 7, 0], "raster-fade-duration": 0, "raster-resampling": "linear" } },
         { id: "zee-line", type: "line", source: "zee", filter: LIMITE, paint: { "line-color": cor("--sea-line"), "line-width": 1.4, "line-dasharray": [3, 2] } },
         { id: "zc-line", type: "line", source: "zc", filter: LIMITE, paint: { "line-color": cor("--zc"), "line-width": 0.8, "line-opacity": 0.7 } },
         { id: "mt-line", type: "line", source: "mt", filter: LIMITE, paint: { "line-color": cor("--mt"), "line-width": 0.8, "line-opacity": 0.7 } },
@@ -259,9 +257,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
           paint: { "line-color": cor("--pce"), "line-width": 1.3 } },
         { id: "pce-line-ana", type: "line", source: "pce", filter: ["all", LIMITE, ["==", ["get", "status"], "em_analise"]],
           paint: { "line-color": cor("--pce"), "line-width": 1.2, "line-opacity": 0.85, "line-dasharray": [3, 2] } },
-        { id: "estados-line", type: "line", source: "estados", paint: TESTE
-            ? { "line-color": "rgba(240,200,130,.55)", "line-width": 0.9 }
-            : { "line-color": "rgba(220,240,225,.55)", "line-width": 0.8 } },
+        { id: "estados-line", type: "line", source: "estados", paint: { "line-color": "rgba(240,200,130,.55)", "line-width": 0.9 } },
         /* contorno do Brasil em destaque (brilho dourado por baixo de uma linha cheia) */
         { id: "brasil-brilho", type: "line", source: "brasil", layout: { "line-join": "round", "line-cap": "round" },
           paint: { "line-color": "rgba(255,184,70,.45)", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 7, 8, 12], "line-blur": 5 } },
@@ -1069,9 +1065,9 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       const cores = L.id === "pop" ? COR_POP_LEG : COR_NOITE_LEG;
       leg = `<span>${L.titulo}</span><span class="faixa"><span>${L.id === "pop" ? "menos gente" : "escuro"}</span>
         <span class="ramp">${cores.map(c => `<i style="background:${c}"></i>`).join("")}</span><span>${L.id === "pop" ? "mais gente" : "mais luz"}</span></span>`;
-    } else if (P && P.val && TESTE) {
-      /* versão de teste: luz de fundo (brasa → ouro) e os dois cinzas; o relevo sombreado fica por cima (camada "relevo") */
-      const K = classesTeste(P, Object.keys(NAME)), vals = K.escala;
+    } else if (P && P.val) {
+      /* luz de fundo (do bege fosco ao ouro) e os dois cinzas; o relevo sombreado fica por cima (camadas "relevo-ouro" e "relevo") */
+      const K = classesEscala(P, Object.keys(NAME)), vals = K.escala;
       const base = s => K.c[s] === "forte" ? cor("--sem-forte") : K.c[s] === "fraco" ? cor("--sem-fraco") : cor(RAMP[K.c[s]]);
       const m = ["match", ["get", "sigla"]];
       Object.keys(NAME).forEach(s => m.push(s, base(s)));
@@ -1081,18 +1077,6 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(Math.max(...vals))}</span></span>
         ${K.forte ? `<span><i class="key sq" style="background:var(--sem-forte)"></i>sem número</span>` : ""}
         ${K.fraco ? `<span><i class="key sq" style="background:var(--sem-fraco)"></i>${K.fraco}</span>` : ""}`;
-    } else if (P && P.val) {
-      const vals = Object.keys(NAME).map(P.val).filter(v => v != null);
-      const q = quintis(vals), cores = RAMP.map(cor);
-      const m = ["match", ["get", "sigla"]];
-      /* sem valor: sem pintura (o mapa natural); quando a falta tem significado ("sem produção"), cinza, para não parecer o grupo mais baixo */
-      Object.keys(NAME).forEach(s => { const v = P.val(s); m.push(s, v == null ? (P.vazio ? cor("--sem") : "rgba(0,0,0,0)") : cores[q(v)]); });
-      m.push("rgba(0,0,0,0)");
-      if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", m);
-      const DD = DATA[P.id];
-      leg = `<span>${P.nome}${P.unidade ? " (" + P.unidade + ")" : ""}</span><span class="faixa"><span>${P.fmt(Math.min(...vals))}</span>
-        <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(Math.max(...vals))}</span></span>
-        ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : `<span>sem pintura = sem dado</span>`) : ""}`;
       /* "Sem cor": os estados sem pintura, como os países vizinhos (o mapa natural); em volta do escolhido, escurecidos */
     } else if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color",
       ["case", ["boolean", ["feature-state", "fade"], false], "#02070b", ["boolean", ["feature-state", "hover"], false], "#ffffff", "rgba(0,0,0,0)"]);
@@ -1118,7 +1102,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   const FADE = ["boolean", ["feature-state", "fade"], false];
   const COR_POP_LEG = ["#6e370a", "#d77d23", "#ffbe50", "#ffe8aa", "#fffceb"];
   const COR_NOITE_LEG = ["#0a0c1c", "#2c2a44", "#a8823f", "#f2d083", "#fffbe8"];
-  /* ---------- versão de teste: ouro sobre preto (escala B, escolha do Edu em 25/10/2026) ----------
+  /* ---------- ouro sobre preto (escala B, escolha do Edu em 25/10/2026; no site normal desde o mesmo dia) ----------
      Com uma pintura, a "luz de fundo": cada estado acende conforme o valor, do bege fosco (pouco) ao ouro (muito), com o
      relevo sombreado por cima em tons quentes, e o planeta em azul-noite. Com a luz "População", a terra em ouro apagado,
      com as luzes por cima. Em "Sem cor" e na "Iluminação noturna" (a imagem da NASA), o mapa natural. */
@@ -1132,7 +1116,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   function visualModo(L, P) {
     if (!map.getLayer("estados-fill")) return;
     const pinta = !L && !!(P && P.val), pop = !!L && L.id === "pop";
-    if (TESTE && pop) {   /* versão de teste: com a luz População, a terra em ouro apagado */
+    if (pop) {   /* com a luz População, a terra em ouro apagado */
       map.setPaintProperty("estados-fill", "fill-color", "#1d1810");
       map.setPaintProperty("estados-fill", "fill-opacity", ["case", FADE, 0.35, 1]);
     } else map.setPaintProperty("estados-fill", "fill-opacity", pinta ? 1 : ["case", FADE, L ? 0.6 : 0.5, 0]);
@@ -1141,9 +1125,9 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     const levanta = pinta && !(i > 1 && cs[i + 1] === "rgba(0,0,0,0)");
     map.setPaintProperty("sel-fill", "fill-color", cs);
     for (const id of ["sel-fill", "sel-sombra"]) map.setLayoutProperty(id, "visibility", levanta ? "visible" : "none");
-    if (TESTE) visualOuro(L, pinta, pop);
+    visualOuro(L, pinta, pop);
   }
-  /* versão de teste: planeta, divisas e relevo do ouro */
+  /* planeta, divisas e relevo do ouro */
   function visualOuro(L, pinta, pop) {
     /* planeta "azul-noite" com o ouro: o natural, mais escuro e um pouco menos colorido (o quase preto foi reprovado
        pelo Edu em 23/10/2026); com a luz População, um pouco mais escuro, para as luzes aparecerem */
@@ -1153,10 +1137,10 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     map.setPaintProperty("estados-line", "line-color", pinta ? "rgba(18,11,4,.62)" : "rgba(240,200,130,.55)");
     emOuro = pinta || pop;
     if (map.getLayer("relevo-ouro")) map.setLayoutProperty("relevo-ouro", "visibility", emOuro ? "visible" : "none");
-    relevoTeste();
+    relevoOuro();
   }
-  /* o relevo sombreado chega depois da primeira imagem; na versão de teste, em tons quentes sobre o ouro */
-  function relevoTeste() {
+  /* o relevo sombreado chega depois da primeira imagem; em tons quentes sobre o ouro */
+  function relevoOuro() {
     if (!map.getLayer("relevo")) return;
     Object.entries(emOuro ? RELEVO_OURO : RELEVO_NATURAL).forEach(([k, v]) => map.setPaintProperty("relevo", k, v));
     map.setLayoutProperty("relevo", "visibility", luz === "noite" ? "none" : "visible");
@@ -1194,12 +1178,12 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 3, 6, 5, 11, 8, 28],
         "heatmap-color": ["interpolate", ["linear"], ["heatmap-density"], 0, "rgba(0,0,0,0)", 0.08, "rgba(110,55,10,0.35)",
           0.25, "rgba(215,125,35,0.7)", 0.5, "rgba(255,190,80,0.9)", 0.8, "rgba(255,232,170,1)", 1, "rgba(255,252,235,1)"],
-        "heatmap-opacity": 0.95 } }, TESTE ? "estados-line" : "paises-borda");
+        "heatmap-opacity": 0.95 } }, "estados-line");
       /* um ponto de luz por município, do tamanho da população (raiz quadrada: área do ponto proporcional às pessoas) */
       const RAIO = ["interpolate", ["linear"], ["sqrt", ["get", "p"]], 0, 0.6, 100, 1.1, 300, 1.8, 1000, 3.4, 3500, 6.5];
       map.addLayer({ id: "luz-pop-ponto", type: "circle", source: "luz-pop", paint: {
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, ["*", 0.6, RAIO], 5, ["*", 0.9, RAIO], 8, ["*", 1.6, RAIO]],
-        "circle-color": "#ffe4a8", "circle-blur": 0.6, "circle-opacity": 0.9 } }, TESTE ? "estados-line" : "paises-borda");
+        "circle-color": "#ffe4a8", "circle-blur": 0.6, "circle-opacity": 0.9 } }, "estados-line");
     }
     const vis = (id, on) => map.getLayer(id) && map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
     vis("luz-noite", luz === "noite"); vis("luz-pop-calor", luz === "pop"); vis("luz-pop-ponto", luz === "pop");
@@ -1460,7 +1444,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     map.addLayer({ id: "relevo", type: "hillshade", source: "demh",
       paint: { "hillshade-exaggeration": 0.5, "hillshade-shadow-color": "#04100a", "hillshade-highlight-color": "rgba(255,255,240,.55)", "hillshade-accent-color": "#0c2a18" } }, "zee-line");
     if (luz !== "off") map.setLayoutProperty("relevo", "visibility", "none");
-    if (TESTE) relevoTeste();
+    relevoOuro();
   });
   let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { ajustarCabecalho(); map.resize(); limitarZoom(); }, 150); });
   /* a legenda acompanha os créditos quando eles abrem ou fecham (botão i) e quando a própria legenda muda de tamanho */

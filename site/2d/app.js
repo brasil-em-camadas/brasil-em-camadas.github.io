@@ -11,8 +11,8 @@ const NIVEL = {
   pendente:  ["n-pendente", "Em apuração", "Ainda sem dado. O campo fica vazio, sem estimativa."]
 };
 const RAMP = ["--q1", "--q2", "--q3", "--q4", "--q5"];
-/* versão de teste (endereço com ?teste): visual novo em avaliação, sem mudar o site normal. Desde 25/10/2026, só a cor
-   (ouro sobre preto, escala B, os dois cinzas e o planeta escuro com pintura); o resto foi para o site normal */
+/* versão de teste (endereço com ?teste): visual novo em avaliação, sem mudar o site normal (selo "Teste" no título).
+   Em 25/10/2026 tudo o que estava em teste foi para o site normal, a pedido do Edu; hoje o teste não tem nada a mais */
 const TESTE = new URLSearchParams(location.search).has("teste");
 if (TESTE) document.documentElement.classList.add("teste");
 /* aviãozinho (desenho em 24 × 24), usado nos aeroportos */
@@ -27,14 +27,14 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   <path d="M12 2c4 4 5.2 9.4 4.6 21H7.4C6.8 11.4 8 6 12 2z" fill="#f3efe6" stroke="#1a1206" stroke-width="1.2"/>
   <path d="M12 2.6c2.4 2.4 3.6 5 4.1 7.6H7.9c.5-2.6 1.7-5.2 4.1-7.6z" fill="#e6b450"/>
   <circle cx="12" cy="14.2" r="2.1" fill="#2b3c4d" stroke="#1a1206" stroke-width=".9"/><circle cx="11.3" cy="13.5" r=".6" fill="#cfe6ff"/>`;
-/* versão de teste (escolha do Edu em 23/10/2026), igual ao globo: cinza forte = sem número; cinza fraco = nenhum (ex.:
+/* faixas da pintura (escolha do Edu em 23/10/2026), iguais às do globo: cinza forte = sem número; cinza fraco = nenhum (ex.:
    "sem produção") ou, nas pinturas de total, menos de 0,1% do Brasil (soma dos estados). Esses estados saem da escala,
    e as 5 faixas (quintis, a mesma conta do globo) são feitas só com os outros. Em taxas e porcentagens, só o zero é "nenhum". */
 function quintis(vals) {
   const s = [...vals].sort((a, b) => a - b), q = [0.2, 0.4, 0.6, 0.8].map(p => s[Math.floor(p * (s.length - 1))]);
   return v => q.filter(t => v > t).length;
 }
-function classesTeste(P, ufs) {
+function classesEscala(P, ufs) {
   const v = {}; ufs.forEach(s => { v[s] = P.val(s); });
   const total = P.por === "total" ? ufs.reduce((a, s) => a + (v[s] > 0 ? v[s] : 0), 0) : 0;
   const nada = s => (v[s] == null && !!P.vazio) || v[s] === 0;
@@ -704,26 +704,18 @@ function rewind(f) {
     LAYERS.filter(l => G[l.id]).forEach(l => G[l.id].attr("display", l.on ? null : "none"));
     const P = PAINT.find(p => p.id === paint);
     let leg = "";
-    if (P && P.val && TESTE) {
-      /* versão de teste: escala de luz (brasa → ouro) e os dois cinzas */
-      const K = classesTeste(P, Object.keys(NAME)), vals = K.escala;
+    if (P && P.val) {
+      /* escala de luz (do bege fosco ao ouro) e os dois cinzas */
+      const K = classesEscala(P, Object.keys(NAME)), vals = K.escala;
       states.style("fill", d => { const c = K.c[d.properties.sigla]; return c === "forte" ? "var(--sem-forte)" : c === "fraco" ? "var(--sem-fraco)" : `var(${RAMP[c]})`; });
       leg = `<span>${P.nome}${P.unidade ? " (" + P.unidade + ")" : ""}</span><span class="faixa"><span>${P.fmt(d3.min(vals))}</span>
         <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(d3.max(vals))}</span></span>
         ${K.forte ? `<span><i class="key sq" style="background:var(--sem-forte)"></i>sem número</span>` : ""}
         ${K.fraco ? `<span><i class="key sq" style="background:var(--sem-fraco)"></i>${K.fraco}</span>` : ""}`;
-    } else if (P && P.val) {
-      const vals = Object.keys(NAME).map(P.val).filter(v => v != null);
-      const q = d3.scaleQuantile().domain(vals).range(RAMP);
-      states.style("fill", d => { const v = P.val(d.properties.sigla); return v == null ? (P.vazio ? "var(--sem)" : null) : `var(${q(v)})`; });
-      const D = DATA[P.id];
-      leg = `<span>${P.nome}${P.unidade ? " (" + P.unidade + ")" : ""}</span><span class="faixa"><span>${P.fmt(d3.min(vals))}</span>
-        <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(d3.max(vals))}</span></span>
-        ${vals.length < 27 ? (P.vazio ? `<span><i class="key sq" style="background:var(--sem)"></i>${P.vazio}</span>` : `<span>sem pintura = sem dado</span>`) : ""}`;
     } else states.style("fill", null);
-    /* com pintura (classe "pinta"), o estado escolhido levanta; na versão de teste (classe "ouro"), o planeta fica escuro */
+    /* com pintura (classe "pinta"), o estado escolhido levanta e o planeta fica escuro (classe "ouro") */
     svg.classed("pinta", !!(P && P.val));
-    if (TESTE) svg.classed("ouro", !!(P && P.val));
+    svg.classed("ouro", !!(P && P.val));
     /* legenda completa (escala de cores + símbolos das camadas ligadas): sempre no rodapé, ao lado dos níveis de confiança;
        sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
     const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
