@@ -1,9 +1,11 @@
-/* Brasil em Camadas — ícones das camadas por município (desenhos em 24 × 24), usados no globo (3d/app3d.js)
-   e na versão leve (2d/app.js). Versão de teste: aparecem só dentro do estado escolhido, num medalhão escuro
-   com aro na cor da camada. Gerados por scripts/estudos/icones_lavouras.py.
+/* Brasil em Camadas — ícones das camadas de pontos (desenhos em 24 × 24), usados no globo (3d/app3d.js)
+   e na versão leve (2d/app.js), num medalhão escuro com aro na cor da camada. Lavouras e boi: só no estado escolhido
+   (scripts/estudos/icones_lavouras.py). Versão de teste: usinas, poços, celular e pedágios também no estado escolhido;
+   portos, refinarias e unidades de gás no mapa todo (scripts/estudos/icones_camadas.py).
    Cada ícone é uma lista de partes:
      ["f", caminho]     preenchido na cor da camada
      ["s", caminho, w]  preenchido, com um contorno escuro de w em volta (separa peças que se sobrepõem)
+     ["h", caminho]     preenchido em escuro (janela, furo, raio da gota)
      ["x", caminho, w]  risco escuro de largura w (sulco, nó, grão marcado)
      ["l", caminho, w]  risco na cor da camada (haste, cabinho) */
 "use strict";
@@ -85,7 +87,124 @@ const ICONES = {
     ["l", "M12 21.4L12 11.6", 1.8],
     ["s", "M12 14.6Q11.39 7.12 4 8.4Q5.34 14.93 12 14.6z", 1.0],
     ["s", "M12 11.8Q19.28 11.66 19.8 4.4Q11.69 3.67 12 11.8z", 1.0],
-    ["l", "M7.6 21.4L16.4 21.4", 1.6]]
+    ["l", "M7.6 21.4L16.4 21.4", 1.6]],
+  /* ---- outras camadas de pontos (scripts/estudos/icones_camadas.py) ---- */
+  /* hidrelétrica: gota com raio */
+  hid: [
+    ["f", "M12 2.4C12 2.4 4.6 10.6 4.6 15.4a7.4 7.4 0 0 0 14.8 0C19.4 10.6 12 2.4 12 2.4z"],
+    ["h", "M13.4 8.8L8.6 15.6h3.1l-1.1 5.4 4.9-7.6h-3.2l1.1-4.6z"]],
+  /* eólica: cata-vento de três pás */
+  eol: [
+    ["f", "M11.1 10.2h1.8l.9 11.4h-3.6z"],
+    ["f", "M12 8.6Q15.07 4.8 12 1Q10.32 4.8 12 8.6z"],
+    ["f", "M12 8.6Q13.75 13.16 18.58 12.4Q16.13 9.05 12 8.6z"],
+    ["f", "M12 8.6Q7.17 7.84 5.42 12.4Q9.55 11.95 12 8.6z"],
+    ["s", "M10.3 8.6a1.7 1.7 0 1 0 3.4 0a1.7 1.7 0 1 0 -3.4 0z", 0.8],
+    ["l", "M7 21.8L17 21.8", 1.4]],
+  /* solar: sol e painel */
+  sol: [
+    ["f", "M3.9 5.6a2.1 2.1 0 1 0 4.2 0a2.1 2.1 0 1 0 -4.2 0z"],
+    ["l", "M9.1 5.6L10.4 5.6", 1.1],
+    ["l", "M8.19 7.79L9.11 8.71", 1.1],
+    ["l", "M6 8.7L6 10", 1.1],
+    ["l", "M3.81 7.79L2.89 8.71", 1.1],
+    ["l", "M2.9 5.6L1.6 5.6", 1.1],
+    ["l", "M3.81 3.41L2.89 2.49", 1.1],
+    ["l", "M6 2.5L6 1.2", 1.1],
+    ["l", "M8.19 3.41L9.11 2.49", 1.1],
+    ["f", "M6.4 11.2h11.4l4.4 8.2H10.8z"],
+    ["x", "M10.2 11.2L14.6 19.4", 0.9],
+    ["x", "M14 11.2L18.4 19.4", 0.9],
+    ["x", "M8.6 15.3L20 15.3", 0.9],
+    ["l", "M16.5 19.4L16.5 22.2", 1.5],
+    ["l", "M12.5 22.4L20.5 22.4", 1.4]],
+  /* térmica a biomassa: folha com nervuras */
+  bio: [
+    ["f", "M4.6 19.4Q18.48 17.88 20 4Q6.12 5.52 4.6 19.4z"],
+    ["x", "M6.6 17.4L17.4 6.6", 1.0],
+    ["x", "M10.4 13.6L9.4 10.2", 0.8],
+    ["x", "M10.4 13.6L13.8 14.6", 0.8],
+    ["x", "M13.8 10.2L12.8 6.8", 0.8],
+    ["x", "M13.8 10.2L17.2 11.2", 0.8],
+    ["l", "M3.2 20.8L5.6 18.4", 1.6]],
+  /* térmica fóssil: fábrica com chaminé e fumaça */
+  fos: [
+    ["f", "M2.6 21.4V12.2l4.8 3V12.2l4.8 3V12.2l4.4 2.7v6.5z"],
+    ["f", "M16.8 5.4h3.4v16h-3.4z"],
+    ["h", "M4.6 17h2v2h-2zM9.4 17h2v2h-2zM14.1 17h1.6v2h-1.6z"],
+    ["f", "M16.9 2.9a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0 -3 0z"],
+    ["f", "M20 1.9a1 1 0 1 0 2 0a1 1 0 1 0 -2 0z"],
+    ["l", "M2 21.6L22 21.6", 1.2]],
+  /* nuclear: átomo */
+  nuc: [
+    ["l", "M21.6 12A9.6 3.5 0 1 0 2.4 12A9.6 3.5 0 1 0 21.6 12z", 1.35],
+    ["l", "M16.8 20.31A9.6 3.5 60 1 0 7.2 3.69A9.6 3.5 60 1 0 16.8 20.31z", 1.35],
+    ["l", "M16.8 3.69A9.6 3.5 -60 1 0 7.2 20.31A9.6 3.5 -60 1 0 16.8 3.69z", 1.35],
+    ["f", "M10 12a2 2 0 1 0 4 0a2 2 0 1 0 -4 0z"]],
+  /* poço de petróleo: torre de perfuração */
+  poco: [
+    ["l", "M12 2.6L6.1 21.4", 1.7],
+    ["l", "M12 2.6L17.9 21.4", 1.7],
+    ["l", "M10.18 8.4L13.82 8.4", 1.3],
+    ["l", "M8.42 14L15.58 14", 1.3],
+    ["l", "M6.79 19.2L17.21 19.2", 1.3],
+    ["l", "M10.18 8.4L15.58 14", 0.9],
+    ["l", "M13.82 8.4L8.42 14", 0.9],
+    ["l", "M8.42 14L17.21 19.2", 0.9],
+    ["l", "M15.58 14L6.79 19.2", 0.9],
+    ["f", "M10.4 1.6h3.2v2.4h-3.2z"],
+    ["l", "M3.6 21.6L20.4 21.6", 1.8]],
+  /* celular: torre com ondas */
+  antena: [
+    ["f", "M10.2 7.6a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0z"],
+    ["l", "M12 9.4L12 21.6", 1.8],
+    ["l", "M12 12.6L8.2 21.6", 1.3],
+    ["l", "M12 12.6L15.8 21.6", 1.3],
+    ["l", "M7.4 21.8L16.6 21.8", 1.4],
+    ["l", "M15.22 4.9A4.2 4.2 0 0 1 15.22 10.3", 1.5],
+    ["l", "M17.99 3.25A7.4 7.4 0 0 1 17.99 11.95", 1.5],
+    ["l", "M8.78 10.3A4.2 4.2 0 0 1 8.78 4.9", 1.5],
+    ["l", "M6.01 11.95A7.4 7.4 0 0 1 6.01 3.25", 1.5]],
+  /* pedágio: cabine e cancela */
+  pedagio: [
+    ["f", "M2.6 8.6L6.2 5.6l3.6 3H8.8v12.8H3.6V8.6z"],
+    ["h", "M4.6 10.4h3.2v3.2H4.6z"],
+    ["f", "M9.8 11.6h12.2v2.8H9.8z"],
+    ["h", "M12.2 11.6h1.8l-1 2.8h-1.8zM16 11.6h1.8l-1 2.8H15zM19.8 11.6h1.8l-1 2.8h-1.8z"],
+    ["l", "M2 21.6L22 21.6", 1.4]],
+  /* porto: âncora */
+  ancora: [
+    ["l", "M9.9 4.6a2.1 2.1 0 1 0 4.2 0a2.1 2.1 0 1 0 -4.2 0z", 1.6],
+    ["l", "M12 6.7L12 20.8", 2],
+    ["l", "M7.8 10L16.2 10", 1.9],
+    ["l", "M4.8 13.6C5.2 18.6 8.6 21 12 21s6.8-2.4 7.2-7.4", 1.9],
+    ["f", "M2.8 15.2l2-3.6 2.4 3.4z"],
+    ["f", "M21.2 15.2l-2-3.6-2.4 3.4z"]],
+  /* refinaria: torres de destilação e tanque */
+  refinaria: [
+    ["f", "M4.6 21.4V8.2a2 2 0 0 1 4 0v13.2z"],
+    ["f", "M10.6 21.4V4.6a1.8 1.8 0 0 1 3.6 0v16.8z"],
+    ["f", "M15.8 21.4v-5.4a3 3 0 0 1 6 0v5.4z"],
+    ["x", "M4.6 12.4L8.6 12.4", 0.8],
+    ["x", "M4.6 16.4L8.6 16.4", 0.8],
+    ["x", "M10.6 9L14.2 9", 0.8],
+    ["x", "M10.6 13.2L14.2 13.2", 0.8],
+    ["x", "M10.6 17.4L14.2 17.4", 0.8],
+    ["l", "M8.6 10.6L10.6 10.6", 1.1],
+    ["l", "M14.2 13.6L17.6 13.6", 1.1],
+    ["l", "M2.4 21.6L21.6 21.6", 1.4]],
+  /* unidade de processamento de gás natural: chama */
+  upgn: [
+    ["f", "M12 2.2c.8 3.6 6.4 6.6 6.4 12.4a6.4 6.4 0 0 1-12.8 0c0-3.2 1.7-5.4 3.4-6.8.2 2.2 1 3.6 2.4 4.3C11.6 9.4 11 5.6 12 2.2z"],
+    ["h", "M12 12.6c.5 2 3 3.2 3 5.8a3 3 0 0 1-6 0c0-1.6.8-2.7 1.6-3.4.2 1 .6 1.6 1.2 2-.3-1.6-.2-3 .2-4.4z"]],
+  /* terminal de GNL: navio com os tanques esféricos */
+  gnl: [
+    ["f", "M1.8 14.2h20.4l-2.8 5.6H4.6z"],
+    ["s", "M9.2 14.2A2.6 2.6 0 1 0 4 14.2A2.6 2.6 0 1 0 9.2 14.2z", 0.8],
+    ["s", "M14.2 14.2A2.6 2.6 0 1 0 9 14.2A2.6 2.6 0 1 0 14.2 14.2z", 0.8],
+    ["s", "M19.2 14.2A2.6 2.6 0 1 0 14 14.2A2.6 2.6 0 1 0 19.2 14.2z", 0.8],
+    ["f", "M18.8 9.6h2.6v4.6h-2.6z"],
+    ["l", "M2.4 22.2q2-1.4 4 0t4 0 4 0 4 0 4 0", 1.2]]
 };
 /* desenha o ícone num canvas já posicionado (coordenadas de 24 × 24) */
 function desenharIcone(x, partes, cor) {
@@ -94,6 +213,7 @@ function desenharIcone(x, partes, cor) {
     const P = new Path2D(d);
     if (t === "s") { x.lineWidth = w * 2; x.strokeStyle = RISCO; x.stroke(P); }
     if (t === "f" || t === "s") { x.fillStyle = cor; x.fill(P); }
+    else if (t === "h") { x.fillStyle = RISCO; x.fill(P); }
     else if (t === "x" || t === "l") { x.lineWidth = w; x.strokeStyle = t === "x" ? RISCO : cor; x.stroke(P); }
   }
 }
@@ -109,6 +229,7 @@ function medalhaoCanvas(partes, cor) {
 /* o mesmo desenho em SVG (cor = "currentColor": quem usa define a cor com "color") */
 function iconeSVG(partes) {
   return partes.map(([t, d, w]) => t === "f" ? `<path d="${d}" fill="currentColor"/>`
+    : t === "h" ? `<path d="${d}" fill="${RISCO}"/>`
     : t === "s" ? `<path d="${d}" fill="currentColor" stroke="${RISCO}" stroke-width="${w * 2}" stroke-linejoin="round" paint-order="stroke"/>`
     : `<path d="${d}" fill="none" stroke="${t === "x" ? RISCO : "currentColor"}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`).join("");
 }
@@ -117,6 +238,15 @@ function chaveIcone(nome, corVar) {
   return `<svg class="key ico" viewBox="0 0 64 64" style="color:var(${corVar})" aria-hidden="true"><circle cx="32" cy="32" r="29.5" fill="${MEDALHAO}" stroke="currentColor" stroke-width="3"/>`
     + `<g transform="translate(10.4 10.4) scale(1.8)">${iconeSVG(ICONES[nome])}</g></svg>`;
 }
+/* versão de teste (diretriz God's Eye View, 25/10/2026): nome da imagem no mapa (globo) e do padrão "pad-ico-<nome>"
+   (versão leve) → [desenho, cor da camada] */
+const IMG_ICO = { "us-hid": ["hid", "--hid"], "us-eol": ["eol", "--eol"], "us-sol": ["sol", "--sol"], "us-bio": ["bio", "--bio"], "us-fos": ["fos", "--fos"],
+  "us-nuc": ["nuc", "--nuc"], poco: ["poco", "--oil"], "cel-1": ["antena", "--cel1"], "cel-2": ["antena", "--cel2"], "cel-3": ["antena", "--cel3"],
+  "cel-4": ["antena", "--cel4"], "ped-0": ["pedagio", "--tr0"], "ped-1": ["pedagio", "--tr1"], "ped-2": ["pedagio", "--tr2"], "ped-3": ["pedagio", "--tr3"],
+  "ped-4": ["pedagio", "--tr4"], porto: ["ancora", "--port"], "ref-refinaria": ["refinaria", "--refin"], "ref-upgn": ["upgn", "--upgn"], "ref-gnl": ["gnl", "--gnl"] };
+/* chave da legenda com o medalhão do mapa: camada → desenho, pela cor do item da legenda */
+const ICO_LEG = { lav: c => c.replace("--lav-", ""), usinas: c => ({ "--hid": "hid", "--eol": "eol", "--sol": "sol", "--bio": "bio", "--fos": "fos", "--nuc": "nuc" })[c],
+  oil: () => "poco", refin: c => ({ "--refin": "refinaria", "--upgn": "upgn", "--gnl": "gnl" })[c], celm: () => "antena", pedagio: () => "pedagio", ports: () => "ancora" };
 /* moedas de ouro caindo (botão "Apoie este projeto"; pedido do Edu em 25/10/2026: quatro, em alturas diferentes, como se
    estivessem caindo). Cada moeda: [x, y, raio, giro em graus, achatamento] — achatamento 1 = de frente; menos = de lado,
    girando na queda; a borda grossa aparece embaixo da face */
@@ -131,3 +261,20 @@ const MOEDAS = (() => {
   return `<svg class="moedas" viewBox="0 0 66 30" aria-hidden="true">`
     + [[9, 19, 7.6, -12, 1], [24.5, 9.5, 7.2, 24, 0.55], [39.5, 20, 7.4, -8, 0.85], [56, 8, 6.8, -32, 0.42]].map(moeda).join("") + `</svg>`;
 })();
+/* selo "Dados atualizados em [data]" (diretriz God's Eye View; versão de teste desde 25/10/2026): a data da última vez
+   que um robô buscou dados com sucesso nos órgãos oficiais (arquivos robo*.json, gravados pelo robô do GitHub); cada
+   camada continua com a própria data no painel. A data é a do registro do robô (em UTC), a mesma que o painel mostra.
+   Ao criar um robô novo, acrescentar o arquivo dele em ROBOS */
+const ROBOS = ["robo_ibge.json", "petroleo/robo.json", "energia/robo_aneel.json", "energia/robo.json", "celular/robo.json",
+  "trafego/robo.json", "aeroportos/robo.json", "defesa/robo.json"];
+async function seloDados(base) {
+  const ler = async a => { try { const r = await fetch(base + a); return r.ok ? await r.json() : null; } catch (e) { return null; } };
+  const rs = await Promise.all(ROBOS.map(ler));
+  const datas = rs.filter(r => r && r.rodou_em && Object.values(r.passos || {}).some(v => String(v).startsWith("ok")))
+    .map(r => r.rodou_em.slice(0, 10)).sort();
+  const brand = document.querySelector(".brand");
+  if (!datas.length || !brand) return;
+  const d = datas[datas.length - 1].split("-").reverse().join("/");
+  brand.insertAdjacentHTML("beforeend", `<span class="selo-dados" title="Última vez que o robô do site buscou os dados nos órgãos oficiais. Cada camada mostra a própria data no painel.">`
+    + `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Dados atualizados em ${d}</span>`);
+}
