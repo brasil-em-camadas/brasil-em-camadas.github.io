@@ -12,11 +12,12 @@ const NIVEL = {
 };
 const RAMP = ["--q1", "--q2", "--q3", "--q4", "--q5"];
 /* versão de teste (endereço com ?teste): visual novo em avaliação, sem mudar o site normal (selo "Teste" no título).
-   Em 25/10/2026 tudo o que estava em teste foi para o site normal, a pedido do Edu; hoje o teste não tem nada a mais */
+   Em 25 e 26/10/2026 tudo o que estava em teste foi para o site normal, a pedido do Edu; hoje o teste não tem nada a mais */
 const TESTE = new URLSearchParams(location.search).has("teste");
 if (TESTE) document.documentElement.classList.add("teste");
-/* versão de teste: fundo inteiro com profundidade (icones.js, fundoTeste; ?teste&fundo=a, b ou c) */
-if (TESTE) fundoTeste("../");
+/* fundo inteiro com profundidade (icones.js, fundoSite): na versão leve, a imagem do chão de hexágonos (fundo B), que
+   aparece no rodapé; no site normal desde 26/10/2026 */
+fundoSite("../");
 /* aviãozinho (desenho em 24 × 24), usado nos aeroportos */
 const AVIAO = "M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z";
 /* ícones por município só dentro do estado escolhido (como no globo); boi em 24 × 24 */
@@ -229,7 +230,7 @@ function rewind(f) {
   const contornoBr = contornoBrasil(estados);
   const gBr = root.append("g");
   if (contornoBr) { gBr.append("path").attr("class", "contorno-br-brilho"); gBr.append("path").attr("class", "contorno-br"); }
-  /* versão de teste: fronteira terrestre na cor do tipo (em rio ou lagoa, seca, seca na mata), por cima do contorno dourado */
+  /* fronteira terrestre na cor do tipo (em rio ou lagoa, seca, seca na mata), por cima do contorno dourado */
   const COM_PAIS = { URU: "o Uruguai", ARG: "a Argentina", PAR: "o Paraguai", BOL: "a Bolívia", PER: "o Peru", COL: "a Colômbia", VEN: "a Venezuela",
     GUY: "a Guiana", SUR: "o Suriname", GUF: "a Guiana Francesa (França)" };
   const gFront = root.append("g");
@@ -255,17 +256,23 @@ function rewind(f) {
      ou tracejado (sem pavimento) */
   const gRodEst = root.append("g");
   let rodEstP = gRodEst.selectAll("path");
-  function desenharRodEst() { rodEstP = gRodEst.selectAll("path").data(DATA.rodest.features).join("path").attr("class", "road est"); }
+  /* cada estadual com uma borda escura por baixo (o mesmo desenho duas vezes), para aparecer sobre a pintura dourada */
+  function desenharRodEst() {
+    gRodEst.selectAll("path.est-borda").data(DATA.rodest.features).join("path").attr("class", "road est-borda");
+    gRodEst.selectAll("path.est").data(DATA.rodest.features).join("path").attr("class", "road est");
+    rodEstP = gRodEst.selectAll("path");
+  }
   const gRod = root.append("g");
   const roads = gRod.selectAll("path").data(DATA.rod ? DATA.rod.features : []).join("path")
     .attr("class", d => "road" + (d.properties.p ? "" : " terra") + (d.properties.e ? " est-adm" : ""));
-  /* versão de teste: pista dupla (DNIT, SNV de out/2026): uma linha larga na cor e uma escura no meio = duas linhas finas */
+  /* pista dupla (DNIT, SNV de out/2026): borda escura, faixa clara e um traço escuro no meio (o canteiro) = duas pistas */
   const gDup = root.append("g");
   const DUP = DATA.dup ? DATA.dup.features : [];
+  const dupB = gDup.selectAll("path.dup-borda").data(DUP).join("path").attr("class", "dup-borda");
   const dupL = gDup.selectAll("path.dup").data(DUP).join("path").attr("class", d => "dup" + (d.properties.d === 2 ? " obra" : ""));
   const dupM = gDup.selectAll("path.dup-meio").data(DUP).join("path").attr("class", "dup-meio");
   dupL.append("title").text(d => `${d.properties.br}${d.properties.u ? " (" + d.properties.u + ")" : ""}: ${d.properties.d === 1 ? "pista dupla" : "em obra de duplicação"} (${DATA.dup.meta.fonte}).`);
-  /* versão de teste: fluxo nas rodovias federais (DNIT, VMDa 2025), sob demanda: largura pelos veículos por dia, cor pela
+  /* fluxo nas rodovias federais (DNIT, VMDa 2025), sob demanda: largura pelos veículos por dia, cor pela
      parte de ônibus e caminhões */
   const gVmda = root.append("g");
   let vmdaP = gVmda.selectAll("path");
@@ -440,7 +447,7 @@ function rewind(f) {
     return `${p[13] ? "Validador do pedágio" : "Praça de pedágio"} ${p[2]} · ${p[3]} · ${p[4]}, km ${p[5]} · ${p[6]}${p[7] ? "/" + p[7] : ""}: `
       + (p[12] === 1 ? `sem volume informado à ANTT em ${M.referencia}.` : p[12] === 2 ? "o volume informado à ANTT não fecha (mais de 40% aparece como motos); o número não é mostrado."
         : `≈ ${fmt(p[8])} veículos por dia, ${fmt1(p[9])}% caminhões e ônibus (média de ${p[10]} ${p[10] > 1 ? "meses" : "mês"}, ${p[11]}).`) + " Fonte: ANTT."; });
-  /* versão de teste: passagens de fronteira (cidades gêmeas) e as estradas do outro lado (tracejadas, esmaecendo) */
+  /* passagens de fronteira (cidades gêmeas) e as estradas do outro lado (tracejadas, esmaecendo) */
   const gPassa = root.append("g");
   const PA = DATA.passa ? DATA.passa.features : [];
   const passaE = gPassa.selectAll("path").data(PA.filter(f => f.properties.k === "estrada")).join("path").attr("class", "passa-estrada");
@@ -488,8 +495,8 @@ function rewind(f) {
   let proj, path, W, H, head = 0, k = 1;
   const zoom = d3.zoom().scaleExtent([0.8, 12]).on("zoom", e => {
     root.attr("transform", e.transform); k = e.transform.k; place();
-    /* base mundial simplificada: de perto, as divisas entre os vizinhos somem (versão de teste; como no globo, zoom 4,8 a 6) */
-    if (TESTE) vizB.style("opacity", Math.max(0, Math.min(1, (5.7 - k) / 3.2)));
+    /* base mundial simplificada: de perto, as divisas entre os vizinhos somem (como no globo, zoom 4,8 a 6) */
+    vizB.style("opacity", Math.max(0, Math.min(1, (5.7 - k) / 3.2)));
   }).on("end", raioPocos);   /* são milhares de poços: o tamanho deles só é refeito quando o zoom termina */
   svg.call(zoom).on("dblclick.zoom", null);
 
@@ -541,7 +548,7 @@ function rewind(f) {
     posBoi(); ltP.attr("d", path); usinasC.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]);
     posCel(); raioPocos();
     roads.attr("d", path); rodEstP.attr("d", path); frontB.attr("d", path); frontL.attr("d", path); passaE.attr("d", path);
-    dupL.attr("d", path); dupM.attr("d", path); vmdaP.attr("d", path);
+    dupB.attr("d", path); dupL.attr("d", path); dupM.attr("d", path); vmdaP.attr("d", path);
     states.attr("d", path);
     if (contornoBr) gBr.selectAll("path").attr("d", path(contornoBr));
     vizP.attr("d", path); vizB.attr("d", path);
@@ -902,7 +909,7 @@ function rewind(f) {
 
   /* aeroportos do estado (ANAC): aeródromos públicos, quantos têm voos de passageiros e os mais movimentados */
   const passageiros = n => n >= 1e6 ? `${milhoes(n / 1e6)} de passageiros` : `${fmt(Math.round(n / 1e3))} mil passageiros`;
-  /* versão de teste: pista dupla do estado (DNIT, SNV) */
+  /* pista dupla do estado (DNIT, SNV) */
   function fichaDupla(s) {
     if (!DATA.dup) return "";
     const M = DATA.dup.meta, k = M.km_por_uf[s];
@@ -910,7 +917,7 @@ function rewind(f) {
       ${k && k[1] ? `<div class="list">Mais ≈ ${fmt(k[1])} km em obra de duplicação.</div>` : ""}
       ${pill("manual")} <span class="note">${esc(M.fonte)}.</span>`;
   }
-  /* versão de teste: passagens de fronteira do estado (cidades gêmeas) */
+  /* passagens de fronteira do estado (cidades gêmeas) */
   function fichaPassagens(s) {
     if (!DATA.passa) return "";
     const ps = DATA.passa.features.filter(f => f.properties.k === "passagem" && f.properties.br.includes("(" + s + ")"));

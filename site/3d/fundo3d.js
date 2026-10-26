@@ -1,4 +1,4 @@
-/* Brasil em Camadas — fundo do globo com distorção gravitacional (versão de teste; pedido do Edu em 25/10/2026: "gostei
+/* Brasil em Camadas — fundo do globo com distorção gravitacional (no site normal desde 26/10/2026; pedido do Edu em 25/10/2026: "gostei
    mais do B, e pensei como ficaria se na parte em torno do globo tivesse o efeito da distorção gravitacional? com essas
    mesmas linhas?"). O chão de hexágonos do fundo B é desenhado pela placa de vídeo (WebGL2), atrás da página toda, e se
    deforma em volta do globo:
@@ -8,7 +8,7 @@
             Edu em 25/10/2026; o desvio no contorno é menor que o raio, para não formar o anel ("auréola") em volta.
    O efeito acompanha a posição, o tamanho e a inclinação do globo (aproximar, afastar, relevo 3D) e some quando o globo
    enche a tela. Só redesenha quando algo muda (globo, tamanho da janela, rolagem, mouse). Sem WebGL2, fica a imagem do
-   fundo B (icones.js, fundoTeste). Carregado só na versão de teste, por app3d.js. */
+   fundo B (icones.js, fundoSite). Carregado por app3d.js com o fundo "lente" (padrão) ou "funil". */
 "use strict";
 function fundoGravidade(map, modo) {
   const cv = document.createElement("canvas");

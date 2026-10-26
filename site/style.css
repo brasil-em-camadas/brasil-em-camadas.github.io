@@ -177,7 +177,9 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .road{stroke-width:.85;stroke-opacity:.8}.road.terra{stroke-dasharray:3 3}
 /* trecho com sigla BR administrado pelo estado (coincidente com rodovia estadual ou delegado): cor das estaduais, fora da soma federal */
 .road.est-adm{stroke:var(--road-est)}
-.road.est{stroke:var(--road-est);stroke-opacity:.55}
+.road.est{stroke:var(--road-est);stroke-opacity:.95;stroke-width:1.05}
+/* borda escura por baixo das estaduais, para aparecer sobre a pintura dourada (25/10/2026) */
+.road.est-borda{stroke:rgba(14,9,4,.62);stroke-opacity:1;stroke-width:2.6}
 .rail.obra{stroke-width:1.4;stroke-dasharray:4 5}
 .nomes{pointer-events:none}
 .uf{font:600 11px var(--f-mono);letter-spacing:.08em;fill:#f4f1e6;text-anchor:middle;dominant-baseline:middle;paint-order:stroke;stroke:rgba(8,20,12,.75);stroke-width:3px}
@@ -367,17 +369,18 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .g5.ico{stroke-width:1.7;stroke-opacity:1}
 
 /* ---------- versão de teste (endereço com ?teste) ----------
-   selo "Teste" no título. Em 25/10/2026 tudo o que estava em teste foi para o site normal; fica pronta para os próximos
-   experimentos (pôr as regras novas atrás de .teste) */
+   selo "Teste" no título. Em 25 e 26/10/2026 tudo o que estava em teste foi para o site normal; fica pronta para os
+   próximos experimentos (pôr as regras novas atrás de .teste). As regras abaixo do selo (fundo, globo que se afasta,
+   botão Apoie, fronteira, passagens, pista dupla, fluxo) já valem para o site normal */
 .selo-teste{font:600 .7rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--night);background:var(--accent);
   padding:3px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;align-self:center}
 /* fundo inteiro com profundidade (icones.js, fundoTeste): imagem parada atrás da página toda (em volta do globo e no
    rodapé), um pouco maior que a tela para poder andar com o mouse e a rolagem sem mostrar a borda */
-.teste.fundo{background:#03080d}
-.teste.fundo body{background:transparent}
-.teste.fundo body::before{content:"";position:fixed;inset:-6%;z-index:-1;pointer-events:none;
+.fundo{background:#03080d}
+.fundo body{background:transparent}
+.fundo body::before{content:"";position:fixed;inset:-6%;z-index:-1;pointer-events:none;
   background:#03080d var(--fundo-img) center/cover no-repeat;transform:translate3d(var(--fx,0px),var(--fy,0px),0)}
-.teste.fundo #map.maplibregl-map{background:transparent}
+.fundo #map.maplibregl-map{background:transparent}
 /* fundo desenhado pela placa de vídeo (3d/fundo3d.js): no lugar da imagem */
 canvas.fundo-vivo{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;display:block}
 .fundo-vivo body::before{display:none}
@@ -398,23 +401,27 @@ canvas.fundo-vivo{position:fixed;inset:0;width:100%;height:100%;z-index:-1;point
 }
 /* botão Apoie sobre o fundo com linhas (pedido do Edu em 25/10/2026: "o botão de apoie fica misturado com o fundo"):
    fundo quase opaco, contorno dourado inteiro e um brilho dourado em volta; a frase embaixo, clara e com sombra */
-.teste.fundo .apoiar{background:rgba(14,11,6,.93);border-color:rgba(242,192,105,.9);
+.fundo .apoiar{background:rgba(14,11,6,.93);border-color:rgba(242,192,105,.9);
   box-shadow:0 0 0 1px rgba(0,0,0,.55),0 8px 26px rgba(0,0,0,.6),0 0 22px rgba(230,180,80,.28)}
-.teste.fundo .foot .apoiar:hover,.teste.fundo .foot .apoiar:focus-visible{background:rgba(42,31,12,.96);border-color:var(--accent);
+.fundo .foot .apoiar:hover,.fundo .foot .apoiar:focus-visible{background:rgba(42,31,12,.96);border-color:var(--accent);
   box-shadow:0 0 0 1px rgba(0,0,0,.55),0 8px 26px rgba(0,0,0,.6),0 0 32px rgba(230,180,80,.45)}
-.teste.fundo .apoio .note,.teste.fundo .apoio-fim .note{opacity:1;color:var(--ink);text-shadow:0 1px 3px #000,0 0 12px #000}
-/* fronteira terrestre por tipo e passagens de fronteira (versão de teste; scripts/gerar_fronteira.py) */
+.fundo .apoio .note,.fundo .apoio-fim .note{opacity:1;color:var(--ink);text-shadow:0 1px 3px #000,0 0 12px #000}
+/* fronteira terrestre por tipo e passagens de fronteira (scripts/gerar_fronteira.py) */
 :root{--fronteira:#ffcf7a;--fr-agua:#4fb3ff;--fr-seca:#c8874a;--fr-mata:#2fa65e}
 .front-borda{fill:none;stroke:rgba(6,4,2,.85);stroke-width:5;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
 .front{fill:none;stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:visibleStroke}
 .front.t-rio,.front.t-lagoa{stroke:var(--fr-agua)}.front.t-seca{stroke:var(--fr-seca)}.front.t-mata{stroke:var(--fr-mata)}
 .passa-estrada{fill:none;stroke:var(--road);stroke-opacity:.7;stroke-width:1.4;stroke-dasharray:5 3;vector-effect:non-scaling-stroke;pointer-events:none}
 .passa.ico{fill-opacity:1;stroke-width:1.2;cursor:pointer;vector-effect:non-scaling-stroke}
-/* pista dupla (DNIT, SNV) e fluxo nas rodovias federais (DNIT, VMDa 2025) (versão de teste) */
-:root{--dup:#ffd166}
+/* pista dupla (DNIT, SNV) e fluxo nas rodovias federais (DNIT, VMDa 2025) */
+/* pista dupla: faixa clara com borda escura e traço escuro no meio (o canteiro); em obra, a faixa tracejada.
+   Até 25/10/2026 era amarela (#ffd166) e sumia sobre a pintura dourada ("ficaram um pouco apagadas"). Em obra, cinza
+   (tracejada pareceria ferrovia) */
+:root{--dup:#fbf7ee;--dup-obra:#aaa395}
+.dup-borda{fill:none;stroke:rgba(14,9,4,.85);stroke-width:5.4;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
 .dup{fill:none;stroke:var(--dup);stroke-width:3.6;stroke-linejoin:round;vector-effect:non-scaling-stroke;pointer-events:visibleStroke}
-.dup.obra{stroke-dasharray:6 4}
-.dup-meio{fill:none;stroke:var(--road);stroke-width:1.3;stroke-linejoin:round;vector-effect:non-scaling-stroke;pointer-events:none}
+.dup.obra{stroke:var(--dup-obra)}
+.dup-meio{fill:none;stroke:rgba(14,9,4,.9);stroke-width:1.1;stroke-linejoin:round;vector-effect:non-scaling-stroke;pointer-events:none}
 .vmda{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;stroke-opacity:.92}
 .vmda.f0{stroke:var(--tr0)}.vmda.f1{stroke:var(--tr1)}.vmda.f2{stroke:var(--tr2)}.vmda.f3{stroke:var(--tr3)}.vmda.f4{stroke:var(--tr4)}
-.key.dup{height:4px;background:none;border-top:2px solid currentColor;border-bottom:2px solid currentColor;border-radius:0}
+.key.dup{height:6px;border-radius:0;background:linear-gradient(currentColor 0 2.2px,#140c04 2.2px 3.8px,currentColor 3.8px 6px);box-shadow:0 0 0 1.3px rgba(14,9,4,.9)}

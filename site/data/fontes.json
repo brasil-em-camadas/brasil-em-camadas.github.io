@@ -241,7 +241,6 @@
    "ministerio": "def",
    "nivel": "calculado",
    "ligada": true,
-   "teste": true,
    "cor": "--fr-agua",
    "fonte": "IBGE, BC250 versão 2025 (países e hidrografia) e Monitoramento da Cobertura e Uso da Terra (grade de 1 km, 2020); classificação do projeto: fronteira em rio ou lagoa onde a linha segue a água, seca no resto, e seca na mata onde a vegetação florestal cobre a maior parte em volta. A costa continua com o contorno dourado",
    "legenda": [
@@ -291,7 +290,6 @@
    "ministerio": "trans",
    "nivel": "manual",
    "ligada": false,
-   "teste": true,
    "cor": "--dup",
    "fonte": "DNIT, Sistema Nacional de Viação (SNV), versão de 20/10/2026: trechos federais duplicados e em obra de duplicação. Arquivo do DNIT baixado à mão, do Brasil",
    "legenda": [
@@ -302,8 +300,8 @@
     },
     {
      "nome": "em obra de duplicação",
-     "cor": "--dup",
-     "forma": "tr"
+     "cor": "--dup-obra",
+     "forma": "dup"
     }
    ]
   },
@@ -347,7 +345,6 @@
    "ministerio": "trans",
    "nivel": "manual",
    "ligada": true,
-   "teste": true,
    "cor": "--fronteira",
    "fonte": "IBGE, lista oficial das 33 cidades gêmeas (Portaria MDR nº 2.507/2021) e BC250 (rodovias); cidade do outro lado e tipo de ligação de artigos e reportagens (ver a janelinha de cada passagem); estrada do outro lado: Natural Earth (base aberta, desenho aproximado), só até uns 45 km da fronteira",
    "legenda": [
@@ -721,7 +718,6 @@
    "ministerio": "trans",
    "nivel": "manual",
    "ligada": false,
-   "teste": true,
    "cor": "--tr3",
    "fonte": "DNIT, Plano Nacional de Contagem de Tráfego: VMDa 2025, a estimativa do DNIT de veículos por dia em cada trecho federal (modelagem a partir de 703 pontos de contagem, não contagem em cada trecho); largura pela quantidade de veículos, cor pela parte de ônibus e caminhões. Arquivos do DNIT baixados à mão, do Brasil",
    "legenda": [
