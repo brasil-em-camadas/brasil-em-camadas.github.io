@@ -790,6 +790,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     for (const id of ["estado-sel", "sel-halo", "sel-sombra", "sel-fill"]) map.setFilter(id, ["==", ["get", "sigla"], sel || ""]);
     linhasTrem();
     sel ? verEstado(sel) : verBrasil(1000);
+    realceContorno();
     render(); ficha();
   }
   document.getElementById("back").onclick = () => { if (sel) selecionar(sel); };
@@ -808,13 +809,14 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     if (hover !== s) { if (hover) map.setFeatureState({ source: "estados", id: hover }, { hover: false }); hover = s; map.setFeatureState({ source: "estados", id: s }, { hover: true }); realceContorno(); }
   });
   map.on("mouseleave", "estados-fill", () => { map.getCanvas().style.cursor = ""; if (hover) map.setFeatureState({ source: "estados", id: hover }, { hover: false }); hover = null; realceContorno(); });
-  /* o estado sob o mouse ganha o contorno dourado com a luz correndo (sem movimento para quem pede menos animação) */
+  /* o estado sob o mouse ganha o contorno dourado com a luz correndo (sem movimento para quem pede menos animação); o
+     estado escolhido não ganha, porque já tem o contorno próprio (pedido do Edu em 26/10/2026) */
   let geoAtual = estados, animHover = 0;
   function realceContorno() {
     const src = map.getSource("contorno-hover");
     if (!src) return;
     cancelAnimationFrame(animHover);
-    const f = hover && geoAtual.features.find(x => x.properties.sigla === hover);
+    const f = hover && hover !== sel && geoAtual.features.find(x => x.properties.sigla === hover);
     if (!f) { src.setData(fc([])); return; }
     const g = f.geometry, aneis = (g.type === "Polygon" ? [g.coordinates] : g.coordinates).flatMap(pl => pl);
     src.setData(fc(aneis.map(r => ({ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: r } }))));

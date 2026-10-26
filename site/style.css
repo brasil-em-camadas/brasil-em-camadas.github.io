@@ -57,7 +57,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .st:hover{stroke:#ffd27a;stroke-width:2.2;stroke-dasharray:10 6;animation:contorno-corre 1.4s linear infinite;filter:drop-shadow(0 0 3px rgba(255,190,80,.85))}
 @keyframes contorno-corre{to{stroke-dashoffset:-32}}
 @media (prefers-reduced-motion:reduce){.st:hover{animation:none;stroke-dasharray:none}}
-.st.sel{stroke:#fff3d0;stroke-width:2.4;stroke-dasharray:none}
+.st.sel,.st.sel:hover{stroke:#fff3d0;stroke-width:2.4;stroke-dasharray:none;animation:none}
 .st.fade{fill:rgba(2,7,11,.5)}
 /* ferrovias: símbolo clássico dos mapas (faixa escura .rail-borda, miolo claro cortado por "dormentes"); em obras, só os
    traços, claros com borda escura */
