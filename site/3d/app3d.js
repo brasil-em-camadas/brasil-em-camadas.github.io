@@ -120,6 +120,9 @@ const ICO_ESTADO = { boi: ["boi-geral", "boi", "u"], lav: ["lav-geral", "lav", "
 const NO_ESTADO = new Set(Object.keys(ICO_ESTADO));
 /* escolher um estado com a pintura ligada a estas camadas liga os ícones sozinho (só boi e lavouras, como antes) */
 const AUTO_ESTADO = new Set(["boi", "lav"]);
+/* camadas que começam desligadas e ligam sozinhas ao escolher um estado, desligando de novo ao voltar ao Brasil (pedido do
+   Edu em 26/10/2026); se a pessoa mexer nelas, vale o que ela escolheu */
+const COM_ESTADO = new Set(["passa", "rodest"]);
 /* "fronteira com ..." */
 const COM_PAIS = { URU: "o Uruguai", ARG: "a Argentina", PAR: "o Paraguai", BOL: "a Bolívia", PER: "o Peru", COL: "a Colômbia", VEN: "a Venezuela",
   GUY: "a Guiana", SUR: "o Suriname", GUF: "a Guiana Francesa (França)" };
@@ -299,6 +302,13 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
           paint: { "line-color": "rgba(255,184,70,.45)", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 7, 8, 12], "line-blur": 5 } },
         { id: "brasil-linha", type: "line", source: "brasil", layout: { "line-join": "round", "line-cap": "round" },
           paint: { "line-color": "#ffe2a6", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1.5, 8, 2.4] } },
+        /* estado escolhido: contorno claro com borda escura (o dourado sumia sobre o ouro). Fica por baixo da fronteira por
+           tipo, para a cor da fronteira com os vizinhos continuar aparecendo com o estado escolhido (pedido do Edu em
+           26/10/2026); por cima dela ficavam só os ícones, rodovias e ferrovias, que agora passam por cima do contorno */
+        { id: "sel-halo", type: "line", source: "estados", filter: ["==", ["get", "sigla"], ""], layout: { "line-join": "round" },
+          paint: { "line-color": "rgba(12,7,2,.9)", "line-width": 8 } },
+        { id: "estado-sel", type: "line", source: "estados", filter: ["==", ["get", "sigla"], ""], layout: { "line-join": "round" },
+          paint: { "line-color": "#fff3d0", "line-width": 3 } },
         /* a fronteira terrestre na cor do tipo (em rio ou lagoa, seca, seca na mata), por cima do contorno
            dourado (a costa continua dourada); borda escura para a cor aparecer sobre o ouro e sobre os vizinhos */
         { id: "front-borda", type: "line", source: "fronttipo", layout: { "line-join": "round", "line-cap": "round", visibility: "none" },
@@ -502,11 +512,6 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
             "icon-allow-overlap": true, "icon-ignore-placement": true,
             "icon-size": ["interpolate", ["linear"], ["zoom"], 3, ["interpolate", ["linear"], ["sqrt", ["get", "n"]], 1, 0.5, 7.2, 1.45],
               6, ["interpolate", ["linear"], ["sqrt", ["get", "n"]], 1, 0.75, 7.2, 2.1], 9, ["interpolate", ["linear"], ["sqrt", ["get", "n"]], 1, 1, 7.2, 2.7]] } },
-        /* estado escolhido: contorno claro com borda escura (o dourado sumia sobre o ouro) */
-        { id: "sel-halo", type: "line", source: "estados", filter: ["==", ["get", "sigla"], ""], layout: { "line-join": "round" },
-          paint: { "line-color": "rgba(12,7,2,.9)", "line-width": 8 } },
-        { id: "estado-sel", type: "line", source: "estados", filter: ["==", ["get", "sigla"], ""], layout: { "line-join": "round" },
-          paint: { "line-color": "#fff3d0", "line-width": 3 } },
         { id: "pce-rotulo", type: "symbol", source: "pce", filter: ["==", ["get", "parte"], "rotulo"],
           layout: { "text-field": ["get", "texto"], "text-font": fonte(SEMI), "text-size": 10, "text-letter-spacing": 0.12, "text-transform": "uppercase", "text-max-width": 14 },
           paint: { "text-color": "rgba(244,196,235,.9)", ...halo } },
@@ -777,6 +782,10 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     if (sel) { detalhar(); aba("ficha"); }
     /* escolher um estado com a pintura Rebanho (ou uma das lavouras) liga os ícones dos municípios dele */
     if (sel) camadasDa(paint).filter(l => AUTO_ESTADO.has(l.id)).forEach(l => { if (!l.on) { l.on = true; l.dono = paint; } });
+    LAYERS.filter(l => COM_ESTADO.has(l.id) && l.nivel !== "pendente").forEach(l => {
+      if (sel && !l.on && !l.mexeu) { l.on = true; l.auto = true; }
+      if (!sel && l.auto) { l.on = false; l.auto = false; }
+    });
     estados.features.forEach(f => map.setFeatureState({ source: "estados", id: f.properties.sigla }, { fade: !!sel && f.properties.sigla !== sel }));
     for (const id of ["estado-sel", "sel-halo", "sel-sombra", "sel-fill"]) map.setFilter(id, ["==", ["get", "sigla"], sel || ""]);
     linhasTrem();
@@ -1098,7 +1107,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     minF = b.dataset.m; guardadas = null;
     mins.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-pressed", x === b));
     /* o filtro liga as camadas do ministério, menos as marcadas com "no_filtro": false (ficam na lista, desligadas) */
-    LAYERS.forEach(l => { if (l.nivel !== "pendente") l.on = padrao(l); });
+    LAYERS.forEach(l => { if (l.nivel !== "pendente") { l.on = padrao(l); l.auto = l.mexeu = false; } });
     proxima = "ligar";
     const p = PAINT.find(p => p.ministerio === minF && p.ok);
     paint = minF === "todos" ? "pop" : (p ? p.id : "none");
@@ -1155,7 +1164,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         <span><span class="nm">${l.id === "rail" ? '<i class="key trilho"></i>' : l.cor ? `<i class="key" style="background:var(${l.cor})"></i>` : ""}${l.nome} ${pill(l.nivel)}</span>
         <span class="src">${l.fonte}${quando(l.id)} · ${F.ministerios[l.ministerio]}${l.baixando ? " · <b>carregando…</b>" : ""}${l.falhou ? " · <b>não foi possível carregar agora; tente de novo</b>" : ""}${NO_ESTADO.has(l.id) ? " · <b>ícones ao escolher um estado</b>" : ""}</span></span>
       </label>`).join("") : `<p class="note">Este ministério ainda não tem camadas de mapa.</p>`;
-    lv.filter(l => l.nivel !== "pendente").forEach(l => document.getElementById("ly-" + l.id).onchange = e => { l.on = e.target.checked; render(); });
+    lv.filter(l => l.nivel !== "pendente").forEach(l => document.getElementById("ly-" + l.id).onchange = e => { l.on = e.target.checked; l.mexeu = true; l.auto = false; render(); });
     /* ligar ou desligar de uma vez todas as camadas da lista (respeita o ministério escolhido) */
     const lig = lv.filter(l => l.nivel !== "pendente"), todas = document.getElementById("todas");
     if (todas) {
@@ -1166,9 +1175,9 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       todas.title = proxima === "padrao" ? "Volta às camadas que começam ligadas" : "";
       /* ligar todas → desligar todas → padrão, nessa ordem */
       todas.onclick = () => {
-        if (proxima === "ligar") { lig.forEach(l => { l.on = true; }); proxima = "desligar"; }
-        else if (proxima === "desligar") { lig.forEach(l => { l.on = false; }); proxima = "padrao"; }
-        else { lig.forEach(l => { l.on = padrao(l); }); proxima = "ligar"; }
+        if (proxima === "ligar") { lig.forEach(l => { l.on = true; l.auto = false; }); proxima = "desligar"; }
+        else if (proxima === "desligar") { lig.forEach(l => { l.on = false; l.auto = false; }); proxima = "padrao"; }
+        else { lig.forEach(l => { l.on = padrao(l); l.auto = l.mexeu = false; }); proxima = "ligar"; }
         guardadas = null; render();
       };
     }

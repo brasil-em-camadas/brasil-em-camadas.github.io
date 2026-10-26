@@ -26,6 +26,13 @@ const AVIAO = "M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-
 const NO_ESTADO = new Set(["boi", "lav", "usinas", "oil", "celm", "g5", "pedagio"]);
 /* escolher um estado com a pintura ligada a estas camadas liga os ícones sozinho (só boi e lavouras, como antes) */
 const AUTO_ESTADO = new Set(["boi", "lav"]);
+/* camadas que começam desligadas e ligam sozinhas ao escolher um estado, desligando de novo ao voltar ao Brasil (pedido do
+   Edu em 26/10/2026); se a pessoa mexer nelas, vale o que ela escolheu */
+const COM_ESTADO = new Set(["passa", "rodest"]);
+const autoEstado = (camadas, sel) => camadas.filter(l => COM_ESTADO.has(l.id) && l.nivel !== "pendente").forEach(l => {
+  if (sel && !l.on && !l.mexeu) { l.on = true; l.auto = true; }
+  if (!sel && l.auto) { l.on = false; l.auto = false; }
+});
 const BOI = "M2.6 10.4Q3.4 8.4 5.2 8.1L4.3 5.9 5.7 7.8 6.6 7.7 7.3 5.9 7.4 8.1Q8.2 8.5 9.4 8.5L18.2 8.4Q20.6 8.4 20.9 10.6L21.5 14 20.8 14.1 20.4 11.8Q20.2 13.2 19.6 14L19.7 19.6 18.1 19.6 17.8 15.2 10.4 15.2 10 19.6 8.4 19.6 8.1 14.6Q7.1 13.7 6.8 12.7 5.6 12.9 4.3 12.6 3 12.3 2.6 11.6Z";
 /* foguete de Alcântara (desenho em 24 × 34, igual ao do globo; a base fica no ponto) */
 const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/>
@@ -646,7 +653,7 @@ function rewind(f) {
     svg.transition().duration(reduce ? 0 : dur).ease(d3.easeCubicInOut).call(zoom.transform, t);
   }
   function reset() {
-    sel = null;
+    sel = null; autoEstado(LAYERS, sel);
     svg.transition().duration(reduce ? 0 : 900).ease(d3.easeCubicInOut).call(zoom.transform, d3.zoomIdentity);
     render(); ficha();
   }
@@ -655,6 +662,7 @@ function rewind(f) {
     sel = s; aba("ficha");
     /* escolher um estado com a pintura Rebanho (ou uma das lavouras) liga os ícones dos municípios dele */
     camadasDa(paint).filter(l => AUTO_ESTADO.has(l.id)).forEach(l => { if (!l.on) { l.on = true; l.dono = paint; } });
+    autoEstado(LAYERS, sel);
     zoomTo(estados.features.find(f => f.properties.sigla === s)); render(); ficha();
   }
   document.getElementById("back").onclick = reset;
@@ -708,7 +716,7 @@ function rewind(f) {
     minF = b.dataset.m;
     mins.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-pressed", x === b));
     /* o filtro liga as camadas do ministério, menos as marcadas com "no_filtro": false (ficam na lista, desligadas) */
-    LAYERS.forEach(l => { if (l.nivel !== "pendente") l.on = padrao(l); });
+    LAYERS.forEach(l => { if (l.nivel !== "pendente") { l.on = padrao(l); l.auto = l.mexeu = false; } });
     proxima = "ligar";
     const p = PAINT.find(p => p.ministerio === minF && p.ok);
     paint = minF === "todos" ? "pop" : (p ? p.id : "none");
@@ -747,7 +755,7 @@ function rewind(f) {
         <span><span class="nm">${l.id === "rail" ? '<i class="key trilho"></i>' : l.cor ? `<i class="key" style="background:var(${l.cor})"></i>` : ""}${l.nome} ${pill(l.nivel)}</span>
         <span class="src">${l.fonte}${quando(l.id)} · ${F.ministerios[l.ministerio]}${l.baixando ? " · <b>carregando…</b>" : ""}${l.falhou ? " · <b>não foi possível carregar agora; tente de novo</b>" : ""}${NO_ESTADO.has(l.id) ? " · <b>ícones ao escolher um estado</b>" : ""}</span></span>
       </label>`).join("") : `<p class="note">Este ministério ainda não tem camadas de mapa.</p>`;
-    lv.filter(l => l.nivel !== "pendente").forEach(l => document.getElementById("ly-" + l.id).onchange = e => { l.on = e.target.checked; render(); });
+    lv.filter(l => l.nivel !== "pendente").forEach(l => document.getElementById("ly-" + l.id).onchange = e => { l.on = e.target.checked; l.mexeu = true; l.auto = false; render(); });
     /* ligar ou desligar de uma vez todas as camadas da lista (respeita o ministério escolhido) */
     const lig = lv.filter(l => l.nivel !== "pendente"), todas = document.getElementById("todas");
     if (todas) {
@@ -758,9 +766,9 @@ function rewind(f) {
       todas.title = proxima === "padrao" ? "Volta às camadas que começam ligadas" : "";
       /* ligar todas → desligar todas → padrão, nessa ordem */
       todas.onclick = () => {
-        if (proxima === "ligar") { lig.forEach(l => { l.on = true; }); proxima = "desligar"; }
-        else if (proxima === "desligar") { lig.forEach(l => { l.on = false; }); proxima = "padrao"; }
-        else { lig.forEach(l => { l.on = padrao(l); }); proxima = "ligar"; }
+        if (proxima === "ligar") { lig.forEach(l => { l.on = true; l.auto = false; }); proxima = "desligar"; }
+        else if (proxima === "desligar") { lig.forEach(l => { l.on = false; l.auto = false; }); proxima = "padrao"; }
+        else { lig.forEach(l => { l.on = padrao(l); l.auto = l.mexeu = false; }); proxima = "ligar"; }
         render();
       };
     }
