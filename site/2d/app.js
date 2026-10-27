@@ -968,7 +968,7 @@ function rewind(f) {
       ${G5 ? `<br>${pill(C.nivel)} <span class="note">5G: Anatel, presença da telefonia móvel (RQUAL), ${esc(G5.referencia)} · atualizado em ${G5.atualizado_em}</span>` : ""}`;
     if (g) h += `
       <div class="kv" style="margin-top:8px"><span>Moradores com sinal 5G</span><span class="v">${fmt1(g.valor)}% · ${pos(G)}º</span></div>
-      <div class="list">${fmt(g.municipios_com_5g)} de ${fmt(g.municipios)} municípios com algum sinal 5G.${G.anos.length > 1 ? " Antes: " + G.anos.slice(0, -1).map((a, i) => `${a}, ${g.serie[i] == null ? "—" : fmt1(g.serie[i]) + "%"}`).join("; ") + "." : ""}
+      <div class="list">${fmt(g.municipios_com_5g)} de ${fmt(g.municipios)} municípios com algum sinal 5G previsto (conta também o sinal que chega das antenas de cidades vizinhas).${G.anos.length > 1 ? " Antes: " + G.anos.slice(0, -1).map((a, i) => `${a}, ${g.serie[i] == null ? "—" : fmt1(g.serie[i]) + "%"}`).join("; ") + "." : ""}
         É previsão da Anatel, não medição; no estado, a média dos municípios pela população do Censo 2022.</div>
       ${pill(G.nivel)} <span class="note">${esc(G.fonte)}, ${esc(G.referencia)} · atualizado em ${G.atualizado_em}</span>`;
     if (x) h += `
