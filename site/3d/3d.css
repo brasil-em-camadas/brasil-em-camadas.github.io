@@ -43,6 +43,9 @@
 .luz-info{display:grid;gap:6px;margin:2px 0 4px}
 .luz-info p{margin:0}
 .pop-fonte{font-size:11px;color:var(--muted)}
+/* janelinha do celular e da internet: detalhes em letra menor e avisos (poucos testes, números fora do comum) */
+.pop-sub{font-size:12px;line-height:1.35;color:var(--muted)}
+.pop-aviso{font-size:11.5px;line-height:1.35;color:#f2dc6b;font-style:italic}
 /* lista longa na janelinha (empresas de defesa de um município): rola dentro dela */
 .pop-lista{max-height:180px;overflow-y:auto;margin:6px 0 4px;padding-right:4px;font-size:12px;line-height:1.35;scrollbar-width:thin}
 .pop-lista span{color:var(--muted);font-size:11px}

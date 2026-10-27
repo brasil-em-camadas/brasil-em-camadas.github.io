@@ -146,6 +146,42 @@
    ]
   },
   {
+   "id": "vel",
+   "nome": "Velocidade do celular",
+   "arquivo": "celular/velocidade_uf.json",
+   "unidade": "Mbps, mediana dos testes",
+   "ministerio": "com",
+   "por": "taxa",
+   "camadas": [
+    "velm"
+   ],
+   "teste": true
+  },
+  {
+   "id": "g5m",
+   "nome": "Moradores com 5G",
+   "arquivo": "celular/cobertura_5g_uf.json",
+   "unidade": "% dos moradores com sinal 5G",
+   "ministerio": "com",
+   "por": "percentual",
+   "camadas": [
+    "g5c"
+   ],
+   "teste": true
+  },
+  {
+   "id": "blf",
+   "nome": "Banda larga fixa",
+   "arquivo": "celular/banda_larga_uf.json",
+   "unidade": "acessos por 100 habitantes",
+   "ministerio": "com",
+   "por": "taxa",
+   "camadas": [
+    "blm"
+   ],
+   "teste": true
+  },
+  {
    "id": "defesa",
    "nome": "Indústria de defesa",
    "arquivo": "defesa/estados.json",
@@ -590,6 +626,134 @@
     {
      "nome": "Município com 5G",
      "forma": "anel"
+    }
+   ]
+  },
+  {
+   "id": "velm",
+   "nome": "Velocidade medida do celular",
+   "tipo": "pontos",
+   "arquivo": "celular/velocidade.json",
+   "sob_demanda": true,
+   "ministerio": "com",
+   "no_filtro": false,
+   "nivel": "api",
+   "fonte": "Anatel, medidas de velocidade da telefonia móvel (RQUAL): mediana dos testes de download feitos nos celulares de quem tem o programa de medição da Anatel instalado e autorizou os testes, no trimestre mais recente publicado. É medição de verdade, não estimativa. Clique num ponto para ver o 4G, o 5G, as operadoras e o upload",
+   "ligada": false,
+   "cor": "--vel5",
+   "teste": true,
+   "legenda": [
+    {
+     "nome": "50 Mbps ou mais",
+     "forma": "pt",
+     "cor": "--vel5"
+    },
+    {
+     "nome": "35 a 50 Mbps",
+     "forma": "pt",
+     "cor": "--vel4"
+    },
+    {
+     "nome": "25 a 35 Mbps",
+     "forma": "pt",
+     "cor": "--vel3"
+    },
+    {
+     "nome": "15 a 25 Mbps",
+     "forma": "pt",
+     "cor": "--vel2"
+    },
+    {
+     "nome": "menos de 15 Mbps",
+     "forma": "pt",
+     "cor": "--vel1"
+    },
+    {
+     "nome": "menos de 50 testes (só o contorno: número pouco firme)",
+     "forma": "anel",
+     "cor": "--muted"
+    }
+   ]
+  },
+  {
+   "id": "g5c",
+   "nome": "Moradores com sinal 5G",
+   "tipo": "pontos",
+   "arquivo": "celular/cobertura_5g.json",
+   "sob_demanda": true,
+   "ministerio": "com",
+   "no_filtro": false,
+   "nivel": "api",
+   "fonte": "Anatel, Meu Município: parte dos moradores de cada município com sinal 5G de pelo menos uma operadora, no ano mais recente publicado. É previsão da Anatel (antenas licenciadas e um modelo de propagação do sinal), não medição; o 5G que chegou depois aparece na camada “5G nos municípios”. Clique num ponto para ver as operadoras e os anos anteriores",
+   "ligada": false,
+   "cor": "--c5g3",
+   "teste": true,
+   "legenda": [
+    {
+     "nome": "80% ou mais dos moradores com sinal 5G",
+     "forma": "pt",
+     "cor": "--c5g4"
+    },
+    {
+     "nome": "50 a 80%",
+     "forma": "pt",
+     "cor": "--c5g3"
+    },
+    {
+     "nome": "25 a 50%",
+     "forma": "pt",
+     "cor": "--c5g2"
+    },
+    {
+     "nome": "menos de 25%",
+     "forma": "pt",
+     "cor": "--c5g1"
+    },
+    {
+     "nome": "sem sinal 5G previsto",
+     "forma": "pt",
+     "cor": "--c5g0"
+    }
+   ]
+  },
+  {
+   "id": "blm",
+   "nome": "Banda larga fixa por município",
+   "tipo": "pontos",
+   "arquivo": "celular/banda_larga.json",
+   "sob_demanda": true,
+   "ministerio": "com",
+   "no_filtro": false,
+   "nivel": "api",
+   "fonte": "Anatel, acessos da banda larga fixa: contratos de internet fixa (em casas e empresas) por 100 habitantes em cada município, a conta oficial da Anatel, no mês completo mais recente. Clique num ponto para ver a fibra óptica, a velocidade contratada e as empresas",
+   "ligada": false,
+   "cor": "--bl4",
+   "teste": true,
+   "legenda": [
+    {
+     "nome": "30 ou mais acessos por 100 habitantes",
+     "forma": "pt",
+     "cor": "--bl5"
+    },
+    {
+     "nome": "20 a 30",
+     "forma": "pt",
+     "cor": "--bl4"
+    },
+    {
+     "nome": "10 a 20",
+     "forma": "pt",
+     "cor": "--bl3"
+    },
+    {
+     "nome": "5 a 10",
+     "forma": "pt",
+     "cor": "--bl2"
+    },
+    {
+     "nome": "menos de 5",
+     "forma": "pt",
+     "cor": "--bl1"
     }
    ]
   },

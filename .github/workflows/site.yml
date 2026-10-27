@@ -44,9 +44,12 @@ jobs:
       - name: Buscar dados da EPE (linhas de transmissão e subestações)
         continue-on-error: true
         run: python scripts/atualizar_epe.py
-      # Telefonia celular (sinal 4G/5G e municípios com 5G) dos dados abertos da Anatel; se falhar, ficam os arquivos antigos.
-      - name: Buscar dados da Anatel (telefonia celular)
+      # Telefonia celular e internet dos dados abertos da Anatel: sinal 4G/5G, municípios com 5G, moradores com sinal 5G,
+      # velocidade medida no celular (arquivo de ≈ 1 GB, só baixado quando a Anatel publica um novo) e banda larga fixa
+      # (só os dois arquivos usados, de dentro do zip de ≈ 1 GB); se falhar, ficam os arquivos antigos.
+      - name: Buscar dados da Anatel (celular e internet)
         continue-on-error: true
+        timeout-minutes: 40
         run: python scripts/atualizar_anatel.py
       # Tráfego nos pedágios federais (ANTT); o servidor da ANTT às vezes demora, então o passo tem limite de tempo; se falhar, ficam os arquivos antigos.
       - name: Buscar o tráfego nos pedágios federais (ANTT)

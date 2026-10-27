@@ -7,6 +7,11 @@
   --glass:rgba(10,18,20,.8); --bar:rgba(9,15,17,.94);
   --accent:#e6b450; --road:#f6f3ec; --mt:#9fe6f2; --sea-line:#58cfe0; --rail:#fbf6ea; --port:#f4f7f5; --air:#a9bdf7; --cla:#ff7a6b; --zc:#5fd0a8; --pce:#e58fd3; --oil:#f6c945; --uep:#ff6b4a; --campo:#d9902b; --presal:#fff0a8; --sem:#3e433f; --boi:#d9a66b; --road-est:#a9bdcc; --hid:#4ea3ff; --eol:#e6eefc; --sol:#ffe14d; --bio:#9be15d; --fos:#ff7b7b; --nuc:#ff4fd8; --lt:#b18cff;
   --cel1:#ff5c4d; --cel2:#ff9b45; --cel3:#f2dc6b; --cel4:#8fe3f0; --g5:#f06bff;
+  /* celular e internet (em teste desde 27/10/2026): velocidade medida (do vermelho lento ao ciano rápido), moradores com
+     sinal 5G (do roxo apagado ao rosa aceso) e banda larga fixa (do azul fundo ao quase branco) */
+  --vel1:#ff5c4d; --vel2:#ff9b45; --vel3:#f2dc6b; --vel4:#a6e07a; --vel5:#8fe3f0;
+  --c5g0:#5d5262; --c5g1:#8e4fa6; --c5g2:#c25fd9; --c5g3:#f06bff; --c5g4:#ffc4ff;
+  --bl1:#3a6896; --bl2:#3f8fc9; --bl3:#4fc0ea; --bl4:#93e4f6; --bl5:#e4fbff;
   --lav-soja:#ffd23f; --lav-milho:#ff8c42; --lav-cana:#4ee1c1; --lav-cafe:#c08457; --lav-mandioca:#c77dff; --lav-banana:#ff70a6; --lav-feijao:#e63946; --lav-arroz:#f1faee; --lav-outras:#8d99ae;
   --gasd:#7fdbff; --oleod:#ff8a65; --refin:#ff3d3d; --upgn:#b3ecff; --gnl:#26c6da; --def:#d9e4ec;
   --tr0:#cfd8dc; --tr1:#cfe3ea; --tr2:#f3d27a; --tr3:#ec8f3c; --tr4:#c4462b;
@@ -289,6 +294,15 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .celm{stroke:#06100c;stroke-width:.5;vector-effect:non-scaling-stroke;fill-opacity:.9;cursor:pointer}
 .celm.f1{fill:var(--cel1)}.celm.f2{fill:var(--cel2)}.celm.f3{fill:var(--cel3)}.celm.f4{fill:var(--cel4)}
 .g5{fill:none;stroke:var(--g5);stroke-opacity:.85;stroke-width:1;vector-effect:non-scaling-stroke;cursor:pointer;pointer-events:visibleStroke}
+/* velocidade medida, moradores com 5G e banda larga fixa por município (versão leve, em teste): cor pela faixa;
+   velocidade com menos de 50 testes fica só com o contorno (número pouco firme) */
+.velm,.g5c,.blm{stroke:#06100c;stroke-width:.5;vector-effect:non-scaling-stroke;fill-opacity:.92;cursor:pointer}
+.velm.f1{fill:var(--vel1)}.velm.f2{fill:var(--vel2)}.velm.f3{fill:var(--vel3)}.velm.f4{fill:var(--vel4)}.velm.f5{fill:var(--vel5)}
+.velm.poucos:not(.ico){fill-opacity:0;stroke-width:1.2}
+.velm.poucos.f1:not(.ico){stroke:var(--vel1)}.velm.poucos.f2:not(.ico){stroke:var(--vel2)}.velm.poucos.f3:not(.ico){stroke:var(--vel3)}
+.velm.poucos.f4:not(.ico){stroke:var(--vel4)}.velm.poucos.f5:not(.ico){stroke:var(--vel5)}
+.g5c.f0{fill:var(--c5g0);fill-opacity:.55;stroke-width:0}.g5c.f0.ico{opacity:.7;stroke-width:1.1}.g5c.f1{fill:var(--c5g1)}.g5c.f2{fill:var(--c5g2)}.g5c.f3{fill:var(--c5g3)}.g5c.f4{fill:var(--c5g4)}
+.blm.f1{fill:var(--bl1)}.blm.f2{fill:var(--bl2)}.blm.f3{fill:var(--bl3)}.blm.f4{fill:var(--bl4)}.blm.f5{fill:var(--bl5)}
 /* principal lavoura de cada município (versão leve): cor pela lavoura, tamanho pelo valor de todas as lavouras */
 /* lavouras: no mapa do Brasil, a cor da lavoura com borda escura; no estado escolhido, o medalhão (fundo e aro vêm do app.js) */
 .lav{stroke:#140c04;stroke-width:.9;vector-effect:non-scaling-stroke;fill-opacity:.95;cursor:pointer}
@@ -364,7 +378,8 @@ h2{font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.18
 .layer input{accent-color:var(--cor)}
 .layer.on .nm>.key{box-shadow:0 0 8px var(--cor)}
 /* medalhões das outras camadas de pontos na versão leve (usinas, poços, celular, pedágios, refinarias, portos) */
-.usina.ico,.poco.ico,.celm.ico,.ped.ico,.inst.ico,.port.ico{fill-opacity:1;stroke-width:1.1;cursor:pointer}
+.usina.ico,.poco.ico,.celm.ico,.velm.ico,.g5c.ico,.blm.ico,.ped.ico,.inst.ico,.port.ico{fill-opacity:1;stroke-width:1.1;cursor:pointer}
+.velm.poucos.ico{opacity:.62}
 .ped.sem.ico{pointer-events:visiblePainted}
 .g5.ico{stroke-width:1.7;stroke-opacity:1}
 

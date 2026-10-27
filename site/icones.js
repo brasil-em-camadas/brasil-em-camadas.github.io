@@ -9,6 +9,17 @@
      ["x", caminho, w]  risco escuro de largura w (sulco, nó, grão marcado)
      ["l", caminho, w]  risco na cor da camada (haste, cabinho) */
 "use strict";
+/* desenho da aba do navegador (favicon), em teste desde 27/10/2026 (pedido do Edu): com ?teste aparece a opção F (três
+   folhas com o Brasil, empilhadas); ?teste&icone=a ... f mostra as outras. Desenhos em site/aba/, feitos por
+   scripts/estudos/icone_aba.py */
+(() => {
+  const q = new URLSearchParams(location.search), k = (q.get("icone") || "f").toLowerCase();
+  if (!q.has("teste") || !/^[a-f]$/.test(k)) return;
+  const raiz = new URL(".", document.currentScript ? document.currentScript.src : location.href).href;
+  const l = document.createElement("link");
+  l.rel = "icon"; l.type = "image/svg+xml"; l.href = raiz + "aba/icone_" + k + ".svg";
+  document.head.appendChild(l);
+})();
 const MEDALHAO = "rgba(16,10,4,.88)", RISCO = "#100a04";
 const ICONES = {
   /* soja: vagem com três grãos */
@@ -165,6 +176,18 @@ const ICONES = {
     ["l", "M17.99 3.25A7.4 7.4 0 0 1 17.99 11.95", 1.5],
     ["l", "M8.78 10.3A4.2 4.2 0 0 1 8.78 4.9", 1.5],
     ["l", "M6.01 11.95A7.4 7.4 0 0 1 6.01 3.25", 1.5]],
+  /* velocidade medida do celular: velocímetro com o ponteiro para o lado rápido */
+  velocimetro: [
+    ["l", "M4.73 19.2A8.4 8.4 0 1 1 19.27 19.2", 2.1],
+    ["l", "M6.9 11.1L8.1 11.9M12 8.6V10M17.1 11.1L15.9 11.9", 1.3],
+    ["l", "M12 15L16.3 9.9", 2.1],
+    ["f", "M10.1 15a1.9 1.9 0 1 0 3.8 0a1.9 1.9 0 1 0 -3.8 0z"]],
+  /* banda larga fixa: casa com o sinal do wi-fi */
+  casa: [
+    ["f", "M2.8 11.6L12 3.4l9.2 8.2-1.3 1.4-.9-.8V21H5V12.2l-.9.8z"],
+    ["x", "M7.9 14.3a5.8 5.8 0 0 1 8.2 0", 1.6],
+    ["x", "M9.9 16.6a3 3 0 0 1 4.2 0", 1.6],
+    ["h", "M10.9 18.9a1.1 1.1 0 1 0 2.2 0a1.1 1.1 0 1 0 -2.2 0z"]],
   /* pedágio: cabine e cancela */
   pedagio: [
     ["f", "M2.6 8.6L6.2 5.6l3.6 3H8.8v12.8H3.6V8.6z"],
@@ -213,6 +236,11 @@ const ICONES = {
     ["f", "M18.8 9.6h2.6v4.6h-2.6z"],
     ["l", "M2.4 22.2q2-1.4 4 0t4 0 4 0 4 0 4 0", 1.2]]
 };
+/* moradores com sinal 5G: quatro barras de sinal, cheias conforme a faixa (sinal0 = nenhuma cheia ... sinal4 = todas) */
+for (let k = 0; k <= 4; k++) ICONES["sinal" + k] = [0, 1, 2, 3].map(i => {
+  const x = 3.3 + i * 4.75, t = 16 - 4.1 * i, d = `M${x.toFixed(2)} 20.8V${t.toFixed(1)}h3.4V20.8z`;
+  return i < k ? ["f", d] : ["l", d, 1.15];
+});
 /* desenha o ícone num canvas já posicionado (coordenadas de 24 × 24) */
 function desenharIcone(x, partes, cor) {
   x.lineCap = "round"; x.lineJoin = "round";
@@ -252,10 +280,14 @@ const IMG_ICO = { "us-hid": ["hid", "--hid"], "us-eol": ["eol", "--eol"], "us-so
   "cel-4": ["antena", "--cel4"], "ped-0": ["pedagio", "--tr0"], "ped-1": ["pedagio", "--tr1"], "ped-2": ["pedagio", "--tr2"], "ped-3": ["pedagio", "--tr3"],
   "ped-4": ["pedagio", "--tr4"], porto: ["ancora", "--port"], "ref-refinaria": ["refinaria", "--refin"], "ref-upgn": ["upgn", "--upgn"], "ref-gnl": ["gnl", "--gnl"],
   passagem: ["passagem", "--fronteira"] };
+/* velocidade (5 faixas), moradores com 5G (sem sinal + 4 faixas) e banda larga fixa (5 faixas), em teste desde 27/10/2026 */
+for (let k = 1; k <= 5; k++) { IMG_ICO["vel-" + k] = ["velocimetro", "--vel" + k]; IMG_ICO["bl-" + k] = ["casa", "--bl" + k]; }
+for (let k = 0; k <= 4; k++) IMG_ICO["s5g-" + k] = ["sinal" + k, "--c5g" + k];
 /* chave da legenda com o medalhão do mapa: camada → desenho, pela cor do item da legenda */
 const ICO_LEG = { lav: c => c.replace("--lav-", ""), usinas: c => ({ "--hid": "hid", "--eol": "eol", "--sol": "sol", "--bio": "bio", "--fos": "fos", "--nuc": "nuc" })[c],
   oil: () => "poco", refin: c => ({ "--refin": "refinaria", "--upgn": "upgn", "--gnl": "gnl" })[c], celm: () => "antena", pedagio: () => "pedagio", ports: () => "ancora",
-  passa: c => c === "--fronteira" ? "passagem" : null };
+  passa: c => c === "--fronteira" ? "passagem" : null,
+  velm: c => /^--vel\d$/.test(c) ? "velocimetro" : null, g5c: c => /^--c5g\d$/.test(c) ? "sinal" + c.slice(-1) : null, blm: c => /^--bl\d$/.test(c) ? "casa" : null };
 /* fundo inteiro na página toda, com profundidade (pedido do Edu em 25/10/2026; no site normal desde 26/10/2026). Padrão:
    lente (o fundo B, chão de hexágonos, com a lente gravitacional em volta do globo, desenhado pela placa de vídeo:
    3d/fundo3d.js; na versão leve, sem globo, fica a imagem do B). Para comparar, no endereço: ?fundo=a (facetas),

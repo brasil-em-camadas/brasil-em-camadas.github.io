@@ -23,7 +23,7 @@ const AVIAO = "M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-
 /* ícones por município só dentro do estado escolhido (como no globo); boi em 24 × 24 */
 /* desde 25/10/2026 (diretriz God's Eye View, aprovada pelo Edu): usinas, poços, celular, 5G e pedágios também (círculos no
    Brasil, medalhões no estado escolhido); portos e refinarias, medalhão no mapa todo (desenhos e cores em icones.js) */
-const NO_ESTADO = new Set(["boi", "lav", "usinas", "oil", "celm", "g5", "pedagio"]);
+const NO_ESTADO = new Set(["boi", "lav", "usinas", "oil", "celm", "g5", "pedagio", "velm", "g5c", "blm"]);
 /* escolher um estado com a pintura ligada a estas camadas liga os ícones sozinho (só boi e lavouras, como antes) */
 const AUTO_ESTADO = new Set(["boi", "lav"]);
 /* camadas que começam desligadas e ligam sozinhas ao escolher um estado, desligando de novo ao voltar ao Brasil (pedido do
@@ -77,6 +77,8 @@ function contornoBrasil(geo) {
 }
 const fmt = n => n.toLocaleString("pt-BR");
 const fmt1 = n => n.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
+/* velocidade em Mbps: inteiro a partir de 100; abaixo de 1, "menos de 1" */
+const mbps = x => x == null ? "—" : x < 0.95 ? "menos de 1" : x >= 100 ? fmt(Math.round(x)) : fmt1(x);
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 /* valores em mil R$ (padrão do IBGE) viram "R$ 71,3 bi" ou "R$ 251 mi" */
 const kmTxt = a => a >= 1e6 ? `${(a / 1e6).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} milhão de km²` : `${fmt(Math.round(a / 1e3))} mil km²`;
@@ -114,6 +116,7 @@ function rewind(f) {
   /* camadas "sob_demanda" (arquivos grandes que começam desligados) só são baixadas quando alguém liga a camada */
   /* camadas marcadas "teste" no fontes.json só existem na versão de teste */
   F.camadas = F.camadas.filter(l => TESTE || !l.teste);
+  F.pintura = F.pintura.filter(p => TESTE || !p.teste);
   await Promise.all([...F.pintura, ...F.camadas].filter(l => l.arquivo && !l.sob_demanda).map(async l => {
     DATA[l.id] = await (UNICO[l.arquivo] || (UNICO[l.arquivo] = getJSON("../data/" + l.arquivo)));
     if (!DATA[l.id] && l.nivel) l.nivel = "pendente";
@@ -130,7 +133,7 @@ function rewind(f) {
     val: !DATA[p.id] ? null
       : p.por === "per_capita" ? s => (DATA[p.id].valores[s] && POP[s]) ? DATA[p.id].valores[s].valor / POP[s] * 1e5 : null
       : s => { const v = DATA[p.id].valores[s]; return v == null ? null : (typeof v === "object" ? (v[p.campo || "valor"] ?? null) : v); },
-    fmt: p.por === "per_capita" || p.por === "percentual" ? fmt1 : fmt,
+    fmt: p.por === "per_capita" || p.por === "percentual" || p.por === "taxa" ? fmt1 : fmt,
     unidade: p.unidade || (DATA[p.id] && DATA[p.id].unidade) || ""
   }))];
   const LAYERS = F.camadas.map(l => ({ ...l, on: !!l.ligada && l.nivel !== "pendente" }));
@@ -397,6 +400,50 @@ function rewind(f) {
     iconesNoEstado();
     g5C.append("title").text(d => `${d.n} · ${d.u}: 5G de ${d.o} (Anatel, ${M.meta.referencia}). Não quer dizer sinal 5G em todo o município.`);
   }
+  /* em teste desde 27/10/2026: velocidade medida do celular, moradores com sinal 5G e banda larga fixa, por município
+     (Anatel), sob demanda; cor pela faixa, medalhão no estado escolhido; clicar num ponto abre o estado dele */
+  const FX_VEL = v => v >= 50 ? 5 : v >= 35 ? 4 : v >= 25 ? 3 : v >= 15 ? 2 : 1;
+  const FX_5G = p => p >= 80 ? 4 : p >= 50 ? 3 : p >= 25 ? 2 : p > 0 ? 1 : 0;
+  const FX_BL = d => d >= 30 ? 5 : d >= 20 ? 4 : d >= 10 ? 3 : d >= 5 ? 2 : 1;
+  const pct = v => v == null ? "—" : fmt1(v) + "%";
+  const gVelm = root.append("g"), gG5c = root.append("g"), gBlm = root.append("g");
+  let velmC = gVelm.selectAll("circle"), g5cC = gG5c.selectAll("circle"), blmC = gBlm.selectAll("circle");
+  function desenharVelm() {
+    const M = DATA.velm.meta;
+    velmC = gVelm.selectAll("circle").data(DATA.velm.municipios.map(m => ({ c: [m[0], m[1]], v: m[2], t: m[3], p5: m[4], d4: m[5], d5: m[6], up: m[7], ops: m[8],
+      n: m[9], u: m[10], r0: 1.5, ri: 3.4, im: "vel-" + FX_VEL(m[2]) }))).join("circle")
+      .attr("class", d => "velm f" + FX_VEL(d.v) + (d.t < M.poucos_testes ? " poucos" : ""));
+    velmC.on("click", (e, d) => { e.stopPropagation(); abrir(d.u); });
+    iconesNoEstado();
+    velmC.append("title").text(d => `${d.n} · ${d.u}: velocidade medida no celular ${mbps(d.v)} Mbps (mediana de ${fmt(d.t)} testes, ${M.referencia})`
+      + `${d.t < M.poucos_testes ? "; poucos testes, número pouco firme" : ""}. ${[d.d4 != null ? "4G " + mbps(d.d4) : "", d.d5 != null ? "5G " + mbps(d.d5) : ""].filter(Boolean).join(" · ")} Mbps; `
+      + `${d.p5 > 0 ? pct(d.p5) + " dos testes no 5G" : "nenhum teste no 5G"}${d.up != null ? "; upload " + mbps(d.up) + " Mbps" : ""}. `
+      + M.operadoras.map((o, i) => d.ops[i] ? `${o} ${mbps(d.ops[i][1])}${d.ops[i][0] < 30 ? " (poucos testes)" : ""}` : "").filter(Boolean).join(" · ") + " Mbps. "
+      + `Anatel, testes nos celulares de quem tem o programa de medição. O ponto fica na sede do município.`);
+  }
+  function desenharG5c() {
+    const M = DATA.g5c.meta;
+    g5cC = gG5c.selectAll("circle").data(DATA.g5c.municipios.map(m => ({ c: [m[0], m[1]], p: m[2], ops: m[5], se: m[6], n: m[7], u: m[8],
+      r0: m[2] > 0 ? 1.6 : 0.8, ri: m[2] > 0 ? 3.4 : 2.5, im: "s5g-" + FX_5G(m[2]) }))).join("circle").attr("class", d => "g5c f" + FX_5G(d.p));
+    g5cC.on("click", (e, d) => { e.stopPropagation(); abrir(d.u); });
+    iconesNoEstado();
+    g5cC.append("title").text(d => `${d.n} · ${d.u}: ${d.p > 0 ? `sinal 5G para ${pct(d.p)} dos moradores` : "sem sinal 5G previsto"} (previsão da Anatel, ${M.referencia})`
+      + `${d.ops.length ? ": " + d.ops.map(([o, v]) => `${o} ${pct(v)}`).join(", ") : ""}.`
+      + `${d.se.slice(0, -1).some(v => v) ? " Antes: " + M.anos.slice(0, -1).map((a, i) => `${a}, ${pct(d.se[i])}`).join("; ") + "." : ""} O ponto fica na sede do município.`);
+  }
+  function desenharBlm() {
+    const M = DATA.blm.meta;
+    blmC = gBlm.selectAll("circle").data(DATA.blm.municipios.map(m => ({ c: [m[0], m[1]], d: m[2], a: m[3], fi: m[4], sf: m[5], vc: m[6], em: m[7], n: m[9], u: m[10],
+      r0: 1.5, ri: 3.4, im: "bl-" + FX_BL(m[2]) }))).join("circle").attr("class", d => "blm f" + FX_BL(d.d));
+    blmC.on("click", (e, d) => { e.stopPropagation(); abrir(d.u); });
+    iconesNoEstado();
+    blmC.append("title").text(d => `${d.n} · ${d.u}: banda larga fixa, ${fmt1(d.d)} acessos por 100 habitantes (${fmt(d.a)} ${d.a === 1 ? "acesso" : "acessos"}, ${M.referencia}). `
+      + [d.fi != null ? pct(d.fi) + " por fibra óptica" : "", d.sf ? pct(d.sf) + " por rádio ou satélite" : "", d.vc != null ? "velocidade contratada " + mbps(d.vc) + " Mbps (mediana)" : "",
+         d.em ? fmt(d.em) + (d.em > 1 ? " empresas" : " empresa") : ""].filter(Boolean).join(" · ") + "."
+      + (d.d > 60 ? " Bem acima do comum: pode ser cidade de veraneio (casas de quem mora em outro lugar) ou acessos de uma empresa registrados no município da sede dela."
+        : d.d < 2 ? " Bem abaixo do comum: pode haver empresas que não informaram os acessos à Anatel." : "")
+      + " Anatel. O ponto fica na sede do município.");
+  }
   /* indústria de defesa (Ministério da Defesa), sob demanda: escudo na sede do município, maior = mais empresas credenciadas;
      clicar abre o estado */
   const ESCUDO = { draw(c, size) { const r = Math.sqrt(size) / 2;
@@ -431,7 +478,7 @@ function rewind(f) {
       return `${p.nome} · ${p.tipo}${p.operador ? " · " + p.operador : ""}${p.prevista ? " · prevista" : ""}${p.atende ? ". Atende: " + p.atende : ""}${p.capacidade_bbl_dia ? ". Capacidade: " + fmt(p.capacidade_bbl_dia) + " barris de petróleo/dia" : ""}. Fonte: ANP.`; });
   }
   const DESENHA = { boi: desenharBoi, oil: desenharPocos, uep: desenharUep, campos: desenharCampos, zc: desenharZc, pce: desenharPce, rodest: desenharRodEst, usinas: desenharUsinas, lt: desenharLt,
-    celm: desenharCelm, g5: desenharG5, lav: desenharLav, dutos: desenharDutos, se: desenharSe, empdef: desenharDef, vmda: desenharVmda };
+    celm: desenharCelm, g5: desenharG5, velm: desenharVelm, g5c: desenharG5c, blm: desenharBlm, lav: desenharLav, dutos: desenharDutos, se: desenharSe, empdef: desenharDef, vmda: desenharVmda };
   /* refinarias (tamanho pela capacidade), unidades de gás natural e terminais de GNL (ANP); clicar abre o estado */
   const gRefin = root.append("g");
   const INST = { refinaria: "Refinaria", upgn: "Unidade de processamento de gás natural", gnl: "Terminal de GNL" };
@@ -497,7 +544,7 @@ function rewind(f) {
   caps.append("text").attr("x", 6).attr("y", 4).text(d => d.n);
   caps.filter(d => d.viz).append("title").text(d => `${d.n}: ${d.d}. Fonte: Natural Earth (base aberta).`);
   const G = { zee: gZee, mt: gMt, zc: gZc, pce: gPce, rod: gRod, rail: gRail, ports: gPorts, air: gAir, cla: gCla, fronttipo: gFront, passa: gPassa, dup: gDup, vmda: gVmda,
-    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt, celm: gCelm, g5: gG5, lav: gLav, dutos: gDutos, refin: gRefin, se: gSe, empdef: gDef, pedagio: gPed };
+    oil: gPocos, uep: gUep, campos: gCampos, presal: gPresal, boi: gBoi, rodest: gRodEst, usinas: gUsinas, lt: gLt, celm: gCelm, g5: gG5, velm: gVelm, g5c: gG5c, blm: gBlm, lav: gLav, dutos: gDutos, refin: gRefin, se: gSe, empdef: gDef, pedagio: gPed };
 
   let proj, path, W, H, head = 0, k = 1;
   const zoom = d3.zoom().scaleExtent([0.8, 12]).on("zoom", e => {
@@ -601,16 +648,16 @@ function rewind(f) {
     for (const c of [boiC, lavC]) c.attr("display", d => !sel || d.u === sel ? null : "none").classed("ico", no);
     lavC.style("fill", d => no(d) ? `url(#pad-lav-${d.g})` : null).style("stroke", d => no(d) ? `var(--lav-${d.g})` : null);
     /* as outras camadas de pontos do mesmo jeito (o anel do 5G só cresce em volta da antena) */
-    for (const c of [usinasC, pocosC, celmC, g5C, pedC]) {
+    for (const c of [usinasC, pocosC, celmC, g5C, pedC, velmC, g5cC, blmC]) {
       c.attr("display", d => !sel || d.u === sel ? null : "none").classed("ico", no);
       if (c !== g5C) c.style("fill", d => no(d) ? `url(#pad-ico-${d.im})` : null).style("stroke", d => no(d) ? `var(${IMG_ICO[d.im][1]})` : null);
     }
     raioPocos();
   }
-  function posCel() { for (const c of [celmC, g5C, lavC]) c.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]); }
+  function posCel() { for (const c of [celmC, g5C, lavC, velmC, g5cC, blmC]) c.attr("cx", d => proj(d.c)[0]).attr("cy", d => proj(d.c)[1]); }
   function raioPocos() {
     const s = 1 / Math.sqrt(k);
-    for (const c of [pocosC, boiC, usinasC, celmC, g5C, lavC, pedC]) c.attr("r", d => raio(d) * s);
+    for (const c of [pocosC, boiC, usinasC, celmC, g5C, lavC, pedC, velmC, g5cC, blmC]) c.attr("r", d => raio(d) * s);
   }
   /* pontos mantêm tamanho legível em qualquer zoom */
   /* com pintura, o estado escolhido "levanta" (borda escura e sombra curta), sem apagar os outros (pedido do Edu em
@@ -702,6 +749,9 @@ function rewind(f) {
     refin: "M3 21V12l5 3v-3l5 3V8h3V4h3v17zM3 21h18",
     celm: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
     g5: "M12 10v11M8 21h8M9 7a4 4 0 016 0M6 4a8 8 0 0112 0",
+    velm: "M4.5 18a7.5 7.5 0 1115 0M12 18l4-5",
+    g5c: "M5 20v-3M10 20v-7M15 20v-11M20 20V5",
+    blm: "M3 11l9-7 9 7M5 9.5V20h14V9.5M9 15.5a4.2 4.2 0 016 0M12 18.5h.01",
     empdef: "M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z",
     pedagio: "M5 21V8h3v13M8 11h12v3H8zM4 21h5"
   };
@@ -898,21 +948,46 @@ function rewind(f) {
       ${pill(L.nivel)} <span class="note">${esc(L.fonte)}, ref. ${esc(L.referencia)} · atualizado em ${L.atualizado_em}</span>`;
   }
 
-  /* telefonia celular do estado (Anatel): sinal 4G/5G, 5G nos municípios, fibra, antenas e o índice de conectividade */
+  /* telefonia celular do estado (Anatel): sinal 4G/5G, 5G nos municípios, fibra, antenas e o índice de conectividade;
+     em teste desde 27/10/2026, os moradores com sinal 5G, a velocidade medida e a banda larga fixa */
   function fichaCelular(s) {
-    const C = DATA.cel;
-    if (!C || !C.valores[s]) return "";
-    const v = C.valores[s], G5 = C.cinco_g;
-    const pos = k => Object.entries(C.valores).filter(e => e[1][k] != null).sort((a, b) => b[1][k] - a[1][k]).findIndex(e => e[0] === s) + 1;
-    return `<div class="sec"><h3>Telefonia celular</h3>
-      <div class="kv"><span>Moradores com sinal 4G ou 5G</span><span class="v">${fmt1(v.valor)}% · ${pos("valor")}º</span></div>
+    const C = DATA.cel, V = DATA.vel, G = DATA.g5m, B = DATA.blf;
+    const v = C && C.valores[s], x = V && V.valores[s], g = G && G.valores[s], b = B && B.valores[s];
+    if (!v && !x && !g && !b) return "";
+    const pos = (D, k = "valor") => Object.entries(D.valores).filter(e => e[1][k] != null).sort((a, b) => b[1][k] - a[1][k]).findIndex(e => e[0] === s) + 1;
+    const G5 = C && C.cinco_g;
+    let h = `<div class="sec"><h3>Telefonia celular</h3>`;
+    if (v) h += `
+      <div class="kv"><span>Moradores com sinal 4G ou 5G</span><span class="v">${fmt1(v.valor)}% · ${pos(C)}º</span></div>
       ${v.g5 ? `<div class="kv"><span>Municípios com 5G</span><span class="v">${fmt(v.g5[0])} de ${fmt(v.g5[1])}</span></div>` : ""}
       ${v.fibra != null ? `<div class="kv"><span>Municípios com fibra óptica</span><span class="v">${fmt(v.fibra)}%</span></div>` : ""}
       ${v.erb_10mil != null ? `<div class="kv"><span>Antenas por 10 mil habitantes</span><span class="v">${fmt1(v.erb_10mil)}</span></div>` : ""}
-      ${v.ibc != null ? `<div class="kv"><span>Índice Brasileiro de Conectividade</span><span class="v">${fmt1(v.ibc)} · ${pos("ibc")}º</span></div>` : ""}
+      ${v.ibc != null ? `<div class="kv"><span>Índice Brasileiro de Conectividade</span><span class="v">${fmt1(v.ibc)} · ${pos(C, "ibc")}º</span></div>` : ""}
       <div class="list">O sinal é estimado pela Anatel a partir das antenas licenciadas, não medido no local. Fibra óptica: a rede que leva a internet até a cidade (backhaul). O índice vai de 0 a 100 e junta sinal, acessos, antenas, fibra e concorrência.</div>
       ${pill(C.nivel)} <span class="note">${esc(C.fonte)} · atualizado em ${C.atualizado_em}</span>
-      ${G5 ? `<br>${pill(C.nivel)} <span class="note">5G: Anatel, presença da telefonia móvel (RQUAL), ${esc(G5.referencia)} · atualizado em ${G5.atualizado_em}</span>` : ""}</div>`;
+      ${G5 ? `<br>${pill(C.nivel)} <span class="note">5G: Anatel, presença da telefonia móvel (RQUAL), ${esc(G5.referencia)} · atualizado em ${G5.atualizado_em}</span>` : ""}`;
+    if (g) h += `
+      <div class="kv" style="margin-top:8px"><span>Moradores com sinal 5G</span><span class="v">${fmt1(g.valor)}% · ${pos(G)}º</span></div>
+      <div class="list">${fmt(g.municipios_com_5g)} de ${fmt(g.municipios)} municípios com algum sinal 5G.${G.anos.length > 1 ? " Antes: " + G.anos.slice(0, -1).map((a, i) => `${a}, ${g.serie[i] == null ? "—" : fmt1(g.serie[i]) + "%"}`).join("; ") + "." : ""}
+        É previsão da Anatel, não medição; no estado, a média dos municípios pela população do Censo 2022.</div>
+      ${pill(G.nivel)} <span class="note">${esc(G.fonte)}, ${esc(G.referencia)} · atualizado em ${G.atualizado_em}</span>`;
+    if (x) h += `
+      <div class="kv" style="margin-top:8px"><span>Velocidade medida (mediana)</span><span class="v">${mbps(x.valor)} Mbps · ${pos(V)}º</span></div>
+      <div class="kv"><span>No 4G · no 5G</span><span class="v">${mbps(x.d4g)} · ${mbps(x.d5g)} Mbps</span></div>
+      <div class="kv"><span>Testes feitos no 5G</span><span class="v">${fmt1(x.pct_5g)}%</span></div>
+      <div class="kv"><span>Upload (mediana)</span><span class="v">${mbps(x.sub)} Mbps</span></div>
+      <div class="list">Por operadora: ${Object.entries(x.op).map(([o, [, m]]) => `${esc(o)} ${mbps(m)}`).join(" · ")} Mbps. ${fmt(x.testes)} testes nos celulares de quem tem o programa de medição da Anatel; mediana: metade dos testes deu mais que isso, metade deu menos.</div>
+      ${pill(V.nivel)} <span class="note">${esc(V.fonte)}, ${esc(V.referencia)} · atualizado em ${V.atualizado_em}</span>`;
+    h += `</div>`;
+    if (b) h += `<div class="sec"><h3>Internet fixa (banda larga)</h3>
+      <div class="kv"><span>Acessos por 100 habitantes</span><span class="v">${fmt1(b.valor)} · ${pos(B)}º</span></div>
+      <div class="kv"><span>Acessos</span><span class="v">${fmt(b.acessos)}</span></div>
+      <div class="kv"><span>Por fibra óptica</span><span class="v">${fmt1(b.fibra)}%</span></div>
+      <div class="kv"><span>Velocidade contratada (mediana)</span><span class="v">${mbps(b.vel)} Mbps</span></div>
+      <div class="kv"><span>Empresas com acessos</span><span class="v">${fmt(b.empresas)}</span></div>
+      <div class="list">${fmt1(b.pequenas)}% dos acessos são de empresas de pequeno porte, como os provedores regionais; ${fmt1(b.semfio)}% chegam por rádio ou satélite. Acesso: cada contrato de internet fixa em cada endereço, de casa ou de empresa.</div>
+      ${pill(B.nivel)} <span class="note">${esc(B.fonte)}, ${esc(B.referencia)} · atualizado em ${B.atualizado_em}</span></div>`;
+    return h;
   }
 
   /* aeroportos do estado (ANAC): aeródromos públicos, quantos têm voos de passageiros e os mais movimentados */
@@ -1023,6 +1098,12 @@ function rewind(f) {
           ${pill(DATA.ene.nivel)} <span class="note">${esc(DATA.ene.fonte)}, potência instalada (${esc(DATA.ene.referencia)}) · atualizado em ${DATA.ene.atualizado_em}. Sem os painéis solares de telhado.</span>` : ""}
         ${DATA.cel && DATA.cel.cinco_g ? `<div class="kv" style="margin-top:8px"><span>Municípios com 5G</span><span class="v">${fmt(DATA.cel.cinco_g.municipios)} de ${fmt(DATA.cel.cinco_g.total)}</span></div>
           ${pill(DATA.cel.nivel)} <span class="note">Anatel, presença da telefonia móvel (RQUAL), ${esc(DATA.cel.cinco_g.referencia)} · atualizado em ${DATA.cel.cinco_g.atualizado_em}. Pelo menos uma operadora com 5G no município.</span>` : ""}
+        ${DATA.g5m && DATA.g5m.brasil ? `<div class="kv" style="margin-top:8px"><span>Moradores com sinal 5G</span><span class="v">${fmt1(DATA.g5m.brasil.valor)}%</span></div>
+          ${pill(DATA.g5m.nivel)} <span class="note">${esc(DATA.g5m.fonte)}, ${esc(DATA.g5m.referencia)} · atualizado em ${DATA.g5m.atualizado_em}. Previsão da Anatel, não medição.</span>` : ""}
+        ${DATA.vel && DATA.vel.brasil ? `<div class="kv" style="margin-top:8px"><span>Velocidade do celular (mediana)</span><span class="v">${mbps(DATA.vel.brasil.valor)} Mbps</span></div>
+          ${pill(DATA.vel.nivel)} <span class="note">${esc(DATA.vel.fonte)}, ${esc(DATA.vel.referencia)} · atualizado em ${DATA.vel.atualizado_em}. No 4G, ${mbps(DATA.vel.brasil.d4g)} Mbps; no 5G, ${mbps(DATA.vel.brasil.d5g)} Mbps.</span>` : ""}
+        ${DATA.blf && DATA.blf.brasil ? `<div class="kv" style="margin-top:8px"><span>Banda larga fixa</span><span class="v">${fmt1(DATA.blf.brasil.valor)} acessos por 100 hab.</span></div>
+          ${pill(DATA.blf.nivel)} <span class="note">${esc(DATA.blf.fonte)}, ${esc(DATA.blf.referencia)} · atualizado em ${DATA.blf.atualizado_em}. ${milhoes(DATA.blf.brasil.acessos / 1e6)} de acessos, ${fmt1(DATA.blf.brasil.fibra)}% por fibra óptica.</span>` : ""}
         ${DATA.defesa ? `<div class="kv" style="margin-top:8px"><span>Indústria de defesa</span><span class="v">${fmt(DATA.defesa.total)} empresas</span></div>
           ${pill(DATA.defesa.nivel)} <span class="note">Ministério da Defesa, empresas credenciadas: ${fmt(DATA.defesa.eed)} estratégicas de defesa (EED) e ${fmt(DATA.defesa.ed)} de defesa (ED); ${esc(DATA.defesa.referencia)} · atualizado em ${DATA.defesa.atualizado_em}</span>` : ""}
         ${DATA.evpc && DATA.evpc.brasil ? `<div class="kv" style="margin-top:8px"><span>Eletropostos</span><span class="v">≈ ${fmt1(DATA.evpc.brasil.valor / 1000)} mil</span></div>
