@@ -134,18 +134,6 @@
    ]
   },
   {
-   "id": "g5p",
-   "nome": "Celular 5G",
-   "arquivo": "celular/estados.json",
-   "campo": "g5_pct",
-   "unidade": "% dos municípios com 5G",
-   "ministerio": "com",
-   "por": "percentual",
-   "camadas": [
-    "g5"
-   ]
-  },
-  {
    "id": "vel",
    "nome": "Velocidade do celular",
    "arquivo": "celular/velocidade_uf.json",
@@ -155,7 +143,7 @@
    "camadas": [
     "velm"
    ],
-   "teste": true
+   "so_no_ministerio": true
   },
   {
    "id": "g5m",
@@ -167,7 +155,7 @@
    "camadas": [
     "g5c"
    ],
-   "teste": true
+   "so_no_ministerio": true
   },
   {
    "id": "blf",
@@ -179,7 +167,7 @@
    "camadas": [
     "blm"
    ],
-   "teste": true
+   "so_no_ministerio": true
   },
   {
    "id": "defesa",
@@ -641,7 +629,6 @@
    "fonte": "Anatel, medidas de velocidade da telefonia móvel (RQUAL): mediana dos testes de download feitos nos celulares de quem tem o programa de medição da Anatel instalado e autorizou os testes, no trimestre mais recente publicado. É medição de verdade, não estimativa. Clique num ponto para ver o 4G, o 5G, as operadoras e o upload",
    "ligada": false,
    "cor": "--vel5",
-   "teste": true,
    "legenda": [
     {
      "nome": "50 Mbps ou mais",
@@ -687,7 +674,6 @@
    "fonte": "Anatel, Meu Município: parte dos moradores de cada município com sinal 5G de pelo menos uma operadora, no ano mais recente publicado. É previsão da Anatel (antenas licenciadas e um modelo de propagação do sinal), não medição; o 5G que chegou depois aparece na camada “5G nos municípios”. Clique num ponto para ver as operadoras e os anos anteriores",
    "ligada": false,
    "cor": "--c5g3",
-   "teste": true,
    "legenda": [
     {
      "nome": "80% ou mais dos moradores com sinal 5G",
@@ -728,7 +714,6 @@
    "fonte": "Anatel, acessos da banda larga fixa: contratos de internet fixa (em casas e empresas) por 100 habitantes em cada município, a conta oficial da Anatel, no mês completo mais recente. Clique num ponto para ver a fibra óptica, a velocidade contratada e as empresas",
    "ligada": false,
    "cor": "--bl4",
-   "teste": true,
    "legenda": [
     {
      "nome": "30 ou mais acessos por 100 habitantes",

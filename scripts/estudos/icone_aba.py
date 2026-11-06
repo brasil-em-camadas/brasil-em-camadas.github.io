@@ -1,10 +1,12 @@
 """Desenhos para a aba do navegador (favicon) do Brasil em Camadas, em SVG de 64 × 64, ouro sobre escuro.
 Opções (27/10/2026): A, três camadas em losango; B, o Brasil; C, globo em faixas; D, o Brasil em camadas inclinadas;
-E, o Brasil cortado em três faixas; F, três folhas com o Brasil, empilhadas (a recomendada). O contorno do Brasil vem de
-site/data/geo/estados.json (sem as ilhas), alisado e simplificado. Grava site/aba/icone_<letra>.svg.
+E, o Brasil cortado em três faixas; F, três folhas com o Brasil, empilhadas. O Edu escolheu a F em 05/11/2026: só ela fica em
+site/aba/ (icone_f.svg, icone_f_32.png e icone_f_180.png). O contorno do Brasil vem de site/data/geo/estados.json (sem as
+ilhas), alisado e simplificado. Grava site/aba/icone_f.svg; com --todas, grava também as outras opções na pasta do script.
 Rodar da raiz do repositório:  python scripts/estudos/icone_aba.py
 Os PNG (32 e 180 px) foram feitos no navegador sem cabeça (Playwright), a partir do SVG."""
-import json, math
+import json, math, os, sys
+TODAS, PASTA = '--todas' in sys.argv, os.path.dirname(os.path.abspath(__file__))
 from shapely.geometry import shape
 from shapely.ops import unary_union
 E = json.load(open('site/data/geo/estados.json', encoding='utf-8'))
@@ -38,7 +40,7 @@ C = svg(f'<defs><clipPath id="g"><circle cx="32" cy="32" r="25"/></clipPath></de
 D = svg(''.join(f'<path d="{caminho(br, 32, cy, 50, 0.52)}" fill="{c}" stroke="{ESC}" stroke-width="2.4" stroke-linejoin="round"/>'
                 for cy, c in ((44, OURO4), (35, OURO2), (26, OURO))))
 for nome, s in zip('abcd', (A, B, C, D)):
-    open(f'site/aba/icone_{nome}.svg', 'w').write(s)
+    if TODAS: open(f'{PASTA}/icone_{nome}.svg', 'w').write(s)
 print('ok', br.geom_type, len(br.exterior.coords), 'pontos')
 # E: o Brasil cortado em três faixas (camadas), do ouro aceso (norte) ao ouro fundo (sul)
 cam = caminho(br, 32.5, 32.5, 50)
@@ -47,4 +49,5 @@ E_ = svg(f'<defs><clipPath id="b"><path d="{cam}"/></clipPath></defs><g clip-pat
 # F: três folhas com o Brasil, empilhadas (as de baixo mais escuras, deslocadas para baixo e para a direita)
 F_ = svg(''.join(f'<path d="{caminho(br, 30 + d, 30 + d, 46)}" fill="{c}" stroke="{ESC}" stroke-width="1.6" stroke-linejoin="round"/>'
                  for d, c in ((5.2, OURO4), (2.6, OURO2), (0, OURO))))
-open('site/aba/icone_e.svg', 'w').write(E_); open('site/aba/icone_f.svg', 'w').write(F_)
+if TODAS: open(f'{PASTA}/icone_e.svg', 'w').write(E_)
+open('site/aba/icone_f.svg', 'w').write(F_)

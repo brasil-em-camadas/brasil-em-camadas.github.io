@@ -400,7 +400,7 @@ function rewind(f) {
     iconesNoEstado();
     g5C.append("title").text(d => `${d.n} · ${d.u}: 5G de ${d.o} (Anatel, ${M.meta.referencia}). Não quer dizer sinal 5G em todo o município.`);
   }
-  /* em teste desde 27/10/2026: velocidade medida do celular, moradores com sinal 5G e banda larga fixa, por município
+  /* desde 05/11/2026: velocidade medida do celular, moradores com sinal 5G e banda larga fixa, por município
      (Anatel), sob demanda; cor pela faixa, medalhão no estado escolhido; clicar num ponto abre o estado dele */
   const FX_VEL = v => v >= 50 ? 5 : v >= 35 ? 4 : v >= 25 ? 3 : v >= 15 ? 2 : 1;
   const FX_5G = p => p >= 80 ? 4 : p >= 50 ? 3 : p >= 25 ? 2 : p > 0 ? 1 : 0;
@@ -949,7 +949,7 @@ function rewind(f) {
   }
 
   /* telefonia celular do estado (Anatel): sinal 4G/5G, 5G nos municípios, fibra, antenas e o índice de conectividade;
-     em teste desde 27/10/2026, os moradores com sinal 5G, a velocidade medida e a banda larga fixa */
+     desde 05/11/2026, os moradores com sinal 5G, a velocidade medida e a banda larga fixa */
   function fichaCelular(s) {
     const C = DATA.cel, V = DATA.vel, G = DATA.g5m, B = DATA.blf;
     const v = C && C.valores[s], x = V && V.valores[s], g = G && G.valores[s], b = B && B.valores[s];

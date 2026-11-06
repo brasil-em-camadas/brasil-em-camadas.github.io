@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Brasil em Camadas · versão leve</title>
+<link rel="icon" href="../aba/icone_f.svg" type="image/svg+xml">
+<link rel="icon" href="../aba/icone_f_32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../aba/icone_f_180.png">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Versão leve, em 2D, do Brasil em Camadas, para aparelhos que não abrem o globo 3D.">
 <meta name="robots" content="noindex">
@@ -11,7 +14,7 @@
 <link rel="preload" href="../letras/barlow-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../letras/big-shoulders-display-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../letras/letras.css?v=1">
-<link rel="stylesheet" href="../style.css?v=51">
+<link rel="stylesheet" href="../style.css?v=52">
 </head>
 <body>
 <main class="stage" id="stage">
@@ -56,6 +59,7 @@
     <p>Contornos dos estados: IBGE, Malha Municipal 2025, simplificada para o mapa. Rebanhos e aquicultura: IBGE; posição das sedes municipais: IBGE, Localidades do Brasil 2022. Energia elétrica: usinas em operação da ANEEL (SIGA, o cadastro de geração, atualizado todo dia; no mapa, as de 1 MW ou mais; a soma dos estados inclui todas; Itaipu entra com a parte brasileira, 7.000 MW) e linhas de transmissão e subestações da EPE (Webmap do sistema elétrico existente); só a geração centralizada, sem os painéis solares de telhado. Telefonia celular (sinal 4G/5G e municípios com 5G): Anatel, dados abertos, licença CC-BY. Aeroportos: ANAC, dados abertos. Tráfego nos pedágios federais: ANTT, dados abertos, licença CC-BY. Pista dupla e fluxo nas rodovias federais: DNIT (Sistema Nacional de Viação e Plano Nacional de Contagem de Tráfego). Fronteira terrestre por tipo: IBGE (BC250 e grade de cobertura e uso da terra, 2020). Passagens de fronteira: IBGE, lista de cidades gêmeas (2024). Indústria de defesa: Ministério da Defesa, lista pública das empresas credenciadas. Letras do site: Barlow, Big Shoulders Display e JetBrains Mono (licença SIL OFL), e biblioteca de desenho D3 (licença ISC), guardadas no próprio site. Nada aqui é inventado; o que falta aparece como falta.</p>
     <p>Pecuária e aquicultura: IBGE, Pesquisa da Pecuária Municipal (PPM), com os animais contados em 31 de dezembro de cada ano. A aquicultura (peixes, camarão, ostras e outros criados em cativeiro) aparece pelo valor da produção, porque cada produto é medido numa unidade diferente. No mapa, o rebanho de cada município fica no ponto da sede (a cidade), então a fazenda longe da cidade aparece junto dela.</p>
     <p>Telefonia celular: o sinal 4G/5G é a parte dos moradores coberta pelo sinal de pelo menos uma operadora, estimada pela Anatel a partir das antenas licenciadas e de um modelo de como o sinal se espalha (não é medição no local). Vem do Índice Brasileiro de Conectividade (IBC), que a Anatel atualiza uma vez por ano. Os municípios com 5G vêm dos indicadores de qualidade da Anatel (RQUAL), atualizados todo mês: o anel aparece quando há 5G de pelo menos uma operadora, o que não quer dizer sinal 5G em todo o município. No mapa, cada município fica no ponto da sede (a cidade).</p>
+    <p>Internet no celular e em casa (no filtro Comunicações), também da Anatel: a velocidade medida do celular é a mediana (metade dos testes deu mais, metade deu menos) dos testes de velocidade feitos nos celulares de quem tem o programa de medição da Anatel instalado e autorizou os testes, no trimestre mais recente que ela publica; só Claro, TIM e Vivo são medidas, e a conta da mediana de cada município, estado e do Brasil é do site. Os moradores com sinal 5G vêm do Meu Município, uma previsão anual da Anatel feita com as antenas licenciadas (não é medição); por estado e no Brasil, o site faz a média dos municípios pela população do Censo 2022. A banda larga fixa são os contratos de internet fixa (de casas e empresas) por 100 habitantes, a conta oficial da Anatel, no mês completo mais recente; alguns municípios têm números fora do comum na base da Anatel (cidades de praia, acessos registrados na sede de uma empresa ou empresas que não informaram), e o site mostra como ela publica, com um aviso.</p>
     <p>Lavouras: IBGE, Produção Agrícola Municipal (PAM), com a produção do ano anterior ao da divulgação. A ficha de cada estado mostra as cinco lavouras de maior valor da produção, com a quantidade; as pinturas por lavoura (soja, milho, cana-de-açúcar e café) aparecem com o filtro Agricultura. No mapa, cada município mostra a lavoura de maior valor, no ponto da sede; o tamanho do ponto é o valor de todas as lavouras.</p>
     <p>Indústria de defesa: lista do Ministério da Defesa com as empresas credenciadas como empresa estratégica de defesa (EED) ou empresa de defesa (ED), que junta as portarias publicadas no Diário Oficial da União; o robô procura a revisão nova todo mês. A EED tem sede, administração e produção no Brasil, conhecimento tecnológico próprio (ou em parceria com instituição de pesquisa) e controle nacional, e pode usar o regime tributário especial da defesa (Lei 12.598/2012); a ED fabrica produtos de defesa ou faz parte da cadeia que os produz (Decreto 7.970/2013). No mapa, cada empresa fica no ponto da sede do município informado na lista, não no endereço dela. Quando a lista traz um bairro ou distrito no lugar do município (ex.: Barra da Tijuca, Vila Olímpia), o site usa o município a que ele pertence; quando traz só o nome do estado, um bairro que existe em várias cidades ou cidade e UF que não combinam, o município vem do cadastro do CNPJ da empresa na Receita Federal. Cada correção fica registrada, com o motivo, no código do site.</p>
     <p>Tráfego nos pedágios federais: ANTT, dados abertos (licença Creative Commons Atribuição), com os números que as concessionárias informam à agência. Cada praça mostra a média de veículos por dia nos 12 meses mais recentes publicados e a parte de caminhões e ônibus. A média usa só os meses completos de cada praça (o total do mês fica entre metade e 1,6 vez a mediana), para não misturar mês ainda sendo informado ou início de cobrança; conta os sentidos em que há cobrança. Quando mais de 40% do volume aparece como motos, o número não fecha e não é mostrado. Ficam de fora os pedágios das concessões estaduais e as rodovias sem pedágio, que o DNIT conta à parte.</p>
@@ -66,8 +70,8 @@
 </footer>
 
 <script src="vendor/d3.min.js?v=7.8.5"></script>
-<script src="../icones.js?v=9"></script>
-<script src="app.js?v=51"></script>
+<script src="../icones.js?v=10"></script>
+<script src="app.js?v=52"></script>
 <!-- contagem de visitas: GoatCounter, sem cookies e sem guardar o IP (script guardado no próprio site) -->
 <script data-goatcounter="https://brasilemcamadas.goatcounter.com/count" async src="../vendor/count.js?v=1"></script>
 </body>

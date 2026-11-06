@@ -9,17 +9,6 @@
      ["x", caminho, w]  risco escuro de largura w (sulco, nó, grão marcado)
      ["l", caminho, w]  risco na cor da camada (haste, cabinho) */
 "use strict";
-/* desenho da aba do navegador (favicon), em teste desde 27/10/2026 (pedido do Edu): com ?teste aparece a opção F (três
-   folhas com o Brasil, empilhadas); ?teste&icone=a ... f mostra as outras. Desenhos em site/aba/, feitos por
-   scripts/estudos/icone_aba.py */
-(() => {
-  const q = new URLSearchParams(location.search), k = (q.get("icone") || "f").toLowerCase();
-  if (!q.has("teste") || !/^[a-f]$/.test(k)) return;
-  const raiz = new URL(".", document.currentScript ? document.currentScript.src : location.href).href;
-  const l = document.createElement("link");
-  l.rel = "icon"; l.type = "image/svg+xml"; l.href = raiz + "aba/icone_" + k + ".svg";
-  document.head.appendChild(l);
-})();
 const MEDALHAO = "rgba(16,10,4,.88)", RISCO = "#100a04";
 const ICONES = {
   /* soja: vagem com três grãos */
@@ -280,7 +269,7 @@ const IMG_ICO = { "us-hid": ["hid", "--hid"], "us-eol": ["eol", "--eol"], "us-so
   "cel-4": ["antena", "--cel4"], "ped-0": ["pedagio", "--tr0"], "ped-1": ["pedagio", "--tr1"], "ped-2": ["pedagio", "--tr2"], "ped-3": ["pedagio", "--tr3"],
   "ped-4": ["pedagio", "--tr4"], porto: ["ancora", "--port"], "ref-refinaria": ["refinaria", "--refin"], "ref-upgn": ["upgn", "--upgn"], "ref-gnl": ["gnl", "--gnl"],
   passagem: ["passagem", "--fronteira"] };
-/* velocidade (5 faixas), moradores com 5G (sem sinal + 4 faixas) e banda larga fixa (5 faixas), em teste desde 27/10/2026 */
+/* velocidade (5 faixas), moradores com 5G (sem sinal + 4 faixas) e banda larga fixa (5 faixas), desde 05/11/2026 */
 for (let k = 1; k <= 5; k++) { IMG_ICO["vel-" + k] = ["velocimetro", "--vel" + k]; IMG_ICO["bl-" + k] = ["casa", "--bl" + k]; }
 for (let k = 0; k <= 4; k++) IMG_ICO["s5g-" + k] = ["sinal" + k, "--c5g" + k];
 /* chave da legenda com o medalhão do mapa: camada → desenho, pela cor do item da legenda */

@@ -119,7 +119,7 @@ const TRACOS = [[0, 4, 3], [0.5, 4, 2.5], [1, 4, 2], [1.5, 4, 1.5], [2, 4, 1], [
 const ICO_ESTADO = { boi: ["boi-geral", "boi", "u"], lav: ["lav-geral", "lav", "u"],
   usinas: ["usinas", "usinas-ico", "uf"], oil: ["pocos", "pocos-ico", "u"], celm: ["celm", "celm-ico", "u"], g5: ["g5", "g5-ico", "u"],
   pedagio: ["pedagio", "pedagio-ico", "u"],
-  /* em teste desde 27/10/2026: velocidade medida do celular, moradores com 5G e banda larga fixa */
+  /* desde 05/11/2026: velocidade medida do celular, moradores com 5G e banda larga fixa */
   velm: ["velm", "velm-ico", "u"], g5c: ["g5c", "g5c-ico", "u"], blm: ["blm", "blm-ico", "u"] };
 const NO_ESTADO = new Set(Object.keys(ICO_ESTADO));
 /* escolher um estado com a pintura ligada a estas camadas liga os ícones sozinho (só boi e lavouras, como antes) */
@@ -1542,7 +1542,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   }
 
   /* telefonia celular do estado (Anatel): sinal 4G/5G, 5G nos municípios, fibra, antenas e o índice de conectividade;
-     em teste desde 27/10/2026, os moradores com sinal 5G, a velocidade medida e a banda larga fixa */
+     desde 05/11/2026, os moradores com sinal 5G, a velocidade medida e a banda larga fixa */
   function fichaCelular(s) {
     const C = DATA.cel, V = DATA.vel, G = DATA.g5m, B = DATA.blf;
     const v = C && C.valores[s], x = V && V.valores[s], g = G && G.valores[s], b = B && B.valores[s];

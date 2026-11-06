@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Brasil em Camadas</title>
+<link rel="icon" href="aba/icone_f.svg" type="image/svg+xml">
+<link rel="icon" href="aba/icone_f_32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="aba/icone_f_180.png">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Mapa interativo do Brasil por estado, num globo 3D, com a fonte, a data e o nível de confiança de cada dado.">
 <!-- letras guardadas no próprio site (sem Google Fonts) -->
@@ -12,7 +15,7 @@
 <link rel="stylesheet" href="letras/letras.css?v=1">
 <link rel="preload" href="3d/vendor/maplibre-gl.js?v=5.24.0" as="script">
 <link rel="stylesheet" href="3d/vendor/maplibre-gl.css?v=5.24.0">
-<link rel="stylesheet" href="style.css?v=51">
+<link rel="stylesheet" href="style.css?v=52">
 <link rel="stylesheet" href="3d/3d.css?v=18">
 </head>
 <body>
@@ -74,6 +77,7 @@
     <p>Petróleo e gás: a produção de cada poço é a média por dia do último mês que a ANP já publicou para terra e mar; o tamanho do ponto mostra a produção em barris de óleo equivalente (boe), somando petróleo e gás pela conversão da ANP (1.000 m³ de gás equivalem a 1 m³ de petróleo, cerca de 6,3 barris). No mar, a ANP atribui a produção ao estado em frente ao campo.</p>
     <p>Pecuária e aquicultura: IBGE, Pesquisa da Pecuária Municipal (PPM), com os animais contados em 31 de dezembro de cada ano. A aquicultura (peixes, camarão, ostras e outros criados em cativeiro) aparece pelo valor da produção, porque cada produto é medido numa unidade diferente. No mapa, o rebanho de cada município fica no ponto da sede (a cidade), então a fazenda longe da cidade aparece junto dela.</p>
     <p>Telefonia celular: o sinal 4G/5G é a parte dos moradores coberta pelo sinal de pelo menos uma operadora, estimada pela Anatel a partir das antenas licenciadas e de um modelo de como o sinal se espalha (não é medição no local). Vem do Índice Brasileiro de Conectividade (IBC), que a Anatel atualiza uma vez por ano. Os municípios com 5G vêm dos indicadores de qualidade da Anatel (RQUAL), atualizados todo mês: o anel aparece quando há 5G de pelo menos uma operadora, o que não quer dizer sinal 5G em todo o município. No mapa, cada município fica no ponto da sede (a cidade).</p>
+    <p>Internet no celular e em casa (no filtro Comunicações), também da Anatel: a velocidade medida do celular é a mediana (metade dos testes deu mais, metade deu menos) dos testes de velocidade feitos nos celulares de quem tem o programa de medição da Anatel instalado e autorizou os testes, no trimestre mais recente que ela publica; só Claro, TIM e Vivo são medidas, e a conta da mediana de cada município, estado e do Brasil é do site. Os moradores com sinal 5G vêm do Meu Município, uma previsão anual da Anatel feita com as antenas licenciadas (não é medição); por estado e no Brasil, o site faz a média dos municípios pela população do Censo 2022. A banda larga fixa são os contratos de internet fixa (de casas e empresas) por 100 habitantes, a conta oficial da Anatel, no mês completo mais recente; alguns municípios têm números fora do comum na base da Anatel (cidades de praia, acessos registrados na sede de uma empresa ou empresas que não informaram), e o site mostra como ela publica, com um aviso.</p>
     <p>Luzes à noite, População: o brilho mostra onde as pessoas moram, em quadrados de 1 km da Grade Estatística do Censo 2022 do IBGE, inclusive na zona rural; os pontos são os municípios, para o clique.</p>
     <p>Lavouras: IBGE, Produção Agrícola Municipal (PAM), com a produção do ano anterior ao da divulgação. A ficha de cada estado mostra as cinco lavouras de maior valor da produção, com a quantidade; as pinturas por lavoura (soja, milho, cana-de-açúcar e café) aparecem com o filtro Agricultura. No mapa, cada município mostra a lavoura de maior valor, no ponto da sede; o tamanho do ponto é o valor de todas as lavouras.</p>
     <p>Indústria de defesa: lista do Ministério da Defesa com as empresas credenciadas como empresa estratégica de defesa (EED) ou empresa de defesa (ED), que junta as portarias publicadas no Diário Oficial da União; o robô procura a revisão nova todo mês. A EED tem sede, administração e produção no Brasil, conhecimento tecnológico próprio (ou em parceria com instituição de pesquisa) e controle nacional, e pode usar o regime tributário especial da defesa (Lei 12.598/2012); a ED fabrica produtos de defesa ou faz parte da cadeia que os produz (Decreto 7.970/2013). No mapa, cada empresa fica no ponto da sede do município informado na lista, não no endereço dela. Quando a lista traz um bairro ou distrito no lugar do município (ex.: Barra da Tijuca, Vila Olímpia), o site usa o município a que ele pertence; quando traz só o nome do estado, um bairro que existe em várias cidades ou cidade e UF que não combinam, o município vem do cadastro do CNPJ da empresa na Receita Federal. Cada correção fica registrada, com o motivo, no código do site.</p>
@@ -85,8 +89,8 @@
 </footer>
 
 <script src="3d/vendor/maplibre-gl.js?v=5.24.0"></script>
-<script src="icones.js?v=9"></script>
-<script src="3d/app3d.js?v=53"></script>
+<script src="icones.js?v=10"></script>
+<script src="3d/app3d.js?v=54"></script>
 <!-- contagem de visitas: GoatCounter, sem cookies e sem guardar o IP (script guardado no próprio site) -->
 <script data-goatcounter="https://brasilemcamadas.goatcounter.com/count" async src="vendor/count.js?v=1"></script>
 </body>
