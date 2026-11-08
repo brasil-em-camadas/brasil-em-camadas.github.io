@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 .DS_Store
+# feitos na hora de publicar por scripts/preparar_publicacao.py (não ficam no repositório)
+site/robots.txt
+site/sitemap.xml

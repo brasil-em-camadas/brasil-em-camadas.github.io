@@ -83,6 +83,10 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: main
+      # Põe o endereço completo onde a internet exige (robots.txt, sitemap.xml, link canônico, prévia de compartilhamento),
+      # só na cópia que vai para o ar; o endereço fica escrito num lugar só: scripts/dados/endereco_do_site.txt.
+      - name: Preparar para os buscadores
+        run: python3 scripts/preparar_publicacao.py
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

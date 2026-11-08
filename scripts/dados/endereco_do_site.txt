@@ -1,0 +1,4 @@
+# Endereço do site: o único lugar onde ele fica escrito (regra do domínio próprio; ver o README).
+# Para trocar de domínio, mude a linha abaixo. O scripts/preparar_publicacao.py coloca o endereço completo
+# onde a internet exige (robots.txt, sitemap.xml, link canônico e prévia de compartilhamento) na hora de publicar.
+https://brasil-em-camadas.github.io/

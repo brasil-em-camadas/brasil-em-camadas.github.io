@@ -13,6 +13,8 @@ site/                 o site em si (é isto que vai para o ar)
                       (3d/index.html só redireciona quem tinha o endereço antigo da página de teste)
   2d/                 versão leve em 2D (D3, cópia em 2d/vendor/), para aparelhos que não abrem o globo
   vendor/count.js     script do contador de visitas (GoatCounter, licença ISC), guardado aqui
+  previa/             imagem da prévia de compartilhamento (WhatsApp, redes sociais, buscadores), 1200 × 630,
+                      feita por scripts/estudos/previa_compartilhamento.py
   data/fontes.json    o registro de todas as camadas: nome, ministério, fonte, nível de confiança
   data/*.json         os dados de cada camada
   data/geo/*.json     contornos, ferrovias, portos, aeroportos e limites do mar (ZEE, mar territorial,
@@ -42,7 +44,9 @@ scripts/
   gerar_contorno_estados.py   gera o contorno dos estados a partir da malha oficial do IBGE (roda só à mão, uma vez por ano)
   gerar_sedes_municipais.py   gera a posição oficial das sedes municipais (IBGE, Localidades do Brasil 2022; roda só à mão)
   gerar_transportes_ibge.py   gera rodovias, ferrovias e portos a partir da base cartográfica 1:250.000 do IBGE (BC250; roda só à mão)
-  dados/              arquivos de apoio dos robôs (ex.: posição da sede de cada município)
+  preparar_publicacao.py      na hora de publicar, faz o robots.txt e o sitemap.xml e põe o endereço completo no link
+                              canônico e na prévia de compartilhamento (o endereço fica em dados/endereco_do_site.txt)
+  dados/              arquivos de apoio dos robôs (ex.: posição da sede de cada município) e o endereço do site
   estudos/            estudos de visual que não vão para o ar: texturas.py (laboratório de texturas) e relevo_em_ondas.js
                       (relevo dos estados em ondas, testado e descartado em 22/10/2026, guardado como referência)
 .github/workflows/
@@ -105,7 +109,8 @@ As páginas (principal e versão leve) contam visitas com o [GoatCounter](https:
 
 O site foi feito para mudar de endereço sem reescrever nada:
 
-- Todos os links internos são relativos (`data/...`, `../style.css`). Nenhum arquivo do site cita `brasil-em-camadas.github.io`.
+- Todos os links internos são relativos (`data/...`, `../style.css`).
+- O endereço completo só aparece onde a internet exige (robots.txt, sitemap.xml, link canônico, prévia de compartilhamento e dados estruturados para os buscadores). Ele fica escrito num lugar só, `scripts/dados/endereco_do_site.txt`, e o `scripts/preparar_publicacao.py` o coloca nesses arquivos na hora de publicar (passo "Preparar para os buscadores" do `site.yml`). No repositório, as páginas continuam com endereços relativos, e `robots.txt` e `sitemap.xml` nem existem: são feitos a cada publicação.
 - O botão de apoio e os textos de fonte ficam em `site/data/fontes.json`, não espalhados pelo código.
 
 Quando houver um domínio (ex.: `brasilemcamadas.com.br`):
@@ -113,7 +118,9 @@ Quando houver um domínio (ex.: `brasilemcamadas.com.br`):
 1. Registrar o domínio (para `.com.br`, no Registro.br).
 2. No GitHub: **Settings → Pages → Custom domain**, digitar o domínio e salvar. Marcar **Enforce HTTPS** quando liberar.
 3. No painel do domínio, criar os apontamentos que o GitHub mostrar (registros `A` para os IPs do GitHub Pages e `CNAME` do `www` para `brasil-em-camadas.github.io`).
-4. Esperar a propagação (de minutos a um dia). O endereço antigo continua funcionando e passa a redirecionar para o novo.
+4. Trocar o endereço em `scripts/dados/endereco_do_site.txt` e publicar (qualquer envio ao `main` publica).
+5. Esperar a propagação (de minutos a um dia). O endereço antigo continua funcionando e passa a redirecionar para o novo.
+6. No Google Search Console e no Bing Webmaster Tools, cadastrar o endereço novo (com domínio próprio, dá para confirmar pelo DNS) e avisar a mudança de endereço.
 
 Detalhe: as preferências de cada visitante (tamanho da letra, painel recolhido) ficam guardadas por endereço; no domínio novo elas começam do zero uma vez.
 
