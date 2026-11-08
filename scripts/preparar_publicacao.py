@@ -88,7 +88,7 @@ def principal():
     base = endereco()
 
     (pasta / "robots.txt").write_text(
-        "# Brasil em Camadas: dados públicos, com a fonte, a data e o nível de confiança de cada número.\n"
+        "# Brasil em Camadas: mapa do Brasil com dados verificáveis, com a fonte, a data e o nível de confiança de cada número.\n"
         "# Todos os robôs são bem-vindos, inclusive os dos buscadores e os das IAs.\n"
         "User-agent: *\n"
         "Allow: /\n"
