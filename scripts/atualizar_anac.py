@@ -5,7 +5,10 @@ Fontes: dados abertos da ANAC (https://sistemas.anac.gov.br/dadosabertos/):
    (código OACI, nome, município servido, UF, coordenadas, situação; a ANAC atualiza toda semana).
 2. Dados estatísticos do transporte aéreo: Voos e operações aéreas/Dados Estatísticos do Transporte Aéreo/
    Dados_Estatisticos.csv (cerca de 360 MB; cada linha = empresa, mês, aeroporto de origem e de destino, com
-   passageiros pagos e grátis e carga). O robô lê o arquivo aos poucos, sem guardar tudo na memória.
+   passageiros pagos e grátis e carga). O robô baixa o arquivo para o disco, continuando de onde parou se a conexão
+   cair, confere o tamanho com o que a ANAC informa e só então lê, aos poucos, sem guardar tudo na memória.
+   (Em 03/11/2026 a conexão caiu no meio sem dar erro, o robô leu só os primeiros anos e falhou com "só 0 meses";
+   a conferência do tamanho evita isso.)
 
 Cálculo: passageiros de um aeroporto = os que embarcaram (aeroporto de origem) + os que desembarcaram (aeroporto de
 destino) nos 12 meses mais recentes do arquivo, em voos domésticos e internacionais, regulares ou não; é a mesma conta
@@ -23,8 +26,10 @@ import argparse
 import csv
 import io
 import json
+import os
 import re
 import sys
+import tempfile
 import time
 import urllib.parse
 import urllib.request
@@ -61,6 +66,43 @@ def abrir(caminho, cache):
             if i == 3:
                 raise
             time.sleep(15 * (i + 1))
+
+
+def baixar(caminho, destino, tentativas=6):
+    """Baixa um arquivo grande para o disco e devolve o tamanho. Se a conexão cair, continua de onde parou (pedido de
+    intervalo de bytes) e, no fim, confere o tamanho com o que o servidor informou. Sem essa conferência, uma conexão
+    cortada passa despercebida: o Python devolve "fim do arquivo" sem erro."""
+    destino = Path(destino)
+    destino.write_bytes(b"")
+    total, erro = None, None
+    for i in range(tentativas):
+        feito = destino.stat().st_size
+        cab = dict(AGENTE)
+        if feito:
+            cab["Range"] = f"bytes={feito}-"
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url(caminho), headers=cab), timeout=300) as r:
+                if feito and r.status != 206:   # o servidor não aceitou continuar de onde parou: recomeça do zero
+                    destino.write_bytes(b"")
+                    feito = 0
+                faixa = r.headers.get("Content-Range") or ""
+                if "/" in faixa and faixa.rsplit("/", 1)[1].isdigit():
+                    total = int(faixa.rsplit("/", 1)[1])
+                elif r.headers.get("Content-Length"):
+                    total = feito + int(r.headers["Content-Length"])
+                with open(destino, "ab") as f:
+                    while bloco := r.read(1 << 20):
+                        f.write(bloco)
+            if total is None:   # o servidor não disse o tamanho: não dá para conferir; segue com o que veio
+                return destino.stat().st_size
+        except Exception as e:
+            erro = e
+        feito = destino.stat().st_size
+        if total is not None and feito >= total:
+            return feito
+        print(f"[anac] o download parou em {feito / 1e6:.0f} de {(total or 0) / 1e6:.0f} MB; continuando ({erro or 'conexão encerrada'})")
+        time.sleep(10 * (i + 1))
+    raise ValueError(f"download incompleto: {destino.stat().st_size} de {total} bytes ({erro or 'conexão encerrada'})")
 
 
 def titulo(t):
@@ -112,7 +154,22 @@ def movimento(cache):
     """Passageiros e carga por aeroporto e mês, lendo o arquivo grande aos poucos (só os 3 últimos anos)."""
     ano_min = date.today().year - 2
     soma = {}   # (oaci, ano, mes) -> [passageiros, carga_kg]
-    with abrir(ESTATISTICOS, cache) as r:
+    if cache:
+        arquivo, temporario = Path(cache) / Path(ESTATISTICOS).name, None
+    else:
+        fd, nome = tempfile.mkstemp(prefix="anac_", suffix=".csv")
+        os.close(fd)
+        arquivo = temporario = Path(nome)
+        print(f"[anac] dados estatísticos baixados: {baixar(ESTATISTICOS, arquivo) / 1e6:.0f} MB")
+    try:
+        return _ler_movimento(arquivo, ano_min, soma)
+    finally:
+        if temporario:
+            temporario.unlink(missing_ok=True)
+
+
+def _ler_movimento(arquivo, ano_min, soma):
+    with open(arquivo, "rb") as r:
         texto = io.TextIOWrapper(r, encoding="utf-8-sig", newline="")
         primeira = texto.readline()   # "Atualizado em: AAAA-MM-DD"; se um dia sair, a primeira linha já é o cabeçalho
         if primeira.lower().startswith("atualizado"):
@@ -152,6 +209,9 @@ def principal(cache):
     janela = set(meses[-12:])
     if len(janela) < 12:
         raise ValueError(f"só {len(janela)} meses nos dados estatísticos")
+    (a1, m1), hoje_ = meses[-1], date.today()
+    if (hoje_.year - a1) * 12 + hoje_.month - m1 > 6:
+        raise ValueError(f"o mês mais recente nos dados estatísticos é {m1:02d}/{a1}; o arquivo parece incompleto")
     total = {}
     for (oaci, a, m), (pax, carga) in soma.items():
         if (a, m) in janela:
