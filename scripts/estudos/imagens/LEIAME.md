@@ -17,6 +17,8 @@ Todas em Mercator, recorte de -75 a -28 de longitude e de 6 a -34,5 de latitude 
 | `ouro_rebanho_4_versoes.jpg` | rebanho bovino em ouro no globo de teste, 4 versões (23/10/2026): A translúcida (laboratório), B opacidade crescente, C luz de fundo, D luz de fundo de brasa a ouro. **Escolhida pelo Edu: D**, com cinza forte = sem número e cinza fraco = menos de 0,1% do total do Brasil |
 | `comparar_cores_fraco_fosco.jpg` | escala de cor (24/10/2026): A como está (brasa → ouro); B o mais fraco numa cor fosca e opaca (bege acinzentado) em vez do quase preto; C como B, com as duas faixas mais fracas lisas (sem relevo). Celular 4G/5G e rebanho bovino. **Aguardando a escolha do Edu** |
 | `comparar_destaque_estado.jpg` | estado escolhido (24/10/2026): 1 os outros apagam (como estava); 2 sem apagar, contorno claro; 3 sem apagar, contorno e sombra (estado "levantado"). A 3 foi para a versão de teste |
+| `previa_a.jpg`, `previa_b.jpg` | prévia de compartilhamento (08/11/2026): a = só o globo; b = o globo com o nome e a frase, a escolhida pelo Edu (`site/previa/`) |
+| `previa_c.jpg`, `previa_c_quadrado.jpg` | estudo de 09/11/2026, aguardando o Edu: tudo dentro do quadrado do meio, que é o que o WhatsApp mostra (o segundo arquivo é esse recorte); na b, o WhatsApp corta o nome |
 
 Para refazer: `python3 scripts/estudos/texturas.py site/data <saída>` (texturas) e
 `python3 scripts/estudos/texturas_luzes.py site/data <saída>` (com as luzes; baixa os ladrilhos da NASA). Precisam de numpy e Pillow.
