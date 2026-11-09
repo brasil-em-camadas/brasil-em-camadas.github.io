@@ -1,0 +1,1893 @@
+{
+ "formato": "Brasil em Camadas · acervo de dados por período, formato 1 (ver README.md desta pasta)",
+ "id": "banda-larga-anatel",
+ "titulo": "Banda larga fixa (Anatel)",
+ "descricao": "Acessos de internet fixa em serviço (contratos em casas e empresas) no Brasil, em cada estado e (desde 2010) em cada município, com o meio de acesso, a faixa de velocidade, as empresas e a densidade (acessos por 100 habitantes), no último mês de cada trimestre e de cada ano.",
+ "fonte": {
+  "orgao": "Anatel",
+  "titulo": "Anatel, Acessos – Banda Larga Fixa (dados abertos)",
+  "consulta": "https://www.anatel.gov.br/dadosabertos/paineis_de_dados/acessos/acessos_banda_larga_fixa.zip",
+  "catalogo": "https://dados.gov.br/dados/conjuntos-dados/acessos---banda-larga-fixa",
+  "licenca": "Creative Commons Atribuição (CC BY), como informado no Portal Brasileiro de Dados Abertos"
+ },
+ "nivel_confianca": "Oficial · API",
+ "periodicidade": "mensal na fonte; no acervo, por trimestre e por ano",
+ "medida": "posição: acessos em serviço no último mês do período",
+ "como_vira_ano": "posição em dezembro; o trimestre é o seu último mês (março, junho, setembro ou dezembro)",
+ "niveis": {
+  "brasil": "Brasil",
+  "uf": "estados",
+  "municipio": "municípios (desde 2010; nos trimestres, só no ano em aberto)"
+ },
+ "consolidacao": "preliminar até 12 meses depois da publicação do período; a publicação conta como o fim do período + 2 meses (o atraso típico da fonte)",
+ "metodo": "Soma das linhas do arquivo de acessos da Anatel (cada linha: empresa, município, meio de acesso, faixa de velocidade e número de acessos) no último mês do período. O total de acessos do Brasil vem do arquivo de totais da própria Anatel. A densidade é a da Anatel (arquivo de densidade). Contas do projeto: empresas (CNPJs distintos com pelo menos um acesso no lugar) e velocidade contratada mediana (metade dos acessos tem velocidade contratada maior, metade menor, pela velocidade de cada linha).",
+ "avisos": [
+  "Acesso = cada contrato de internet fixa num endereço (casa ou empresa); não é o número de pessoas com internet.",
+  "Meio de acesso e faixa de velocidade são os que cada empresa informou à Anatel.",
+  "O último mês costuma chegar incompleto (as empresas pequenas informam depois): o trimestre em aberto só entra quando o mês dele tem pelo menos 99% (e no máximo 105%) dos acessos do mês anterior, e fica preliminar.",
+  "A Anatel revisa meses antigos de vez em quando; quando um número muda, entra uma versão nova do pacote.",
+  "Município sem nenhuma linha no arquivo: 0 acessos registrados pela Anatel.",
+  "Ausência na base não significa ausência real: são os acessos que as empresas informaram à Anatel."
+ ],
+ "licenca": {
+  "name": "CC-BY-4.0",
+  "title": "Creative Commons Atribuição 4.0 Internacional",
+  "path": "https://creativecommons.org/licenses/by/4.0/deed.pt_BR"
+ },
+ "licenca_da_fonte": "Creative Commons Atribuição (CC BY), como informado no Portal Brasileiro de Dados Abertos",
+ "conferido_em": "2026-11-09",
+ "colunas": [
+  {
+   "name": "codigo_ibge",
+   "type": "string",
+   "title": "Código do IBGE do lugar",
+   "description": "1 = Brasil (como na SIDRA do IBGE)"
+  },
+  {
+   "name": "acessos",
+   "type": "integer",
+   "title": "Acessos em serviço",
+   "unidade": "acessos",
+   "description": "no Brasil, o total da própria Anatel"
+  },
+  {
+   "name": "acessos_fibra",
+   "type": "integer",
+   "title": "Acessos por fibra óptica",
+   "unidade": "acessos"
+  },
+  {
+   "name": "acessos_cabo_coaxial",
+   "type": "integer",
+   "title": "Acessos por cabo coaxial (TV a cabo)",
+   "unidade": "acessos"
+  },
+  {
+   "name": "acessos_cabo_metalico",
+   "type": "integer",
+   "title": "Acessos por cabo metálico (linha telefônica, xDSL)",
+   "unidade": "acessos"
+  },
+  {
+   "name": "acessos_radio",
+   "type": "integer",
+   "title": "Acessos por rádio",
+   "unidade": "acessos"
+  },
+  {
+   "name": "acessos_satelite",
+   "type": "integer",
+   "title": "Acessos por satélite",
+   "unidade": "acessos"
+  },
+  {
+   "name": "acessos_outros_meios",
+   "type": "integer",
+   "title": "Acessos por outros meios",
+   "unidade": "acessos",
+   "description": "outro, híbrido, LTE ou indeterminado, como a empresa informou"
+  },
+  {
+   "name": "acessos_ate_512k",
+   "type": "integer",
+   "title": "Acessos com velocidade contratada até 512 kbps",
+   "unidade": "acessos"
+  },
+  {
+   "name": "acessos_512k_a_2m",
+   "type": "integer",
+   "title": "Acessos de 512 kbps a 2 Mbps",
+   "unidade": "acessos"
+  },
+  {
+   "name": "acessos_2m_a_34m",
+   "type": "integer",
+   "title": "Acessos de 2 a 34 Mbps",
+   "unidade": "acessos",
+   "description": "até 2010 a Anatel não separava 2 a 12 e 12 a 34 Mbps"
+  },
+  {
+   "name": "acessos_acima_34m",
+   "type": "integer",
+   "title": "Acessos acima de 34 Mbps",
+   "unidade": "acessos"
+  },
+  {
+   "name": "acessos_pequeno_porte",
+   "type": "integer",
+   "title": "Acessos em empresas de pequeno porte",
+   "unidade": "acessos",
+   "description": "porte da empresa como a Anatel classifica"
+  },
+  {
+   "name": "empresas",
+   "type": "integer",
+   "title": "Empresas com acessos no lugar",
+   "unidade": "empresas",
+   "description": "CNPJs distintos com pelo menos um acesso (conta do projeto)"
+  },
+  {
+   "name": "acessos_por_100_hab",
+   "type": "number",
+   "title": "Densidade: acessos por 100 habitantes",
+   "unidade": "acessos por 100 habitantes",
+   "description": "a conta da Anatel, arredondada a 2 casas; vazia quando a Anatel não publicou um número coerente"
+  },
+  {
+   "name": "uf",
+   "type": "string",
+   "title": "Sigla do estado"
+  },
+  {
+   "name": "acessos_2m_a_12m",
+   "type": "integer",
+   "title": "Acessos de 2 a 12 Mbps",
+   "unidade": "acessos"
+  },
+  {
+   "name": "acessos_12m_a_34m",
+   "type": "integer",
+   "title": "Acessos de 12 a 34 Mbps",
+   "unidade": "acessos"
+  },
+  {
+   "name": "velocidade_contratada_mediana_mbps",
+   "type": "number",
+   "title": "Velocidade contratada, mediana",
+   "unidade": "Mbps",
+   "description": "metade dos acessos tem velocidade contratada maior, metade menor (conta do projeto)"
+  }
+ ],
+ "serie": "serie_uf.csv",
+ "pacotes": [
+  {
+   "periodo": "2007",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2009-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2007/datapackage.json",
+   "hash": "sha256:2dc8602c2a2071c22ec5b9a52811fd7190047e46666b898040cf7e6ba2769a38",
+   "bytes": 12885,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2007-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2008-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2007-T1/datapackage.json",
+   "hash": "sha256:0939aa9b85500fd1c028d4341b30cff8d182026a72c7beda96f5c7ea18627bff",
+   "bytes": 12830,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2007-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2008-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2007-T2/datapackage.json",
+   "hash": "sha256:d57bdf2112a37562cca8286e2b29432b9c00c5b305bb3cd077a4ef44d6708cde",
+   "bytes": 12861,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2007-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2008-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2007-T3/datapackage.json",
+   "hash": "sha256:30f325513a6f2297ad82b461c9dda549f9d738af922b950c43534ce0ae8ff36f",
+   "bytes": 12873,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2007-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2009-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2007-T4/datapackage.json",
+   "hash": "sha256:c7b2eef2476d40ffe51c37644bba2675b53b9b38856360ea60aaf35ad75e4660",
+   "bytes": 12914,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2008",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2010-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2008/datapackage.json",
+   "hash": "sha256:d28c17fb48bd5701f976d1f0579630379739858e93e7784a170250bdd81f897f",
+   "bytes": 12942,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2008-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2009-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2008-T1/datapackage.json",
+   "hash": "sha256:5208e4b9c5d1b64a76ba999dedc542e36e4cf1473a5b809f7f42bbddc5087fcc",
+   "bytes": 12937,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2008-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2009-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2008-T2/datapackage.json",
+   "hash": "sha256:74c2f028caa3b9302e9253b99507951436ec556a68fffbb4e2a7c22c627fe7be",
+   "bytes": 12955,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2008-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2009-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2008-T3/datapackage.json",
+   "hash": "sha256:56f378d935b8ab52c62fa77a133e81b64bb6bad5fa18f435389274199b02de8b",
+   "bytes": 12976,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2008-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2010-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2008-T4/datapackage.json",
+   "hash": "sha256:89be424decd025e46b20e4b0467c41885e9afd47feed13328a4684f88a6adab3",
+   "bytes": 12971,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2009",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2011-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2009/datapackage.json",
+   "hash": "sha256:b7a31ec965f6d53ccd320cfbbf447eb97084dfd62953b4bd63cb94467889a854",
+   "bytes": 12976,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2009-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2010-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2009-T1/datapackage.json",
+   "hash": "sha256:29ece312ce9179f51d49edfd95d0c74e2b413a69c0e7e56257162de3715e1d23",
+   "bytes": 12969,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2009-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2010-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2009-T2/datapackage.json",
+   "hash": "sha256:e25bac78d9b8bf42d6cff61d18def1abd5010f03945d0a5f10fabb6c6e7f13bf",
+   "bytes": 12989,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2009-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2010-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2009-T3/datapackage.json",
+   "hash": "sha256:527514e96464bf83cffdfff32e8d5020984ab43f7df944a5119e98426feca249",
+   "bytes": 12992,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2009-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2011-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2009-T4/datapackage.json",
+   "hash": "sha256:08722981975841f4e9c5586ea1b92e16ebffbbf91702770945bc1ec52a56f2c7",
+   "bytes": 13005,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2010",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2012-02-29",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2010/datapackage.json",
+   "hash": "sha256:50cf6ca2968b97953fa2e972b1c5daae0e6c95a70b3163d171266b904f492b1c",
+   "bytes": 294779,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2010-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2011-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2010-T1/datapackage.json",
+   "hash": "sha256:8a83378f96feeb506dd74d12a739aa70da72561445a63170502bc5f7131acac4",
+   "bytes": 13009,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2010-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2011-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2010-T2/datapackage.json",
+   "hash": "sha256:2e858a1aaaf5f328b6e927ebbc388cd4708fd02b3ded5cb59ab174261364ed76",
+   "bytes": 13012,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2010-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2011-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2010-T3/datapackage.json",
+   "hash": "sha256:477e6f243a9130681e74dfd9d8855638b15559ef386481e98a6c4ee69720d051",
+   "bytes": 13036,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2010-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2012-02-29",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2010-T4/datapackage.json",
+   "hash": "sha256:8183909f7298d881b2a61ab439a18fec99db51f01de23c1c875b809ddf6dd923",
+   "bytes": 13043,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2011",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2013-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2011/datapackage.json",
+   "hash": "sha256:3d90a8ee185376ee708db9bebca51581bc3f1203d5a4295478a1ff28ac7d2df3",
+   "bytes": 308862,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2011-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2012-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2011-T1/datapackage.json",
+   "hash": "sha256:e9fbb5f0e95fdea438dfcfa4633bd72f11530cac576a98e7cd4dfd31a44f3cd5",
+   "bytes": 12930,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2011-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2012-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2011-T2/datapackage.json",
+   "hash": "sha256:a06bb813dd4d5e3a4e2a8e640ac3829999b3865080d93bca26ca9aec58266ac0",
+   "bytes": 12998,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2011-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2012-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2011-T3/datapackage.json",
+   "hash": "sha256:db132358bd827644327f1b00385cd33d717bc271fff94496a5e6216aacb736a8",
+   "bytes": 12954,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2011-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2013-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2011-T4/datapackage.json",
+   "hash": "sha256:35631c5a93c1d3c1d485b8aaecd40888b8d1b416b1bd01dd1f848498e493c396",
+   "bytes": 12971,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2012",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2014-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2012/datapackage.json",
+   "hash": "sha256:7d28e211f986c4987b033c83e76eef4271947ea5a2dcf181c9bb056233c94d1b",
+   "bytes": 314809,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2012-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2013-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2012-T1/datapackage.json",
+   "hash": "sha256:c4d98920b24f48b014d913e7a00948b1e37d39c610974c385084d3f4a106a669",
+   "bytes": 13034,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2012-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2013-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2012-T2/datapackage.json",
+   "hash": "sha256:27575d7e0fd3e18d366c19e571de6971e1f35da445f06997fb7a976fab6ec978",
+   "bytes": 13045,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2012-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2013-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2012-T3/datapackage.json",
+   "hash": "sha256:1159feb7fbb6a9a25fe4fbd9b6728b16bb817c59aef80ebe21f05dfe1f4ad5e4",
+   "bytes": 13062,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2012-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2014-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2012-T4/datapackage.json",
+   "hash": "sha256:a0290fed12e08bc0b6eebde5538eef086c2c84e3a5c0c3b15a0f2b18c47fb79b",
+   "bytes": 13074,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2013",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2015-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2013/datapackage.json",
+   "hash": "sha256:593825b8fbfd1d73fb735ae792139ff24499de83a11962cd925f46e10069daa0",
+   "bytes": 320807,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2013-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2014-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2013-T1/datapackage.json",
+   "hash": "sha256:ba960db439129db8114d613701ce5a38bde82a39f813de7d022ad9e6225a2572",
+   "bytes": 13089,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2013-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2014-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2013-T2/datapackage.json",
+   "hash": "sha256:b4c62980951e7efa2ffb6053f035317b808346666a339c8bdf0a3a499941917e",
+   "bytes": 13121,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2013-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2014-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2013-T3/datapackage.json",
+   "hash": "sha256:256019a46619feb76f26df64f97b55ab96c34a51ca330f57bd21b10836572bce",
+   "bytes": 13129,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2013-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2015-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2013-T4/datapackage.json",
+   "hash": "sha256:5f0712b8662e42ea85e4f94f2063beea89b786f5556ba18e8165297155bbadc2",
+   "bytes": 13145,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2014",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2016-02-29",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2014/datapackage.json",
+   "hash": "sha256:821a59889c84c4c585502e8b2000c9da12fc955dd268f633c589ba23fe0a4407",
+   "bytes": 324578,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2014-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2015-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2014-T1/datapackage.json",
+   "hash": "sha256:500aee87bb09c68aaf6c1674dc7db5d889d5a75bc0d68f3cea974421ad9c41f8",
+   "bytes": 13100,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2014-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2015-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2014-T2/datapackage.json",
+   "hash": "sha256:81eca43686c08e98045ca8f880b22f4a11a01387e07c84a8d3c54ce223ae4b23",
+   "bytes": 13197,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2014-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2015-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2014-T3/datapackage.json",
+   "hash": "sha256:2709a368361f8f0af7cce39d3cd2c7662c81049a0a2b7bb7cb68a9f3148a0d52",
+   "bytes": 13209,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2014-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2016-02-29",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2014-T4/datapackage.json",
+   "hash": "sha256:80442b625aa63b573d0d01c59d7a582319db24169a525b7198814f356e1489ec",
+   "bytes": 13229,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2015",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2017-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2015/datapackage.json",
+   "hash": "sha256:d6bf43718165c8c005c5f6c75c61f99d883c6ed9a9ceb828ddc0213433945781",
+   "bytes": 333176,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2015-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2016-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2015-T1/datapackage.json",
+   "hash": "sha256:03ed646f82bd1dc6e5c1e569e7f3fb6c2cccbca5352c756ed81d140fe948227c",
+   "bytes": 13264,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2015-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2016-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2015-T2/datapackage.json",
+   "hash": "sha256:75b8d6450c3456315023f5c57b6895f3c9e9d9c0479d4ecbed2b82a7ad717fee",
+   "bytes": 13282,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2015-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2016-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2015-T3/datapackage.json",
+   "hash": "sha256:5132e98601996acd2860f75b40d052641def5d39f5eb2bb6328bffa22ce586c5",
+   "bytes": 13302,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2015-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2017-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2015-T4/datapackage.json",
+   "hash": "sha256:4f72790dc7f80f05ac649c8bc8350cf7aceb3f7711733bf938a895f1f95f4e31",
+   "bytes": 13299,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2016",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2018-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2016/datapackage.json",
+   "hash": "sha256:58c198948ad3ebe4690d5fb5ccc73952dbedd1ad5edf99cd3c0698edf3cea5ba",
+   "bytes": 335824,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2016-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2017-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2016-T1/datapackage.json",
+   "hash": "sha256:4ce21a9adc7cb9cc69f8a69e22bb39960e668b2615e153ab9d08a7c44911fd74",
+   "bytes": 13306,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2016-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2017-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2016-T2/datapackage.json",
+   "hash": "sha256:6af97dba95f1f35d2cb25fe61503fd2860aacd674c90835ff1127dc0ce4d159e",
+   "bytes": 13315,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2016-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2017-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2016-T3/datapackage.json",
+   "hash": "sha256:e955e4a82f8e89949d4a519a20197139778df46bd94e55cd01b6edd18c81b163",
+   "bytes": 13320,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2016-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2018-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2016-T4/datapackage.json",
+   "hash": "sha256:7089366ad8a0cd05952f3619ab8bfbaeba8ab054b778ad8ac8f1f4de15a6798c",
+   "bytes": 13336,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2017",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2019-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2017/datapackage.json",
+   "hash": "sha256:66df5c183ce43f0724a79ca0b6f60214a18c2c8c1dbc1b962cbd4e238640181d",
+   "bytes": 339605,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2017-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2018-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2017-T1/datapackage.json",
+   "hash": "sha256:f90e1150e24fc938908f6ff23a07897311bf4465fc600b4fe93a90abd1494a26",
+   "bytes": 13311,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2017-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2018-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2017-T2/datapackage.json",
+   "hash": "sha256:95d64e378ce5b80ee1f04b42e711162f8994979196d615ac6d11465f6b4ce13b",
+   "bytes": 13321,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2017-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2018-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2017-T3/datapackage.json",
+   "hash": "sha256:03b11122affd6ac5a820370ae76c81cc4d084fef1c9555daa4f4694b9e095b52",
+   "bytes": 13333,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2017-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2019-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2017-T4/datapackage.json",
+   "hash": "sha256:771589af66170b393be2fea205c13952b4cb0b59a91cb12f28f7ec14d2da593f",
+   "bytes": 13351,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2018",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2020-02-29",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2018/datapackage.json",
+   "hash": "sha256:f73490eebdfda68fa6a19862ce0036042854851acefb83ef08aec9d085488786",
+   "bytes": 346868,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2018-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2019-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2018-T1/datapackage.json",
+   "hash": "sha256:6652d4eec317669f192f9bcc6976a56341050bc17bdc8e9546b98126dba4b9f6",
+   "bytes": 13356,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2018-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2019-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2018-T2/datapackage.json",
+   "hash": "sha256:0b5137ed02102440a136ab452e1343d6bc1bdbc5da205aa80fd6dc06d360a605",
+   "bytes": 13359,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2018-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2019-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2018-T3/datapackage.json",
+   "hash": "sha256:9c3db26f8220beba6bdfac802f93b38105e534259873369f28fc8be447047cd3",
+   "bytes": 13363,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2018-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2020-02-29",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2018-T4/datapackage.json",
+   "hash": "sha256:764dfae30ae23c34358cff687bf9378d871c167f4cca66a72aad3a0c4ce03d94",
+   "bytes": 13371,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2019",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2021-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2019/datapackage.json",
+   "hash": "sha256:88f7b5e7c874a2bcdcd42ad6c875f77e7cd4a8d41d146367c6c88256e9d33e8b",
+   "bytes": 354308,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2019-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2020-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2019-T1/datapackage.json",
+   "hash": "sha256:61a418abd06a3cfce38b07c462c43e8fe848fcbcbf88d3d5a847a4bb35d61fc6",
+   "bytes": 13378,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2019-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2020-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2019-T2/datapackage.json",
+   "hash": "sha256:f8659b8f5db20df39ac8a04bdf943b068d0027ffe6aaf812e492e2f8a0896bb5",
+   "bytes": 13389,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2019-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2020-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2019-T3/datapackage.json",
+   "hash": "sha256:1c38b019ce2a1d989a77e1858f8e2baf3e0d179c7623697d0654ffaa27ffdff8",
+   "bytes": 13394,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2019-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2021-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2019-T4/datapackage.json",
+   "hash": "sha256:7f140d3ae74cb9e7fadd9d722774b071b9f5926348b026b19dceb99283a5a4c2",
+   "bytes": 13396,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2020",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2022-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2020/datapackage.json",
+   "hash": "sha256:cab2d42b653dcb6fa678f7f304c83320b762b9af1756be202aa53f668b199054",
+   "bytes": 358953,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2020-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2021-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2020-T1/datapackage.json",
+   "hash": "sha256:f54a1d875e2553c9edd0e8c7d0a3cf57335fc4d34f47e2f991d1e1310e494984",
+   "bytes": 13393,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2020-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2021-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2020-T2/datapackage.json",
+   "hash": "sha256:10e159cedcb5980b20cb47d6f5ee74a4724a60a796cc91646895d5b833455d91",
+   "bytes": 13399,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2020-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2021-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2020-T3/datapackage.json",
+   "hash": "sha256:6bb4168119368ac3bf0a7b4735a39774accac0f39ccd8274452b313c33f30c51",
+   "bytes": 13402,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2020-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2022-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2020-T4/datapackage.json",
+   "hash": "sha256:c0cdea49032f4f4b04a8207ad53dd4660da13c6684f40a6b266880519fadc612",
+   "bytes": 13404,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2021",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2023-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2021/datapackage.json",
+   "hash": "sha256:483313d78e5ba7b5f78e9d82be1f3d4a36cb10e8acedada64750b7f5e155515a",
+   "bytes": 383496,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2021-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2022-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2021-T1/datapackage.json",
+   "hash": "sha256:640ceea2d289229f20ce71939bbe32ec74b695daf4044402efa582baccbcce9c",
+   "bytes": 14095,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2021-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2022-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2021-T2/datapackage.json",
+   "hash": "sha256:9410e7c3d0dce135426991eecb86b24126af98b4f9fe272d867c1e2be52cf5aa",
+   "bytes": 13997,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2021-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2022-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2021-T3/datapackage.json",
+   "hash": "sha256:8495bf6d6a80042a371577998410ccc6cd00f41689187dfabb73555c4ef577ce",
+   "bytes": 13995,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2021-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2023-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2021-T4/datapackage.json",
+   "hash": "sha256:77eb2e8d50979ee8907eb65d2be831c5acb02336f348395426296b416dc097d2",
+   "bytes": 14002,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2022",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2024-02-29",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2022/datapackage.json",
+   "hash": "sha256:af1eff6837ac199df2eb3dccf5bc06c57d65cd4d30df8bfaca9bc171e4561a1f",
+   "bytes": 386017,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2022-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2023-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2022-T1/datapackage.json",
+   "hash": "sha256:561f388bdd4afce4e74f4c00661238c56afebe4db1d519c2e7ba568833b12588",
+   "bytes": 13988,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2022-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2023-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2022-T2/datapackage.json",
+   "hash": "sha256:449798102e5a830ca2452ee6f5adf8bf9db396d02c2f26de0d55ad1de5d13776",
+   "bytes": 13986,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2022-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2023-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2022-T3/datapackage.json",
+   "hash": "sha256:dad53f8bb4aaa8ee081e826b5e592a30230972bf2e9ed3c5192981f116170d0e",
+   "bytes": 13990,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2022-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2024-02-29",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2022-T4/datapackage.json",
+   "hash": "sha256:ac1ea7ceb64c4fb1f2b4eb567e2d76a24fa7541258128e790d7c4f11ced19f49",
+   "bytes": 13996,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2023",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2025-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2023/datapackage.json",
+   "hash": "sha256:fb27a69a3408a893d854f429d2de170a7f5a85fdded6cc39c4e2faa81ed60885",
+   "bytes": 363128,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2023-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2024-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2023-T1/datapackage.json",
+   "hash": "sha256:b00e4188b22263703d0dff2f75596087949eb8c4f99d2a0285ded9a1bd7df5d0",
+   "bytes": 13928,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2023-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2024-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2023-T2/datapackage.json",
+   "hash": "sha256:dfb21bece6dabd63449d41e8876b6aa3b487c35774480e59725659d051944286",
+   "bytes": 13918,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2023-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2024-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2023-T3/datapackage.json",
+   "hash": "sha256:591754d80cf9df05127848af3d9459128e8dd1750ad05e1e9ffc69be4111c9b1",
+   "bytes": 13915,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2023-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2025-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2023-T4/datapackage.json",
+   "hash": "sha256:8438faaae05abf05a63ca13259e35043e9d25162638b2c41fa6cc0f34de89527",
+   "bytes": 13913,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2024",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2026-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2024/datapackage.json",
+   "hash": "sha256:c6bc54f33e602d153e3e1c5d4441ee99d44c270feb140d6adf4299ad27f9a0d1",
+   "bytes": 362785,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2024-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2025-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2024-T1/datapackage.json",
+   "hash": "sha256:ea14c3c6eb3dd457b2f02c64bf415750d5b3527a44adc4d2af7862541388a2bb",
+   "bytes": 13905,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2024-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2025-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2024-T2/datapackage.json",
+   "hash": "sha256:803e34a239ef4292c9103f33e79a21bee56e0ecc8a837de41b8071a149f97dd8",
+   "bytes": 13906,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2024-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2025-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2024-T3/datapackage.json",
+   "hash": "sha256:dfa1e916684ea39697a8af3ca1bc6ee2037eb9a56d506c03567e9855b9e1482d",
+   "bytes": 13898,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2024-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2026-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2024-T4/datapackage.json",
+   "hash": "sha256:2b15623add0f18a5f6da77b5287772a4fe8cacf5a885c3e786ea2932cfa54ab7",
+   "bytes": 13897,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2025",
+   "tipo": "ano",
+   "versao": 1,
+   "situacao": "preliminar",
+   "consolida_em": "2027-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2025/datapackage.json",
+   "hash": "sha256:f286cad68608c7bc22998bdfc0cecf5801cdb6f8d12d9a75831574e8bfc5be45",
+   "bytes": 364708,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2025-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2026-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2025-T1/datapackage.json",
+   "hash": "sha256:6c5875b9d9f9814589aec1c506a99832d78ed553ded5377124e34f41df83b829",
+   "bytes": 13887,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2025-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "consolidado",
+   "consolida_em": "2026-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2025-T2/datapackage.json",
+   "hash": "sha256:0534cf0e98953a41464674a6ba7cf67a4bfa6e3287e42364da37a9cb5b4becae",
+   "bytes": 13895,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2025-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "preliminar",
+   "consolida_em": "2026-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2025-T3/datapackage.json",
+   "hash": "sha256:095bbc70678e7c8ee622109d03b9a69b026acb71e05e76472339b5a783ed3599",
+   "bytes": 13891,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2025-T4",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "preliminar",
+   "consolida_em": "2027-02-28",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf"
+   ],
+   "ficha": "2025-T4/datapackage.json",
+   "hash": "sha256:403efb74cd19850de1a4d5ffbc6ff219b54c3b158a3c7cf0f220a6a14f67bdbc",
+   "bytes": 13893,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2026-T1",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "preliminar",
+   "consolida_em": "2027-05-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2026-T1/datapackage.json",
+   "hash": "sha256:5d4b7f2567fe733723d0d4aa04849f84996d4c9618582871497ab52012c4c533",
+   "bytes": 364534,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2026-T2",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "preliminar",
+   "consolida_em": "2027-08-31",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2026-T2/datapackage.json",
+   "hash": "sha256:bef98caabdc9dafcd8fe22dc8c2aa62c4e7a2419685fac0ea768dc38c244decc",
+   "bytes": 390594,
+   "versoes_antigas": []
+  },
+  {
+   "periodo": "2026-T3",
+   "tipo": "trimestre",
+   "versao": 1,
+   "situacao": "preliminar",
+   "consolida_em": "2027-11-30",
+   "coletado_em": "2026-11-08",
+   "niveis": [
+    "brasil",
+    "uf",
+    "municipio"
+   ],
+   "ficha": "2026-T3/datapackage.json",
+   "hash": "sha256:d4283b1797bc347b6eaa2d63e90700f474f2c08fc1e73c458c1ee4e5f8d003d8",
+   "bytes": 389467,
+   "versoes_antigas": []
+  }
+ ],
+ "estado_da_fonte": {
+  "arquivo": "acessos_banda_larga_fixa.zip",
+  "tamanho": 1074819318,
+  "modificado": "Wed, 04 Nov 2026 10:32:22 GMT",
+  "membros": {
+   "Acessos_Banda_Larga_Fixa_2007-2010.csv": {
+    "crc": "25902606",
+    "tamanho": 97786908,
+    "data": "2023-07-12"
+   },
+   "Acessos_Banda_Larga_Fixa_2007-2010_Colunas.csv": {
+    "crc": "e35da5cc",
+    "tamanho": 11602410,
+    "data": "2023-07-12"
+   },
+   "Acessos_Banda_Larga_Fixa_2011-2012.csv": {
+    "crc": "b96e8180",
+    "tamanho": 190827518,
+    "data": "2023-07-12"
+   },
+   "Acessos_Banda_Larga_Fixa_2011-2012_Colunas.csv": {
+    "crc": "6b9593f2",
+    "tamanho": 14568578,
+    "data": "2023-07-12"
+   },
+   "Acessos_Banda_Larga_Fixa_2013-2014.csv": {
+    "crc": "cfdad9c0",
+    "tamanho": 237037116,
+    "data": "2023-07-12"
+   },
+   "Acessos_Banda_Larga_Fixa_2013-2014_Colunas.csv": {
+    "crc": "b275404f",
+    "tamanho": 20508504,
+    "data": "2023-07-12"
+   },
+   "Acessos_Banda_Larga_Fixa_2015-2016.csv": {
+    "crc": "aa08b550",
+    "tamanho": 276161040,
+    "data": "2025-10-16"
+   },
+   "Acessos_Banda_Larga_Fixa_2015-2016_Colunas.csv": {
+    "crc": "4ee4a269",
+    "tamanho": 21775892,
+    "data": "2025-10-17"
+   },
+   "Acessos_Banda_Larga_Fixa_2017-2018.csv": {
+    "crc": "45879886",
+    "tamanho": 344074827,
+    "data": "2023-07-12"
+   },
+   "Acessos_Banda_Larga_Fixa_2017-2018_Colunas.csv": {
+    "crc": "8c9b4cb0",
+    "tamanho": 29440606,
+    "data": "2023-07-12"
+   },
+   "Acessos_Banda_Larga_Fixa_2019-2020.csv": {
+    "crc": "14624d32",
+    "tamanho": 428843233,
+    "data": "2023-08-30"
+   },
+   "Acessos_Banda_Larga_Fixa_2019_2020_Colunas.csv": {
+    "crc": "e4e41ccf",
+    "tamanho": 36326301,
+    "data": "2023-07-12"
+   },
+   "Acessos_Banda_Larga_Fixa_2021.csv": {
+    "crc": "05050850",
+    "tamanho": 908876080,
+    "data": "2025-10-17"
+   },
+   "Acessos_Banda_Larga_Fixa_2021_Colunas.csv": {
+    "crc": "0fd65401",
+    "tamanho": 167959021,
+    "data": "2025-10-17"
+   },
+   "Acessos_Banda_Larga_Fixa_2022.csv": {
+    "crc": "043ae5e6",
+    "tamanho": 981838047,
+    "data": "2026-07-20"
+   },
+   "Acessos_Banda_Larga_Fixa_2022_Colunas.csv": {
+    "crc": "a5be0415",
+    "tamanho": 137104374,
+    "data": "2026-07-02"
+   },
+   "Acessos_Banda_Larga_Fixa_2023.csv": {
+    "crc": "66532327",
+    "tamanho": 1087868590,
+    "data": "2026-07-02"
+   },
+   "Acessos_Banda_Larga_Fixa_2023_Colunas.csv": {
+    "crc": "766412c9",
+    "tamanho": 141448757,
+    "data": "2026-07-02"
+   },
+   "Acessos_Banda_Larga_Fixa_2024.csv": {
+    "crc": "fc288829",
+    "tamanho": 1160382400,
+    "data": "2026-07-20"
+   },
+   "Acessos_Banda_Larga_Fixa_2024_Colunas.csv": {
+    "crc": "1fc78db4",
+    "tamanho": 159096229,
+    "data": "2026-07-02"
+   },
+   "Acessos_Banda_Larga_Fixa_2025.csv": {
+    "crc": "da94f35b",
+    "tamanho": 1191434811,
+    "data": "2026-07-02"
+   },
+   "Acessos_Banda_Larga_Fixa_2025_Colunas.csv": {
+    "crc": "077816f2",
+    "tamanho": 157645104,
+    "data": "2026-07-02"
+   },
+   "Acessos_Banda_Larga_Fixa_2026.csv": {
+    "crc": "6ae6551e",
+    "tamanho": 926790600,
+    "data": "2026-11-03"
+   },
+   "Acessos_Banda_Larga_Fixa_2026_Colunas.csv": {
+    "crc": "33b1d3ab",
+    "tamanho": 147608246,
+    "data": "2026-11-03"
+   },
+   "Acessos_Banda_Larga_Fixa_Total.csv": {
+    "crc": "0f708ffb",
+    "tamanho": 3549,
+    "data": "2026-11-03"
+   },
+   "Densidades.pdf": {
+    "crc": "9506c276",
+    "tamanho": 139962,
+    "data": "2020-07-21"
+   },
+   "Densidade_Banda_Larga_Fixa.csv": {
+    "crc": "754cb67e",
+    "tamanho": 71305379,
+    "data": "2026-11-03"
+   }
+  }
+ }
+}

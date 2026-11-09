@@ -1,0 +1,900 @@
+codigo_ibge,uf,lavoura,area_plantada_ha,area_colhida_ha,quantidade,unidade_quantidade,rendimento
+11,RO,total,,376914,..,..,..
+11,RO,abacate,,441,7892,mil frutos,17896
+11,RO,abacaxi,,474,3288,mil frutos,6937
+11,RO,algodao_herbaceo,,914,1278,t,1398
+11,RO,amendoim,,321,211,t,657
+11,RO,arroz,,111285,188714,t,1696
+11,RO,banana,,27116,24344,mil cachos,898
+11,RO,batata_doce,,128,385,t,3008
+11,RO,cacau,,17478,6690,t,383
+11,RO,cafe,,44991,45104,t,1003
+11,RO,cana_de_acucar,,369,14280,t,38699
+11,RO,cana_para_forragem,,471,8478,t,18000
+11,RO,coco_da_baia,,57,117,mil frutos,2053
+11,RO,feijao,,67556,45195,t,669
+11,RO,laranja,,513,27570,mil frutos,53743
+11,RO,limao,,219,12594,mil frutos,57507
+11,RO,mamao,,196,1420,mil frutos,7245
+11,RO,mandioca,,22770,396120,t,17397
+11,RO,manga,,276,4467,mil frutos,16185
+11,RO,melancia,,429,1823,mil frutos,4249
+11,RO,milho,,80830,136434,t,1688
+11,RO,pimenta_do_reino,,14,32,t,2286
+11,RO,tangerina,,52,652,mil frutos,12538
+11,RO,tomate,,14,280,t,20000
+12,AC,total,,74404,..,..,..
+12,AC,abacate,,44,2398,mil frutos,54500
+12,AC,abacaxi,,89,363,mil frutos,4079
+12,AC,amendoim,,2,3,t,1500
+12,AC,arroz,,19126,27761,t,1451
+12,AC,banana,,3970,4764,mil cachos,1200
+12,AC,batata_doce,,8,84,t,10500
+12,AC,cafe,,768,747,t,973
+12,AC,caju,,23,253,mil frutos,11000
+12,AC,cana_de_acucar,,644,18071,t,28061
+12,AC,coco_da_baia,,19,115,mil frutos,6053
+12,AC,feijao,,10937,6529,t,597
+12,AC,fumo,,1153,732,t,635
+12,AC,guarana,,114,21,t,184
+12,AC,laranja,,91,6359,mil frutos,69879
+12,AC,limao,,18,2471,mil frutos,137278
+12,AC,mamao,,36,455,mil frutos,12639
+12,AC,mandioca,,16825,269109,t,15995
+12,AC,manga,,44,4330,mil frutos,98409
+12,AC,melancia,,267,731,mil frutos,2738
+12,AC,milho,,20174,25770,t,1277
+12,AC,tangerina,,33,2891,mil frutos,87606
+12,AC,tomate,,19,494,t,26000
+13,AM,total,,118827,..,..,..
+13,AM,abacate,,214,9605,mil frutos,44883
+13,AM,abacaxi,,452,6885,mil frutos,15232
+13,AM,arroz,,4601,4840,t,1052
+13,AM,banana,,2512,1935,mil cachos,770
+13,AM,batata_doce,,476,3676,t,7723
+13,AM,cacau,,890,629,t,707
+13,AM,cafe,,34,29,t,853
+13,AM,caju,,35,836,mil frutos,23886
+13,AM,cana_de_acucar,,2250,150750,t,67000
+13,AM,coco_da_baia,,105,475,mil frutos,4524
+13,AM,feijao,,2146,1808,t,842
+13,AM,fumo,,542,335,t,618
+13,AM,guarana,,4036,600,t,149
+13,AM,juta,,10019,10327,t,1031
+13,AM,laranja,,710,68948,mil frutos,97110
+13,AM,limao,,233,30842,mil frutos,132369
+13,AM,malva,,10840,19507,t,1800
+13,AM,mamao,,106,4760,mil frutos,44906
+13,AM,mandioca,,71739,860748,t,11998
+13,AM,manga,,188,10185,mil frutos,54176
+13,AM,melancia,,1692,5079,mil frutos,3002
+13,AM,melao,,199,560,mil frutos,2814
+13,AM,milho,,4335,5635,t,1300
+13,AM,pimenta_do_reino,,81,72,t,889
+13,AM,tangerina,,156,12856,mil frutos,82410
+13,AM,tomate,,236,1402,t,5941
+14,RR,total,,24043,..,..,..
+14,RR,abacate,,10,68,mil frutos,6800
+14,RR,abacaxi,,20,200,mil frutos,10000
+14,RR,amendoim,,4,4,t,1000
+14,RR,arroz,,15680,18524,t,1181
+14,RR,banana,,836,522,mil cachos,624
+14,RR,batata_doce,,21,168,t,8000
+14,RR,cana_de_acucar,,15,480,t,32000
+14,RR,coco_da_baia,,10,40,mil frutos,4000
+14,RR,feijao,,733,302,t,412
+14,RR,fumo,,10,15,t,1500
+14,RR,laranja,,60,3300,mil frutos,55000
+14,RR,limao,,28,2240,mil frutos,80000
+14,RR,mamao,,11,635,mil frutos,57727
+14,RR,mandioca,,2800,38768,t,13846
+14,RR,melancia,,20,30,mil frutos,1500
+14,RR,milho,,3751,2513,t,670
+14,RR,tangerina,,20,745,mil frutos,37250
+14,RR,tomate,,14,290,t,20714
+15,PA,total,,528999,..,..,..
+15,PA,abacate,,217,10446,mil frutos,48138
+15,PA,abacaxi,,350,4062,mil frutos,11606
+15,PA,algodao_herbaceo,,11437,6871,t,601
+15,PA,arroz,,132705,175481,t,1322
+15,PA,banana,,12245,14160,mil cachos,1156
+15,PA,batata_doce,,172,1500,t,8721
+15,PA,borracha_latex_coagulado,,2412,1134,t,470
+15,PA,borracha_latex_liquido,,1309,571,t,436
+15,PA,cacau,,14770,7104,t,481
+15,PA,cafe,,1185,1176,t,992
+15,PA,caju,,65,2830,mil frutos,43538
+15,PA,cana_de_acucar,,4946,243330,t,49197
+15,PA,coco_da_baia,,2055,12350,mil frutos,6010
+15,PA,feijao,,33860,19703,t,582
+15,PA,fumo,,2166,1263,t,583
+15,PA,guarana,,296,44,t,149
+15,PA,juta,,4636,3843,t,829
+15,PA,laranja,,1340,153864,mil frutos,114824
+15,PA,limao,,234,26203,mil frutos,111979
+15,PA,malva,,29000,23200,t,800
+15,PA,mamao,,1773,99089,mil frutos,55888
+15,PA,mandioca,,131616,1681529,t,12776
+15,PA,manga,,106,7055,mil frutos,66557
+15,PA,melancia,,1061,2355,mil frutos,2220
+15,PA,melao,,111,365,mil frutos,3288
+15,PA,milho,,118682,141152,t,1189
+15,PA,pimenta_do_reino,,19879,47927,t,2411
+15,PA,tangerina,,110,14067,mil frutos,127882
+15,PA,tomate,,261,1377,t,5276
+16,AP,total,,9468,..,..,..
+16,AP,abacaxi,,19,57,mil frutos,3000
+16,AP,arroz,,1847,1844,t,998
+16,AP,banana,,191,268,mil cachos,1403
+16,AP,cafe,,162,95,t,586
+16,AP,cana_de_acucar,,68,1048,t,15412
+16,AP,coco_da_baia,,62,124,mil frutos,2000
+16,AP,feijao,,179,76,t,425
+16,AP,laranja,,91,3320,mil frutos,36484
+16,AP,limao,,13,690,mil frutos,53077
+16,AP,mandioca,,5081,45358,t,8927
+16,AP,melancia,,64,254,mil frutos,3969
+16,AP,milho,,1552,1108,t,714
+16,AP,pimenta_do_reino,,139,300,t,2158
+17,TO,total,,,..,..,..
+17,TO,abacate,,,,mil frutos,
+17,TO,abacaxi,,,,mil frutos,
+17,TO,alfafa_fenada,,,,t,
+17,TO,algodao_arboreo,,,,t,
+17,TO,algodao_herbaceo,,,,t,
+17,TO,alho,,,,t,
+17,TO,amendoim,,,,t,
+17,TO,arroz,,,,t,
+17,TO,aveia,,,,t,
+17,TO,azeitona,,,,t,
+17,TO,banana,,,,mil cachos,
+17,TO,batata_doce,,,,t,
+17,TO,batata_inglesa,,,,t,
+17,TO,borracha_latex_coagulado,,,,t,
+17,TO,borracha_latex_liquido,,,,t,
+17,TO,cacau,,,,t,
+17,TO,cafe,,,,t,
+17,TO,caju,,,,mil frutos,
+17,TO,cana_de_acucar,,,,t,
+17,TO,cana_para_forragem,,,,t,
+17,TO,caqui,,,,mil frutos,
+17,TO,cebola,,,,t,
+17,TO,centeio,,,,t,
+17,TO,cevada,,,,t,
+17,TO,cha_da_india,,,,t,
+17,TO,coco_da_baia,,,,mil frutos,
+17,TO,erva_mate,,,,t,
+17,TO,fava,,,,t,
+17,TO,feijao,,,,t,
+17,TO,figo,,,,mil frutos,
+17,TO,fumo,,,,t,
+17,TO,guarana,,,,t,
+17,TO,juta,,,,t,
+17,TO,laranja,,,,mil frutos,
+17,TO,limao,,,,mil frutos,
+17,TO,linho,,,,t,
+17,TO,maca,,,,mil frutos,
+17,TO,malva,,,,t,
+17,TO,mamao,,,,mil frutos,
+17,TO,mamona,,,,t,
+17,TO,mandioca,,,,t,
+17,TO,manga,,,,mil frutos,
+17,TO,marmelo,,,,mil frutos,
+17,TO,melancia,,,,mil frutos,
+17,TO,melao,,,,mil frutos,
+17,TO,milho,,,,t,
+17,TO,noz,,,,t,
+17,TO,palmito,,,,t,
+17,TO,pera,,,,mil frutos,
+17,TO,pessego,,,,mil frutos,
+17,TO,pimenta_do_reino,,,,t,
+17,TO,rami,,,,t,
+17,TO,sisal,,,,t,
+17,TO,soja,,,,t,
+17,TO,sorgo,,,,t,
+17,TO,tangerina,,,,mil frutos,
+17,TO,tomate,,,,t,
+17,TO,trigo,,,,t,
+17,TO,tungue,,,,t,
+17,TO,uva,,,,t,
+21,MA,total,,2422059,..,..,..
+21,MA,abacate,,163,8058,mil frutos,49436
+21,MA,abacaxi,,166,1190,mil frutos,7169
+21,MA,algodao_arboreo,,48253,11436,t,237
+21,MA,algodao_herbaceo,,1105,273,t,247
+21,MA,arroz,,1167204,1575030,t,1349
+21,MA,banana,,9220,11147,mil cachos,1209
+21,MA,batata_doce,,269,1237,t,4599
+21,MA,cafe,,225,126,t,560
+21,MA,caju,,1042,101917,mil frutos,97809
+21,MA,cana_de_acucar,,24222,1035114,t,42734
+21,MA,cana_para_forragem,,813,16305,t,20055
+21,MA,coco_da_baia,,1764,6036,mil frutos,3422
+21,MA,fava,,10294,2699,t,262
+21,MA,feijao,,117380,58690,t,500
+21,MA,fumo,,265,124,t,468
+21,MA,laranja,,3711,439129,mil frutos,118332
+21,MA,limao,,123,20041,mil frutos,162935
+21,MA,malva,,2900,2270,t,783
+21,MA,mamao,,21,153,mil frutos,7286
+21,MA,mandioca,,450128,3493621,t,7761
+21,MA,manga,,1278,88133,mil frutos,68962
+21,MA,melancia,,26520,13811,mil frutos,521
+21,MA,melao,,360,160,mil frutos,444
+21,MA,milho,,553401,303592,t,549
+21,MA,pimenta_do_reino,,287,690,t,2404
+21,MA,soja,,215,430,t,2000
+21,MA,tangerina,,232,23169,mil frutos,99866
+21,MA,tomate,,498,12900,t,25904
+22,PI,total,,1258536,..,..,..
+22,PI,abacate,,43,1670,mil frutos,38837
+22,PI,abacaxi,,55,168,mil frutos,3055
+22,PI,algodao_arboreo,,187899,17150,t,91
+22,PI,algodao_herbaceo,,12271,2592,t,211
+22,PI,alho,,156,739,t,4737
+22,PI,arroz,,231108,213103,t,922
+22,PI,banana,,3434,4216,mil cachos,1228
+22,PI,batata_doce,,410,1614,t,3937
+22,PI,cafe,,46,19,t,413
+22,PI,caju,,28420,1046387,mil frutos,36819
+22,PI,cana_de_acucar,,14337,666305,t,46475
+22,PI,cana_para_forragem,,15,275,t,18333
+22,PI,cebola,,33,116,t,3515
+22,PI,coco_da_baia,,256,1771,mil frutos,6918
+22,PI,fava,,1312,375,t,286
+22,PI,feijao,,274544,48098,t,175
+22,PI,fumo,,501,185,t,369
+22,PI,laranja,,1333,136731,mil frutos,102574
+22,PI,limao,,24,2805,mil frutos,116875
+22,PI,mamao,,14,144,mil frutos,10286
+22,PI,mamona,,15187,3500,t,230
+22,PI,mandioca,,117397,1048950,t,8935
+22,PI,manga,,2147,120691,mil frutos,56214
+22,PI,melancia,,8992,8541,mil frutos,950
+22,PI,melao,,171,41,mil frutos,240
+22,PI,milho,,358200,123316,t,344
+22,PI,soja,,10,20,t,2000
+22,PI,sorgo,,100,150,t,1500
+22,PI,tangerina,,73,9473,mil frutos,129767
+22,PI,tomate,,48,142,t,2958
+23,CE,total,,2635767,..,..,..
+23,CE,abacate,,2597,52657,mil frutos,20276
+23,CE,abacaxi,,50,400,mil frutos,8000
+23,CE,algodao_arboreo,,977945,140766,t,144
+23,CE,algodao_herbaceo,,124010,57690,t,465
+23,CE,alho,,122,524,t,4295
+23,CE,amendoim,,956,547,t,572
+23,CE,arroz,,57876,70525,t,1219
+23,CE,banana,,29750,40906,mil cachos,1375
+23,CE,batata_doce,,1072,8885,t,8288
+23,CE,cafe,,13700,4515,t,330
+23,CE,caju,,137623,6918620,mil frutos,50272
+23,CE,cana_de_acucar,,55176,2296346,t,41619
+23,CE,cana_para_forragem,,375,8450,t,22533
+23,CE,cebola,,10,10,t,1000
+23,CE,coco_da_baia,,20195,100642,mil frutos,4984
+23,CE,fava,,3797,453,t,119
+23,CE,feijao,,593540,168228,t,283
+23,CE,fumo,,174,77,t,443
+23,CE,laranja,,1700,170000,mil frutos,100000
+23,CE,limao,,272,52150,mil frutos,191728
+23,CE,mamao,,59,988,mil frutos,16746
+23,CE,mamona,,16830,9435,t,561
+23,CE,mandioca,,74621,577214,t,7735
+23,CE,manga,,4510,334713,mil frutos,74216
+23,CE,melancia,,1354,614,mil frutos,453
+23,CE,milho,,510226,153349,t,301
+23,CE,pimenta_do_reino,,33,8,t,242
+23,CE,sisal,,340,259,t,762
+23,CE,sorgo,,5400,6750,t,1250
+23,CE,tangerina,,302,24754,mil frutos,81967
+23,CE,tomate,,1148,27470,t,23929
+23,CE,uva,,4,8,t,2000
+24,RN,total,,858342,..,..,..
+24,RN,abacate,,116,6175,mil frutos,53233
+24,RN,abacaxi,,446,8948,mil frutos,20063
+24,RN,algodao_arboreo,,293734,29732,t,101
+24,RN,algodao_herbaceo,,154085,31583,t,205
+24,RN,alho,,134,536,t,4000
+24,RN,arroz,,4451,1782,t,400
+24,RN,banana,,3125,4442,mil cachos,1421
+24,RN,batata_doce,,6897,47781,t,6928
+24,RN,cafe,,36,2,t,56
+24,RN,caju,,51227,711778,mil frutos,13895
+24,RN,cana_de_acucar,,50485,2847555,t,56404
+24,RN,cana_para_forragem,,287,4326,t,15073
+24,RN,cebola,,118,1339,t,11347
+24,RN,coco_da_baia,,15862,56677,mil frutos,3573
+24,RN,fava,,5468,566,t,104
+24,RN,feijao,,127756,19141,t,150
+24,RN,fumo,,8,6,t,750
+24,RN,laranja,,559,23898,mil frutos,42751
+24,RN,limao,,95,8990,mil frutos,94632
+24,RN,mamao,,82,1046,mil frutos,12756
+24,RN,mamona,,225,58,t,258
+24,RN,mandioca,,57685,543621,t,9424
+24,RN,manga,,1802,74284,mil frutos,41223
+24,RN,melancia,,610,655,mil frutos,1074
+24,RN,melao,,583,7709,mil frutos,13223
+24,RN,milho,,39778,5743,t,144
+24,RN,pimenta_do_reino,,6,7,t,1167
+24,RN,sisal,,34803,14198,t,408
+24,RN,sorgo,,7424,3851,t,519
+24,RN,tangerina,,21,1080,mil frutos,51429
+24,RN,tomate,,434,7649,t,17624
+25,PB,total,,1437809,..,..,..
+25,PB,abacate,,198,8630,mil frutos,43586
+25,PB,abacaxi,,7329,160970,mil frutos,21963
+25,PB,algodao_arboreo,,438650,23529,t,54
+25,PB,algodao_herbaceo,,176395,28397,t,161
+25,PB,alho,,254,946,t,3724
+25,PB,amendoim,,648,569,t,878
+25,PB,arroz,,9327,7666,t,822
+25,PB,banana,,8898,14192,mil cachos,1595
+25,PB,batata_doce,,6900,61035,t,8846
+25,PB,batata_inglesa,,857,4550,t,5309
+25,PB,cafe,,296,109,t,368
+25,PB,caju,,2535,191375,mil frutos,75493
+25,PB,cana_de_acucar,,134655,7269996,t,53990
+25,PB,cana_para_forragem,,1183,31805,t,26885
+25,PB,cebola,,202,235,t,1163
+25,PB,coco_da_baia,,11492,27275,mil frutos,2373
+25,PB,fava,,34619,8843,t,255
+25,PB,feijao,,207779,27873,t,134
+25,PB,fumo,,1026,909,t,886
+25,PB,laranja,,1713,163680,mil frutos,95552
+25,PB,limao,,93,16106,mil frutos,173183
+25,PB,mamao,,172,5115,mil frutos,29738
+25,PB,mamona,,1208,417,t,345
+25,PB,mandioca,,60492,498426,t,8240
+25,PB,manga,,2086,146613,mil frutos,70284
+25,PB,melancia,,945,500,mil frutos,529
+25,PB,melao,,9,27,mil frutos,3000
+25,PB,milho,,209506,26065,t,124
+25,PB,pimenta_do_reino,,563,125,t,222
+25,PB,sisal,,115871,81050,t,699
+25,PB,tangerina,,30,3914,mil frutos,130467
+25,PB,tomate,,1818,55659,t,30616
+25,PB,uva,,60,150,t,2500
+26,PE,total,,1355100,..,..,..
+26,PE,abacate,,875,17712,mil frutos,20242
+26,PE,abacaxi,,1321,16011,mil frutos,12120
+26,PE,algodao_arboreo,,107438,9777,t,91
+26,PE,algodao_herbaceo,,43841,10613,t,242
+26,PE,alho,,340,935,t,2750
+26,PE,amendoim,,5,2,t,400
+26,PE,arroz,,4270,14910,t,3492
+26,PE,banana,,17812,30011,mil cachos,1685
+26,PE,batata_doce,,4166,35869,t,8610
+26,PE,cafe,,15823,12026,t,760
+26,PE,caju,,2329,93907,mil frutos,40321
+26,PE,cana_de_acucar,,357156,17578504,t,49218
+26,PE,cana_para_forragem,,379,7459,t,19681
+26,PE,cebola,,4570,54091,t,11836
+26,PE,coco_da_baia,,11712,45456,mil frutos,3881
+26,PE,fava,,41852,15058,t,360
+26,PE,feijao,,270804,92358,t,341
+26,PE,figo,,20,624,mil frutos,31200
+26,PE,fumo,,579,461,t,796
+26,PE,laranja,,4264,274133,mil frutos,64290
+26,PE,limao,,136,15596,mil frutos,114676
+26,PE,mamao,,210,4952,mil frutos,23581
+26,PE,mamona,,25265,6670,t,264
+26,PE,mandioca,,174824,1666248,t,9531
+26,PE,manga,,3622,110621,mil frutos,30541
+26,PE,melancia,,2365,7369,mil frutos,3116
+26,PE,melao,,1601,12733,mil frutos,7953
+26,PE,milho,,235080,94738,t,403
+26,PE,pimenta_do_reino,,81,15,t,185
+26,PE,sisal,,6765,5818,t,860
+26,PE,sorgo,,6284,4713,t,750
+26,PE,tangerina,,152,14634,mil frutos,96276
+26,PE,tomate,,8635,215530,t,24960
+26,PE,uva,,524,6440,t,12290
+27,AL,total,,842770,..,..,..
+27,AL,abacate,,10,501,mil frutos,50100
+27,AL,abacaxi,,492,8436,mil frutos,17146
+27,AL,algodao_herbaceo,,82934,20860,t,252
+27,AL,amendoim,,347,186,t,536
+27,AL,arroz,,7395,15537,t,2101
+27,AL,banana,,9039,10367,mil cachos,1147
+27,AL,batata_doce,,3442,19539,t,5677
+27,AL,cafe,,88,30,t,341
+27,AL,caju,,1399,43875,mil frutos,31362
+27,AL,cana_de_acucar,,384460,21535646,t,56015
+27,AL,coco_da_baia,,24764,74292,mil frutos,3000
+27,AL,fava,,3037,1158,t,381
+27,AL,feijao,,150236,49576,t,330
+27,AL,fumo,,49611,46813,t,944
+27,AL,laranja,,876,70202,mil frutos,80139
+27,AL,limao,,71,6020,mil frutos,84789
+27,AL,mamona,,75,38,t,507
+27,AL,mandioca,,21648,221081,t,10213
+27,AL,manga,,1777,46943,mil frutos,26417
+27,AL,melancia,,189,203,mil frutos,1074
+27,AL,milho,,100851,35478,t,352
+27,AL,tangerina,,29,2010,mil frutos,69310
+28,SE,total,,362251,..,..,..
+28,SE,abacate,,8,950,mil frutos,118750
+28,SE,abacaxi,,188,2797,mil frutos,14878
+28,SE,algodao_herbaceo,,22134,4170,t,188
+28,SE,amendoim,,1333,1494,t,1121
+28,SE,arroz,,8964,24758,t,2762
+28,SE,banana,,2388,2327,mil cachos,974
+28,SE,batata_doce,,2414,22930,t,9499
+28,SE,batata_inglesa,,138,852,t,6174
+28,SE,caju,,262,7980,mil frutos,30458
+28,SE,cana_de_acucar,,23592,1315139,t,55745
+28,SE,cana_para_forragem,,32,1800,t,56250
+28,SE,cebola,,75,375,t,5000
+28,SE,coco_da_baia,,40902,77017,mil frutos,1883
+28,SE,fava,,14304,4686,t,328
+28,SE,feijao,,80857,40692,t,503
+28,SE,fumo,,7668,6188,t,807
+28,SE,laranja,,24447,2594919,mil frutos,106145
+28,SE,limao,,438,44436,mil frutos,101452
+28,SE,mamao,,89,2968,mil frutos,33348
+28,SE,mandioca,,39742,581255,t,14626
+28,SE,manga,,656,33808,mil frutos,51537
+28,SE,melancia,,61,366,mil frutos,6000
+28,SE,milho,,91203,78260,t,858
+28,SE,pimenta_do_reino,,20,16,t,800
+28,SE,tangerina,,99,9789,mil frutos,98879
+28,SE,tomate,,237,3940,t,16624
+29,BA,total,,3288881,..,..,..
+29,BA,abacate,,724,22362,mil frutos,30887
+29,BA,abacaxi,,3190,39340,mil frutos,12332
+29,BA,algodao_arboreo,,2030,962,t,474
+29,BA,algodao_herbaceo,,67231,48137,t,716
+29,BA,alho,,1333,4619,t,3465
+29,BA,amendoim,,2457,3527,t,1435
+29,BA,arroz,,83804,57441,t,685
+29,BA,banana,,54200,75230,mil cachos,1388
+29,BA,batata_doce,,7922,69960,t,8831
+29,BA,batata_inglesa,,600,6200,t,10333
+29,BA,borracha_latex_coagulado,,10939,7941,t,726
+29,BA,borracha_latex_liquido,,10729,9898,t,923
+29,BA,cacau,,479343,324608,t,677
+29,BA,cafe,,74615,74809,t,1003
+29,BA,caju,,6564,270443,mil frutos,41201
+29,BA,cana_de_acucar,,84160,3510900,t,41717
+29,BA,cana_para_forragem,,37,2439,t,65919
+29,BA,caqui,,12,817,mil frutos,68083
+29,BA,cebola,,4498,46023,t,10232
+29,BA,coco_da_baia,,34900,129409,mil frutos,3708
+29,BA,fava,,2986,2102,t,704
+29,BA,feijao,,689699,224527,t,326
+29,BA,figo,,10,500,mil frutos,50000
+29,BA,fumo,,52000,39000,t,750
+29,BA,guarana,,220,111,t,505
+29,BA,laranja,,11455,1007902,mil frutos,87988
+29,BA,limao,,1022,131338,mil frutos,128511
+29,BA,mamao,,830,17892,mil frutos,21557
+29,BA,mamona,,340909,90000,t,264
+29,BA,mandioca,,358000,4439200,t,12400
+29,BA,manga,,2983,127353,mil frutos,42693
+29,BA,marmelo,,33,851,mil frutos,25788
+29,BA,melancia,,18106,17444,mil frutos,963
+29,BA,melao,,890,6422,mil frutos,7216
+29,BA,milho,,678782,312251,t,460
+29,BA,pessego,,15,442,mil frutos,29467
+29,BA,pimenta_do_reino,,818,605,t,740
+29,BA,rami,,150,180,t,1200
+29,BA,sisal,,187500,150000,t,800
+29,BA,soja,,1180,354,t,300
+29,BA,sorgo,,7511,12764,t,1699
+29,BA,tangerina,,1031,100328,mil frutos,97311
+29,BA,tomate,,3417,95376,t,27912
+29,BA,uva,,46,179,t,3891
+31,MG,total,,4325337,..,..,..
+31,MG,abacate,,2487,110154,mil frutos,44292
+31,MG,abacaxi,,7938,125236,mil frutos,15777
+31,MG,alfafa_fenada,,3,36,t,12000
+31,MG,algodao_herbaceo,,99062,83238,t,840
+31,MG,alho,,5035,22122,t,4394
+31,MG,amendoim,,3503,4542,t,1297
+31,MG,arroz,,563292,731721,t,1299
+31,MG,aveia,,32,54,t,1688
+31,MG,banana,,33503,34750,mil cachos,1037
+31,MG,batata_doce,,3924,33870,t,8631
+31,MG,batata_inglesa,,32248,546818,t,16957
+31,MG,cacau,,143,233,t,1629
+31,MG,cafe,,480062,479437,t,999
+31,MG,caju,,33,1809,mil frutos,54818
+31,MG,cana_de_acucar,,216392,10856051,t,50168
+31,MG,cana_para_forragem,,35110,1039007,t,29593
+31,MG,caqui,,88,8797,mil frutos,99966
+31,MG,cebola,,1199,7566,t,6310
+31,MG,cha_da_india,,3,6,t,2000
+31,MG,coco_da_baia,,738,3830,mil frutos,5190
+31,MG,fava,,17279,6190,t,358
+31,MG,feijao,,744759,335166,t,450
+31,MG,figo,,387,66298,mil frutos,171313
+31,MG,fumo,,10544,7087,t,672
+31,MG,laranja,,29113,2042980,mil frutos,70174
+31,MG,limao,,1263,88871,mil frutos,70365
+31,MG,maca,,184,2048,mil frutos,11130
+31,MG,mamao,,739,14571,mil frutos,19717
+31,MG,mamona,,6676,7234,t,1084
+31,MG,mandioca,,101955,1362729,t,13366
+31,MG,manga,,6355,233975,mil frutos,36817
+31,MG,marmelo,,2494,52730,mil frutos,21143
+31,MG,melancia,,2725,2945,mil frutos,1081
+31,MG,milho,,1654350,3030924,t,1832
+31,MG,noz,,1,8,t,8000
+31,MG,pera,,651,34968,mil frutos,53714
+31,MG,pessego,,830,47956,mil frutos,57778
+31,MG,soja,,229348,390390,t,1702
+31,MG,sorgo,,280,436,t,1557
+31,MG,tangerina,,2634,194605,mil frutos,73882
+31,MG,tomate,,4429,160548,t,36249
+31,MG,trigo,,22939,22999,t,1003
+31,MG,uva,,607,2609,t,4298
+32,ES,total,,723084,..,..,..
+32,ES,abacate,,432,12252,mil frutos,28361
+32,ES,abacaxi,,569,18856,mil frutos,33139
+32,ES,alho,,547,2256,t,4124
+32,ES,amendoim,,295,320,t,1085
+32,ES,arroz,,30410,71790,t,2361
+32,ES,banana,,23203,19568,mil cachos,843
+32,ES,batata_doce,,699,10202,t,14595
+32,ES,batata_inglesa,,419,4672,t,11150
+32,ES,borracha_latex_coagulado,,60,101,t,1683
+32,ES,cacau,,19601,11616,t,593
+32,ES,cafe,,327737,369887,t,1129
+32,ES,caju,,4,43,mil frutos,10750
+32,ES,cana_de_acucar,,29328,1621119,t,55275
+32,ES,cana_para_forragem,,4349,114565,t,26343
+32,ES,caqui,,2,140,mil frutos,70000
+32,ES,cebola,,100,611,t,6110
+32,ES,coco_da_baia,,888,3176,mil frutos,3577
+32,ES,feijao,,110605,55260,t,500
+32,ES,figo,,5,373,mil frutos,74600
+32,ES,fumo,,8,7,t,875
+32,ES,laranja,,1584,120211,mil frutos,75891
+32,ES,limao,,431,25954,mil frutos,60218
+32,ES,maca,,3,216,mil frutos,72000
+32,ES,mamao,,535,33195,mil frutos,62047
+32,ES,mandioca,,27571,492494,t,17863
+32,ES,manga,,1135,39828,mil frutos,35091
+32,ES,marmelo,,6,312,mil frutos,52000
+32,ES,melancia,,59,171,mil frutos,2898
+32,ES,melao,,20,141,mil frutos,7050
+32,ES,milho,,140356,222540,t,1586
+32,ES,pera,,15,1070,mil frutos,71333
+32,ES,pessego,,12,1474,mil frutos,122833
+32,ES,pimenta_do_reino,,488,1166,t,2389
+32,ES,tangerina,,736,49018,mil frutos,66601
+32,ES,tomate,,819,37387,t,45650
+32,ES,uva,,53,470,t,8868
+33,RJ,total,,413451,..,..,..
+33,RJ,abacate,,431,12683,mil frutos,29427
+33,RJ,abacaxi,,242,4191,mil frutos,17318
+33,RJ,alho,,62,151,t,2435
+33,RJ,amendoim,,74,110,t,1486
+33,RJ,arroz,,31004,92419,t,2981
+33,RJ,banana,,30704,31086,mil cachos,1012
+33,RJ,batata_doce,,1873,26024,t,13894
+33,RJ,batata_inglesa,,586,4876,t,8321
+33,RJ,cafe,,11499,30946,t,2691
+33,RJ,caju,,572,20324,mil frutos,35531
+33,RJ,cana_de_acucar,,197386,10784380,t,54636
+33,RJ,cana_para_forragem,,3633,99255,t,27320
+33,RJ,caqui,,258,17371,mil frutos,67329
+33,RJ,cebola,,105,200,t,1905
+33,RJ,coco_da_baia,,309,1724,mil frutos,5579
+33,RJ,fava,,10,5,t,500
+33,RJ,feijao,,23799,15728,t,661
+33,RJ,figo,,5,516,mil frutos,103200
+33,RJ,fumo,,8,20,t,2500
+33,RJ,laranja,,35721,2278108,mil frutos,63775
+33,RJ,limao,,1963,290552,mil frutos,148014
+33,RJ,maca,,2,34,mil frutos,17000
+33,RJ,mamao,,950,15099,mil frutos,15894
+33,RJ,mandioca,,13072,199545,t,15265
+33,RJ,manga,,985,75801,mil frutos,76955
+33,RJ,melancia,,66,172,mil frutos,2606
+33,RJ,melao,,29,34,mil frutos,1172
+33,RJ,milho,,53667,73281,t,1365
+33,RJ,pera,,50,2860,mil frutos,57200
+33,RJ,pessego,,5,438,mil frutos,87600
+33,RJ,pimenta_do_reino,,16,29,t,1813
+33,RJ,tangerina,,1898,263875,mil frutos,139028
+33,RJ,tomate,,2432,92954,t,38221
+33,RJ,uva,,35,265,t,7571
+35,SP,total,,6012310,..,..,..
+35,SP,abacate,,9871,244278,mil frutos,24747
+35,SP,abacaxi,,1080,23620,mil frutos,21870
+35,SP,alfafa_fenada,,7,34,t,4857
+35,SP,algodao_herbaceo,,318000,529227,t,1664
+35,SP,alho,,810,3475,t,4290
+35,SP,amendoim,,184000,249235,t,1355
+35,SP,arroz,,309000,463500,t,1500
+35,SP,banana,,39653,40730,mil cachos,1027
+35,SP,batata_doce,,1493,18026,t,12074
+35,SP,batata_inglesa,,31944,573315,t,17948
+35,SP,borracha_latex_coagulado,,203,156,t,768
+35,SP,borracha_latex_liquido,,258,840,t,3256
+35,SP,cacau,,198,179,t,904
+35,SP,cafe,,555996,674400,t,1213
+35,SP,caju,,12,1800,mil frutos,150000
+35,SP,cana_de_acucar,,1281350,92228391,t,71978
+35,SP,cana_para_forragem,,76054,3178186,t,41789
+35,SP,caqui,,2351,278243,mil frutos,118351
+35,SP,cebola,,16180,255620,t,15799
+35,SP,cha_da_india,,5570,11266,t,2023
+35,SP,coco_da_baia,,26,249,mil frutos,9577
+35,SP,fava,,14,17,t,1214
+35,SP,feijao,,574945,392600,t,683
+35,SP,figo,,1775,279169,mil frutos,157278
+35,SP,fumo,,1459,828,t,568
+35,SP,laranja,,440849,45749997,mil frutos,103777
+35,SP,limao,,15991,2260887,mil frutos,141385
+35,SP,maca,,1756,77515,mil frutos,44143
+35,SP,mamao,,1612,72017,mil frutos,44676
+35,SP,mamona,,23000,26700,t,1161
+35,SP,mandioca,,34728,728000,t,20963
+35,SP,manga,,4453,117588,mil frutos,26406
+35,SP,marmelo,,5,93,mil frutos,18600
+35,SP,melancia,,2993,10413,mil frutos,3479
+35,SP,melao,,299,4347,mil frutos,14538
+35,SP,milho,,1330700,3392400,t,2549
+35,SP,noz,,50,28,t,560
+35,SP,pera,,863,38783,mil frutos,44940
+35,SP,pessego,,994,85068,mil frutos,85581
+35,SP,soja,,516000,993300,t,1925
+35,SP,sorgo,,34970,69940,t,2000
+35,SP,tangerina,,23308,2128881,mil frutos,91337
+35,SP,tomate,,23200,826000,t,35603
+35,SP,trigo,,134000,134000,t,1000
+35,SP,uva,,10290,149040,t,14484
+41,PR,total,,7694696,..,..,..
+41,PR,abacate,,1157,17883,mil frutos,15456
+41,PR,abacaxi,,28,386,mil frutos,13786
+41,PR,alfafa_fenada,,1867,12701,t,6803
+41,PR,algodao_herbaceo,,369500,739026,t,2000
+41,PR,alho,,1376,4180,t,3038
+41,PR,amendoim,,27093,37995,t,1402
+41,PR,arroz,,204142,257229,t,1260
+41,PR,aveia,,16401,14022,t,855
+41,PR,banana,,4929,7741,mil cachos,1571
+41,PR,batata_doce,,5406,78969,t,14608
+41,PR,batata_inglesa,,50460,598553,t,11862
+41,PR,cafe,,302812,162683,t,537
+41,PR,cana_de_acucar,,89872,6830330,t,76001
+41,PR,cana_para_forragem,,3890,183049,t,47056
+41,PR,caqui,,258,16039,mil frutos,62167
+41,PR,cebola,,4180,21923,t,5245
+41,PR,centeio,,1820,1856,t,1020
+41,PR,cevada,,44000,31240,t,710
+41,PR,erva_mate,,17,7,t,412
+41,PR,feijao,,879990,666780,t,758
+41,PR,figo,,70,7922,mil frutos,113171
+41,PR,fumo,,17510,30000,t,1713
+41,PR,laranja,,4200,377830,mil frutos,89960
+41,PR,limao,,397,31698,mil frutos,79844
+41,PR,maca,,1371,72825,mil frutos,53118
+41,PR,mamao,,220,5059,mil frutos,22995
+41,PR,mamona,,28570,43286,t,1515
+41,PR,mandioca,,62490,1218740,t,19503
+41,PR,manga,,610,16841,mil frutos,27608
+41,PR,marmelo,,4,134,mil frutos,33500
+41,PR,melancia,,919,1382,mil frutos,1504
+41,PR,melao,,20,37,mil frutos,1850
+41,PR,milho,,2276700,5430000,t,2385
+41,PR,noz,,73,64,t,877
+41,PR,pera,,133,11352,mil frutos,85353
+41,PR,pessego,,614,59678,mil frutos,97195
+41,PR,rami,,5818,9477,t,1629
+41,PR,soja,,2099996,4200120,t,2000
+41,PR,sorgo,,5904,16285,t,2758
+41,PR,tangerina,,1597,165531,mil frutos,103651
+41,PR,tomate,,1080,46494,t,43050
+41,PR,trigo,,1174997,1025000,t,872
+41,PR,uva,,2205,19258,t,8734
+42,SC,total,,2373682,..,..,..
+42,SC,abacate,,6,180,mil frutos,30000
+42,SC,abacaxi,,127,3278,mil frutos,25811
+42,SC,alfafa_fenada,,907,9270,t,10221
+42,SC,alho,,2608,8654,t,3318
+42,SC,amendoim,,1053,1522,t,1445
+42,SC,arroz,,143088,374078,t,2614
+42,SC,aveia,,18556,12099,t,652
+42,SC,banana,,21535,30453,mil cachos,1414
+42,SC,batata_doce,,4179,67113,t,16060
+42,SC,batata_inglesa,,18975,160912,t,8480
+42,SC,cafe,,264,331,t,1254
+42,SC,cana_de_acucar,,19666,1023550,t,52047
+42,SC,cana_para_forragem,,1505,31625,t,21013
+42,SC,caqui,,5,75,mil frutos,15000
+42,SC,cebola,,11384,113745,t,9992
+42,SC,centeio,,1004,690,t,687
+42,SC,cevada,,13773,10654,t,774
+42,SC,erva_mate,,79,2153,t,27253
+42,SC,feijao,,368540,321045,t,871
+42,SC,figo,,4,360,mil frutos,90000
+42,SC,fumo,,71392,132126,t,1851
+42,SC,laranja,,2501,401714,mil frutos,160621
+42,SC,limao,,20,2587,mil frutos,129350
+42,SC,maca,,6444,410479,mil frutos,63699
+42,SC,mamao,,5,35,mil frutos,7000
+42,SC,mandioca,,79033,1141097,t,14438
+42,SC,melancia,,1767,3944,mil frutos,2232
+42,SC,melao,,70,40,mil frutos,571
+42,SC,milho,,1108615,2628756,t,2371
+42,SC,noz,,11,55,t,5000
+42,SC,pera,,331,34312,mil frutos,103662
+42,SC,pessego,,570,37166,mil frutos,65204
+42,SC,soja,,445700,534652,t,1200
+42,SC,sorgo,,62,202,t,3258
+42,SC,tangerina,,168,24084,mil frutos,143357
+42,SC,tomate,,1441,39827,t,27638
+42,SC,trigo,,23213,13656,t,588
+42,SC,uva,,5081,80565,t,15856
+43,RS,total,,8301260,..,..,..
+43,RS,abacate,,842,13791,mil frutos,16379
+43,RS,abacaxi,,914,6375,mil frutos,6975
+43,RS,alfafa_fenada,,7397,56915,t,7694
+43,RS,alho,,2095,5797,t,2767
+43,RS,amendoim,,6608,6515,t,986
+43,RS,arroz,,624254,2589885,t,4149
+43,RS,aveia,,59438,35071,t,590
+43,RS,azeitona,,150,207,t,1380
+43,RS,banana,,7105,5454,mil cachos,768
+43,RS,batata_doce,,29554,229280,t,7758
+43,RS,batata_inglesa,,45779,245624,t,5365
+43,RS,cana_de_acucar,,37663,965779,t,25643
+43,RS,cana_para_forragem,,16938,264334,t,15606
+43,RS,caqui,,521,62354,mil frutos,119681
+43,RS,cebola,,19703,168555,t,8555
+43,RS,centeio,,1842,1174,t,637
+43,RS,cevada,,109109,56630,t,519
+43,RS,erva_mate,,4829,15933,t,3299
+43,RS,fava,,36,34,t,944
+43,RS,feijao,,213671,146928,t,688
+43,RS,figo,,1045,113386,mil frutos,108503
+43,RS,fumo,,98438,152839,t,1553
+43,RS,laranja,,19611,1618854,mil frutos,82548
+43,RS,limao,,1210,124381,mil frutos,102794
+43,RS,linho,,19722,14007,t,710
+43,RS,maca,,4736,391849,mil frutos,82738
+43,RS,mamao,,400,6130,mil frutos,15325
+43,RS,mandioca,,137834,1685263,t,12227
+43,RS,marmelo,,778,34084,mil frutos,43810
+43,RS,melancia,,6209,18744,mil frutos,3019
+43,RS,melao,,1551,4083,mil frutos,2632
+43,RS,milho,,1851740,3147246,t,1700
+43,RS,noz,,2093,1358,t,649
+43,RS,pera,,1745,82014,mil frutos,46999
+43,RS,pessego,,16528,796565,mil frutos,48195
+43,RS,soja,,3539585,4220579,t,1192
+43,RS,sorgo,,50423,105634,t,2095
+43,RS,tangerina,,5986,848586,mil frutos,141762
+43,RS,tomate,,3573,47374,t,13259
+43,RS,trigo,,1308052,516790,t,395
+43,RS,tungue,,2851,7116,t,2496
+43,RS,uva,,38702,429944,t,11109
+50,MS,total,,1641603,..,..,..
+50,MS,abacate,,15,835,mil frutos,55667
+50,MS,abacaxi,,182,1833,mil frutos,10071
+50,MS,algodao_herbaceo,,41465,60933,t,1470
+50,MS,alho,,525,1286,t,2450
+50,MS,amendoim,,7801,10059,t,1289
+50,MS,arroz,,314996,339315,t,1077
+50,MS,aveia,,169,223,t,1320
+50,MS,banana,,2096,2903,mil cachos,1385
+50,MS,batata_doce,,165,2270,t,13758
+50,MS,cafe,,12354,12221,t,989
+50,MS,caju,,14,1030,mil frutos,73571
+50,MS,cana_de_acucar,,34577,1496591,t,43283
+50,MS,cana_para_forragem,,572,23150,t,40472
+50,MS,cebola,,13,81,t,6231
+50,MS,centeio,,75,99,t,1320
+50,MS,coco_da_baia,,27,81,mil frutos,3000
+50,MS,erva_mate,,5,13,t,2600
+50,MS,feijao,,50230,24319,t,484
+50,MS,laranja,,373,19889,mil frutos,53322
+50,MS,limao,,19,2959,mil frutos,155737
+50,MS,mamao,,47,1655,mil frutos,35213
+50,MS,mamona,,3120,4041,t,1295
+50,MS,mandioca,,17985,272989,t,15179
+50,MS,manga,,82,3813,mil frutos,46500
+50,MS,melancia,,359,418,mil frutos,1164
+50,MS,melao,,45,63,mil frutos,1400
+50,MS,milho,,145436,257902,t,1773
+50,MS,soja,,842561,1537341,t,1825
+50,MS,sorgo,,3123,3684,t,1180
+50,MS,tangerina,,45,4020,mil frutos,89333
+50,MS,tomate,,132,3575,t,27083
+50,MS,trigo,,162995,112641,t,691
+51,MT,total,,1345365,..,..,..
+51,MT,abacate,,4,105,mil frutos,26250
+51,MT,abacaxi,,102,1183,mil frutos,11598
+51,MT,algodao_herbaceo,,4338,3797,t,875
+51,MT,alho,,6,18,t,3000
+51,MT,amendoim,,183,216,t,1180
+51,MT,arroz,,795447,1002243,t,1260
+51,MT,banana,,12934,9717,mil cachos,751
+51,MT,batata_doce,,65,1235,t,19000
+51,MT,borracha_latex_coagulado,,118,244,t,2068
+51,MT,borracha_latex_liquido,,43,54,t,1256
+51,MT,cacau,,850,90,t,106
+51,MT,cafe,,35446,28527,t,805
+51,MT,caju,,18,1420,mil frutos,78889
+51,MT,cana_de_acucar,,12028,566232,t,47076
+51,MT,cana_para_forragem,,165,5350,t,32424
+51,MT,cebola,,2,12,t,6000
+51,MT,feijao,,99150,47499,t,479
+51,MT,fumo,,139,74,t,532
+51,MT,guarana,,60,11,t,183
+51,MT,laranja,,707,59860,mil frutos,84668
+51,MT,limao,,8,685,mil frutos,85625
+51,MT,mamona,,759,769,t,1013
+51,MT,mandioca,,20846,312690,t,15000
+51,MT,manga,,31,2270,mil frutos,73226
+51,MT,melancia,,63,256,mil frutos,4063
+51,MT,melao,,2,4,mil frutos,2000
+51,MT,milho,,167227,288324,t,1724
+51,MT,pimenta_do_reino,,56,91,t,1625
+51,MT,soja,,194331,365501,t,1881
+51,MT,sorgo,,50,100,t,2000
+51,MT,tangerina,,12,874,mil frutos,72833
+51,MT,tomate,,82,2177,t,26549
+51,MT,trigo,,93,107,t,1151
+52,GO,total,,2728569,..,..,..
+52,GO,abacate,,123,2643,mil frutos,21488
+52,GO,abacaxi,,650,7408,mil frutos,11397
+52,GO,algodao_herbaceo,,39546,66580,t,1684
+52,GO,alho,,2877,7319,t,2544
+52,GO,amendoim,,200,390,t,1950
+52,GO,arroz,,1129383,1396899,t,1237
+52,GO,banana,,34940,32847,mil cachos,940
+52,GO,batata_doce,,316,4205,t,13307
+52,GO,batata_inglesa,,104,1298,t,12481
+52,GO,cafe,,16397,17502,t,1067
+52,GO,cana_de_acucar,,29220,1785680,t,61112
+52,GO,cana_para_forragem,,10831,333021,t,30747
+52,GO,cebola,,12,60,t,5000
+52,GO,coco_da_baia,,2,12,mil frutos,6000
+52,GO,feijao,,230945,93748,t,406
+52,GO,fumo,,2030,1240,t,611
+52,GO,laranja,,2240,167373,mil frutos,74720
+52,GO,limao,,119,11670,mil frutos,98067
+52,GO,mamao,,107,2455,mil frutos,22944
+52,GO,mandioca,,20860,293794,t,14084
+52,GO,manga,,56,2530,mil frutos,45179
+52,GO,marmelo,,50,400,mil frutos,8000
+52,GO,melancia,,4323,14990,mil frutos,3467
+52,GO,melao,,30,94,mil frutos,3133
+52,GO,milho,,881820,1921842,t,2179
+52,GO,palmito,,5,36,t,7200
+52,GO,soja,,317302,560916,t,1768
+52,GO,sorgo,,1115,1964,t,1761
+52,GO,tangerina,,276,17669,mil frutos,64018
+52,GO,tomate,,1340,56280,t,42000
+52,GO,trigo,,1350,1270,t,941
+53,DF,total,,45444,..,..,..
+53,DF,abacate,,112,2240,mil frutos,20000
+53,DF,abacaxi,,40,60,mil frutos,1500
+53,DF,alho,,76,384,t,5053
+53,DF,amendoim,,5,4,t,800
+53,DF,arroz,,19998,17558,t,878
+53,DF,banana,,420,420,mil cachos,1000
+53,DF,batata_doce,,105,924,t,8800
+53,DF,batata_inglesa,,394,7105,t,18033
+53,DF,cafe,,950,1140,t,1200
+53,DF,cana_de_acucar,,280,5040,t,18000
+53,DF,cana_para_forragem,,450,8100,t,18000
+53,DF,caqui,,3,120,mil frutos,40000
+53,DF,cebola,,15,62,t,4133
+53,DF,feijao,,1503,788,t,524
+53,DF,laranja,,205,10250,mil frutos,50000
+53,DF,limao,,230,22540,mil frutos,98000
+53,DF,mamao,,14,70,mil frutos,5000
+53,DF,mandioca,,287,3731,t,13000
+53,DF,manga,,190,13585,mil frutos,71500
+53,DF,milho,,2569,3858,t,1502
+53,DF,soja,,17049,32444,t,1903
+53,DF,tangerina,,115,7130,mil frutos,62000
+53,DF,tomate,,144,7283,t,50576
+53,DF,trigo,,290,482,t,1662

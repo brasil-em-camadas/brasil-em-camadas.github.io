@@ -1,6 +1,7 @@
 # Robô do Brasil em Camadas
 # - Todo dia 3 de cada mês (e quando você clicar em "Run workflow"): busca dados novos do IBGE, da ANP, da ANEEL, da EPE, da Anatel, da ANTT, da ANAC e do Ministério da Defesa e salva no repositório.
-# - Depois de cada mudança: publica o site no GitHub Pages.
+#   Depois, guarda os períodos novos no acervo (site/acervo/, ver o README de lá) e confere os preliminares.
+# - Depois de cada mudança: publica o site no GitHub Pages (antes, confere que nenhum pacote publicado do acervo foi mudado ou apagado).
 # Versões das ações conferidas em 21/10/2026 (todas em Node 24; o Node 20 foi descontinuado pelo GitHub).
 name: Atualizar dados e publicar
 
@@ -65,12 +66,35 @@ jobs:
       - name: Buscar a lista da indústria de defesa (Ministério da Defesa)
         continue-on-error: true
         run: python scripts/atualizar_defesa.py
+      # Acervo de dados por período: cada robô guarda os períodos novos e confere os preliminares. Pacote publicado nunca é
+      # apagado nem sobrescrito (se a fonte mudar um número, entra uma versão nova, e a antiga fica em versoes/).
+      # A velocidade do celular usa o que o robô da Anatel acabou de calcular (site/data/celular/velocidade*.json).
+      - name: "Acervo: lavouras (IBGE)"
+        continue-on-error: true
+        timeout-minutes: 30
+        run: python scripts/acervo/lavouras_ibge.py
+      - name: "Acervo: banda larga fixa (Anatel)"
+        continue-on-error: true
+        timeout-minutes: 30
+        run: python scripts/acervo/banda_larga_anatel.py
+      - name: "Acervo: velocidade do celular (Anatel)"
+        continue-on-error: true
+        run: python scripts/acervo/velocidade_celular_anatel.py
+      # Se o acervo não passar na conferência (ex.: um robô parou no meio), as mudanças dele ficam de fora desta vez;
+      # os dados do mapa são salvos mesmo assim.
+      - name: "Acervo: conferir"
+        run: |
+          if ! python scripts/acervo/verificar.py --git HEAD; then
+            echo "::warning::O acervo não passou na conferência; as mudanças dele ficaram de fora desta vez."
+            git checkout -- site/acervo
+            git clean -fdq site/acervo
+          fi
       - name: Salvar se algo mudou
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add site/data
-          git diff --cached --quiet || (git commit -m "Atualiza dados do IBGE, da ANP, da ANEEL, da EPE, da Anatel, da ANTT, da ANAC e da Defesa" && git push)
+          git add site/data site/acervo
+          git diff --cached --quiet || (git commit -m "Atualiza dados do IBGE, da ANP, da ANEEL, da EPE, da Anatel, da ANTT, da ANAC e da Defesa, e o acervo" && git push)
 
   publicar:
     needs: atualizar
@@ -83,6 +107,10 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: main
+          fetch-depth: 2   # o commit anterior, para o verificador do acervo
+      # Acervo: barra a publicação se algum pacote já publicado (no commit anterior ou no site no ar) foi mudado ou apagado.
+      - name: Conferir o acervo
+        run: python3 scripts/acervo/verificar.py --git HEAD~1 --publicado
       # Põe o endereço completo onde a internet exige (robots.txt, sitemap.xml, link canônico, prévia de compartilhamento),
       # só na cópia que vai para o ar; o endereço fica escrito num lugar só: scripts/dados/endereco_do_site.txt.
       - name: Preparar para os buscadores

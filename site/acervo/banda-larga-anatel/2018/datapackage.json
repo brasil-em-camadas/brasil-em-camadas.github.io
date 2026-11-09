@@ -1,0 +1,458 @@
+{
+ "profile": "tabular-data-package",
+ "name": "banda-larga-anatel-2018",
+ "title": "Banda larga fixa (Anatel) · 2018",
+ "description": "Acessos de internet fixa em serviço (contratos em casas e empresas) no Brasil, em cada estado e (desde 2010) em cada município, com o meio de acesso, a faixa de velocidade, as empresas e a densidade (acessos por 100 habitantes), no último mês de cada trimestre e de cada ano.",
+ "version": "1.0.0",
+ "periodo": "2018",
+ "tipo_de_periodo": "ano",
+ "inicio": "2018-01-01",
+ "fim": "2018-12-31",
+ "situacao": "consolidado",
+ "consolida_em": "2020-02-29",
+ "versao": 1,
+ "coletado_em": "2026-11-08",
+ "fonte": {
+  "orgao": "Anatel",
+  "titulo": "Anatel, Acessos – Banda Larga Fixa (dados abertos)",
+  "consulta": "https://www.anatel.gov.br/dadosabertos/paineis_de_dados/acessos/acessos_banda_larga_fixa.zip",
+  "catalogo": "https://dados.gov.br/dados/conjuntos-dados/acessos---banda-larga-fixa",
+  "licenca": "Creative Commons Atribuição (CC BY), como informado no Portal Brasileiro de Dados Abertos"
+ },
+ "nivel_confianca": "Oficial · API",
+ "medida": "posição: acessos em serviço no último mês do período",
+ "metodo": "Soma das linhas do arquivo de acessos da Anatel (cada linha: empresa, município, meio de acesso, faixa de velocidade e número de acessos) no último mês do período. O total de acessos do Brasil vem do arquivo de totais da própria Anatel. A densidade é a da Anatel (arquivo de densidade). Contas do projeto: empresas (CNPJs distintos com pelo menos um acesso no lugar) e velocidade contratada mediana (metade dos acessos tem velocidade contratada maior, metade menor, pela velocidade de cada linha). Mês usado: dez/2018.",
+ "avisos": [
+  "Acesso = cada contrato de internet fixa num endereço (casa ou empresa); não é o número de pessoas com internet.",
+  "Meio de acesso e faixa de velocidade são os que cada empresa informou à Anatel.",
+  "O último mês costuma chegar incompleto (as empresas pequenas informam depois): o trimestre em aberto só entra quando o mês dele tem pelo menos 99% (e no máximo 105%) dos acessos do mês anterior, e fica preliminar.",
+  "A Anatel revisa meses antigos de vez em quando; quando um número muda, entra uma versão nova do pacote.",
+  "Município sem nenhuma linha no arquivo: 0 acessos registrados pela Anatel.",
+  "Ausência na base não significa ausência real: são os acessos que as empresas informaram à Anatel.",
+  "Outros meios, nos arquivos da Anatel: LTE."
+ ],
+ "marcas": {
+  "numero": "valor (0 é zero de verdade)",
+  "vazio": "sem dado",
+  "X": "a fonte esconde o número",
+  "..": "não se aplica"
+ },
+ "licenses": [
+  {
+   "name": "CC-BY-4.0",
+   "title": "Creative Commons Atribuição 4.0 Internacional",
+   "path": "https://creativecommons.org/licenses/by/4.0/deed.pt_BR"
+  }
+ ],
+ "licenca_da_fonte": "Creative Commons Atribuição (CC BY), como informado no Portal Brasileiro de Dados Abertos",
+ "sources": [
+  {
+   "title": "Anatel, Acessos – Banda Larga Fixa (dados abertos)",
+   "path": "https://www.anatel.gov.br/dadosabertos/paineis_de_dados/acessos/acessos_banda_larga_fixa.zip"
+  }
+ ],
+ "contributors": [
+  {
+   "title": "Brasil em Camadas",
+   "role": "publisher"
+  }
+ ],
+ "formato": "Brasil em Camadas · acervo de dados por período, formato 1 (ver README.md desta pasta)",
+ "resources": [
+  {
+   "name": "brasil",
+   "path": "brasil.csv",
+   "profile": "tabular-data-resource",
+   "title": "Brasil",
+   "format": "csv",
+   "mediatype": "text/csv",
+   "encoding": "utf-8",
+   "bytes": 384,
+   "hash": "sha256:17788150167c65ba0203599c52279600a2781fd6895b327f2ba6d0ff2e6e04e1",
+   "dialect": {
+    "delimiter": ",",
+    "header": true
+   },
+   "schema": {
+    "fields": [
+     {
+      "name": "codigo_ibge",
+      "type": "string",
+      "title": "Código do IBGE do lugar",
+      "description": "1 = Brasil (como na SIDRA do IBGE)"
+     },
+     {
+      "name": "acessos",
+      "type": "integer",
+      "title": "Acessos em serviço",
+      "description": "no Brasil, o total da própria Anatel",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_fibra",
+      "type": "integer",
+      "title": "Acessos por fibra óptica",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_cabo_coaxial",
+      "type": "integer",
+      "title": "Acessos por cabo coaxial (TV a cabo)",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_cabo_metalico",
+      "type": "integer",
+      "title": "Acessos por cabo metálico (linha telefônica, xDSL)",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_radio",
+      "type": "integer",
+      "title": "Acessos por rádio",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_satelite",
+      "type": "integer",
+      "title": "Acessos por satélite",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_outros_meios",
+      "type": "integer",
+      "title": "Acessos por outros meios",
+      "description": "outro, híbrido, LTE ou indeterminado, como a empresa informou",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_ate_512k",
+      "type": "integer",
+      "title": "Acessos com velocidade contratada até 512 kbps",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_512k_a_2m",
+      "type": "integer",
+      "title": "Acessos de 512 kbps a 2 Mbps",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_2m_a_12m",
+      "type": "integer",
+      "title": "Acessos de 2 a 12 Mbps",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_12m_a_34m",
+      "type": "integer",
+      "title": "Acessos de 12 a 34 Mbps",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_acima_34m",
+      "type": "integer",
+      "title": "Acessos acima de 34 Mbps",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_pequeno_porte",
+      "type": "integer",
+      "title": "Acessos em empresas de pequeno porte",
+      "description": "porte da empresa como a Anatel classifica",
+      "unidade": "acessos"
+     },
+     {
+      "name": "empresas",
+      "type": "integer",
+      "title": "Empresas com acessos no lugar",
+      "description": "CNPJs distintos com pelo menos um acesso (conta do projeto)",
+      "unidade": "empresas"
+     },
+     {
+      "name": "acessos_por_100_hab",
+      "type": "number",
+      "title": "Densidade: acessos por 100 habitantes",
+      "description": "a conta da Anatel, arredondada a 2 casas; vazia quando a Anatel não publicou um número coerente",
+      "unidade": "acessos por 100 habitantes"
+     }
+    ],
+    "missingValues": [
+     "",
+     "X",
+     ".."
+    ],
+    "primaryKey": [
+     "codigo_ibge"
+    ]
+   },
+   "linhas": 1
+  },
+  {
+   "name": "uf",
+   "path": "uf.csv",
+   "profile": "tabular-data-resource",
+   "title": "estados",
+   "format": "csv",
+   "mediatype": "text/csv",
+   "encoding": "utf-8",
+   "bytes": 2853,
+   "hash": "sha256:d8834ff30651361e050c673fdbfc5a65a5a92faf26374a5202e4fa4bea5eaaa1",
+   "dialect": {
+    "delimiter": ",",
+    "header": true
+   },
+   "schema": {
+    "fields": [
+     {
+      "name": "codigo_ibge",
+      "type": "string",
+      "title": "Código do IBGE do lugar",
+      "description": "código do estado (2 dígitos)"
+     },
+     {
+      "name": "uf",
+      "type": "string",
+      "title": "Sigla do estado"
+     },
+     {
+      "name": "acessos",
+      "type": "integer",
+      "title": "Acessos em serviço",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_fibra",
+      "type": "integer",
+      "title": "Acessos por fibra óptica",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_cabo_coaxial",
+      "type": "integer",
+      "title": "Acessos por cabo coaxial (TV a cabo)",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_cabo_metalico",
+      "type": "integer",
+      "title": "Acessos por cabo metálico (linha telefônica, xDSL)",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_radio",
+      "type": "integer",
+      "title": "Acessos por rádio",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_satelite",
+      "type": "integer",
+      "title": "Acessos por satélite",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_outros_meios",
+      "type": "integer",
+      "title": "Acessos por outros meios",
+      "description": "outro, híbrido, LTE ou indeterminado, como a empresa informou",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_ate_512k",
+      "type": "integer",
+      "title": "Acessos com velocidade contratada até 512 kbps",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_512k_a_2m",
+      "type": "integer",
+      "title": "Acessos de 512 kbps a 2 Mbps",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_2m_a_12m",
+      "type": "integer",
+      "title": "Acessos de 2 a 12 Mbps",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_12m_a_34m",
+      "type": "integer",
+      "title": "Acessos de 12 a 34 Mbps",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_acima_34m",
+      "type": "integer",
+      "title": "Acessos acima de 34 Mbps",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_pequeno_porte",
+      "type": "integer",
+      "title": "Acessos em empresas de pequeno porte",
+      "description": "porte da empresa como a Anatel classifica",
+      "unidade": "acessos"
+     },
+     {
+      "name": "empresas",
+      "type": "integer",
+      "title": "Empresas com acessos no lugar",
+      "description": "CNPJs distintos com pelo menos um acesso (conta do projeto)",
+      "unidade": "empresas"
+     },
+     {
+      "name": "acessos_por_100_hab",
+      "type": "number",
+      "title": "Densidade: acessos por 100 habitantes",
+      "description": "a conta da Anatel, arredondada a 2 casas; vazia quando a Anatel não publicou um número coerente",
+      "unidade": "acessos por 100 habitantes"
+     }
+    ],
+    "missingValues": [
+     "",
+     "X",
+     ".."
+    ],
+    "primaryKey": [
+     "codigo_ibge"
+    ]
+   },
+   "linhas": 27
+  },
+  {
+   "name": "municipio",
+   "path": "municipio.csv",
+   "profile": "tabular-data-resource",
+   "title": "municípios (desde 2010; nos trimestres, só no ano em aberto)",
+   "format": "csv",
+   "mediatype": "text/csv",
+   "encoding": "utf-8",
+   "bytes": 330019,
+   "hash": "sha256:9095358719260bafc908a5c62b4578aac58b632bcef9e1720bdec78f5ae37144",
+   "dialect": {
+    "delimiter": ",",
+    "header": true
+   },
+   "schema": {
+    "fields": [
+     {
+      "name": "codigo_ibge",
+      "type": "string",
+      "title": "Código do IBGE do lugar",
+      "description": "código do município (7 dígitos); nome e posição em ../../municipios.csv"
+     },
+     {
+      "name": "uf",
+      "type": "string",
+      "title": "Sigla do estado"
+     },
+     {
+      "name": "acessos",
+      "type": "integer",
+      "title": "Acessos em serviço",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_fibra",
+      "type": "integer",
+      "title": "Acessos por fibra óptica",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_cabo_coaxial",
+      "type": "integer",
+      "title": "Acessos por cabo coaxial (TV a cabo)",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_cabo_metalico",
+      "type": "integer",
+      "title": "Acessos por cabo metálico (linha telefônica, xDSL)",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_radio",
+      "type": "integer",
+      "title": "Acessos por rádio",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_satelite",
+      "type": "integer",
+      "title": "Acessos por satélite",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_outros_meios",
+      "type": "integer",
+      "title": "Acessos por outros meios",
+      "description": "outro, híbrido, LTE ou indeterminado, como a empresa informou",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_ate_512k",
+      "type": "integer",
+      "title": "Acessos com velocidade contratada até 512 kbps",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_512k_a_2m",
+      "type": "integer",
+      "title": "Acessos de 512 kbps a 2 Mbps",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_2m_a_12m",
+      "type": "integer",
+      "title": "Acessos de 2 a 12 Mbps",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_12m_a_34m",
+      "type": "integer",
+      "title": "Acessos de 12 a 34 Mbps",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_acima_34m",
+      "type": "integer",
+      "title": "Acessos acima de 34 Mbps",
+      "unidade": "acessos"
+     },
+     {
+      "name": "acessos_pequeno_porte",
+      "type": "integer",
+      "title": "Acessos em empresas de pequeno porte",
+      "description": "porte da empresa como a Anatel classifica",
+      "unidade": "acessos"
+     },
+     {
+      "name": "empresas",
+      "type": "integer",
+      "title": "Empresas com acessos no lugar",
+      "description": "CNPJs distintos com pelo menos um acesso (conta do projeto)",
+      "unidade": "empresas"
+     },
+     {
+      "name": "acessos_por_100_hab",
+      "type": "number",
+      "title": "Densidade: acessos por 100 habitantes",
+      "description": "a conta da Anatel, arredondada a 2 casas; vazia quando a Anatel não publicou um número coerente",
+      "unidade": "acessos por 100 habitantes"
+     }
+    ],
+    "missingValues": [
+     "",
+     "X",
+     ".."
+    ],
+    "primaryKey": [
+     "codigo_ibge"
+    ]
+   },
+   "linhas": 5570
+  }
+ ]
+}

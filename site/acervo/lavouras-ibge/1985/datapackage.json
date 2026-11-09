@@ -1,0 +1,582 @@
+{
+ "profile": "tabular-data-package",
+ "name": "lavouras-ibge-1985",
+ "title": "Lavouras (IBGE, Produção Agrícola Municipal) · 1985",
+ "description": "Área plantada e colhida, quantidade produzida, rendimento médio e valor da produção de cada lavoura temporária e permanente, no Brasil, em cada estado e (desde 2010) em cada município, por ano.",
+ "version": "1.0.0",
+ "periodo": "1985",
+ "tipo_de_periodo": "ano",
+ "inicio": "1985-01-01",
+ "fim": "1985-12-31",
+ "situacao": "consolidado",
+ "consolida_em": "1987-09-30",
+ "versao": 1,
+ "coletado_em": "2026-11-08",
+ "fonte": {
+  "orgao": "IBGE",
+  "titulo": "IBGE, Produção Agrícola Municipal (PAM), tabela 5457 da SIDRA",
+  "consulta": "https://apisidra.ibge.gov.br/values/t/5457/n1/all/v/8331,216,214,112,215/p/1985/c782/all",
+  "catalogo": "https://sidra.ibge.gov.br/tabela/5457",
+  "licenca": "uso livre, desde que citada a fonte (IBGE)"
+ },
+ "nivel_confianca": "Oficial · API",
+ "medida": "fluxo: o que foi plantado, colhido e produzido no ano civil",
+ "metodo": "Números da PAM como o IBGE publica na tabela 5457 (uma linha por lugar e lavoura). O IBGE levanta os dados em cada município com entidades públicas e privadas, produtores e técnicos (não é medição no campo nem estimativa do site). O total do Brasil vem da própria SIDRA, não da soma dos estados.",
+ "avisos": [
+  "Uma lavoura que não aparece num lugar teve zero registrado pela fonte naquele ano. A lista das lavouras pesquisadas no ano está na ficha (itens); fora dela, a lavoura não foi pesquisada.",
+  "A linha 'total' traz a soma do IBGE para todas as lavouras (área e valor); quantidade e rendimento não se somam entre produtos diferentes ('..', não se aplica).",
+  "Café arábica e café canephora (desde 2012) são partes do café; não somar com a linha 'cafe'.",
+  "Rendimento: quilos por hectare; nas lavouras contadas em mil frutos (ou mil cachos), frutos (ou cachos) por hectare.",
+  "Ausência na base não significa ausência real: a PAM registra o que o IBGE levantou em cada município.",
+  "Área plantada: a SIDRA só tem desde 1988 (vazio neste ano).",
+  "Valor da produção fora deste pacote: antes de 1994 a fonte publica em moedas antigas (cruzeiro, cruzado…), que não se comparam com o real.",
+  "Até 2000, a quantidade de 17 frutas (abacate, banana, caqui, figo, goiaba, laranja, limão, maçã, mamão, manga, maracujá, marmelo, melancia, melão, pera, pêssego e tangerina) era contada em mil frutos (a banana, em mil cachos); a partir de 2001, em toneladas. Para comparar com 2001 em diante, é preciso converter (o IBGE publicou a tabela de conversão: sidra.ibge.gov.br/content/documentos/pam/AlteracoesUnidadesMedidaFrutas.pdf).",
+  "Caju (pesquisado até 1987): a tabela não diz a unidade; o questionário da PAM de 1985 manda contar o fruto, e o rendimento (dezenas de milhares por hectare) só faz sentido em frutos: unidade registrada como mil frutos."
+ ],
+ "marcas": {
+  "numero": "valor (0 é zero de verdade)",
+  "vazio": "sem dado",
+  "X": "a fonte esconde o número",
+  "..": "não se aplica"
+ },
+ "licenses": [
+  {
+   "name": "CC-BY-4.0",
+   "title": "Creative Commons Atribuição 4.0 Internacional",
+   "path": "https://creativecommons.org/licenses/by/4.0/deed.pt_BR"
+  }
+ ],
+ "licenca_da_fonte": "uso livre, desde que citada a fonte (IBGE)",
+ "sources": [
+  {
+   "title": "IBGE, Produção Agrícola Municipal (PAM), tabela 5457 da SIDRA",
+   "path": "https://apisidra.ibge.gov.br/values/t/5457/n1/all/v/8331,216,214,112,215/p/1985/c782/all"
+  }
+ ],
+ "contributors": [
+  {
+   "title": "Brasil em Camadas",
+   "role": "publisher"
+  }
+ ],
+ "formato": "Brasil em Camadas · acervo de dados por período, formato 1 (ver README.md desta pasta)",
+ "itens": [
+  {
+   "lavoura": "total",
+   "codigo_ibge_produto": "0",
+   "nome_ibge": "Total",
+   "unidade_quantidade": ".."
+  },
+  {
+   "lavoura": "abacate",
+   "codigo_ibge_produto": "40129",
+   "nome_ibge": "Abacate",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "abacaxi",
+   "codigo_ibge_produto": "40092",
+   "nome_ibge": "Abacaxi",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "alfafa_fenada",
+   "codigo_ibge_produto": "40329",
+   "nome_ibge": "Alfafa fenada",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "algodao_arboreo",
+   "codigo_ibge_produto": "40130",
+   "nome_ibge": "Algodão arbóreo (em caroço)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "algodao_herbaceo",
+   "codigo_ibge_produto": "40099",
+   "nome_ibge": "Algodão herbáceo (em caroço)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "alho",
+   "codigo_ibge_produto": "40100",
+   "nome_ibge": "Alho",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "amendoim",
+   "codigo_ibge_produto": "40101",
+   "nome_ibge": "Amendoim (em casca)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "arroz",
+   "codigo_ibge_produto": "40102",
+   "nome_ibge": "Arroz (em casca)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "aveia",
+   "codigo_ibge_produto": "40103",
+   "nome_ibge": "Aveia (em grão)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "azeitona",
+   "codigo_ibge_produto": "40131",
+   "nome_ibge": "Azeitona",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "banana",
+   "codigo_ibge_produto": "40136",
+   "nome_ibge": "Banana (cacho)",
+   "unidade_quantidade": "mil cachos"
+  },
+  {
+   "lavoura": "batata_doce",
+   "codigo_ibge_produto": "40104",
+   "nome_ibge": "Batata-doce",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "batata_inglesa",
+   "codigo_ibge_produto": "40105",
+   "nome_ibge": "Batata-inglesa",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "borracha_latex_coagulado",
+   "codigo_ibge_produto": "40137",
+   "nome_ibge": "Borracha (látex coagulado)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "borracha_latex_liquido",
+   "codigo_ibge_produto": "40468",
+   "nome_ibge": "Borracha (látex líquido)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "cacau",
+   "codigo_ibge_produto": "40138",
+   "nome_ibge": "Cacau (em amêndoa)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "cafe",
+   "codigo_ibge_produto": "40139",
+   "nome_ibge": "Café (em grão) Total",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "caju",
+   "codigo_ibge_produto": "40330",
+   "nome_ibge": "Caju",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "cana_de_acucar",
+   "codigo_ibge_produto": "40106",
+   "nome_ibge": "Cana-de-açúcar",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "cana_para_forragem",
+   "codigo_ibge_produto": "40331",
+   "nome_ibge": "Cana para forragem",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "caqui",
+   "codigo_ibge_produto": "40142",
+   "nome_ibge": "Caqui",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "cebola",
+   "codigo_ibge_produto": "40107",
+   "nome_ibge": "Cebola",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "centeio",
+   "codigo_ibge_produto": "40108",
+   "nome_ibge": "Centeio (em grão)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "cevada",
+   "codigo_ibge_produto": "40109",
+   "nome_ibge": "Cevada (em grão)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "cha_da_india",
+   "codigo_ibge_produto": "40144",
+   "nome_ibge": "Chá-da-índia (folha verde)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "coco_da_baia",
+   "codigo_ibge_produto": "40145",
+   "nome_ibge": "Coco-da-baía",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "erva_mate",
+   "codigo_ibge_produto": "40147",
+   "nome_ibge": "Erva-mate (folha verde)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "fava",
+   "codigo_ibge_produto": "40111",
+   "nome_ibge": "Fava (em grão)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "feijao",
+   "codigo_ibge_produto": "40112",
+   "nome_ibge": "Feijão (em grão)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "figo",
+   "codigo_ibge_produto": "40148",
+   "nome_ibge": "Figo",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "fumo",
+   "codigo_ibge_produto": "40113",
+   "nome_ibge": "Fumo (em folha)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "guarana",
+   "codigo_ibge_produto": "40150",
+   "nome_ibge": "Guaraná (semente)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "juta",
+   "codigo_ibge_produto": "40115",
+   "nome_ibge": "Juta (fibra)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "laranja",
+   "codigo_ibge_produto": "40151",
+   "nome_ibge": "Laranja",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "limao",
+   "codigo_ibge_produto": "40152",
+   "nome_ibge": "Limão",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "linho",
+   "codigo_ibge_produto": "40116",
+   "nome_ibge": "Linho (semente)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "maca",
+   "codigo_ibge_produto": "40260",
+   "nome_ibge": "Maçã",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "malva",
+   "codigo_ibge_produto": "40117",
+   "nome_ibge": "Malva (fibra)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "mamao",
+   "codigo_ibge_produto": "40261",
+   "nome_ibge": "Mamão",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "mamona",
+   "codigo_ibge_produto": "40118",
+   "nome_ibge": "Mamona (baga)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "mandioca",
+   "codigo_ibge_produto": "40119",
+   "nome_ibge": "Mandioca",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "manga",
+   "codigo_ibge_produto": "40262",
+   "nome_ibge": "Manga",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "marmelo",
+   "codigo_ibge_produto": "40264",
+   "nome_ibge": "Marmelo",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "melancia",
+   "codigo_ibge_produto": "40120",
+   "nome_ibge": "Melancia",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "melao",
+   "codigo_ibge_produto": "40121",
+   "nome_ibge": "Melão",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "milho",
+   "codigo_ibge_produto": "40122",
+   "nome_ibge": "Milho (em grão)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "noz",
+   "codigo_ibge_produto": "40265",
+   "nome_ibge": "Noz (fruto seco)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "palmito",
+   "codigo_ibge_produto": "40266",
+   "nome_ibge": "Palmito",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "pera",
+   "codigo_ibge_produto": "40267",
+   "nome_ibge": "Pera",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "pessego",
+   "codigo_ibge_produto": "40268",
+   "nome_ibge": "Pêssego",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "pimenta_do_reino",
+   "codigo_ibge_produto": "40269",
+   "nome_ibge": "Pimenta-do-reino",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "rami",
+   "codigo_ibge_produto": "40123",
+   "nome_ibge": "Rami (fibra)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "sisal",
+   "codigo_ibge_produto": "40270",
+   "nome_ibge": "Sisal ou agave (fibra)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "soja",
+   "codigo_ibge_produto": "40124",
+   "nome_ibge": "Soja (em grão)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "sorgo",
+   "codigo_ibge_produto": "40125",
+   "nome_ibge": "Sorgo (em grão)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "tangerina",
+   "codigo_ibge_produto": "40271",
+   "nome_ibge": "Tangerina",
+   "unidade_quantidade": "mil frutos"
+  },
+  {
+   "lavoura": "tomate",
+   "codigo_ibge_produto": "40126",
+   "nome_ibge": "Tomate",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "trigo",
+   "codigo_ibge_produto": "40127",
+   "nome_ibge": "Trigo (em grão)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "tungue",
+   "codigo_ibge_produto": "40272",
+   "nome_ibge": "Tungue (fruto seco)",
+   "unidade_quantidade": "t"
+  },
+  {
+   "lavoura": "uva",
+   "codigo_ibge_produto": "40274",
+   "nome_ibge": "Uva",
+   "unidade_quantidade": "t"
+  }
+ ],
+ "resources": [
+  {
+   "name": "brasil",
+   "path": "brasil.csv",
+   "profile": "tabular-data-resource",
+   "title": "Brasil",
+   "format": "csv",
+   "mediatype": "text/csv",
+   "encoding": "utf-8",
+   "bytes": 2202,
+   "hash": "sha256:29d5d8df03cb6c1a08d1cd05f94b4a9b2dbf3b95c7c1f73696d595740be88a8f",
+   "dialect": {
+    "delimiter": ",",
+    "header": true
+   },
+   "schema": {
+    "fields": [
+     {
+      "name": "codigo_ibge",
+      "type": "string",
+      "title": "Código do IBGE do lugar",
+      "description": "1 = Brasil (como na SIDRA)"
+     },
+     {
+      "name": "lavoura",
+      "type": "string",
+      "title": "Lavoura (nome curto; a lista com o nome do IBGE está em itens, na ficha)"
+     },
+     {
+      "name": "area_plantada_ha",
+      "type": "integer",
+      "title": "Área plantada ou destinada à colheita",
+      "description": "na SIDRA desde 1988; antes, vazio",
+      "unidade": "hectares"
+     },
+     {
+      "name": "area_colhida_ha",
+      "type": "integer",
+      "title": "Área colhida",
+      "unidade": "hectares"
+     },
+     {
+      "name": "quantidade",
+      "type": "integer",
+      "title": "Quantidade produzida",
+      "unidade": "ver unidade_quantidade"
+     },
+     {
+      "name": "unidade_quantidade",
+      "type": "string",
+      "title": "Unidade da quantidade",
+      "description": "t (toneladas), mil frutos ou mil cachos"
+     },
+     {
+      "name": "rendimento",
+      "type": "integer",
+      "title": "Rendimento médio da produção",
+      "description": "quilos por hectare; quando a quantidade está em mil frutos (ou mil cachos), frutos (ou cachos) por hectare",
+      "unidade": "kg por hectare (ou frutos/cachos por hectare)"
+     }
+    ],
+    "missingValues": [
+     "",
+     "X",
+     ".."
+    ],
+    "primaryKey": [
+     "codigo_ibge",
+     "lavoura"
+    ]
+   },
+   "linhas": 61
+  },
+  {
+   "name": "uf",
+   "path": "uf.csv",
+   "profile": "tabular-data-resource",
+   "title": "estados",
+   "format": "csv",
+   "mediatype": "text/csv",
+   "encoding": "utf-8",
+   "bytes": 31830,
+   "hash": "sha256:bbedde41fee3d523af69e800761685a643db6aa0fa9bb64f7a0871e1ff772c92",
+   "dialect": {
+    "delimiter": ",",
+    "header": true
+   },
+   "schema": {
+    "fields": [
+     {
+      "name": "codigo_ibge",
+      "type": "string",
+      "title": "Código do IBGE do lugar",
+      "description": "código do estado (2 dígitos)"
+     },
+     {
+      "name": "uf",
+      "type": "string",
+      "title": "Sigla do estado"
+     },
+     {
+      "name": "lavoura",
+      "type": "string",
+      "title": "Lavoura (nome curto; a lista com o nome do IBGE está em itens, na ficha)"
+     },
+     {
+      "name": "area_plantada_ha",
+      "type": "integer",
+      "title": "Área plantada ou destinada à colheita",
+      "description": "na SIDRA desde 1988; antes, vazio",
+      "unidade": "hectares"
+     },
+     {
+      "name": "area_colhida_ha",
+      "type": "integer",
+      "title": "Área colhida",
+      "unidade": "hectares"
+     },
+     {
+      "name": "quantidade",
+      "type": "integer",
+      "title": "Quantidade produzida",
+      "unidade": "ver unidade_quantidade"
+     },
+     {
+      "name": "unidade_quantidade",
+      "type": "string",
+      "title": "Unidade da quantidade",
+      "description": "t (toneladas), mil frutos ou mil cachos"
+     },
+     {
+      "name": "rendimento",
+      "type": "integer",
+      "title": "Rendimento médio da produção",
+      "description": "quilos por hectare; quando a quantidade está em mil frutos (ou mil cachos), frutos (ou cachos) por hectare",
+      "unidade": "kg por hectare (ou frutos/cachos por hectare)"
+     }
+    ],
+    "missingValues": [
+     "",
+     "X",
+     ".."
+    ],
+    "primaryKey": [
+     "codigo_ibge",
+     "lavoura"
+    ]
+   },
+   "linhas": 896
+  }
+ ]
+}

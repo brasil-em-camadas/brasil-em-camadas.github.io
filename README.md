@@ -29,6 +29,8 @@ site/                 o site em si (é isto que vai para o ar)
   data/trafego/       veículos por dia nas praças de pedágio das rodovias federais concedidas (robô da ANTT)
   data/aeroportos/    aeródromos públicos e passageiros de 12 meses (robô da ANAC)
   data/luzes/         população de cada município, para as "Luzes à noite" da página 3D
+  acervo/             acervo de dados por período, para baixar e comparar (um pacote por ano ou trimestre de cada
+                      conjunto; pacote publicado nunca é apagado nem sobrescrito); o formato está em acervo/README.md
 scripts/
   atualizar_ibge.py   robô que busca dados novos na API do IBGE
   atualizar_aneel.py  robô que busca as usinas em operação no SIGA, o cadastro de geração da ANEEL (atualizado todo dia)
@@ -46,6 +48,8 @@ scripts/
   gerar_transportes_ibge.py   gera rodovias, ferrovias e portos a partir da base cartográfica 1:250.000 do IBGE (BC250; roda só à mão)
   preparar_publicacao.py      na hora de publicar, faz o robots.txt e o sitemap.xml e põe o endereço completo no link
                               canônico e na prévia de compartilhamento (o endereço fica em dados/endereco_do_site.txt)
+  acervo/             robôs do acervo (lavouras_ibge.py, banda_larga_anatel.py, velocidade_celular_anatel.py), a parte comum
+                      (comum.py) e o verificador que barra a publicação se um pacote já publicado mudar (verificar.py)
   dados/              arquivos de apoio dos robôs (ex.: posição da sede de cada município) e o endereço do site
   estudos/            estudos de visual que não vão para o ar: texturas.py (laboratório de texturas) e relevo_em_ondas.js
                       (relevo dos estados em ondas, testado e descartado em 22/10/2026, guardado como referência)
@@ -56,6 +60,8 @@ scripts/
 ## Como o site se atualiza
 
 Todo dia 3 de cada mês o GitHub executa o robô. Ele busca população (por estado e por município), produção agrícola (total e por lavoura, por estado e por município; a parte dos municípios só é baixada de novo quando sai um ano novo da pesquisa), rebanhos (por estado e o gado bovino de cada município) e aquicultura na API SIDRA do IBGE, energia elétrica na ANEEL (usinas em operação, pelo SIGA) e na EPE (linhas de transmissão e subestações), telefonia e internet na Anatel (sinal 4G/5G e moradores com sinal 5G, atualizados pela Anatel uma vez por ano; municípios com 5G e banda larga fixa, todo mês; velocidade medida no celular, a cada trimestre, só baixada quando sai um arquivo novo), os aeroportos e os passageiros na ANAC, o tráfego nas praças de pedágio federais na ANTT (média de veículos por dia nos 12 meses mais recentes), a lista das empresas credenciadas pelo Ministério da Defesa (o robô lê a página e segue o link da planilha, cujo nome muda a cada revisão) e petróleo e gás na ANP: a produção de cada poço no último mês que já tem dados de terra e de mar (o mar sai todo mês, a terra por trimestre), a posição dos poços, os campos, as plataformas e o polígono do pré-sal. Se a ANP falhar, os arquivos antigos ficam e o site é publicado mesmo assim, com a data antiga à vista. Se a busca der certo, os arquivos de dados são trocados e o site é republicado. Cada robô deixa o resultado de cada passo em `site/data/robo_ibge.json`, `site/data/petroleo/robo.json`, `site/data/energia/robo.json` (EPE), `site/data/energia/robo_aneel.json`, `site/data/celular/robo.json`, `site/data/trafego/robo.json`, `site/data/aeroportos/robo.json` e `site/data/defesa/robo.json` (este traz também as empresas novas cujo município o robô tirou do cadastro do CNPJ, para a correção virar permanente em `scripts/dados/defesa_municipios.csv`, e as que ficaram sem município), para conferir sem abrir o registro do GitHub. Se der errado, o dado antigo fica, com a data antiga, e o GitHub avisa por e-mail.
+
+Depois dos robôs do mapa, os robôs do acervo (`scripts/acervo/`) guardam os períodos novos em `site/acervo/` e conferem os preliminares; se um número de um pacote já publicado mudar na fonte, entra uma versão nova, e a antiga continua lá. Antes de cada publicação, `scripts/acervo/verificar.py` confere que nenhum pacote publicado foi mudado ou apagado (contra o commit anterior e contra o site no ar); se foi, a publicação para.
 
 Para rodar na hora: aba **Actions** → **Atualizar dados e publicar** → **Run workflow**.
 

@@ -1,0 +1,57 @@
+codigo_ibge,lavoura,area_plantada_ha,area_colhida_ha,quantidade,unidade_quantidade,rendimento
+1,total,,46851522,..,..,..
+1,abacate,,18334,512884,mil frutos,27974
+1,abacaxi,,26696,383020,mil frutos,14347
+1,alfafa_fenada,,14596,80168,t,5492
+1,algodao_arboreo,,2479948,461781,t,186
+1,algodao_herbaceo,,1471092,1108396,t,753
+1,alho,,7060,23975,t,3396
+1,amendoim,,253785,325007,t,1281
+1,arroz,,5623515,7296142,t,1297
+1,aveia,,55552,53947,t,971
+1,azeitona,,476,973,t,2044
+1,banana,,328287,416025,mil cachos,1267
+1,batata_doce,,98230,882071,t,8980
+1,batata_inglesa,,211315,2013882,t,9530
+1,cacau,,443866,284490,t,641
+1,cafe,,2183673,2535323,t,1161
+1,caju,,154329,9204380,mil frutos,59641
+1,cana_de_acucar,,2391455,129144950,t,54003
+1,cana_para_forragem,,151271,4927382,t,32573
+1,caqui,,3997,363402,mil frutos,90919
+1,cebola,,56523,488498,t,8642
+1,centeio,,8191,7349,t,897
+1,cevada,,89423,143917,t,1609
+1,cha_da_india,,4593,9196,t,2002
+1,coco_da_baia,,163215,472715,mil frutos,2896
+1,fava,,182090,63862,t,351
+1,feijao,,4617259,2193977,t,475
+1,figo,,5245,594717,mil frutos,113387
+1,fumo,,328313,405191,t,1234
+1,juta,,16562,16954,t,1024
+1,laranja,,454503,39131682,mil frutos,86098
+1,limao,,22882,2464464,mil frutos,107703
+1,linho,,6077,5495,t,904
+1,maca,,7183,258792,mil frutos,36028
+1,malva,,52700,60318,t,1145
+1,mamao,,9162,183221,mil frutos,19998
+1,mamona,,350336,317083,t,905
+1,mandioca,,2148707,25459408,t,11849
+1,manga,,40815,2025592,mil frutos,49629
+1,marmelo,,3974,99229,mil frutos,24970
+1,melancia,,69429,93067,mil frutos,1340
+1,melao,,4284,21985,mil frutos,5132
+1,milho,,11124827,13569401,t,1220
+1,noz,,981,881,t,898
+1,pera,,4780,246125,mil frutos,51491
+1,pessego,,19971,1059027,mil frutos,53028
+1,pimenta_do_reino,,15786,47015,t,2978
+1,rami,,6400,7220,t,1128
+1,sisal,,269636,201786,t,748
+1,soja,,7782187,9540577,t,1226
+1,sorgo,,104361,227502,t,2180
+1,tangerina,,34934,2975722,mil frutos,85181
+1,tomate,,55902,1464558,t,26199
+1,trigo,,2811189,2690888,t,957
+1,tungue,,3402,8863,t,2605
+1,uva,,58223,666594,t,11449

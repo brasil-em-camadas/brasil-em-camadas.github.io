@@ -1,0 +1,62 @@
+codigo_ibge,lavoura,area_plantada_ha,area_colhida_ha,quantidade,unidade_quantidade,rendimento
+1,total,,51198971,..,..,..
+1,abacate,,21140,566168,mil frutos,26782
+1,abacaxi,,26513,445541,mil frutos,16805
+1,alfafa_fenada,,10181,78956,t,7755
+1,algodao_arboreo,,2055949,233352,t,114
+1,algodao_herbaceo,,1568268,1695265,t,1081
+1,alho,,18356,63941,t,3483
+1,amendoim,,236888,317451,t,1340
+1,arroz,,6024657,9734553,t,1616
+1,aveia,,94596,61469,t,650
+1,azeitona,,150,207,t,1380
+1,banana,,395758,454500,mil cachos,1148
+1,batata_doce,,82076,746781,t,9099
+1,batata_inglesa,,182504,2154775,t,11807
+1,borracha_latex_coagulado,,13732,9576,t,697
+1,borracha_latex_liquido,,12339,11363,t,921
+1,cacau,,533273,351149,t,658
+1,cafe,,1895486,1915861,t,1011
+1,caju,,232177,9416627,mil frutos,40558
+1,cana_de_acucar,,3084297,186646607,t,60515
+1,cana_para_forragem,,157089,5360979,t,34127
+1,caqui,,3498,383956,mil frutos,109764
+1,cebola,,62399,670624,t,10747
+1,centeio,,4741,3819,t,806
+1,cevada,,166882,98524,t,590
+1,cha_da_india,,5573,11272,t,2023
+1,coco_da_baia,,166145,540868,mil frutos,3255
+1,erva_mate,,4930,18106,t,3673
+1,fava,,135008,42186,t,312
+1,feijao,,5926143,2902657,t,490
+1,figo,,3321,469148,mil frutos,141267
+1,fumo,,317231,420329,t,1325
+1,guarana,,4726,787,t,167
+1,juta,,14655,14170,t,967
+1,laranja,,589967,57991021,mil frutos,98295
+1,limao,,24670,3235306,mil frutos,131143
+1,linho,,19722,14007,t,710
+1,maca,,14496,954966,mil frutos,65878
+1,malva,,42740,44977,t,1052
+1,mamao,,8228,289903,mil frutos,35234
+1,mamona,,461824,192148,t,416
+1,mandioca,,2122029,24072320,t,11344
+1,manga,,35372,1615427,mil frutos,45670
+1,marmelo,,3370,88604,mil frutos,26292
+1,melancia,,82158,113210,mil frutos,1378
+1,melao,,5990,36860,mil frutos,6154
+1,milho,,12619531,21842477,t,1731
+1,noz,,2228,1513,t,679
+1,palmito,,5,36,t,7200
+1,pera,,3788,205359,mil frutos,54213
+1,pessego,,19568,1028787,mil frutos,52575
+1,pimenta_do_reino,,22481,51083,t,2272
+1,rami,,5968,9657,t,1618
+1,sisal,,345279,251325,t,728
+1,soja,,8203277,12836047,t,1565
+1,sorgo,,122646,226473,t,1847
+1,tangerina,,39115,3924635,mil frutos,100336
+1,tomate,,55451,1742408,t,31422
+1,trigo,,2827929,1826945,t,646
+1,tungue,,2851,7116,t,2496
+1,uva,,57607,688928,t,11959

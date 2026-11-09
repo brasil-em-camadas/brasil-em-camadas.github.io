@@ -1,0 +1,390 @@
+{
+ "profile": "tabular-data-package",
+ "name": "velocidade-celular-anatel-2026-t2",
+ "title": "Velocidade medida no celular (Anatel) · 2º trimestre de 2026",
+ "description": "Mediana da velocidade de download e de upload nos testes feitos nos celulares, no Brasil, em cada estado e em cada município, por trimestre, com o 4G, o 5G e cada operadora.",
+ "version": "1.0.0",
+ "periodo": "2026-T2",
+ "tipo_de_periodo": "trimestre",
+ "inicio": "2026-04-01",
+ "fim": "2026-06-30",
+ "situacao": "preliminar",
+ "consolida_em": "2027-08-31",
+ "versao": 1,
+ "coletado_em": "2026-10-27",
+ "fonte": {
+  "orgao": "Anatel",
+  "titulo": "Anatel, medidas de velocidade da telefonia móvel (RQUAL, indicador IND4)",
+  "consulta": "https://www.anatel.gov.br/dadosabertos/paineis_de_dados/qualidade/medidas_qoe_smp.zip",
+  "catalogo": "https://dados.gov.br/dados/conjuntos-dados/qualidade---medidas-de-velocidade---telefonia-movel",
+  "licenca": "Creative Commons Atribuição (CC BY), como informado no Portal Brasileiro de Dados Abertos"
+ },
+ "nivel_confianca": "Oficial · API",
+ "medida": "mediana dos testes do trimestre (não se soma: não há pacote anual)",
+ "metodo": "Cada linha do arquivo da Anatel é um teste de velocidade (download e upload, em Mbps) feito no celular de quem tem o programa de medição instalado e autorizou os testes, com operadora, tecnologia e município. Conta do projeto: as medianas (metade dos testes deu mais, metade deu menos), exatas no município e com precisão de 0,1 Mbps no estado e no Brasil (feitas de todos os testes, não da média dos municípios), e a parte dos testes feita no 5G. Arquivo da Anatel lido: 1000842890 bytes, de Tue, 11 Aug 2026 11:24:43 GMT.",
+ "avisos": [
+  "É medição de verdade (a experiência de quem usa), mas não uma amostra planejada: onde há poucos testes a mediana é pouco firme. O mapa só pinta município com 50 testes ou mais e marca operadora com menos de 30; aqui os números ficam todos, com a contagem de testes ao lado.",
+  "Todas as tecnologias: inclui 3G e outras; o 4G e o 5G também aparecem separados.",
+  "Município sem nenhum teste no trimestre: 0 testes e medianas vazias.",
+  "A Anatel publica só o trimestre mais recente; o acervo guarda cada um quando sai.",
+  "Trimestre: abr a jun/2026 (43.051.837 testes no arquivo da Anatel). Operadoras com testes: Claro, TIM, Vivo.",
+  "1 município(s) sem nenhum teste no trimestre."
+ ],
+ "marcas": {
+  "numero": "valor (0 é zero de verdade)",
+  "vazio": "sem dado",
+  "X": "a fonte esconde o número",
+  "..": "não se aplica"
+ },
+ "licenses": [
+  {
+   "name": "CC-BY-4.0",
+   "title": "Creative Commons Atribuição 4.0 Internacional",
+   "path": "https://creativecommons.org/licenses/by/4.0/deed.pt_BR"
+  }
+ ],
+ "licenca_da_fonte": "Creative Commons Atribuição (CC BY), como informado no Portal Brasileiro de Dados Abertos",
+ "sources": [
+  {
+   "title": "Anatel, medidas de velocidade da telefonia móvel (RQUAL, indicador IND4)",
+   "path": "https://www.anatel.gov.br/dadosabertos/paineis_de_dados/qualidade/medidas_qoe_smp.zip"
+  }
+ ],
+ "contributors": [
+  {
+   "title": "Brasil em Camadas",
+   "role": "publisher"
+  }
+ ],
+ "formato": "Brasil em Camadas · acervo de dados por período, formato 1 (ver README.md desta pasta)",
+ "resources": [
+  {
+   "name": "brasil",
+   "path": "brasil.csv",
+   "profile": "tabular-data-resource",
+   "title": "Brasil",
+   "format": "csv",
+   "mediatype": "text/csv",
+   "encoding": "utf-8",
+   "bytes": 320,
+   "hash": "sha256:aa63fd84df8847cf5ba0f0d2929ae2d5aae6160242c5a8e9e64fcab7c54e6d2f",
+   "dialect": {
+    "delimiter": ",",
+    "header": true
+   },
+   "schema": {
+    "fields": [
+     {
+      "name": "codigo_ibge",
+      "type": "string",
+      "title": "Código do IBGE do lugar",
+      "description": "1 = Brasil (como na SIDRA do IBGE)"
+     },
+     {
+      "name": "testes",
+      "type": "integer",
+      "title": "Testes de velocidade no trimestre",
+      "unidade": "testes"
+     },
+     {
+      "name": "download_mediana_mbps",
+      "type": "number",
+      "title": "Download, mediana (todas as tecnologias)",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "download_4g_mediana_mbps",
+      "type": "number",
+      "title": "Download no 4G, mediana",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "download_5g_mediana_mbps",
+      "type": "number",
+      "title": "Download no 5G, mediana",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "pct_testes_5g",
+      "type": "number",
+      "title": "Parte dos testes feita no 5G",
+      "unidade": "%"
+     },
+     {
+      "name": "upload_mediana_mbps",
+      "type": "number",
+      "title": "Upload, mediana (todas as tecnologias)",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "claro_testes",
+      "type": "integer",
+      "title": "Claro: testes",
+      "unidade": "testes"
+     },
+     {
+      "name": "claro_download_mediana_mbps",
+      "type": "number",
+      "title": "Claro: download, mediana",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "tim_testes",
+      "type": "integer",
+      "title": "TIM: testes",
+      "unidade": "testes"
+     },
+     {
+      "name": "tim_download_mediana_mbps",
+      "type": "number",
+      "title": "TIM: download, mediana",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "vivo_testes",
+      "type": "integer",
+      "title": "Vivo: testes",
+      "unidade": "testes"
+     },
+     {
+      "name": "vivo_download_mediana_mbps",
+      "type": "number",
+      "title": "Vivo: download, mediana",
+      "unidade": "Mbps"
+     }
+    ],
+    "missingValues": [
+     "",
+     "X",
+     ".."
+    ],
+    "primaryKey": [
+     "codigo_ibge"
+    ]
+   },
+   "linhas": 1
+  },
+  {
+   "name": "uf",
+   "path": "uf.csv",
+   "profile": "tabular-data-resource",
+   "title": "estados",
+   "format": "csv",
+   "mediatype": "text/csv",
+   "encoding": "utf-8",
+   "bytes": 2248,
+   "hash": "sha256:2a26d4a0fcdaca1f4f6101048320879e6da911d438a92dc1235200d149e5c0d7",
+   "dialect": {
+    "delimiter": ",",
+    "header": true
+   },
+   "schema": {
+    "fields": [
+     {
+      "name": "codigo_ibge",
+      "type": "string",
+      "title": "Código do IBGE do lugar",
+      "description": "código do estado (2 dígitos)"
+     },
+     {
+      "name": "uf",
+      "type": "string",
+      "title": "Sigla do estado"
+     },
+     {
+      "name": "testes",
+      "type": "integer",
+      "title": "Testes de velocidade no trimestre",
+      "unidade": "testes"
+     },
+     {
+      "name": "download_mediana_mbps",
+      "type": "number",
+      "title": "Download, mediana (todas as tecnologias)",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "download_4g_mediana_mbps",
+      "type": "number",
+      "title": "Download no 4G, mediana",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "download_5g_mediana_mbps",
+      "type": "number",
+      "title": "Download no 5G, mediana",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "pct_testes_5g",
+      "type": "number",
+      "title": "Parte dos testes feita no 5G",
+      "unidade": "%"
+     },
+     {
+      "name": "upload_mediana_mbps",
+      "type": "number",
+      "title": "Upload, mediana (todas as tecnologias)",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "claro_testes",
+      "type": "integer",
+      "title": "Claro: testes",
+      "unidade": "testes"
+     },
+     {
+      "name": "claro_download_mediana_mbps",
+      "type": "number",
+      "title": "Claro: download, mediana",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "tim_testes",
+      "type": "integer",
+      "title": "TIM: testes",
+      "unidade": "testes"
+     },
+     {
+      "name": "tim_download_mediana_mbps",
+      "type": "number",
+      "title": "TIM: download, mediana",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "vivo_testes",
+      "type": "integer",
+      "title": "Vivo: testes",
+      "unidade": "testes"
+     },
+     {
+      "name": "vivo_download_mediana_mbps",
+      "type": "number",
+      "title": "Vivo: download, mediana",
+      "unidade": "Mbps"
+     }
+    ],
+    "missingValues": [
+     "",
+     "X",
+     ".."
+    ],
+    "primaryKey": [
+     "codigo_ibge"
+    ]
+   },
+   "linhas": 27
+  },
+  {
+   "name": "municipio",
+   "path": "municipio.csv",
+   "profile": "tabular-data-resource",
+   "title": "municípios",
+   "format": "csv",
+   "mediatype": "text/csv",
+   "encoding": "utf-8",
+   "bytes": 346399,
+   "hash": "sha256:d0e0649144f9a1efc209454cf6acee9690196a4a8cc55f5aacf25d87c4ac9dac",
+   "dialect": {
+    "delimiter": ",",
+    "header": true
+   },
+   "schema": {
+    "fields": [
+     {
+      "name": "codigo_ibge",
+      "type": "string",
+      "title": "Código do IBGE do lugar",
+      "description": "código do município (7 dígitos); nome e posição em ../../municipios.csv"
+     },
+     {
+      "name": "uf",
+      "type": "string",
+      "title": "Sigla do estado"
+     },
+     {
+      "name": "testes",
+      "type": "integer",
+      "title": "Testes de velocidade no trimestre",
+      "unidade": "testes"
+     },
+     {
+      "name": "download_mediana_mbps",
+      "type": "number",
+      "title": "Download, mediana (todas as tecnologias)",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "download_4g_mediana_mbps",
+      "type": "number",
+      "title": "Download no 4G, mediana",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "download_5g_mediana_mbps",
+      "type": "number",
+      "title": "Download no 5G, mediana",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "pct_testes_5g",
+      "type": "number",
+      "title": "Parte dos testes feita no 5G",
+      "unidade": "%"
+     },
+     {
+      "name": "upload_mediana_mbps",
+      "type": "number",
+      "title": "Upload, mediana (todas as tecnologias)",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "claro_testes",
+      "type": "integer",
+      "title": "Claro: testes",
+      "unidade": "testes"
+     },
+     {
+      "name": "claro_download_mediana_mbps",
+      "type": "number",
+      "title": "Claro: download, mediana",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "tim_testes",
+      "type": "integer",
+      "title": "TIM: testes",
+      "unidade": "testes"
+     },
+     {
+      "name": "tim_download_mediana_mbps",
+      "type": "number",
+      "title": "TIM: download, mediana",
+      "unidade": "Mbps"
+     },
+     {
+      "name": "vivo_testes",
+      "type": "integer",
+      "title": "Vivo: testes",
+      "unidade": "testes"
+     },
+     {
+      "name": "vivo_download_mediana_mbps",
+      "type": "number",
+      "title": "Vivo: download, mediana",
+      "unidade": "Mbps"
+     }
+    ],
+    "missingValues": [
+     "",
+     "X",
+     ".."
+    ],
+    "primaryKey": [
+     "codigo_ibge"
+    ]
+   },
+   "linhas": 5571
+  }
+ ]
+}
