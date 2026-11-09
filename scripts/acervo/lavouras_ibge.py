@@ -38,10 +38,16 @@ CFG = {
     "titulo": "Lavouras (IBGE, Produção Agrícola Municipal)",
     "descricao": ("Área plantada e colhida, quantidade produzida, rendimento médio e valor da produção de cada lavoura "
                   "temporária e permanente, no Brasil, em cada estado e (desde 2010) em cada município, por ano."),
-    "fonte": {"orgao": "IBGE", "titulo": "IBGE, Produção Agrícola Municipal (PAM), tabela 5457 da SIDRA",
+    "fonte": {"orgao": "IBGE", "orgao_nome": "Instituto Brasileiro de Geografia e Estatística (IBGE)",
+              "orgao_site": "https://www.ibge.gov.br/",
+              "titulo": "IBGE, Produção Agrícola Municipal (PAM), tabela 5457 da SIDRA",
               "consulta": SIDRA + "/t/5457", "catalogo": "https://sidra.ibge.gov.br/tabela/5457",
               "licenca": "uso livre, desde que citada a fonte (IBGE)"},
     "nivel": "Oficial · API",
+    # palavras para a busca (página do conjunto e ficha schema.org Dataset)
+    "palavras_chave": ["agricultura", "produção agrícola", "lavouras", "PAM", "IBGE", "soja", "milho", "cana-de-açúcar",
+                       "café", "área plantada", "área colhida", "rendimento", "valor da produção", "estados",
+                       "municípios", "série histórica", "dados abertos"],
     "periodicidade": "anual",
     "medida": "fluxo: o que foi plantado, colhido e produzido no ano civil",
     "como_vira_ano": "a PAM já é anual (ano civil); não há trimestres",
@@ -58,6 +64,18 @@ CFG = {
         "Café arábica e café canephora (desde 2012) são partes do café; não somar com a linha 'cafe'.",
         "Rendimento: quilos por hectare; nas lavouras contadas em mil frutos (ou mil cachos), frutos (ou cachos) por hectare.",
         "Ausência na base não significa ausência real: a PAM registra o que o IBGE levantou em cada município.",
+        # achado em 09/11/2026 ao comparar períodos no mapa: a SIDRA chama a lavoura de "Café (em grão) Total" em todos
+        # os anos, mas as publicações da PAM dizem "Café (em coco)" (1982, 1992) e "Café (beneficiado)" (2002), e o
+        # rendimento do Brasil cai à metade de 2001 (1.557 kg/ha) para 2002 (1.101), sem quebra de safra
+        "Café: até 2001, a quantidade é de café em coco (o fruto seco, com a casca); desde 2002, de café beneficiado "
+        "(em grão, sem a casca), que pesa cerca de metade. A SIDRA usa o mesmo nome nos dois casos. As quantidades e "
+        "os rendimentos de antes e de depois de 2002 não se comparam.",
+    ],
+    # quebras na série: o mapa não compara um período de antes com um de depois (valem para estas colunas e lavouras)
+    "quebras": [
+        {"desde": "2002", "colunas": ["quantidade", "rendimento"], "filtro": {"lavoura": "cafe"},
+         "aviso": "Café: até 2001, café em coco (com a casca); desde 2002, café beneficiado (em grão), que pesa cerca de "
+                  "metade. As quantidades de antes e de depois de 2002 não se comparam."},
     ],
 }
 

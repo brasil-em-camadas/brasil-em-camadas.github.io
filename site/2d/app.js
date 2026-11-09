@@ -2,14 +2,11 @@
    Lê o registro data/fontes.json e os arquivos de cada camada. Nada de dado escrito aqui dentro. */
 "use strict";
 
-const NIVEL = {
-  api:       ["n-api", "Oficial · API", "Vem da API do órgão oficial e atualiza sozinho."],
-  manual:    ["n-manual", "Oficial · manual", "Arquivo oficial inserido à mão, com data do último download."],
-  entidade:  ["n-entidade", "Imprensa / entidade", "Número público de terceiros, sempre com fonte e data."],
-  base:      ["n-base", "Base aberta internacional", "Base mundial aberta, real porém menos detalhada."],
-  calculado: ["n-calculado", "Estimado / calculado", "Calculado por nós, com o método explicado."],
-  pendente:  ["n-pendente", "Em apuração", "Ainda sem dado. O campo fica vazio, sem estimativa."]
-};
+/* níveis de confiança: [classe do selo, nome, explicação], lidos do data/fontes.json ("niveis"), o mesmo texto da página
+   "Metodologia e fontes" (desde 09/11/2026; antes, escritos aqui e no app3d.js) */
+const NIVEL = {};
+/* versão deste arquivo (o ?v= do endereço): o fontes.json vem com a mesma, para nunca chegar um registro antigo do cache */
+const VERSAO = new URL(document.currentScript.src).searchParams.get("v") || "0";
 const RAMP = ["--q1", "--q2", "--q3", "--q4", "--q5"];
 /* versão de teste (endereço com ?teste): visual novo em avaliação, sem mudar o site normal (selo "Teste" no título).
    Em 25 e 26/10/2026 tudo o que estava em teste foi para o site normal, a pedido do Edu; hoje o teste não tem nada a mais */
@@ -84,7 +81,7 @@ const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const kmTxt = a => a >= 1e6 ? `${(a / 1e6).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} milhão de km²` : `${fmt(Math.round(a / 1e3))} mil km²`;
 const esc = t => String(t ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const reais = mil => mil >= 1e6 ? `R$ ${fmt1(mil / 1e6)} bi` : mil >= 1e3 ? `R$ ${fmt(Math.round(mil / 1e3))} mi` : `R$ ${fmt(Math.round(mil))} mil`;
-const pill = n => `<span class="pill ${NIVEL[n][0]}">${NIVEL[n][1]}</span>`;
+const pill = n => { const v = NIVEL[n] || NIVEL.pendente || ["", n]; return `<span class="pill ${v[0]}">${v[1]}</span>`; };
 
 async function getJSON(p) {
   try { const r = await fetch(p); if (!r.ok) return null; return await r.json(); } catch { return null; }
@@ -100,12 +97,13 @@ function rewind(f) {
 }
 
 (async function main() {
-  const F = await getJSON("../data/fontes.json");
+  const F = await getJSON("../data/fontes.json?v=" + VERSAO);
   const estados = await getJSON("../data/geo/estados.json");
   if (!F || !estados) {
     document.getElementById("ficha").innerHTML = `<p class="note">Não foi possível carregar os dados do mapa. Recarregue a página.</p>`;
     return;
   }
+  Object.entries(F.niveis || {}).forEach(([k, n]) => { NIVEL[k] = ["n-" + k, n.nome, n.explica]; });
   estados.features.forEach(rewind);
   const viz = await getJSON("../data/geo/mundo.json");
   if (viz) viz.features.forEach(rewind);
@@ -136,6 +134,9 @@ function rewind(f) {
     fmt: p.por === "per_capita" || p.por === "percentual" || p.por === "taxa" ? fmt1 : fmt,
     unidade: p.unidade || (DATA[p.id] && DATA[p.id].unidade) || ""
   }))];
+  /* versão de teste: período e comparação nas pinturas que têm acervo (periodos.js); ao mudar, refaz o mapa e a ficha */
+  if (TESTE && typeof PERIODOS !== "undefined") PERIODOS.iniciar({ NIVEL, aoMudar: () => { render(); ficha(); } });
+  const PER = TESTE && typeof PERIODOS !== "undefined";
   const LAYERS = F.camadas.map(l => ({ ...l, on: !!l.ligada && l.nivel !== "pendente" }));
   /* camadas ligadas a uma pintura (ex.: Rebanho bovino → rebanho por município): clicar de novo na pintura liga e desliga */
   const camadasDa = id => { const P = PAINT.find(p => p.id === id);
@@ -791,6 +792,12 @@ function rewind(f) {
     dica.hidden = !cs.length;
     dica.textContent = cs.length ? `Clique de novo em “${Pa.nome}” para ${cs.every(l => l.on) ? "desligar" : "ligar também"} ${cs.length > 1 ? "as camadas" : "a camada"} ${cs.map(l => "“" + l.nome + "”").join(" e ")}.` : "";
     if (cs.some(l => NO_ESTADO.has(l.id))) dica.textContent += " Escolha um estado no mapa para ver os ícones dentro dele.";
+    /* versão de teste: período e comparação, embaixo da dica (só nas pinturas que têm acervo) */
+    if (PER) {
+      let per = document.getElementById("periodo");
+      if (!per) { per = document.createElement("div"); per.id = "periodo"; per.className = "periodo"; dica.after(per); }
+      PERIODOS.painel(per, Pa, DATA[paint]);
+    }
     /* 1º clique pinta os estados; os seguintes, na mesma pintura, ligam e desligam as camadas dela */
     document.querySelectorAll("#paint .chip:not([disabled])").forEach(b => b.onclick = () => {
       const id = b.dataset.p, cs = camadasDa(id);
@@ -853,13 +860,21 @@ function rewind(f) {
     const P = PAINT.find(p => p.id === paint);
     let leg = "";
     if (P && P.val) {
-      /* escala de luz (do bege fosco ao ouro) e os dois cinzas */
-      const K = classesEscala(P, Object.keys(NAME)), vals = K.escala;
-      states.style("fill", d => { const c = K.c[d.properties.sigla]; return c === "forte" ? "var(--sem-forte)" : c === "fraco" ? "var(--sem-fraco)" : `var(${RAMP[c]})`; });
-      leg = `<span>${P.nome}${P.unidade ? " (" + P.unidade + ")" : ""}</span><span class="faixa"><span>${P.fmt(d3.min(vals))}</span>
-        <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(d3.max(vals))}</span></span>
-        ${K.forte ? `<span><i class="key sq" style="background:var(--sem-forte)"></i>sem número</span>` : ""}
-        ${K.fraco ? `<span><i class="key sq" style="background:var(--sem-fraco)"></i>${K.fraco}</span>` : ""}`;
+      /* escala de luz (do bege fosco ao ouro) e os dois cinzas. Versão de teste: o período escolhido (a mesma escala, com
+         os números do período) ou a comparação de dois (azul = caiu, ouro = subiu; periodos.js) */
+      const ufs = Object.keys(NAME), Kc = PER ? PERIODOS.comparacao(P, DATA[P.id], ufs) : null;
+      const R = Kc ? { P, ...(Kc.ok ? {} : Kc) } : PER ? PERIODOS.pintura(P, DATA[P.id], ufs) : { P };
+      if (Kc && Kc.ok) {
+        states.style("fill", d => { const c = Kc.c[d.properties.sigla]; return typeof c === "number" ? `var(${PERIODOS.CORES[c]})` : c === "forte" ? "var(--sem-forte)" : "var(--sem-fraco)"; });
+        leg = PERIODOS.legenda(P, Kc);
+      } else {
+        const K = R.A ? PERIODOS.escala(R, ufs, classesEscala) : classesEscala(R.P, ufs), vals = K.escala;
+        states.style("fill", d => { const c = K.c[d.properties.sigla]; return c === "forte" ? "var(--sem-forte)" : c === "fraco" ? "var(--sem-fraco)" : `var(${RAMP[c]})`; });
+        leg = `<span>${P.nome}${P.unidade ? " (" + P.unidade + ")" : ""}${PER ? PERIODOS.sufixo(R) : ""}</span>${vals.length ? `<span class="faixa"><span>${P.fmt(d3.min(vals))}</span>
+          <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(d3.max(vals))}</span></span>` : ""}
+          ${K.forte ? `<span><i class="key sq" style="background:var(--sem-forte)"></i>sem número</span>` : ""}
+          ${K.fraco ? `<span><i class="key sq" style="background:var(--sem-fraco)"></i>${K.fraco}</span>` : ""}${PER ? PERIODOS.aviso(R) : ""}`;
+      }
     } else states.style("fill", null);
     /* com pintura (classe "pinta"), o estado escolhido levanta e o planeta fica escuro (classe "ouro") */
     svg.classed("pinta", !!(P && P.val));
@@ -888,6 +903,7 @@ function rewind(f) {
     document.getElementById("back").hidden = !sel;
     document.getElementById("where").textContent = sel ? `${NAME[sel]} · ${sel}` : "Brasil · 27 UFs";
     abas.querySelector('[data-aba="ficha"]').textContent = sel ? `Ficha · ${sel}` : "Ficha · Brasil";
+    fichaPeriodo();
   }
 
   function fichaOleo(s) {
@@ -1088,7 +1104,7 @@ function rewind(f) {
     const el = document.getElementById("ficha");
     const popInfo = DATA.pop ? `${pill(DATA.pop.nivel)} <span class="note">${DATA.pop.fonte} · atualizado em ${DATA.pop.atualizado_em}</span>` : pill("pendente");
     if (!sel) {
-      el.innerHTML = `<h2>Visão nacional</h2><div class="fname">Brasil</div>
+      el.innerHTML = `<h2>Visão nacional</h2><div class="fname">Brasil</div>${PER ? '<div id="per-ficha"></div>' : ""}
         <div class="kv"><span>População</span><span class="v">${fmt(popTot)}</span></div>${popInfo}
         ${DATA.agro ? `<div class="kv" style="margin-top:8px"><span>Produção agrícola</span><span class="v">${reais(Object.values(DATA.agro.valores).reduce((a, b) => a + b, 0))}</span></div>
           ${pill(DATA.agro.nivel)} <span class="note">IBGE, valor da produção das lavouras, ref. ${esc(DATA.agro.referencia)} · atualizado em ${DATA.agro.atualizado_em}</span>` : ""}
@@ -1109,6 +1125,7 @@ function rewind(f) {
         ${DATA.evpc && DATA.evpc.brasil ? `<div class="kv" style="margin-top:8px"><span>Eletropostos</span><span class="v">≈ ${fmt1(DATA.evpc.brasil.valor / 1000)} mil</span></div>
           ${pill(DATA.evpc.nivel)} <span class="note">${esc(DATA.evpc.fonte)}, pontos públicos e semipúblicos, ${esc(DATA.evpc.referencia)}; ${esc(DATA.evpc.brasil.nota)} · atualizado em ${DATA.evpc.atualizado_em}</span>` : ""}
         <p class="lede">Clique num estado para aproximar. Cada camada mostra de onde veio o dado e seu nível de confiança. Arraste para mover e role para aproximar.</p>`;
+      fichaPeriodo();
       return;
     }
     const s = sel;
@@ -1119,7 +1136,7 @@ function rewind(f) {
     const kr = DATA.rod && DATA.rod.meta && DATA.rod.meta.km_por_uf ? DATA.rod.meta.km_por_uf[s] : null;
     const ag = DATA.agro && DATA.agro.valores[s];
     el.innerHTML = `
-      <h2>${s} · ficha do estado</h2><div class="fname">${NAME[s]}</div>
+      <h2>${s} · ficha do estado</h2><div class="fname">${NAME[s]}</div>${PER ? '<div id="per-ficha"></div>' : ""}
       <div class="sec"><h3>População</h3>
         <div class="kv"><span>Habitantes</span><span class="v">${POP[s] ? fmt(POP[s]) : "—"}</span></div>
         <div class="kv"><span>Posição no país</span><span class="v">${rk}º · ${fmt1(POP[s] / popTot * 100)}%</span></div>${popInfo}</div>
@@ -1146,6 +1163,14 @@ function rewind(f) {
       ${fichaCelular(s)}
       ${fichaDefesa(s)}
       ${fichaEletropostos(s)}`;
+    fichaPeriodo();
+  }
+  /* versão de teste: o período escolhido (ou a comparação) da pintura, no alto da ficha; refeito a cada render() */
+  function fichaPeriodo() {
+    const el = document.getElementById("per-ficha");
+    if (!el || !PER) return;
+    const P = PAINT.find(p => p.id === paint), h = P ? PERIODOS.ficha(P, DATA[P.id], sel, Object.keys(NAME)) : "";
+    if (el.innerHTML !== h) el.innerHTML = h;
   }
 
   /* botão de apoio no rodapé: só aparece quando há link em fontes.json */
@@ -1160,6 +1185,9 @@ function rewind(f) {
   }
   document.getElementById("tiers").innerHTML = Object.values(NIVEL)
     .map(([c, t, d]) => `<div><span><span class="pill ${c}">${t}</span></span><span>${d}</span></div>`).join("");
+  /* versão de teste: as páginas novas (dados para baixar e metodologia), ainda fora da busca */
+  const sobre = document.querySelector(".foot .sobre h2");
+  if (PER && sobre) sobre.insertAdjacentHTML("afterend", `<p class="teste-links">Em teste: <a href="../dados/">Dados para baixar</a> · <a href="../metodologia/">Metodologia e fontes</a></p>`);
 
   /* ---------- abertura ---------- */
   layout(); render(); ficha();

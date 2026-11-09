@@ -4,3 +4,6 @@ __pycache__/
 # feitos na hora de publicar por scripts/preparar_publicacao.py (não ficam no repositório)
 site/robots.txt
 site/sitemap.xml
+site/llms.txt
+site/dados/
+site/metodologia/

@@ -1,0 +1,89 @@
+/* Brasil em Camadas — páginas de texto (dados para baixar, metodologia e fontes), geradas por scripts/gerar_paginas.py.
+   Carregado depois do style.css do mapa, de onde vêm as cores, as letras e os selos de confiança (uma versão só). */
+body.pg{min-height:100vh;display:flex;flex-direction:column}
+.pg a{color:var(--accent)}
+.pg a:hover{color:#ffd27a}
+.pg :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pg-topo{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 28px;padding:16px max(24px,env(safe-area-inset-left,0px));
+  background:var(--bar);border-bottom:1px solid var(--hair);box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.pg-marca{font-family:var(--f-display);font-weight:800;font-size:clamp(1.5rem,2.6vw,2.1rem);line-height:1;text-transform:uppercase;
+  letter-spacing:.01em;color:var(--ink)!important;text-decoration:none;white-space:nowrap}
+.pg-nav{display:flex;flex-wrap:wrap;gap:4px 18px;margin-left:auto}
+.pg-nav a{font:500 .95rem var(--f-body);color:var(--muted);text-decoration:none;border-bottom:1px solid transparent;padding:2px 0}
+.pg-nav a:hover{color:var(--ink)}
+.pg-nav a[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+.pg-main{width:100%;max-width:1040px;margin:0 auto;padding:28px max(22px,env(safe-area-inset-left,0px)) 48px;flex:1}
+.pg-trilha{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+.pg-trilha a{text-decoration:none}
+.pg h1{white-space:normal;font-size:clamp(2rem,4.4vw,3.1rem);line-height:.98;margin:0 0 14px}
+.pg-lede{font-size:1.08rem;color:var(--ink);max-width:72ch;margin:0 0 22px;line-height:1.55}
+.pg-previa{border:1px dashed var(--accent);border-radius:10px;padding:8px 12px;color:var(--accent);font-size:.9rem;margin:0 0 20px;max-width:72ch}
+.pg section{margin-top:34px}
+.pg h2{font-size:.8rem;margin-bottom:12px}
+.pg h3{font-family:var(--f-body);font-weight:600;font-size:1.08rem;margin:22px 0 6px;color:var(--ink)}
+.pg p,.pg li{max-width:76ch;line-height:1.55}
+.pg ul{padding-left:1.2em}
+.pg li{margin:4px 0}
+.pg small,.pg .fino{color:var(--muted);font-size:.84rem}
+.pg code{font-family:var(--f-mono);font-size:.86em;background:rgba(255,255,255,.05);border:1px solid var(--hair);border-radius:5px;padding:0 5px}
+/* fatos do conjunto (fonte, confiança, períodos…) */
+.pg-fatos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px 26px;margin:0;
+  padding:16px 18px;border:1px solid var(--hair);border-radius:12px;background:rgba(255,255,255,.025)}
+.pg-fatos div{min-width:0}
+.pg-fatos dt{font:500 .7rem var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.pg-fatos dd{margin:0;line-height:1.45}
+/* cartões dos conjuntos (página "Dados para baixar") */
+.pg-cartoes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.pg-cartao{display:flex;flex-direction:column;gap:8px;padding:16px 18px;border:1px solid var(--hair);border-radius:12px;
+  background:rgba(255,255,255,.03);text-decoration:none;color:var(--ink)!important;transition:border-color .2s,background .2s}
+.pg-cartao:hover,.pg-cartao:focus-visible{border-color:var(--accent);background:rgba(230,180,80,.07)}
+.pg-cartao b{font-family:var(--f-display);font-weight:800;font-size:1.35rem;text-transform:uppercase;line-height:1.05}
+.pg-cartao span{color:var(--muted);font-size:.92rem;line-height:1.45}
+.pg-cartao em{font-style:normal;font-family:var(--f-mono);font-size:.78rem;color:var(--accent)}
+/* como citar */
+.pg-citar{padding:14px 16px;border-left:3px solid var(--accent);background:rgba(230,180,80,.06);border-radius:0 10px 10px 0}
+.pg-citar p{margin:0 0 10px;font-size:.95rem}
+.pg-botao{font:600 .86rem var(--f-body);color:var(--ink);background:var(--glass);border:1px solid var(--hair);padding:6px 14px;border-radius:999px;cursor:pointer}
+.pg-botao:hover{border-color:var(--accent)}
+/* formato do download */
+.pg-formato{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:0 0 14px;padding:10px 14px;border:1px solid var(--hair);border-radius:10px}
+.pg-formato legend{font:500 .7rem var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:0 4px}
+.pg-formato label{display:inline-flex;gap:7px;align-items:center;cursor:pointer}
+.pg-formato input{accent-color:var(--accent)}
+.pg-formato small{flex-basis:100%}
+.pg-aviso-baixar{min-height:1.4em;font-size:.88rem;color:var(--accent);margin:0 0 8px}
+/* tabelas */
+.pg-rolar{overflow-x:auto;border:1px solid var(--hair);border-radius:10px}
+.pg-tabela{width:100%;border-collapse:collapse;font-size:.9rem}
+.pg-tabela th,.pg-tabela td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--hair);vertical-align:top}
+.pg-tabela thead th{font:500 .68rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,.03);
+  position:sticky;top:0}
+.pg-tabela tbody th{font-family:var(--f-mono);font-weight:500;white-space:nowrap}
+.pg-tabela tr:last-child>*{border-bottom:0}
+.pg-tabela td small{display:block}
+.pg-tabela .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pg-tabela details{margin-top:4px}
+.pg-tabela summary{cursor:pointer;color:var(--muted);font-size:.82rem}
+.pg-sit{font-family:var(--f-mono);font-size:.78rem;white-space:nowrap}
+.pg-sit.pre{color:var(--accent)}
+/* metodologia */
+.pg-item{padding:12px 0;border-top:1px solid var(--hair)}
+.pg-item:first-of-type{border-top:0}
+.pg-item h3{margin:0 0 4px;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline}
+.pg-item p{margin:4px 0}
+.pg h3.pg-grupo{font-family:var(--f-display);font-weight:800;font-size:1.45rem;text-transform:uppercase;letter-spacing:.01em;
+  margin:34px 0 2px;padding-bottom:6px;border-bottom:1px solid var(--accent)}
+.pg-nat{display:inline-block;font:500 .68rem var(--f-mono);letter-spacing:.06em;color:var(--ink);border:1px solid var(--hair);border-radius:999px;
+  padding:1px 8px;margin-right:4px;white-space:nowrap}
+.pg-indice{columns:2 260px;column-gap:28px;padding-left:1.1em}
+.pg-indice li{break-inside:avoid;margin:0 0 6px}
+/* endereços longos (consultas das APIs) quebram em qualquer ponto, para não alargar a página no celular */
+.pg-main{overflow-wrap:break-word}
+.pg .fino a{overflow-wrap:anywhere}
+.pg-rodape{border-top:1px solid var(--hair);background:var(--bar);padding:22px 0 30px;color:var(--muted);font-size:.88rem}
+.pg-rodape p{margin:0 auto 6px;max-width:1040px;padding:0 max(22px,env(safe-area-inset-left,0px))}
+@media (max-width:640px){
+  .pg-nav{margin-left:0}
+  .pg-tabela{font-size:.84rem}
+  .pg-tabela th,.pg-tabela td{padding:6px 8px}
+}

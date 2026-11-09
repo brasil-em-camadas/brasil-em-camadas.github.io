@@ -46,8 +46,11 @@ scripts/
   gerar_contorno_estados.py   gera o contorno dos estados a partir da malha oficial do IBGE (roda só à mão, uma vez por ano)
   gerar_sedes_municipais.py   gera a posição oficial das sedes municipais (IBGE, Localidades do Brasil 2022; roda só à mão)
   gerar_transportes_ibge.py   gera rodovias, ferrovias e portos a partir da base cartográfica 1:250.000 do IBGE (BC250; roda só à mão)
-  preparar_publicacao.py      na hora de publicar, faz o robots.txt e o sitemap.xml e põe o endereço completo no link
-                              canônico e na prévia de compartilhamento (o endereço fica em dados/endereco_do_site.txt)
+  preparar_publicacao.py      na hora de publicar, gera as páginas de texto (gerar_paginas.py), faz o robots.txt e o
+                              sitemap.xml e põe o endereço completo no link canônico e na prévia de compartilhamento
+                              (o endereço fica em dados/endereco_do_site.txt)
+  gerar_paginas.py            as páginas "Dados para baixar" (uma por conjunto do acervo, com a ficha schema.org Dataset),
+                              "Metodologia e fontes" e o llms.txt, feitas do fontes.json e das fichas do acervo
   acervo/             robôs do acervo (lavouras_ibge.py, banda_larga_anatel.py, velocidade_celular_anatel.py), a parte comum
                       (comum.py) e o verificador que barra a publicação se um pacote já publicado mudar (verificar.py)
   dados/              arquivos de apoio dos robôs (ex.: posição da sede de cada município) e o endereço do site
@@ -116,7 +119,7 @@ As páginas (principal e versão leve) contam visitas com o [GoatCounter](https:
 O site foi feito para mudar de endereço sem reescrever nada:
 
 - Todos os links internos são relativos (`data/...`, `../style.css`).
-- O endereço completo só aparece onde a internet exige (robots.txt, sitemap.xml, link canônico, prévia de compartilhamento e dados estruturados para os buscadores). Ele fica escrito num lugar só, `scripts/dados/endereco_do_site.txt`, e o `scripts/preparar_publicacao.py` o coloca nesses arquivos na hora de publicar (passo "Preparar para os buscadores" do `site.yml`). No repositório, as páginas continuam com endereços relativos, e `robots.txt` e `sitemap.xml` nem existem: são feitos a cada publicação.
+- O endereço completo só aparece onde a internet exige (robots.txt, sitemap.xml, link canônico, prévia de compartilhamento e dados estruturados para os buscadores). Ele fica escrito num lugar só, `scripts/dados/endereco_do_site.txt`, e o `scripts/preparar_publicacao.py` o coloca nesses arquivos na hora de publicar (passo "Preparar para os buscadores" do `site.yml`). No repositório, as páginas continuam com endereços relativos, e `robots.txt`, `sitemap.xml`, as páginas `dados/` e `metodologia/` e o `llms.txt` nem existem: são feitos a cada publicação.
 - O botão de apoio e os textos de fonte ficam em `site/data/fontes.json`, não espalhados pelo código.
 
 Quando houver um domínio (ex.: `brasilemcamadas.com.br`):

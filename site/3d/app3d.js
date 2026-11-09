@@ -2,14 +2,11 @@
    Usa os mesmos dados e o mesmo registro de camadas da versão leve em 2D (data/fontes.json). */
 "use strict";
 
-const NIVEL = {
-  api:       ["n-api", "Oficial · API", "Vem da API do órgão oficial e atualiza sozinho."],
-  manual:    ["n-manual", "Oficial · manual", "Arquivo oficial inserido à mão, com data do último download."],
-  entidade:  ["n-entidade", "Imprensa / entidade", "Número público de terceiros, sempre com fonte e data."],
-  base:      ["n-base", "Base aberta internacional", "Base mundial aberta, real porém menos detalhada."],
-  calculado: ["n-calculado", "Estimado / calculado", "Calculado por nós, com o método explicado."],
-  pendente:  ["n-pendente", "Em apuração", "Ainda sem dado. O campo fica vazio, sem estimativa."]
-};
+/* níveis de confiança: [classe do selo, nome, explicação], lidos do data/fontes.json ("niveis"), o mesmo texto da página
+   "Metodologia e fontes" (desde 09/11/2026; antes, escritos aqui e no 2d/app.js) */
+const NIVEL = {};
+/* versão deste arquivo (o ?v= do endereço): o fontes.json vem com a mesma, para nunca chegar um registro antigo do cache */
+const VERSAO = new URL(document.currentScript.src).searchParams.get("v") || "0";
 const RAMP = ["--q1", "--q2", "--q3", "--q4", "--q5"];
 /* versão de teste (endereço com ?teste): visual novo em avaliação, sem mudar o site normal (selo "Teste" no título).
    Em 25 e 26/10/2026 tudo o que estava em teste foi para o site normal, a pedido do Edu; hoje o teste não tem nada a mais */
@@ -38,7 +35,7 @@ if (RECUO.ligado) {
   caixa.className = "palco-mapa"; mapa.before(caixa); caixa.append(mapa);
   document.documentElement.classList.add("recuo");
 }
-const pill = n => `<span class="pill ${NIVEL[n][0]}">${NIVEL[n][1]}</span>`;
+const pill = n => { const v = NIVEL[n] || NIVEL.pendente || ["", n]; return `<span class="pill ${v[0]}">${v[1]}</span>`; };
 const cor = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 /* caminhos contados a partir deste arquivo (pasta 3d/), não da página: o site pode mudar de endereço ou de domínio */
 const AQUI = new URL(".", document.currentScript.src).href;
@@ -143,11 +140,12 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   const temGL = (() => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch { return false; } })();
   if (!temGL) { document.getElementById("sem3d").hidden = false; return; }
   const [F, estados, mundo, ROT, REL, CAPVIZ] = await Promise.all([
-    getJSON(D + "fontes.json"), getJSON(D + "geo/estados.json"), getJSON(D + "geo/mundo.json"),
+    getJSON(D + "fontes.json?v=" + VERSAO), getJSON(D + "geo/estados.json"), getJSON(D + "geo/mundo.json"),
     getJSON(D + "geo/rotulos.json"), getJSON(D + "relevo/relevo.json"),
     /* capitais dos países vizinhos (Natural Earth) */
     getJSON(D + "geo/capitais_vizinhos.json")]);
   if (!F || !estados) { document.getElementById("ficha").innerHTML = `<p class="note">Não foi possível carregar os dados. Recarregue a página.</p>`; return; }
+  Object.entries(F.niveis || {}).forEach(([k, n]) => { NIVEL[k] = ["n-" + k, n.nome, n.explica]; });
   const NAME = {}; estados.features.forEach(f => NAME[f.properties.sigla] = f.properties.name);
 
   const DATA = {}, UNICO = {};
@@ -169,6 +167,9 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     fmt: p.por === "per_capita" || p.por === "percentual" || p.por === "taxa" ? fmt1 : fmt,
     unidade: p.unidade || (DATA[p.id] && DATA[p.id].unidade) || ""
   }))];
+  /* versão de teste: período e comparação nas pinturas que têm acervo (periodos.js); ao mudar, refaz o mapa e a ficha */
+  if (TESTE && typeof PERIODOS !== "undefined") PERIODOS.iniciar({ NIVEL, aoMudar: () => { render(); ficha(); } });
+  const PER = TESTE && typeof PERIODOS !== "undefined";
   const LAYERS = F.camadas.map(l => ({ ...l, on: !!l.ligada && l.nivel !== "pendente" }));
   /* camadas ligadas a uma pintura (ex.: Rebanho bovino → rebanho por município): clicar de novo na pintura liga e desliga */
   const camadasDa = id => { const P = PAINT.find(p => p.id === id);
@@ -1184,6 +1185,12 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     dica.hidden = !cs.length;
     dica.textContent = cs.length ? `Clique de novo em “${Pa.nome}” para ${cs.every(l => l.on) ? "desligar" : "ligar também"} ${cs.length > 1 ? "as camadas" : "a camada"} ${cs.map(l => "“" + l.nome + "”").join(" e ")}.` : "";
     if (cs.some(l => NO_ESTADO.has(l.id))) dica.textContent += " Escolha um estado no mapa para ver os ícones dentro dele.";
+    /* versão de teste: período e comparação, embaixo da dica (só nas pinturas que têm acervo) */
+    if (PER) {
+      let per = document.getElementById("periodo");
+      if (!per) { per = document.createElement("div"); per.id = "periodo"; per.className = "periodo"; dica.after(per); }
+      PERIODOS.painel(per, Pa, DATA[paint]);
+    }
     document.querySelectorAll("#paint .chip:not([disabled])").forEach(b => b.onclick = () => {
       /* 1º clique pinta os estados; os seguintes, na mesma pintura, ligam e desligam as camadas dela */
       const id = b.dataset.p, cs = camadasDa(id);
@@ -1340,17 +1347,27 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       leg = `<span>${L.titulo}</span><span class="faixa"><span>${L.id === "pop" ? "menos gente" : "escuro"}</span>
         <span class="ramp">${cores.map(c => `<i style="background:${c}"></i>`).join("")}</span><span>${L.id === "pop" ? "mais gente" : "mais luz"}</span></span>`;
     } else if (P && P.val) {
-      /* luz de fundo (do bege fosco ao ouro) e os dois cinzas; o relevo sombreado fica por cima (camadas "relevo-ouro" e "relevo") */
-      const K = classesEscala(P, Object.keys(NAME)), vals = K.escala;
-      const base = s => K.c[s] === "forte" ? cor("--sem-forte") : K.c[s] === "fraco" ? cor("--sem-fraco") : cor(RAMP[K.c[s]]);
+      /* luz de fundo (do bege fosco ao ouro) e os dois cinzas; o relevo sombreado fica por cima (camadas "relevo-ouro" e "relevo").
+         Versão de teste: o período escolhido (a mesma escala, com os números do período) ou a comparação de dois
+         (azul = caiu, ouro = subiu; periodos.js) */
+      const ufs = Object.keys(NAME), Kc = PER ? PERIODOS.comparacao(P, DATA[P.id], ufs) : null;
+      const R = Kc ? { P, ...(Kc.ok ? {} : Kc) } : PER ? PERIODOS.pintura(P, DATA[P.id], ufs) : { P };
+      let base;
+      if (Kc && Kc.ok) {
+        base = s => typeof Kc.c[s] === "number" ? cor(PERIODOS.CORES[Kc.c[s]]) : Kc.c[s] === "forte" ? cor("--sem-forte") : cor("--sem-fraco");
+        leg = PERIODOS.legenda(P, Kc);
+      } else {
+        const K = R.A ? PERIODOS.escala(R, ufs, classesEscala) : classesEscala(R.P, ufs), vals = K.escala;
+        base = s => K.c[s] === "forte" ? cor("--sem-forte") : K.c[s] === "fraco" ? cor("--sem-fraco") : cor(RAMP[K.c[s]]);
+        leg = `<span>${P.nome}${P.unidade ? " (" + P.unidade + ")" : ""}${PER ? PERIODOS.sufixo(R) : ""}</span>${vals.length ? `<span class="faixa"><span>${P.fmt(Math.min(...vals))}</span>
+          <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(Math.max(...vals))}</span></span>` : ""}
+          ${K.forte ? `<span><i class="key sq" style="background:var(--sem-forte)"></i>sem número</span>` : ""}
+          ${K.fraco ? `<span><i class="key sq" style="background:var(--sem-fraco)"></i>${K.fraco}</span>` : ""}${PER ? PERIODOS.aviso(R) : ""}`;
+      }
       const m = ["match", ["get", "sigla"]];
-      Object.keys(NAME).forEach(s => m.push(s, base(s)));
+      ufs.forEach(s => m.push(s, base(s)));
       m.push("rgba(0,0,0,0)");
       if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color", m);
-      leg = `<span>${P.nome}${P.unidade ? " (" + P.unidade + ")" : ""}</span><span class="faixa"><span>${P.fmt(Math.min(...vals))}</span>
-        <span class="ramp">${RAMP.map(c => `<i style="background:var(${c})"></i>`).join("")}</span><span>${P.fmt(Math.max(...vals))}</span></span>
-        ${K.forte ? `<span><i class="key sq" style="background:var(--sem-forte)"></i>sem número</span>` : ""}
-        ${K.fraco ? `<span><i class="key sq" style="background:var(--sem-fraco)"></i>${K.fraco}</span>` : ""}`;
       /* "Sem cor": os estados sem pintura, como os países vizinhos (o mapa natural); em volta do escolhido, escurecidos */
     } else if (map.getLayer("estados-fill")) map.setPaintProperty("estados-fill", "fill-color",
       ["case", ["boolean", ["feature-state", "fade"], false], "#02070b", ["boolean", ["feature-state", "hover"], false], "#ffffff", "rgba(0,0,0,0)"]);
@@ -1373,6 +1390,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     document.getElementById("back").hidden = !sel;
     document.getElementById("where").textContent = sel ? `${NAME[sel]} · ${sel}` : "Brasil · 27 UFs";
     abas.querySelector('[data-aba="ficha"]').textContent = sel ? `Ficha · ${sel}` : "Ficha · Brasil";
+    fichaPeriodo();
   }
   /* ---------- luzes à noite ---------- */
   const FADE = ["boolean", ["feature-state", "fade"], false];
@@ -1681,7 +1699,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     const el = document.getElementById("ficha");
     const popInfo = DATA.pop ? `${pill(DATA.pop.nivel)} <span class="note">${DATA.pop.fonte} · atualizado em ${DATA.pop.atualizado_em}</span>` : pill("pendente");
     if (!sel) {
-      el.innerHTML = `<h2>Visão nacional</h2><div class="fname">Brasil</div>
+      el.innerHTML = `<h2>Visão nacional</h2><div class="fname">Brasil</div>${PER ? '<div id="per-ficha"></div>' : ""}
         <div class="kv"><span>População</span><span class="v">${fmt(popTot)}</span></div>${popInfo}
         ${DATA.agro ? `<div class="kv" style="margin-top:8px"><span>Produção agrícola</span><span class="v">${reais(Object.values(DATA.agro.valores).reduce((a, b) => a + b, 0))}</span></div>
           ${pill(DATA.agro.nivel)} <span class="note">IBGE, valor da produção das lavouras, ref. ${esc(DATA.agro.referencia)} · atualizado em ${DATA.agro.atualizado_em}</span>` : ""}
@@ -1702,6 +1720,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         ${DATA.evpc && DATA.evpc.brasil ? `<div class="kv" style="margin-top:8px"><span>Eletropostos</span><span class="v">≈ ${fmt1(DATA.evpc.brasil.valor / 1000)} mil</span></div>
           ${pill(DATA.evpc.nivel)} <span class="note">${esc(DATA.evpc.fonte)}, pontos públicos e semipúblicos, ${esc(DATA.evpc.referencia)}; ${esc(DATA.evpc.brasil.nota)} · atualizado em ${DATA.evpc.atualizado_em}</span>` : ""}
         <p class="lede">Clique num estado para aproximar. Arraste para girar o globo, role para aproximar e use o botão "Relevo 3D" para ver as montanhas em altura.</p>`;
+      fichaPeriodo();
       return;
     }
     const s = sel;
@@ -1712,7 +1731,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     const kr = DATA.rod && DATA.rod.meta && DATA.rod.meta.km_por_uf ? DATA.rod.meta.km_por_uf[s] : null;
     const ag = DATA.agro && DATA.agro.valores[s];
     el.innerHTML = `
-      <h2>${s} · ficha do estado</h2><div class="fname">${NAME[s]}</div>
+      <h2>${s} · ficha do estado</h2><div class="fname">${NAME[s]}</div>${PER ? '<div id="per-ficha"></div>' : ""}
       <div class="sec"><h3>População</h3>
         <div class="kv"><span>Habitantes</span><span class="v">${POP[s] ? fmt(POP[s]) : "—"}</span></div>
         <div class="kv"><span>Posição no país</span><span class="v">${rk}º · ${fmt1(POP[s] / popTot * 100)}%</span></div>${popInfo}</div>
@@ -1739,6 +1758,14 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       ${fichaCelular(s)}
       ${fichaDefesa(s)}
       ${fichaEletropostos(s)}`;
+    fichaPeriodo();
+  }
+  /* versão de teste: o período escolhido (ou a comparação) da pintura, no alto da ficha; refeito a cada render() */
+  function fichaPeriodo() {
+    const el = document.getElementById("per-ficha");
+    if (!el || !PER) return;
+    const P = PAINT.find(p => p.id === paint), h = P && luz === "off" ? PERIODOS.ficha(P, DATA[P.id], sel, Object.keys(NAME)) : "";
+    if (el.innerHTML !== h) el.innerHTML = h;
   }
 
   const AP = F.apoio, apoio = document.getElementById("apoio");
@@ -1753,10 +1780,20 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   }
   document.getElementById("tiers").innerHTML = Object.values(NIVEL)
     .map(([c, t, d]) => `<div><span><span class="pill ${c}">${t}</span></span><span>${d}</span></div>`).join("");
+  /* versão de teste: as páginas novas (dados para baixar e metodologia), ainda fora da busca */
+  const sobre = document.querySelector(".foot .sobre h2");
+  if (PER && sobre) sobre.insertAdjacentHTML("afterend", `<p class="teste-links">Em teste: <a href="${new URL("../dados/", AQUI).href}">Dados para baixar</a> · <a href="${new URL("../metodologia/", AQUI).href}">Metodologia e fontes</a></p>`);
 
   /* ---------- abertura ---------- */
   ajustarCabecalho(); controls(); ficha();
   limitarZoom(); verBrasil(0);
+  /* o selo "Dados atualizados" chega depois e, em telas médias (ex.: 1440 px), faz o cabeçalho quebrar em duas linhas;
+     sem refazer a altura, a linha "Brasil · 27 UFs" ficava atrás dele (achado em 09/11/2026) */
+  let alturaTopo = document.getElementById("top").offsetHeight;
+  if (window.ResizeObserver) new ResizeObserver(() => {
+    const h = document.getElementById("top").offsetHeight;
+    if (h !== alturaTopo) { alturaTopo = h; ajustarCabecalho(); limitarZoom(); }
+  }).observe(document.getElementById("top"));
   /* aplica cores e camadas ligadas assim que o estilo é lido, antes das imagens chegarem */
   map.once("style.load", () => render());
   const aviso = document.getElementById("carregando");

@@ -440,3 +440,24 @@ canvas.fundo-vivo{position:fixed;inset:0;width:100%;height:100%;z-index:-1;point
 .vmda{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;stroke-opacity:.92}
 .vmda.f0{stroke:var(--tr0)}.vmda.f1{stroke:var(--tr1)}.vmda.f2{stroke:var(--tr2)}.vmda.f3{stroke:var(--tr3)}.vmda.f4{stroke:var(--tr4)}
 .key.dup{height:6px;border-radius:0;background:linear-gradient(currentColor 0 2.2px,#140c04 2.2px 3.8px,currentColor 3.8px 6px);box-shadow:0 0 0 1.3px rgba(14,9,4,.9)}
+/* ---------- versão de teste: período e comparação nas pinturas (periodos.js, desde 09/11/2026) ----------
+   Comparação: azul = caiu, ouro = subiu, mais claro quanto maior a mudança (a mesma escala B do ouro nos três passos de
+   alta); o centro (zero) fica entre os dois passos mais fracos, sem cinza no meio, porque os dois cinzas de sempre já
+   dizem "sem número" e "nada". Conferidas com o validador de paletas: rampas com claridade crescente e passos fracos
+   distintos dos cinzas (também para daltonismo vermelho-verde) */
+:root{--dv-c3:#8fdaf8;--dv-c2:#5ab3e3;--dv-c1:#4f8ed8;--dv-s1:#ae7f37;--dv-s2:#d29a33;--dv-s3:#f4c552}
+.periodo{margin:0 0 12px;padding:10px 12px 8px;border:1px solid var(--hair);border-radius:10px;background:rgba(255,255,255,.025)}
+.periodo[hidden]{display:none}
+.periodo .per-linha{display:flex;flex-wrap:wrap;gap:8px 14px}
+.periodo label{display:flex;flex-direction:column;gap:3px;font:500 .7rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.periodo select{font:500 .9rem var(--f-body);letter-spacing:0;text-transform:none;color:var(--ink);background:#0c171c;border:1px solid var(--hair);
+  border-radius:8px;padding:5px 8px;min-width:12.5em;max-width:100%}
+.periodo select:disabled{opacity:.55}
+.periodo .note{margin:8px 0 0;font-size:.8rem;line-height:1.45}
+.periodo a,.periodo-ficha a,.teste-links a{color:var(--accent)}
+.per-aviso{color:var(--accent);font-size:.82rem}
+.ramp.cmp{position:relative;margin-bottom:14px}
+.ramp.cmp i{width:30px}
+.ramp.cmp i:nth-child(3){box-shadow:1px 0 0 var(--night)}
+.ramp.cmp b{position:absolute;top:10px;transform:translateX(-50%);font:500 .64rem var(--f-mono);color:var(--ink);white-space:nowrap}
+.teste-links{font-family:var(--f-mono);font-size:.82rem;letter-spacing:.02em}

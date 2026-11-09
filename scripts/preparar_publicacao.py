@@ -7,9 +7,12 @@ na hora de publicar (passo "Preparar para os buscadores" do .github/workflows/si
 repositório: robots.txt e sitemap.xml só existem na cópia publicada, e as páginas continuam com endereços relativos.
 
 O que faz na pasta (por padrão, site/):
+0. Gera as páginas de texto (scripts/gerar_paginas.py): dados para baixar (uma página por conjunto do acervo, com a
+   ficha schema.org Dataset), metodologia e fontes e o llms.txt. Na prévia, com noindex e fora do sitemap.
 1. robots.txt: todos os robôs liberados (buscadores e robôs das IAs) e o endereço do sitemap.
 2. sitemap.xml: as páginas que devem aparecer na busca, com a data dos dados (a mesma do selo "Dados atualizados
-   em", isto é, a última vez que um robô buscou dados com sucesso). A versão leve (2d/) tem noindex e fica fora.
+   em", isto é, a última vez que um robô buscou dados com sucesso; nas páginas do acervo, a última coleta). A versão
+   leve (2d/) tem noindex e fica fora.
 3. Nas páginas .html, troca o endereço relativo do link canônico e da prévia de compartilhamento (og:url, og:image,
    twitter:image) pelo endereço completo, calculado a partir da posição de cada página.
 
@@ -25,6 +28,8 @@ import sys
 from pathlib import Path
 from urllib.parse import urljoin
 from xml.sax.saxutils import escape
+
+import gerar_paginas
 
 RAIZ = Path(__file__).resolve().parent.parent
 ENDERECO = RAIZ / "scripts" / "dados" / "endereco_do_site.txt"
@@ -96,12 +101,13 @@ def principal():
         f"Sitemap: {base}sitemap.xml\n", encoding="utf-8")
 
     data = data_dos_dados(pasta)
+    geradas = gerar_paginas.gerar(pasta, base, data)
     itens = []
-    for p in NA_BUSCA:
+    for p, quando in [(p, data) for p in NA_BUSCA] + geradas:
         if not (pasta / p).exists():
             sys.exit(f"[publicação] a página {p}, listada em NA_BUSCA, não existe em {pasta}")
         loc = urljoin(base, re.sub(r"(^|/)index\.html$", r"\1", p))
-        itens.append(f"  <url>\n    <loc>{escape(loc)}</loc>\n" + (f"    <lastmod>{data}</lastmod>\n" if data else "") + "  </url>\n")
+        itens.append(f"  <url>\n    <loc>{escape(loc)}</loc>\n" + (f"    <lastmod>{quando}</lastmod>\n" if quando else "") + "  </url>\n")
     (pasta / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(itens) + "</urlset>\n", encoding="utf-8")
@@ -115,7 +121,7 @@ def principal():
             f.write_text(novo, encoding="utf-8")
             total += trocas
             print(f"[publicação] {rel}: {trocas} endereço(s) completado(s)")
-    for p in NA_BUSCA:
+    for p in NA_BUSCA + [p for p, _ in geradas]:
         texto = (pasta / p).read_text(encoding="utf-8")
         if not re.search(r'<link\b[^>]*\brel="canonical"[^>]*\bhref="https://', texto):
             print(f"[publicação] aviso: {p} está no sitemap mas não tem link canônico")

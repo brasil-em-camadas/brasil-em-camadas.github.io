@@ -24,11 +24,16 @@ CFG = {
     "titulo": "Velocidade medida no celular (Anatel)",
     "descricao": ("Mediana da velocidade de download e de upload nos testes feitos nos celulares, no Brasil, em cada "
                   "estado e em cada município, por trimestre, com o 4G, o 5G e cada operadora."),
-    "fonte": {"orgao": "Anatel", "titulo": "Anatel, medidas de velocidade da telefonia móvel (RQUAL, indicador IND4)",
+    "fonte": {"orgao": "Anatel", "orgao_nome": "Agência Nacional de Telecomunicações (Anatel)",
+              "orgao_site": "https://www.gov.br/anatel/",
+              "titulo": "Anatel, medidas de velocidade da telefonia móvel (RQUAL, indicador IND4)",
               "consulta": "https://www.anatel.gov.br/dadosabertos/paineis_de_dados/qualidade/medidas_qoe_smp.zip",
               "catalogo": "https://dados.gov.br/dados/conjuntos-dados/qualidade---medidas-de-velocidade---telefonia-movel",
               "licenca": "Creative Commons Atribuição (CC BY), como informado no Portal Brasileiro de Dados Abertos"},
     "nivel": "Oficial · API",
+    # palavras para a busca (página do conjunto e ficha schema.org Dataset)
+    "palavras_chave": ["velocidade da internet móvel", "celular", "4G", "5G", "testes de velocidade", "download", "upload",
+                       "mediana", "Claro", "TIM", "Vivo", "Anatel", "estados", "municípios", "dados abertos"],
     "periodicidade": "trimestral",
     "medida": "mediana dos testes do trimestre (não se soma: não há pacote anual)",
     "como_vira_ano": "não vira: mediana não se soma, então só existem pacotes por trimestre",

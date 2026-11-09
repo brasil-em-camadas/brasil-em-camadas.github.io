@@ -40,7 +40,9 @@ A lista sempre atualizada está em `indice.json`.
 ```
 indice.json                     lista de conjuntos e períodos (o site lê daqui)
 municipios.csv                  código, nome, estado e posição da sede de cada município (guardado uma vez só)
-<conjunto>/conjunto.json        o que é, fonte, método, colunas e a lista de pacotes e versões (com o hash de cada ficha)
+<conjunto>/conjunto.json        o que é, fonte, método, colunas e a lista de pacotes e versões (com o hash de cada ficha
+                                e, em sem_dado, as colunas sem nenhum número nos estados naquele período); em quebras,
+                                as mudanças de método da fonte que impedem comparar um período de antes com um de depois
 <conjunto>/serie_uf.csv         todos os períodos por estado (e Brasil, com uf = BR), gerado, para gráficos
 <conjunto>/<período>/datapackage.json   ficha técnica do pacote
 <conjunto>/<período>/brasil.csv         Brasil

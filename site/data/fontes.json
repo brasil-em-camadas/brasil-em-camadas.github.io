@@ -9,13 +9,64 @@
   "agri": "Agricultura",
   "setor": "Entidades do setor"
  },
+ "niveis": {
+  "api": {
+   "nome": "Oficial · API",
+   "explica": "Vem da API do órgão oficial e atualiza sozinho."
+  },
+  "manual": {
+   "nome": "Oficial · manual",
+   "explica": "Arquivo oficial inserido à mão, com data do último download."
+  },
+  "entidade": {
+   "nome": "Imprensa / entidade",
+   "explica": "Número público de terceiros, sempre com fonte e data."
+  },
+  "base": {
+   "nome": "Base aberta internacional",
+   "explica": "Base mundial aberta, real porém menos detalhada."
+  },
+  "calculado": {
+   "nome": "Estimado / calculado",
+   "explica": "Calculado por nós, com o método explicado."
+  },
+  "pendente": {
+   "nome": "Em apuração",
+   "explica": "Ainda sem dado. O campo fica vazio, sem estimativa."
+  }
+ },
+ "naturezas": {
+  "medicao": {
+   "nome": "Medição, contagem ou registro",
+   "explica": "A fonte mediu, contou ou registrou cada caso: o Censo, os testes de velocidade, a produção de cada poço, os passageiros, os acessos de internet que as empresas informam, o cadastro das usinas, a lista das empresas credenciadas."
+  },
+  "levantamento": {
+   "nome": "Levantamento com informantes",
+   "explica": "A fonte reúne, em cada lugar, o que entidades, produtores e técnicos informam (não é medição no campo): a produção agrícola e a pecuária do IBGE, os eletropostos da associação do setor."
+  },
+  "estimativa": {
+   "nome": "Estimativa da fonte",
+   "explica": "A fonte calcula com um modelo, sem medir no local: o sinal de celular previsto pela Anatel a partir das antenas, o fluxo de veículos que o DNIT estima a partir dos pontos de contagem."
+  },
+  "mapa": {
+   "nome": "Desenho de mapa",
+   "explica": "Linhas e áreas de uma base cartográfica (rodovias, ferrovias e portos do IBGE, limites do mar do Marine Regions, campos e dutos da ANP). Medidas tiradas do desenho, como quilômetros e áreas, são aproximadas."
+  },
+  "calculo": {
+   "nome": "Conta do site",
+   "explica": "O Brasil em Camadas fez a conta com os números da fonte: medianas, médias pela população, somas por estado, valores por habitante, quilômetros e áreas medidos no desenho e classificações. Cada conta está descrita aqui e na ficha."
+  }
+ },
  "pintura": [
   {
    "id": "pop",
    "nome": "População",
    "arquivo": "populacao.json",
    "ministerio": "plan",
-   "por": "total"
+   "por": "total",
+   "natureza": [
+    "medicao"
+   ]
   },
   {
    "id": "agro",
@@ -25,7 +76,17 @@
    "por": "total",
    "camadas": [
     "lav"
-   ]
+   ],
+   "natureza": [
+    "levantamento"
+   ],
+   "acervo": {
+    "conjunto": "lavouras-ibge",
+    "coluna": "valor_mil_reais",
+    "filtro": {
+     "lavoura": "total"
+    }
+   }
   },
   {
    "id": "soja",
@@ -39,7 +100,17 @@
    "so_no_ministerio": true,
    "camadas": [
     "lav"
-   ]
+   ],
+   "natureza": [
+    "levantamento"
+   ],
+   "acervo": {
+    "conjunto": "lavouras-ibge",
+    "coluna": "quantidade",
+    "filtro": {
+     "lavoura": "soja"
+    }
+   }
   },
   {
    "id": "milho",
@@ -53,7 +124,17 @@
    "so_no_ministerio": true,
    "camadas": [
     "lav"
-   ]
+   ],
+   "natureza": [
+    "levantamento"
+   ],
+   "acervo": {
+    "conjunto": "lavouras-ibge",
+    "coluna": "quantidade",
+    "filtro": {
+     "lavoura": "milho"
+    }
+   }
   },
   {
    "id": "cana",
@@ -67,7 +148,17 @@
    "so_no_ministerio": true,
    "camadas": [
     "lav"
-   ]
+   ],
+   "natureza": [
+    "levantamento"
+   ],
+   "acervo": {
+    "conjunto": "lavouras-ibge",
+    "coluna": "quantidade",
+    "filtro": {
+     "lavoura": "cana_de_acucar"
+    }
+   }
   },
   {
    "id": "cafe",
@@ -81,7 +172,17 @@
    "so_no_ministerio": true,
    "camadas": [
     "lav"
-   ]
+   ],
+   "natureza": [
+    "levantamento"
+   ],
+   "acervo": {
+    "conjunto": "lavouras-ibge",
+    "coluna": "quantidade",
+    "filtro": {
+     "lavoura": "cafe"
+    }
+   }
   },
   {
    "id": "reb",
@@ -91,6 +192,9 @@
    "por": "total",
    "camadas": [
     "boi"
+   ],
+   "natureza": [
+    "levantamento"
    ]
   },
   {
@@ -98,7 +202,12 @@
    "nome": "Eletropostos / 100 mil hab.",
    "arquivo": "eletropostos.json",
    "ministerio": "setor",
-   "por": "per_capita"
+   "por": "per_capita",
+   "natureza": [
+    "levantamento",
+    "calculo"
+   ],
+   "conta": "pontos de recarga do estado divididos pela população do Censo 2022, por 100 mil habitantes"
   },
   {
    "id": "oleo",
@@ -110,7 +219,12 @@
    "camadas": [
     "oil",
     "uep"
-   ]
+   ],
+   "natureza": [
+    "medicao",
+    "calculo"
+   ],
+   "conta": "soma da produção dos poços de cada estado, em média por dia do mês; petróleo e gás somados em barris de óleo equivalente (boe), pela conversão da ANP"
   },
   {
    "id": "ene",
@@ -121,7 +235,12 @@
    "vazio": "sem usina no cadastro",
    "camadas": [
     "usinas"
-   ]
+   ],
+   "natureza": [
+    "medicao",
+    "calculo"
+   ],
+   "conta": "soma da potência das usinas em operação de cada estado, todas as do cadastro; Itaipu entra com a parte brasileira (7.000 MW)"
   },
   {
    "id": "cel",
@@ -131,6 +250,9 @@
    "por": "percentual",
    "camadas": [
     "celm"
+   ],
+   "natureza": [
+    "estimativa"
    ]
   },
   {
@@ -143,7 +265,16 @@
    "camadas": [
     "velm"
    ],
-   "so_no_ministerio": true
+   "so_no_ministerio": true,
+   "natureza": [
+    "medicao",
+    "calculo"
+   ],
+   "conta": "mediana de todos os testes do trimestre em cada estado, no Brasil e em cada município (o site faz a conta com cada teste do arquivo da Anatel)",
+   "acervo": {
+    "conjunto": "velocidade-celular-anatel",
+    "coluna": "download_mediana_mbps"
+   }
   },
   {
    "id": "g5m",
@@ -155,7 +286,11 @@
    "camadas": [
     "g5c"
    ],
-   "so_no_ministerio": true
+   "so_no_ministerio": true,
+   "natureza": [
+    "estimativa",
+    "calculo"
+   ]
   },
   {
    "id": "blf",
@@ -167,7 +302,14 @@
    "camadas": [
     "blm"
    ],
-   "so_no_ministerio": true
+   "so_no_ministerio": true,
+   "natureza": [
+    "medicao"
+   ],
+   "acervo": {
+    "conjunto": "banda-larga-anatel",
+    "coluna": "acessos_por_100_hab"
+   }
   },
   {
    "id": "defesa",
@@ -178,7 +320,12 @@
    "vazio": "nenhuma empresa credenciada",
    "camadas": [
     "empdef"
-   ]
+   ],
+   "natureza": [
+    "medicao",
+    "calculo"
+   ],
+   "conta": "empresas da lista contadas pelo estado do município da sede informado na lista; quando a lista traz um bairro, um distrito ou um dado que não combina, o município vem do cadastro do CNPJ"
   }
  ],
  "luzes": [
@@ -188,7 +335,10 @@
    "titulo": "Onde vive a população",
    "arquivo": "luzes/municipios.json",
    "ministerio": "plan",
-   "explica": "Cada ponto de luz é um município: quanto mais gente, mais forte o brilho. O brilho fica na sede do município, então quem mora na zona rural aparece junto da cidade."
+   "explica": "Cada ponto de luz é um município: quanto mais gente, mais forte o brilho. O brilho fica na sede do município, então quem mora na zona rural aparece junto da cidade.",
+   "natureza": [
+    "medicao"
+   ]
   },
   {
    "id": "noite",
@@ -198,7 +348,10 @@
    "nivel": "base",
    "fonte": "NASA, Black Marble (satélite VIIRS), imagem anual de 2016, a mais recente publicada pela NASA nesse formato",
    "explica": "Luz artificial vista do espaço à noite: cidades, estradas, indústria, mineração e plataformas de petróleo. Mostra desenvolvimento e infraestrutura, não quantas pessoas vivem em cada lugar.",
-   "ladrilhos": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_Black_Marble/default/2016-01-01/GoogleMapsCompatible_Level8/{z}/{y}/{x}.png"
+   "ladrilhos": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_Black_Marble/default/2016-01-01/GoogleMapsCompatible_Level8/{z}/{y}/{x}.png",
+   "natureza": [
+    "medicao"
+   ]
   }
  ],
  "camadas": [
@@ -211,7 +364,12 @@
    "nivel": "base",
    "fonte": "Marine Regions (VLIZ), versão 12 de 2023: faixa das 12 às 200 milhas, ≈ 3,42 milhões de km²; com o mar territorial, ≈ 3,57 milhões",
    "ligada": true,
-   "cor": "--sea-line"
+   "cor": "--sea-line",
+   "natureza": [
+    "mapa",
+    "calculo"
+   ],
+   "conta": "áreas medidas no desenho (aproximadas)"
   },
   {
    "id": "mt",
@@ -222,7 +380,12 @@
    "nivel": "base",
    "fonte": "Marine Regions (VLIZ), versão 4 de 2023: 12 milhas a partir das linhas de base, pontilhadas onde são retas (Decreto 8.400/2015); entre elas e a costa ficam as águas interiores, sem cor. ≈ 155 mil km²",
    "ligada": true,
-   "cor": "--mt"
+   "cor": "--mt",
+   "natureza": [
+    "mapa",
+    "calculo"
+   ],
+   "conta": "área medida no desenho (aproximada)"
   },
   {
    "id": "zc",
@@ -234,7 +397,12 @@
    "nivel": "base",
    "fonte": "Marine Regions (VLIZ), versão 4 de 2023: das 12 às 24 milhas, faixa em que o Brasil fiscaliza alfândega, impostos, imigração e saúde (Lei 8.617/1993), ≈ 167 mil km²",
    "ligada": true,
-   "cor": "--zc"
+   "cor": "--zc",
+   "natureza": [
+    "mapa",
+    "calculo"
+   ],
+   "conta": "área medida no desenho (aproximada)"
   },
   {
    "id": "pce",
@@ -255,7 +423,12 @@
      "nome": "em análise na ONU",
      "hachura": true
     }
-   ]
+   ],
+   "natureza": [
+    "mapa",
+    "calculo"
+   ],
+   "conta": "áreas medidas no desenho (aproximadas), ao lado do número da Marinha; a Margem Equatorial foi fechada na linha das 200 milhas a partir dos pontos do documento da ONU"
   },
   {
    "id": "fronttipo",
@@ -280,6 +453,10 @@
      "nome": "Fronteira seca, na mata",
      "cor": "--fr-mata"
     }
+   ],
+   "natureza": [
+    "mapa",
+    "calculo"
    ]
   },
   {
@@ -304,7 +481,12 @@
      "nome": "trecho de BR administrado pelo estado",
      "cor": "--road-est"
     }
-   ]
+   ],
+   "natureza": [
+    "mapa",
+    "calculo"
+   ],
+   "conta": "quilômetros por estado medidos no desenho (aproximados)"
   },
   {
    "id": "dup",
@@ -327,7 +509,12 @@
      "cor": "--dup-obra",
      "forma": "dup"
     }
-   ]
+   ],
+   "natureza": [
+    "mapa",
+    "calculo"
+   ],
+   "conta": "quilômetros por estado medidos no desenho (aproximados), sem contar duas vezes os trechos que coincidem"
   },
   {
    "id": "rodest",
@@ -339,7 +526,10 @@
    "nivel": "manual",
    "fonte": "IBGE, base cartográfica 1:250.000 (BC250, versão 2025): rodovias com sigla do estado (ex.: SP-330) e pavimentadas, 136 mil km",
    "ligada": false,
-   "cor": "--road-est"
+   "cor": "--road-est",
+   "natureza": [
+    "mapa"
+   ]
   },
   {
    "id": "rail",
@@ -359,7 +549,12 @@
      "nome": "em obras",
      "forma": "tr"
     }
-   ]
+   ],
+   "natureza": [
+    "mapa",
+    "calculo"
+   ],
+   "conta": "quilômetros por estado medidos no desenho (aproximados)"
   },
   {
    "id": "passa",
@@ -381,7 +576,12 @@
      "cor": "--road",
      "forma": "tr"
     }
-   ]
+   ],
+   "natureza": [
+    "medicao",
+    "calculo"
+   ],
+   "conta": "ponto onde a rodovia da BC250 chega à fronteira (ou o ponto da fronteira mais perto da sede)"
   },
   {
    "id": "ports",
@@ -392,7 +592,10 @@
    "nivel": "manual",
    "fonte": "IBGE, base cartográfica 1:250.000 (BC250, versão 2025): 133 complexos portuários, marítimos e fluviais (37 portos organizados)",
    "ligada": false,
-   "cor": "--port"
+   "cor": "--port",
+   "natureza": [
+    "mapa"
+   ]
   },
   {
    "id": "air",
@@ -410,6 +613,9 @@
      "forma": "pt",
      "cor": "--air"
     }
+   ],
+   "natureza": [
+    "medicao"
    ]
   },
   {
@@ -425,7 +631,10 @@
     -44.396,
     -2.373
    ],
-   "uf": "MA"
+   "uf": "MA",
+   "natureza": [
+    "calculo"
+   ]
   },
   {
    "id": "oil",
@@ -443,6 +652,9 @@
      "nome": "Poços em produção (tamanho = produção)",
      "forma": "pt"
     }
+   ],
+   "natureza": [
+    "medicao"
    ]
   },
   {
@@ -465,6 +677,9 @@
      "nome": "previstas",
      "forma": "sqv"
     }
+   ],
+   "natureza": [
+    "medicao"
    ]
   },
   {
@@ -477,7 +692,10 @@
    "nivel": "api",
    "fonte": "ANP: campos em produção, em desenvolvimento e em reabilitação (os em devolução ficam de fora). Clique num campo para ver os detalhes",
    "ligada": false,
-   "cor": "--campo"
+   "cor": "--campo",
+   "natureza": [
+    "mapa"
+   ]
   },
   {
    "id": "presal",
@@ -494,6 +712,9 @@
      "nome": "Polígono do pré-sal",
      "forma": "tr"
     }
+   ],
+   "natureza": [
+    "mapa"
    ]
   },
   {
@@ -516,6 +737,9 @@
      "nome": "Oleoduto (petróleo, derivados e etanol)",
      "cor": "--oleod"
     }
+   ],
+   "natureza": [
+    "mapa"
    ]
   },
   {
@@ -544,6 +768,9 @@
      "forma": "pt",
      "cor": "--gnl"
     }
+   ],
+   "natureza": [
+    "medicao"
    ]
   },
   {
@@ -563,7 +790,12 @@
      "forma": "esc",
      "cor": "--def"
     }
-   ]
+   ],
+   "natureza": [
+    "medicao",
+    "calculo"
+   ],
+   "conta": "cada empresa no ponto da sede do município da lista (corrigido pelo cadastro do CNPJ quando necessário), não no endereço dela"
   },
   {
    "id": "celm",
@@ -597,6 +829,9 @@
      "forma": "pt",
      "cor": "--cel1"
     }
+   ],
+   "natureza": [
+    "estimativa"
    ]
   },
   {
@@ -615,6 +850,9 @@
      "nome": "Município com 5G",
      "forma": "anel"
     }
+   ],
+   "natureza": [
+    "medicao"
    ]
   },
   {
@@ -660,7 +898,12 @@
      "forma": "anel",
      "cor": "--muted"
     }
-   ]
+   ],
+   "natureza": [
+    "medicao",
+    "calculo"
+   ],
+   "conta": "mediana dos testes de download de cada município (com menos de 50 testes, só o contorno)"
   },
   {
    "id": "g5c",
@@ -700,6 +943,9 @@
      "forma": "pt",
      "cor": "--c5g0"
     }
+   ],
+   "natureza": [
+    "estimativa"
    ]
   },
   {
@@ -740,6 +986,9 @@
      "forma": "pt",
      "cor": "--bl1"
     }
+   ],
+   "natureza": [
+    "medicao"
    ]
   },
   {
@@ -799,7 +1048,12 @@
      "forma": "pt",
      "cor": "--lav-outras"
     }
-   ]
+   ],
+   "natureza": [
+    "levantamento",
+    "calculo"
+   ],
+   "conta": "a lavoura de maior valor da produção em cada município"
   },
   {
    "id": "boi",
@@ -818,7 +1072,10 @@
      "forma": "pt"
     }
    ],
-   "no_filtro": false
+   "no_filtro": false,
+   "natureza": [
+    "levantamento"
+   ]
   },
   {
    "id": "pedagio",
@@ -856,7 +1113,12 @@
      "forma": "anel",
      "cor": "--tr0"
     }
-   ]
+   ],
+   "natureza": [
+    "medicao",
+    "calculo"
+   ],
+   "conta": "média de veículos por dia nos meses completos dos 12 mais recentes de cada praça (o total do mês fica entre metade e 1,6 vez a mediana) e a parte de caminhões e ônibus"
   },
   {
    "id": "vmda",
@@ -886,6 +1148,9 @@
      "nome": "55% ou mais",
      "cor": "--tr4"
     }
+   ],
+   "natureza": [
+    "estimativa"
    ]
   },
   {
@@ -930,6 +1195,9 @@
      "forma": "pt",
      "cor": "--nuc"
     }
+   ],
+   "natureza": [
+    "medicao"
    ]
   },
   {
@@ -947,6 +1215,9 @@
     {
      "nome": "Linha de transmissão (mais grossa = tensão maior)"
     }
+   ],
+   "natureza": [
+    "mapa"
    ]
   },
   {
@@ -967,7 +1238,10 @@
      "cor": "--lt"
     }
    ],
-   "no_filtro": false
+   "no_filtro": false,
+   "natureza": [
+    "mapa"
+   ]
   }
  ],
  "apoio": {

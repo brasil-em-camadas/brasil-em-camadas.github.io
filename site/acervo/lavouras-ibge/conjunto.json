@@ -5,6 +5,8 @@
  "descricao": "Área plantada e colhida, quantidade produzida, rendimento médio e valor da produção de cada lavoura temporária e permanente, no Brasil, em cada estado e (desde 2010) em cada município, por ano.",
  "fonte": {
   "orgao": "IBGE",
+  "orgao_nome": "Instituto Brasileiro de Geografia e Estatística (IBGE)",
+  "orgao_site": "https://www.ibge.gov.br/",
   "titulo": "IBGE, Produção Agrícola Municipal (PAM), tabela 5457 da SIDRA",
   "consulta": "https://apisidra.ibge.gov.br/values/t/5457",
   "catalogo": "https://sidra.ibge.gov.br/tabela/5457",
@@ -26,7 +28,40 @@
   "A linha 'total' traz a soma do IBGE para todas as lavouras (área e valor); quantidade e rendimento não se somam entre produtos diferentes ('..', não se aplica).",
   "Café arábica e café canephora (desde 2012) são partes do café; não somar com a linha 'cafe'.",
   "Rendimento: quilos por hectare; nas lavouras contadas em mil frutos (ou mil cachos), frutos (ou cachos) por hectare.",
-  "Ausência na base não significa ausência real: a PAM registra o que o IBGE levantou em cada município."
+  "Ausência na base não significa ausência real: a PAM registra o que o IBGE levantou em cada município.",
+  "Café: até 2001, a quantidade é de café em coco (o fruto seco, com a casca); desde 2002, de café beneficiado (em grão, sem a casca), que pesa cerca de metade. A SIDRA usa o mesmo nome nos dois casos. As quantidades e os rendimentos de antes e de depois de 2002 não se comparam."
+ ],
+ "quebras": [
+  {
+   "desde": "2002",
+   "colunas": [
+    "quantidade",
+    "rendimento"
+   ],
+   "filtro": {
+    "lavoura": "cafe"
+   },
+   "aviso": "Café: até 2001, café em coco (com a casca); desde 2002, café beneficiado (em grão), que pesa cerca de metade. As quantidades de antes e de depois de 2002 não se comparam."
+  }
+ ],
+ "palavras_chave": [
+  "agricultura",
+  "produção agrícola",
+  "lavouras",
+  "PAM",
+  "IBGE",
+  "soja",
+  "milho",
+  "cana-de-açúcar",
+  "café",
+  "área plantada",
+  "área colhida",
+  "rendimento",
+  "valor da produção",
+  "estados",
+  "municípios",
+  "série histórica",
+  "dados abertos"
  ],
  "licenca": {
   "name": "CC-BY-4.0",
@@ -108,7 +143,11 @@
    "ficha": "1974/datapackage.json",
    "hash": "sha256:2702eff50f4eace8cbe4b957d7c1d4ce654f1cede9ce21cca19f69f8024dbb50",
    "bytes": 49006,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "area_plantada_ha",
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1975",
@@ -124,7 +163,11 @@
    "ficha": "1975/datapackage.json",
    "hash": "sha256:a1d00caa6ea93eff4c9ddb4119a82936eb44aef49f149a005be9e5bd67564f73",
    "bytes": 48736,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "area_plantada_ha",
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1976",
@@ -140,7 +183,11 @@
    "ficha": "1976/datapackage.json",
    "hash": "sha256:2bb0a9ed60e8a9ef126099f1c95a393eefdcafc51b426f7535a4a4347dff3e81",
    "bytes": 48636,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "area_plantada_ha",
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1977",
@@ -156,7 +203,11 @@
    "ficha": "1977/datapackage.json",
    "hash": "sha256:d2592e32b3fd3f2c31d82134b98cf4bf349b9e1abe79a4f4fa2689230472398f",
    "bytes": 48608,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "area_plantada_ha",
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1978",
@@ -172,7 +223,11 @@
    "ficha": "1978/datapackage.json",
    "hash": "sha256:c94dd51adba3b1ea1497a86e094bf4fbadcd9a6d988fc3328d5c687ba92a16ee",
    "bytes": 48505,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "area_plantada_ha",
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1979",
@@ -188,7 +243,11 @@
    "ficha": "1979/datapackage.json",
    "hash": "sha256:a2893d964749c706f2ac7db8b25b9fbf41cba9c30e86c10efaf26051c0fe3a24",
    "bytes": 48191,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "area_plantada_ha",
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1980",
@@ -204,7 +263,11 @@
    "ficha": "1980/datapackage.json",
    "hash": "sha256:c08d25056056f4b30d842c60036ed91fb96fb2447952bbca23d79d7947c2e44a",
    "bytes": 47985,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "area_plantada_ha",
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1981",
@@ -220,7 +283,11 @@
    "ficha": "1981/datapackage.json",
    "hash": "sha256:124328fb8ad3d2bc4715210f85f0bf52817d8fd4e2de9e62856117d43f269a32",
    "bytes": 50157,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "area_plantada_ha",
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1982",
@@ -236,7 +303,11 @@
    "ficha": "1982/datapackage.json",
    "hash": "sha256:f66da0ac3a7ef67e2af7398d3a5d93543e615db763d2360932d6551bc4147439",
    "bytes": 49781,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "area_plantada_ha",
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1983",
@@ -252,7 +323,11 @@
    "ficha": "1983/datapackage.json",
    "hash": "sha256:a886b972137ba3cfd1b6cd55af781eb01705b1c36ce18e1ee4e292f099d35df7",
    "bytes": 49541,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "area_plantada_ha",
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1984",
@@ -268,7 +343,11 @@
    "ficha": "1984/datapackage.json",
    "hash": "sha256:35a306666a209adf2ebc9be8c63e57eb898b16ffd4f18f03a885cc7db8a38f15",
    "bytes": 49853,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "area_plantada_ha",
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1985",
@@ -284,7 +363,11 @@
    "ficha": "1985/datapackage.json",
    "hash": "sha256:b030a89ffc35e70ceedd1feba628e75107da454a247440f1fcb016f22eec603a",
    "bytes": 49779,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "area_plantada_ha",
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1986",
@@ -300,7 +383,11 @@
    "ficha": "1986/datapackage.json",
    "hash": "sha256:c63cc701c8b2600769bff21276181d1721b4e184fd605b7ad2dc8afb08658b35",
    "bytes": 49853,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "area_plantada_ha",
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1987",
@@ -316,7 +403,11 @@
    "ficha": "1987/datapackage.json",
    "hash": "sha256:77ad4f1845eaeb7fff96ca9d09e2b44a0adb80d7be1dee41c094e06737ee5b5a",
    "bytes": 49465,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "area_plantada_ha",
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1988",
@@ -332,7 +423,10 @@
    "ficha": "1988/datapackage.json",
    "hash": "sha256:17f61e2a8eb3a499dfc8ac55d2a86d9ea0f03900c48f6b956fa8a2e4f598e315",
    "bytes": 53497,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1989",
@@ -348,7 +442,10 @@
    "ficha": "1989/datapackage.json",
    "hash": "sha256:334b66f1d5591800bd54e2176674e228a696072683d6b57247c05ffb3e1693c1",
    "bytes": 52419,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1990",
@@ -364,7 +461,10 @@
    "ficha": "1990/datapackage.json",
    "hash": "sha256:70c799a032b4f6f20561f733317479f10cc4bb5ad8ec7a526f38b7e61f8d537e",
    "bytes": 52085,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1991",
@@ -380,7 +480,10 @@
    "ficha": "1991/datapackage.json",
    "hash": "sha256:406e62e10f163793cd8a17ad9e91e6cf8079242f0a17f7dfbf511ab9a3922a9b",
    "bytes": 51959,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1992",
@@ -396,7 +499,10 @@
    "ficha": "1992/datapackage.json",
    "hash": "sha256:9c70a36e19c55322bfa8786ffbf4731b1c53a5176b493a89cc0e8430f7f3a1c5",
    "bytes": 52068,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1993",
@@ -412,7 +518,10 @@
    "ficha": "1993/datapackage.json",
    "hash": "sha256:a10df5ff83749a76afe66963aa37a088252379cb5f687002cf8d04a57e040bff",
    "bytes": 52677,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": [
+    "valor_mil_reais"
+   ]
   },
   {
    "periodo": "1994",
@@ -428,7 +537,8 @@
    "ficha": "1994/datapackage.json",
    "hash": "sha256:775a01beeb2746f7f55fb686236d75802f8082139a950179c306e6231fca4bfc",
    "bytes": 57558,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "1995",
@@ -444,7 +554,8 @@
    "ficha": "1995/datapackage.json",
    "hash": "sha256:9ccb826cc73a129624f88536a5b075e3cd2c78a0f42be41ebba87960b61331d4",
    "bytes": 57777,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "1996",
@@ -460,7 +571,8 @@
    "ficha": "1996/datapackage.json",
    "hash": "sha256:ba20c63ca92d4358378ec121e6f372dbae2e45ea33c8e0ecd9ccf1d888bd89e4",
    "bytes": 59535,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "1997",
@@ -476,7 +588,8 @@
    "ficha": "1997/datapackage.json",
    "hash": "sha256:fcf97c4045892b7aabe0b9c24b36991b230065a99dda9bc54c05d0341f551b98",
    "bytes": 59022,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "1998",
@@ -492,7 +605,8 @@
    "ficha": "1998/datapackage.json",
    "hash": "sha256:4899a7186fd2d6338010275e3faccc68f8a6fbad769084a7fa69015467244918",
    "bytes": 59577,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "1999",
@@ -508,7 +622,8 @@
    "ficha": "1999/datapackage.json",
    "hash": "sha256:69bc500e21616967ca6ec180ac5ec8969aca4eb689032974f6b2c5de8a094c68",
    "bytes": 59587,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2000",
@@ -524,7 +639,8 @@
    "ficha": "2000/datapackage.json",
    "hash": "sha256:443b6279df2600ad5518711205ff36da07332816c0648e91b5e0d4822bfeac53",
    "bytes": 59746,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2001",
@@ -540,7 +656,8 @@
    "ficha": "2001/datapackage.json",
    "hash": "sha256:45f4da6884ae113da30d9c2fafb5d3e46bdcb7bb3709c281afda9a0b3f1eb16e",
    "bytes": 55857,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2002",
@@ -556,7 +673,8 @@
    "ficha": "2002/datapackage.json",
    "hash": "sha256:5bcc407d3af38ec69d25134afa825d68bc58142da2fe67a64a7e68923673fb20",
    "bytes": 55785,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2003",
@@ -572,7 +690,8 @@
    "ficha": "2003/datapackage.json",
    "hash": "sha256:8f646ab16689d5a7ac2b0df30324347b52e767e76313445c2e56d56567e999ea",
    "bytes": 55834,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2004",
@@ -588,7 +707,8 @@
    "ficha": "2004/datapackage.json",
    "hash": "sha256:73cac72d2086b143404220f28fa478b6af985b4baeb2295b8346683e95cf5761",
    "bytes": 55944,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2005",
@@ -604,7 +724,8 @@
    "ficha": "2005/datapackage.json",
    "hash": "sha256:3537e5309b6235b2ed12fbaf4f13eb8384c4d5347432c7cfb4f3b2024404880c",
    "bytes": 57286,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2006",
@@ -620,7 +741,8 @@
    "ficha": "2006/datapackage.json",
    "hash": "sha256:17c82f1566b271a7213da24d0b420adb66aec4322a9d633ae037db3ba30cc61a",
    "bytes": 57398,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2007",
@@ -636,7 +758,8 @@
    "ficha": "2007/datapackage.json",
    "hash": "sha256:6dd934bc58e51ff7fd884a834178700fd12020f6108d9a79ff637ee2c8f4ad6f",
    "bytes": 57374,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2008",
@@ -652,7 +775,8 @@
    "ficha": "2008/datapackage.json",
    "hash": "sha256:50289f5c7d30da53e450c834db9e9838ceda3d02fc120f813e8ead6d41301d5f",
    "bytes": 57290,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2009",
@@ -668,7 +792,8 @@
    "ficha": "2009/datapackage.json",
    "hash": "sha256:b61ef8584162225612c6a16f282db0380257119d697bf694dfd0fc13acf9de7d",
    "bytes": 56747,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2010",
@@ -685,7 +810,8 @@
    "ficha": "2010/datapackage.json",
    "hash": "sha256:86bb4977a2364c138e5b731b0d68b798cc5a3a5205d03f024814464433cb2799",
    "bytes": 3011963,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2011",
@@ -702,7 +828,8 @@
    "ficha": "2011/datapackage.json",
    "hash": "sha256:b28f00b509a9ef730a3aa4cf458d93ebb4220d94e5229f68c3bcbb1fd3e79048",
    "bytes": 3042447,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2012",
@@ -719,7 +846,8 @@
    "ficha": "2012/datapackage.json",
    "hash": "sha256:ae06fccae3f67b0808ab876f866aec59020c891f2dbc973bfcf6c5c3bc3175fe",
    "bytes": 2986801,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2013",
@@ -736,7 +864,8 @@
    "ficha": "2013/datapackage.json",
    "hash": "sha256:d254e3bb58ffb73300fc7bfb0dbd36c3e4dde920aea119a244a32b8aa3521c89",
    "bytes": 2920710,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2014",
@@ -753,7 +882,8 @@
    "ficha": "2014/datapackage.json",
    "hash": "sha256:2d29836faaff65e806926a0e1eed57495f067d82c84dc784e0c44ffeb011c920",
    "bytes": 2908879,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2015",
@@ -770,7 +900,8 @@
    "ficha": "2015/datapackage.json",
    "hash": "sha256:46d0ee710d5044bcbb234a74dd2d26aa1ccdc12329d694505d5454331c9ed471",
    "bytes": 2877685,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2016",
@@ -787,7 +918,8 @@
    "ficha": "2016/datapackage.json",
    "hash": "sha256:468a14eac1ee4148f39100ae979c8e2f9e7a0970662b7d34de2b8065d91207a2",
    "bytes": 2854961,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2017",
@@ -804,7 +936,8 @@
    "ficha": "2017/datapackage.json",
    "hash": "sha256:a6ea5165ab80085dcc80aa74d5ad6230207a8202ef8a640df01a2d70a1678fa8",
    "bytes": 2860123,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2018",
@@ -821,7 +954,8 @@
    "ficha": "2018/datapackage.json",
    "hash": "sha256:377b916a775079b2e951c02d6cc5f8dc470d33ee3bd731d77e1a953b53aad6a4",
    "bytes": 2906325,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2019",
@@ -838,7 +972,8 @@
    "ficha": "2019/datapackage.json",
    "hash": "sha256:33535fcfd26d18bb3e79b9b489e6e2a995e2036bbec66eecccdddf9a4ec77f8a",
    "bytes": 2922116,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2020",
@@ -855,7 +990,8 @@
    "ficha": "2020/datapackage.json",
    "hash": "sha256:af55f0ae77e01d44d2de618d11349911f632d7804022bb4e089f8999cfeb04fb",
    "bytes": 2924183,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2021",
@@ -872,7 +1008,8 @@
    "ficha": "2021/datapackage.json",
    "hash": "sha256:77b2ea2944c19b7bedd879e970e30a2f661910be85562f1e997d0451397e7d08",
    "bytes": 2909768,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2022",
@@ -889,7 +1026,8 @@
    "ficha": "2022/datapackage.json",
    "hash": "sha256:568d3d027ef7739f6539e7a9bc33f315318abf0049e00095b6635c2f567bc6cb",
    "bytes": 2923383,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2023",
@@ -906,7 +1044,8 @@
    "ficha": "2023/datapackage.json",
    "hash": "sha256:ed81d91a9e4be1e1f2d9f4f8a37d92a6522344cf562d3d9368411fd260970c3e",
    "bytes": 2950024,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2024",
@@ -923,7 +1062,8 @@
    "ficha": "2024/datapackage.json",
    "hash": "sha256:42d7061c8012b056a75838a63f8000140ef0956b73a2c1cb66b792e55c354f6e",
    "bytes": 2948140,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   },
   {
    "periodo": "2025",
@@ -940,7 +1080,8 @@
    "ficha": "2025/datapackage.json",
    "hash": "sha256:a6f7c843a7dbee70b884a0d5a53476535b0268a73292d4b7a9dd66d99d19d895",
    "bytes": 3319614,
-   "versoes_antigas": []
+   "versoes_antigas": [],
+   "sem_dado": []
   }
  ]
 }

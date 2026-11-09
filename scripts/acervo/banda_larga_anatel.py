@@ -39,10 +39,16 @@ CFG = {
     "descricao": ("Acessos de internet fixa em serviço (contratos em casas e empresas) no Brasil, em cada estado e (desde "
                   "2010) em cada município, com o meio de acesso, a faixa de velocidade, as empresas e a densidade "
                   "(acessos por 100 habitantes), no último mês de cada trimestre e de cada ano."),
-    "fonte": {"orgao": "Anatel", "titulo": "Anatel, Acessos – Banda Larga Fixa (dados abertos)",
+    "fonte": {"orgao": "Anatel", "orgao_nome": "Agência Nacional de Telecomunicações (Anatel)",
+              "orgao_site": "https://www.gov.br/anatel/",
+              "titulo": "Anatel, Acessos – Banda Larga Fixa (dados abertos)",
               "consulta": URL, "catalogo": "https://dados.gov.br/dados/conjuntos-dados/acessos---banda-larga-fixa",
               "licenca": "Creative Commons Atribuição (CC BY), como informado no Portal Brasileiro de Dados Abertos"},
     "nivel": "Oficial · API",
+    # palavras para a busca (página do conjunto e ficha schema.org Dataset)
+    "palavras_chave": ["banda larga fixa", "internet fixa", "acessos", "fibra óptica", "densidade", "velocidade contratada",
+                       "provedores", "Anatel", "telecomunicações", "estados", "municípios", "série histórica",
+                       "dados abertos"],
     "periodicidade": "mensal na fonte; no acervo, por trimestre e por ano",
     "medida": "posição: acessos em serviço no último mês do período",
     "como_vira_ano": "posição em dezembro; o trimestre é o seu último mês (março, junho, setembro ou dezembro)",

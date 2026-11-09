@@ -415,6 +415,7 @@ def atualizar_conjunto(cfg, conferido_em=None, estado=None):
     velho = json.loads((base / "conjunto.json").read_text(encoding="utf-8")) if (base / "conjunto.json").exists() else {}
     lista, colunas = [], {}
     serie_campos, serie = None, []
+    com_dado = {}   # período → colunas com pelo menos um número nos estados (para o campo sem_dado; o site lê daqui)
     for p in pacotes(cfg):
         fb = (base / p / "datapackage.json").read_bytes()
         f = json.loads(fb)
@@ -437,6 +438,8 @@ def atualizar_conjunto(cfg, conferido_em=None, estado=None):
                 continue
             t = ler_csv(base / p / ARQUIVO[n])
             cab = t[0]
+            if n == "uf":
+                com_dado[p] = {c for i, c in enumerate(cab) if any(len(l) > i and l[i] not in MARCAS for l in t[1:])}
             if serie_campos is None:
                 serie_campos = []
             for c in cab:
@@ -448,12 +451,19 @@ def atualizar_conjunto(cfg, conferido_em=None, estado=None):
                     d["uf"] = "BR"
                 d["periodo"] = p
                 serie.append(d)
+    # sem_dado: colunas numéricas do conjunto sem nenhum número nos estados naquele período (ausentes do pacote ou só
+    # com marcas), para o seletor de período do mapa não oferecer um período vazio (ex.: valor antes de 1994)
+    numericas = [c["name"] for c in colunas.values() if c.get("type") in ("integer", "number")]
+    for e in lista:
+        e["sem_dado"] = [c for c in numericas if c not in com_dado.get(e["periodo"], set())]
     conj = {"formato": FORMATO, "id": cfg["id"], "titulo": cfg["titulo"], "descricao": cfg["descricao"],
             "fonte": cfg["fonte"], "nivel_confianca": cfg["nivel"], "periodicidade": cfg["periodicidade"],
             "medida": cfg["medida"], "como_vira_ano": cfg["como_vira_ano"], "niveis": cfg["niveis"],
             "consolidacao": f"preliminar até 12 meses depois da publicação do período; a publicação conta como o fim do "
                             f"período + {cfg['atraso_meses']} meses (o atraso típico da fonte)",
-            "metodo": cfg["metodo"], "avisos": cfg.get("avisos", []), "licenca": LICENCA,
+            "metodo": cfg["metodo"], "avisos": cfg.get("avisos", []),
+            **({"quebras": cfg["quebras"]} if cfg.get("quebras") else {}),
+            **({"palavras_chave": cfg["palavras_chave"]} if cfg.get("palavras_chave") else {}), "licenca": LICENCA,
             "licenca_da_fonte": cfg["fonte"].get("licenca"),
             "conferido_em": conferido_em or velho.get("conferido_em"),
             "colunas": list(colunas.values()), "serie": "serie_uf.csv", "pacotes": lista}
