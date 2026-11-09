@@ -11,6 +11,8 @@ const RAMP = ["--q1", "--q2", "--q3", "--q4", "--q5"];
 /* versão de teste (endereço com ?teste): visual novo em avaliação, sem mudar o site normal (selo "Teste" no título).
    Em 25 e 26/10/2026 tudo o que estava em teste foi para o site normal, a pedido do Edu; hoje o teste não tem nada a mais */
 const TESTE = new URLSearchParams(location.search).has("teste");
+/* ?uf=RS abre o mapa já no estado (link das páginas "<estado> em números") */
+const UF_INICIAL = (new URLSearchParams(location.search).get("uf") || "").trim().toUpperCase();
 if (TESTE) document.documentElement.classList.add("teste");
 /* fundo inteiro com profundidade (icones.js, fundoSite): na versão leve, a imagem do chão de hexágonos (fundo B), que
    aparece no rodapé; no site normal desde 26/10/2026 */
@@ -1185,12 +1187,13 @@ function rewind(f) {
   }
   document.getElementById("tiers").innerHTML = Object.values(NIVEL)
     .map(([c, t, d]) => `<div><span><span class="pill ${c}">${t}</span></span><span>${d}</span></div>`).join("");
-  /* versão de teste: as páginas novas (dados para baixar e metodologia), ainda fora da busca */
-  const sobre = document.querySelector(".foot .sobre h2");
-  if (PER && sobre) sobre.insertAdjacentHTML("afterend", `<p class="teste-links">Em teste: <a href="../dados/">Dados para baixar</a> · <a href="../metodologia/">Metodologia e fontes</a></p>`);
+  /* versão de teste: as páginas por estado, ainda em prévia (fora da busca) */
+  const linksPg = document.querySelector(".foot .links-paginas");
+  if (PER && linksPg) linksPg.insertAdjacentHTML("beforeend", ` · em teste: <a href="../estados/">Estados em números</a>`);
 
   /* ---------- abertura ---------- */
   layout(); render(); ficha();
+  if (NAME[UF_INICIAL]) select(UF_INICIAL);
   let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(layout, 150); });
   if (!reduce) {
     states.style("opacity", 0).transition().delay(d => 150 + path.centroid(d)[0] * 1.1).duration(700).style("opacity", 1)

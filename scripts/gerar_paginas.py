@@ -5,6 +5,9 @@
   Search, montada da ficha técnica dos pacotes);
 - metodologia/index.html ("Metodologia e fontes"): de onde vem cada dado, como é calculado, o que é medição, estimativa
   ou conta do site, e os níveis de confiança;
+- estados/index.html ("Estados em números") e estados/<estado>/index.html (uma por estado: os números que pintam o mapa,
+  com a fonte, a data, o nível de confiança e a posição entre os estados, mais os detalhes da ficha e o link para o mapa
+  já aberto no estado, ?uf=RS);
 - llms.txt (um resumo do site para as IAs, com os endereços das páginas).
 
 De onde vem o texto: site/data/fontes.json (níveis de confiança, naturezas, pinturas, luzes e camadas), os arquivos de
@@ -21,14 +24,19 @@ Só usa a biblioteca padrão; precisa do Python 3.12 ou mais novo (aspas dentro 
 import html
 import json
 import re
+import unicodedata
 from pathlib import Path
 
-# Prévia (até o Edu aprovar): as páginas saem com noindex, ficam fora do sitemap, o llms.txt não é publicado e o link para
-# elas só aparece na versão de teste do mapa (?teste). Depois da aprovação: False.
-PREVIA = True
+# Prévia: com True, as páginas saem com noindex, ficam fora do sitemap e o llms.txt não é publicado (foi assim até o Edu
+# aprovar, em 09/11/2026). Desde então, False: as páginas entram na busca e o rodapé do mapa tem os links para elas.
+PREVIA = False
 
-VERSAO_ESTILO = "53"     # style.css (o mesmo número do mapa)
-VERSAO_PAGINAS = "1"     # paginas/paginas.css e paginas/paginas.js
+# Páginas por estado ("<estado> em números", degrau 4 da busca): prévia até o Edu aprovar (noindex, fora do sitemap e do
+# llms.txt, sem link no menu das outras páginas; o link para elas só aparece na versão de teste do mapa). Depois: False.
+PREVIA_ESTADOS = True
+
+VERSAO_ESTILO = "54"     # style.css (o mesmo número do mapa)
+VERSAO_PAGINAS = "2"     # paginas/paginas.css e paginas/paginas.js
 MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
 MESES_LONGOS = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro",
                 "novembro", "dezembro"]
@@ -94,13 +102,16 @@ def links(urls):
 
 # ---------- moldura comum ----------
 
-def moldura(prof, titulo, descricao, corpo, atual, F, jsonld=None):
+def moldura(prof, titulo, descricao, corpo, atual, F, jsonld=None, previa=None):
+    previa_pg = PREVIA if previa is None else previa
     r = "../" * prof
     nav = [("", "Mapa", None), ("dados/", "Dados para baixar", "dados"), ("metodologia/", "Metodologia e fontes", "metodologia")]
+    if not PREVIA_ESTADOS or atual == "estados":
+        nav.insert(1, ("estados/", "Estados", "estados"))
     ap = F.get("apoio") or {}
     apoio = (f' · <a href="{e(ap["link"])}" rel="noopener">{e(ap.get("texto", "Apoie este projeto"))}</a>'
              if ap.get("link") else "")
-    previa = ('<p class="pg-previa">Página em prévia: ainda fora dos buscadores, aguardando aprovação.</p>' if PREVIA else "")
+    previa = ('<p class="pg-previa">Página em prévia: ainda fora dos buscadores, aguardando aprovação.</p>' if previa_pg else "")
     return f"""<!doctype html>
 <html lang="pt-BR">
 <head>
@@ -108,7 +119,7 @@ def moldura(prof, titulo, descricao, corpo, atual, F, jsonld=None):
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{e(titulo)} · Brasil em Camadas</title>
 <meta name="description" content="{e(descricao)}">
-{'<meta name="robots" content="noindex">' if PREVIA else ''}
+{'<meta name="robots" content="noindex">' if previa_pg else ''}
 <link rel="icon" href="{r}aba/icone_f.svg" type="image/svg+xml">
 <link rel="icon" href="{r}aba/icone_f_32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="{r}aba/icone_f_180.png">
@@ -520,9 +531,289 @@ def pagina_metodologia(F, meta, conjuntos, data_dados):
                    "do site, e os níveis de confiança.", corpo, "metodologia", F)
 
 
+# ---------- páginas por estado ("<estado> em números") ----------
+
+REGIOES = {"1": "Norte", "2": "Nordeste", "3": "Sudeste", "4": "Sul", "5": "Centro-Oeste"}   # 1º dígito do código do IBGE
+DE = {"AC": "do", "AL": "de", "AM": "do", "AP": "do", "BA": "da", "CE": "do", "DF": "do", "ES": "do", "GO": "de", "MA": "do",
+      "MG": "de", "MS": "de", "MT": "de", "PA": "do", "PB": "da", "PE": "de", "PI": "do", "PR": "do", "RJ": "do", "RN": "do",
+      "RO": "de", "RR": "de", "RS": "do", "SC": "de", "SE": "de", "SP": "de", "TO": "do"}   # "no mapa do Pará", "de Minas Gerais"
+EM = {"do": "no", "da": "na", "de": "em"}
+
+
+def slug(t):
+    t = unicodedata.normalize("NFKD", t).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", "-", t.lower()).strip("-")
+
+
+def num(v, casas=1):
+    """Número no jeito brasileiro: 10.882.965; 9.904,2; 94,4 (sem zeros sobrando no fim)."""
+    if v is None:
+        return ""
+    if isinstance(v, float) and v.is_integer() and abs(v) >= 1000:
+        v = int(v)
+    s = f"{v:,.{casas}f}" if isinstance(v, float) else f"{v:,}"
+    s = s.replace(",", "X").replace(".", ",").replace("X", ".")
+    if "," in s:
+        s = s.rstrip("0").rstrip(",")
+    return s
+
+
+def reais_mil(v):
+    """Valor em mil reais (como o IBGE publica) escrito por extenso: R$ 28,3 bilhões; R$ 984,5 milhões; R$ 820 mil."""
+    if v is None:
+        return ""
+    r = v * 1000
+    if r >= 1e9:
+        return f"R$ {num(r / 1e9)} {'bilhão' if round(r / 1e9, 1) < 2 else 'bilhões'}"
+    if r >= 1e6:
+        return f"R$ {num(r / 1e6)} {'milhão' if round(r / 1e6, 1) < 2 else 'milhões'}"
+    return f"R$ {num(round(v))} mil"
+
+
+def com_unidade(texto, un):
+    if not un:
+        return texto
+    if un == "mil R$":
+        return texto
+    if un.startswith("%"):
+        return f"{texto}% {un[1:].strip()}".strip()
+    return f"{texto} {un}"
+
+
+def ler_estados(pasta):
+    g = ler_json(Path(pasta) / "data" / "geo" / "estados.json")
+    ests = []
+    for f in g.get("features", []):
+        q = f["properties"]
+        ests.append({"sigla": q["sigla"], "nome": q["name"], "codigo": str(q.get("codigo_ibg", "")),
+                     "regiao": REGIOES.get(str(q.get("codigo_ibg", ""))[:1], ""), "area": q.get("area_km2"),
+                     "slug": slug(q["name"])})
+    return sorted(ests, key=lambda x: (x["codigo"][:1], x["nome"]))
+
+
+def valores_pintura(P, d, pop):
+    """O mesmo número que pinta o mapa (como no app: per_capita = por 100 mil habitantes do Censo 2022)."""
+    vs = {}
+    for uf, v in (d.get("valores") or {}).items():
+        if isinstance(v, dict):
+            v = v.get(P.get("campo") or "valor")
+        if P.get("por") == "per_capita":
+            v = v / pop[uf] * 1e5 if (v is not None and pop.get(uf)) else None
+        vs[uf] = v
+    return vs
+
+
+def brasil_pintura(P, d, pop):
+    b = d.get("brasil")
+    b = b.get("valor") if isinstance(b, dict) else b
+    if b is None:
+        return None
+    if P.get("por") == "per_capita":
+        tot = sum(pop.values())
+        return b / tot * 1e5 if tot else None
+    return b
+
+
+def linhas_estado(uf, F, pasta, pop):
+    """Uma linha por pintura do mapa: valor, parte do Brasil ou valor do Brasil, posição entre os estados, fonte e data."""
+    mins = F.get("ministerios") or {}
+    grupos = {}
+    for P in F.get("pintura", []):
+        if P.get("teste") or not P.get("arquivo"):
+            continue
+        caminho = Path(pasta) / "data" / P["arquivo"]
+        if not caminho.exists():
+            continue
+        d = ler_json(caminho)
+        vs = valores_pintura(P, d, pop)
+        v = vs.get(uf)
+        taxa = P.get("por") in ("per_capita", "percentual", "taxa")
+        un = P.get("unidade") or d.get("unidade") or ""
+        if P.get("por") == "per_capita":
+            un = f"{d.get('unidade', '')} por 100 mil habitantes".strip()
+        validos = {k: x for k, x in vs.items() if x is not None}
+        if v is None:
+            valor = f'<span class="pg-sem">{e(P.get("vazio") or "sem número")}</span>'
+            extra = ""
+            pos = ""
+        else:
+            texto = reais_mil(v) if un == "mil R$" else num(v if taxa or isinstance(v, int) else round(v, 1))
+            valor = e(com_unidade(texto, un))
+            if taxa:
+                b = brasil_pintura(P, d, pop)
+                extra = f"Brasil: {e(num(round(b, 1)))}" if b is not None else ""
+            else:
+                tot = sum(validos.values())
+                extra = f"{e(num(round(v / tot * 100, 1)))}% do Brasil" if tot else ""
+            n = len(validos)
+            lugar = 1 + sum(1 for x in validos.values() if x > v)
+            fora = 27 - n
+            pos = f"{lugar}º de {n}" + (f' <small>(nos outros {fora}: {e(P.get("vazio") or "sem número")})</small>' if fora > 0 else "")
+        fonte = e(d.get("fonte", ""))
+        quando = " · ".join(x for x in [f"referência: {e(d['referencia'])}" if d.get("referencia") else "",
+                                        f"buscado em {e(data_br(d['atualizado_em']))}" if d.get("atualizado_em") else ""] if x)
+        linha = (f'<tr class="pg-l1"><th scope="row"><a href="../../metodologia/#pintura-{e(P["id"])}">{e(P["nome"])}</a></th>'
+                 f'<td class="num">{valor}{f"<small>{extra}</small>" if extra else ""}</td>'
+                 f'<td class="num">{pos}</td></tr>'
+                 f'<tr class="pg-l2"><td colspan="3"><small>Fonte: {fonte}{" · " + quando if quando else ""} {pill(F, d.get("nivel"))}</small></td></tr>')
+        grupos.setdefault(P.get("ministerio", ""), []).append(linha)
+    corpo = []
+    for k, nome in mins.items():
+        if k in grupos:
+            corpo.append(f'<tbody><tr class="pg-grupo-linha"><th colspan="3" scope="rowgroup">{e(nome)}</th></tr>{"".join(grupos[k])}</tbody>')
+    return "".join(corpo)
+
+
+def detalhes_estado(uf, pasta):
+    """Blocos com o que a ficha do estado mostra além das pinturas (lavouras, rebanhos, energia, petróleo, defesa)."""
+    dd = Path(pasta) / "data"
+    blocos = []
+
+    def fonte_de(d):
+        partes = [e(d.get("fonte", ""))]
+        if d.get("referencia"):
+            partes.append(f"referência: {e(d['referencia'])}")
+        return f'<p class="fino">Fonte: {" · ".join(partes)}.</p>'
+
+    if (dd / "lavouras" / "estados.json").exists():
+        d = ler_json(dd / "lavouras" / "estados.json")
+        v = (d.get("valores") or {}).get(uf) or {}
+        pr = v.get("principais") or []
+        if pr:
+            un = {"t": "toneladas", "mil frutos": "mil frutos", "mil cachos": "mil cachos"}
+            linhas = "".join(f'<tr><th scope="row">{e(l[0])}</th><td class="num">{e(reais_mil(l[1]))}</td>'
+                             f'<td class="num">{e(num(l[2]))} {e(un.get(l[3], l[3]) if len(l) > 3 else "")}</td></tr>' for l in pr)
+            blocos.append(f"""<section aria-labelledby="t-lav">
+  <h2 id="t-lav">Lavouras de maior valor</h2>
+  <div class="pg-rolar"><table class="pg-tabela"><thead><tr><th>Lavoura</th><th>Valor da produção</th><th>Quantidade</th></tr></thead>
+  <tbody>{linhas}</tbody></table></div>
+  {fonte_de(d)}
+</section>""")
+    if (dd / "pecuaria" / "estados.json").exists():
+        d = ler_json(dd / "pecuaria" / "estados.json")
+        v = (d.get("valores") or {}).get(uf) or {}
+        itens = [(k, n) for k, n in [("bovino", "Bovinos"), ("suino", "Suínos"), ("galinaceos", "Galinhas, galos, frangos e pintos"),
+                                      ("ovino", "Ovinos"), ("caprino", "Caprinos")] if v.get(k) is not None]
+        if itens:
+            lis = "".join(f'<li>{e(n)}: <b>{e(num(v[k]))}</b> cabeças</li>' for k, n in itens)
+            if v.get("aquicultura_mil_rs"):
+                pr = (f' (a principal: {e(v["aquicultura_principal"])}, {e(reais_mil(v.get("aquicultura_principal_mil_rs")))})'
+                      if v.get("aquicultura_principal") else "")
+                lis += f'<li>Aquicultura (criação de peixes, camarão, ostras e outros): <b>{e(reais_mil(v["aquicultura_mil_rs"]))}</b> por ano{pr}</li>'
+            blocos.append(f"""<section aria-labelledby="t-reb">
+  <h2 id="t-reb">Rebanhos e aquicultura</h2>
+  <ul>{lis}</ul>
+  {fonte_de(d)}
+</section>""")
+    if (dd / "energia" / "estados.json").exists():
+        d = ler_json(dd / "energia" / "estados.json")
+        v = (d.get("valores") or {}).get(uf) or {}
+        tipos = d.get("tipos") or {}
+        itens = sorted(((k, v[k]) for k in tipos if (v.get(k) or 0) > 0), key=lambda x: -x[1])
+        if itens and v.get("valor"):
+            linhas = "".join(f'<tr><th scope="row">{e(tipos[k])}</th><td class="num">{e(num(round(mw, 1)))} MW</td>'
+                             f'<td class="num">{e(num(round(mw / v["valor"] * 100, 1)))}%</td></tr>' for k, mw in itens)
+            blocos.append(f"""<section aria-labelledby="t-ene">
+  <h2 id="t-ene">Energia elétrica por fonte</h2>
+  <p>{e(num(v.get("usinas")))} usinas em operação, com {e(num(round(v["valor"], 1)))} MW de potência no total.</p>
+  <div class="pg-rolar"><table class="pg-tabela"><thead><tr><th>Fonte</th><th>Potência</th><th>Parte do estado</th></tr></thead>
+  <tbody>{linhas}</tbody></table></div>
+  {fonte_de(d)}{f'<p class="fino">{e(d["nota"][:1].upper() + d["nota"][1:])}.</p>' if d.get("nota") else ""}
+</section>""")
+    if (dd / "petroleo" / "producao_estados.json").exists():
+        d = ler_json(dd / "petroleo" / "producao_estados.json")
+        v = (d.get("valores") or {}).get(uf)
+        if isinstance(v, dict) and v.get("valor"):
+            blocos.append(f"""<section aria-labelledby="t-oleo">
+  <h2 id="t-oleo">Petróleo e gás</h2>
+  <ul><li>Petróleo: <b>{e(num(round(v.get("petroleo_bbl_dia") or 0)))}</b> barris por dia</li>
+  <li>Gás natural: <b>{e(num(round(v.get("gas_mil_m3_dia") or 0)))}</b> mil m³ por dia</li>
+  <li>Total: <b>{e(num(round(v["valor"])))}</b> barris de óleo equivalente (boe) por dia, em {e(num(v.get("pocos")))} poços produzindo</li></ul>
+  {fonte_de(d)}
+</section>""")
+    if (dd / "defesa" / "estados.json").exists():
+        d = ler_json(dd / "defesa" / "estados.json")
+        v = (d.get("valores") or {}).get(uf)
+        if isinstance(v, dict) and v.get("valor"):
+            muns = ", ".join(f"{e(m)} ({n})" for m, n in (v.get("municipios") or []))
+            blocos.append(f"""<section aria-labelledby="t-def">
+  <h2 id="t-def">Indústria de defesa</h2>
+  <p><b>{e(num(v["valor"]))}</b> {"empresa credenciada" if v["valor"] == 1 else "empresas credenciadas"} pelo Ministério da Defesa: {e(num(v.get("eed", 0)))} como empresa estratégica de defesa (EED) e {e(num(v.get("ed", 0)))} como empresa de defesa (ED).{f" Sedes: {muns}." if muns else ""}</p>
+  {fonte_de(d)}
+</section>""")
+    return "".join(blocos)
+
+
+def pagina_estado(E, ests, F, pasta, pop, base):
+    uf, nome = E["sigla"], E["nome"]
+    de = DE.get(uf, "de")
+    em = EM[de]
+    agro = ler_json(Path(pasta) / "data" / "agricultura.json") if (Path(pasta) / "data" / "agricultura.json").exists() else {}
+    va = (agro.get("valores") or {}).get(uf)
+    p = pop.get(uf)
+    desc = (f"{nome} em números: população{f' de {num(round(p / 1e6, 1))} milhões' if p and p >= 1e6 else (f' de {num(p)}' if p else '')}"
+            f" (Censo 2022), produção agrícola{f' de {reais_mil(va)}' if va else ''}, rebanhos, energia, internet e mais, "
+            "com a fonte e a data de cada número.")
+    outros = []
+    for reg in REGIOES.values():
+        xs = [x for x in ests if x["regiao"] == reg]
+        if xs:
+            outros.append(f'<li><b>{e(reg)}</b>: ' + ", ".join(
+                (f'<a href="../{x["slug"]}/">{e(x["nome"])}</a>' if x["sigla"] != uf else f'<span aria-current="page">{e(x["nome"])}</span>')
+                for x in xs) + "</li>")
+    corpo = f"""<nav class="pg-trilha" aria-label="Você está em"><a href="../">Estados</a> / {e(nome)}</nav>
+<h1>{e(nome)} em números</h1>
+<p class="pg-lede">Os números que pintam o mapa Brasil em Camadas, para {"o" if uf == "DF" else "o estado " + e(de)} {e(nome)} ({e(uf)}, região {e(E["regiao"])}, {e(num(round(E["area"])) if E.get("area") else "")} km²), com a fonte, a data e o nível de confiança de cada um. A posição compara com os outros estados; a parte do Brasil é a soma dos estados.</p>
+<p class="pg-abrir"><a class="pg-botao pg-botao-forte" href="../../?uf={e(uf)}">Abrir o mapa {e(em)} {e(nome)}</a> <a class="fino" href="../../2d/?uf={e(uf)}">ou na versão leve</a></p>
+<section aria-labelledby="t-num">
+  <h2 id="t-num">Números principais</h2>
+  <div class="pg-rolar"><table class="pg-tabela pg-estado">
+  <thead><tr><th>Dado</th><th>Valor</th><th>Posição entre os estados</th></tr></thead>
+  {linhas_estado(uf, F, pasta, pop)}
+  </table></div>
+  <p class="fino">O que cada número quer dizer e como é calculado: <a href="../../metodologia/">Metodologia e fontes</a>. As séries por ano, para baixar: <a href="../../dados/">Dados para baixar</a>.</p>
+</section>
+{detalhes_estado(uf, pasta)}
+<section aria-labelledby="t-mapa">
+  <h2 id="t-mapa">No mapa</h2>
+  <p>A ficha do estado no mapa tem também rodovias, ferrovias e portos, aeroportos e passageiros, pedágios, fronteira, limites do mar e as camadas de cada ministério, com os municípios. <a href="../../?uf={e(uf)}">Abrir o mapa {e(em)} {e(nome)}</a>.</p>
+</section>
+<section aria-labelledby="t-outros">
+  <h2 id="t-outros">Outros estados</h2>
+  <ul class="pg-estados">{"".join(outros)}</ul>
+</section>
+"""
+    ld = {"@context": "https://schema.org", "@type": "WebPage", "name": f"{nome} em números", "description": desc,
+          "inLanguage": "pt-BR",
+          "about": {"@type": "AdministrativeArea", "name": nome, "identifier": E["codigo"],
+                    "containedInPlace": {"@type": "Country", "name": "Brasil"}},
+          "isPartOf": {"@type": "WebSite", "name": "Brasil em Camadas", "url": base}}
+    return moldura(2, f"{nome} em números", desc, corpo, "estados", F, ld, previa=PREVIA_ESTADOS)
+
+
+def pagina_estados(ests, F, pop):
+    grupos = []
+    for reg in REGIOES.values():
+        xs = [x for x in ests if x["regiao"] == reg]
+        if xs:
+            cartoes = "".join(f'<a class="pg-cartao" href="{e(x["slug"])}/"><b>{e(x["nome"])}</b>'
+                              f'<span>{e(x["sigla"])} · {e(num(pop.get(x["sigla"])))} habitantes (Censo 2022)</span></a>' for x in xs)
+            grupos.append(f'<h3 class="pg-grupo">{e(reg)}</h3><div class="pg-cartoes">{cartoes}</div>')
+    corpo = f"""<h1>Estados em números</h1>
+<p class="pg-lede">Uma página para cada estado e para o Distrito Federal, com os números que pintam o mapa: população, produção agrícola, rebanhos, energia, petróleo, celular e internet, indústria de defesa e eletropostos. Cada número com a fonte, a data, o nível de confiança e a posição entre os estados. As páginas se refazem a cada publicação, com os dados que os robôs do site buscam todo mês.</p>
+<section aria-labelledby="t-est">
+  <h2 id="t-est">Por região</h2>
+  {"".join(grupos)}
+</section>
+"""
+    return moldura(1, "Estados em números",
+                   "População, agricultura, energia, internet e outros números de cada estado do Brasil, com a fonte e a "
+                   "data de cada um.", corpo, "estados", F, previa=PREVIA_ESTADOS)
+
+
 # ---------- llms.txt ----------
 
-def llms(F, conjuntos, base):
+def llms(F, conjuntos, base, ests=None):
     linhas = [
         "# Brasil em Camadas", "",
         "> Mapa interativo do Brasil por estado (população, agricultura, energia, transportes, internet e mais), com a fonte, "
@@ -534,6 +825,9 @@ def llms(F, conjuntos, base):
     ]
     for C in conjuntos:
         linhas.append(f"- [{C['titulo']}]({base}dados/{C['id']}/): {C['descricao']} {cobertura(C)}.")
+    if ests and not PREVIA_ESTADOS:
+        linhas += ["", "## Estados", "", f"- [Estados em números]({base}estados/): uma página por estado, com os números do mapa"]
+        linhas += [f"- [{x['nome']} em números]({base}estados/{x['slug']}/)" for x in ests]
     linhas += ["", "## Metodologia", "",
                f"- [Metodologia e fontes]({base}metodologia/): de onde vem cada número, como é calculado, o que é medição, "
                "estimativa ou conta do site, e os níveis de confiança", "",
@@ -568,7 +862,19 @@ def gerar(pasta, base, data_dados=None):
         for C in conjuntos:
             grava(f"dados/{C['id']}/index.html", pagina_conjunto(C, base, F), max(p["coletado_em"] for p in C["pacotes"]))
     grava("metodologia/index.html", pagina_metodologia(F, meta, conjuntos, data_dados), data_dados)
+    # estados: só entram no sitemap e no llms.txt quando saírem da prévia
+    ests = ler_estados(pasta) if (pasta / "data" / "geo" / "estados.json").exists() else []
+    pop = (ler_json(pasta / "data" / "populacao.json").get("valores") or {}) if (pasta / "data" / "populacao.json").exists() else {}
+    feitas = len(paginas)
+    if ests:
+        grava("estados/index.html", pagina_estados(ests, F, pop), data_dados)
+        for E in ests:
+            grava(f"estados/{E['slug']}/index.html", pagina_estado(E, ests, F, pasta, pop, base), data_dados)
+    de_estados = paginas[feitas:]
+    if PREVIA_ESTADOS:
+        del paginas[feitas:]
     if not PREVIA:
-        (pasta / "llms.txt").write_text(llms(F, conjuntos, base), encoding="utf-8")
-    print(f"[páginas] {len(paginas)} página(s) geradas{' (prévia: noindex, fora do sitemap, sem llms.txt)' if PREVIA else ''}")
+        (pasta / "llms.txt").write_text(llms(F, conjuntos, base, ests), encoding="utf-8")
+    print(f"[páginas] {len(paginas)} página(s) geradas{' (prévia: noindex, fora do sitemap, sem llms.txt)' if PREVIA else ''}"
+          f"; estados: {len(de_estados)}{' (prévia: noindex, fora do sitemap e do llms.txt)' if PREVIA_ESTADOS else ''}")
     return [] if PREVIA else paginas

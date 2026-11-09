@@ -11,6 +11,8 @@ const RAMP = ["--q1", "--q2", "--q3", "--q4", "--q5"];
 /* versão de teste (endereço com ?teste): visual novo em avaliação, sem mudar o site normal (selo "Teste" no título).
    Em 25 e 26/10/2026 tudo o que estava em teste foi para o site normal, a pedido do Edu; hoje o teste não tem nada a mais */
 const TESTE = new URLSearchParams(location.search).has("teste");
+/* ?uf=RS abre o mapa já no estado (link das páginas "<estado> em números") */
+const UF_INICIAL = (new URLSearchParams(location.search).get("uf") || "").trim().toUpperCase();
 if (TESTE) document.documentElement.classList.add("teste");
 /* fundo inteiro com profundidade (icones.js, fundoSite): chão de hexágonos com a lente gravitacional em volta do globo
    (3d/fundo3d.js); escolha do Edu em 25/10/2026, no site normal desde 26/10/2026. Para comparar: ?fundo=a, b, c ou funil */
@@ -1780,9 +1782,9 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   }
   document.getElementById("tiers").innerHTML = Object.values(NIVEL)
     .map(([c, t, d]) => `<div><span><span class="pill ${c}">${t}</span></span><span>${d}</span></div>`).join("");
-  /* versão de teste: as páginas novas (dados para baixar e metodologia), ainda fora da busca */
-  const sobre = document.querySelector(".foot .sobre h2");
-  if (PER && sobre) sobre.insertAdjacentHTML("afterend", `<p class="teste-links">Em teste: <a href="${new URL("../dados/", AQUI).href}">Dados para baixar</a> · <a href="${new URL("../metodologia/", AQUI).href}">Metodologia e fontes</a></p>`);
+  /* versão de teste: as páginas por estado, ainda em prévia (fora da busca) */
+  const linksPg = document.querySelector(".foot .links-paginas");
+  if (PER && linksPg) linksPg.insertAdjacentHTML("beforeend", ` · em teste: <a href="${new URL("../estados/", AQUI).href}">Estados em números</a>`);
 
   /* ---------- abertura ---------- */
   ajustarCabecalho(); controls(); ficha();
@@ -1799,6 +1801,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   const aviso = document.getElementById("carregando");
   map.on("load", () => {
     render();
+    if (NAME[UF_INICIAL] && !sel) selecionar(UF_INICIAL);
     window.MAPA_PRONTO = true;
   });
   map.once("idle", () => {

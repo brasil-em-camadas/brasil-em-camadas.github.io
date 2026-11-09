@@ -50,7 +50,8 @@ scripts/
                               sitemap.xml e põe o endereço completo no link canônico e na prévia de compartilhamento
                               (o endereço fica em dados/endereco_do_site.txt)
   gerar_paginas.py            as páginas "Dados para baixar" (uma por conjunto do acervo, com a ficha schema.org Dataset),
-                              "Metodologia e fontes" e o llms.txt, feitas do fontes.json e das fichas do acervo
+                              "Metodologia e fontes", "Estados em números" (uma por estado; em prévia) e o llms.txt,
+                              feitas do fontes.json, dos arquivos de site/data/ e das fichas do acervo
   acervo/             robôs do acervo (lavouras_ibge.py, banda_larga_anatel.py, velocidade_celular_anatel.py), a parte comum
                       (comum.py) e o verificador que barra a publicação se um pacote já publicado mudar (verificar.py)
   dados/              arquivos de apoio dos robôs (ex.: posição da sede de cada município) e o endereço do site
@@ -119,7 +120,7 @@ As páginas (principal e versão leve) contam visitas com o [GoatCounter](https:
 O site foi feito para mudar de endereço sem reescrever nada:
 
 - Todos os links internos são relativos (`data/...`, `../style.css`).
-- O endereço completo só aparece onde a internet exige (robots.txt, sitemap.xml, link canônico, prévia de compartilhamento e dados estruturados para os buscadores). Ele fica escrito num lugar só, `scripts/dados/endereco_do_site.txt`, e o `scripts/preparar_publicacao.py` o coloca nesses arquivos na hora de publicar (passo "Preparar para os buscadores" do `site.yml`). No repositório, as páginas continuam com endereços relativos, e `robots.txt`, `sitemap.xml`, as páginas `dados/` e `metodologia/` e o `llms.txt` nem existem: são feitos a cada publicação.
+- O endereço completo só aparece onde a internet exige (robots.txt, sitemap.xml, llms.txt, link canônico, prévia de compartilhamento e dados estruturados para os buscadores). Ele fica escrito num lugar só, `scripts/dados/endereco_do_site.txt`, e o `scripts/preparar_publicacao.py` o coloca nesses arquivos na hora de publicar (passo "Preparar para os buscadores" do `site.yml`). No repositório, as páginas continuam com endereços relativos, e `robots.txt`, `sitemap.xml`, as páginas `dados/`, `metodologia/` e `estados/` e o `llms.txt` nem existem: são feitos a cada publicação.
 - O botão de apoio e os textos de fonte ficam em `site/data/fontes.json`, não espalhados pelo código.
 
 Quando houver um domínio (ex.: `brasilemcamadas.com.br`):

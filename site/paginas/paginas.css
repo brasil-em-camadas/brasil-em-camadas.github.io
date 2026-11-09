@@ -87,3 +87,35 @@ body.pg{min-height:100vh;display:flex;flex-direction:column}
   .pg-tabela{font-size:.84rem}
   .pg-tabela th,.pg-tabela td{padding:6px 8px}
 }
+/* páginas por estado */
+.pg-abrir{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:0 0 8px}
+.pg-botao-forte{display:inline-block;text-decoration:none;color:var(--night)!important;background:var(--accent);border-color:var(--accent);
+  font-size:.95rem;padding:8px 18px}
+.pg-botao-forte:hover{background:#ffd27a;border-color:#ffd27a}
+.pg-estado .pg-l1>*{border-bottom:0;padding-bottom:2px}
+.pg-estado .pg-l2 td{padding-top:0;color:var(--muted)}
+.pg-estado .pg-l2 small{display:inline;font-size:.8rem;line-height:1.5}
+.pg-estado .pg-l2 .pill{font-size:.62rem;vertical-align:1px}
+.pg-estado td.num{white-space:normal}
+.pg-estado td.num small{white-space:normal}
+.pg-estado tbody th a{text-decoration:none}
+.pg-estado tbody th a:hover{text-decoration:underline}
+.pg-tabela .pg-grupo-linha th{font:500 .68rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);
+  background:rgba(230,180,80,.06);white-space:normal}
+.pg-tabela td .pill{margin-left:4px}
+.pg-sem{color:var(--muted)}
+.pg-estados{list-style:none;padding:0}
+.pg-estados li{margin:6px 0;line-height:1.7}
+.pg-estados [aria-current]{color:var(--ink);font-weight:600}
+/* celular: cada dado vira um bloco (nome em cima; valor e posição lado a lado; fonte embaixo), sem rolar para o lado */
+@media (max-width:640px){
+  .pg-estado thead{display:none}
+  .pg-estado,.pg-estado tbody,.pg-estado .pg-grupo-linha,.pg-estado .pg-grupo-linha th{display:block}
+  .pg-estado tr.pg-l1{display:grid;grid-template-columns:1fr auto;gap:2px 14px;padding:10px 10px 2px}
+  .pg-estado tr.pg-l1>*{padding:0;border:0}
+  .pg-estado tr.pg-l1 th{grid-column:1/-1;white-space:normal}
+  .pg-estado tr.pg-l1 td:last-child{text-align:right}
+  .pg-estado tr.pg-l1 td:last-child small{display:block;max-width:13em;margin-left:auto}
+  .pg-estado tr.pg-l2,.pg-estado tr.pg-l2 td{display:block}
+  .pg-estado tr.pg-l2 td{padding:4px 10px 10px}
+}
