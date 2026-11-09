@@ -31,9 +31,9 @@ from pathlib import Path
 # aprovar, em 09/11/2026). Desde então, False: as páginas entram na busca e o rodapé do mapa tem os links para elas.
 PREVIA = False
 
-# Páginas por estado ("<estado> em números", degrau 4 da busca): prévia até o Edu aprovar (noindex, fora do sitemap e do
-# llms.txt, sem link no menu das outras páginas; o link para elas só aparece na versão de teste do mapa). Depois: False.
-PREVIA_ESTADOS = True
+# Páginas por estado ("<estado> em números", degrau 4 da busca): com True, prévia (noindex, fora do sitemap e do llms.txt,
+# sem link no menu das outras páginas). Aprovadas pelo Edu em 09/11/2026: False.
+PREVIA_ESTADOS = False
 
 VERSAO_ESTILO = "54"     # style.css (o mesmo número do mapa)
 VERSAO_PAGINAS = "2"     # paginas/paginas.css e paginas/paginas.js
@@ -131,7 +131,7 @@ def moldura(prof, titulo, descricao, corpo, atual, F, jsonld=None, previa=None):
 <meta property="og:title" content="{e(titulo)} · Brasil em Camadas">
 <meta property="og:description" content="{e(descricao)}">
 <meta property="og:url" content="./">
-<meta property="og:image" content="{r}previa/brasil-em-camadas.jpg">
+<meta property="og:image" content="{r}previa/brasil-em-camadas.jpg?v=2">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">

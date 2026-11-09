@@ -1782,9 +1782,6 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   }
   document.getElementById("tiers").innerHTML = Object.values(NIVEL)
     .map(([c, t, d]) => `<div><span><span class="pill ${c}">${t}</span></span><span>${d}</span></div>`).join("");
-  /* versão de teste: as páginas por estado, ainda em prévia (fora da busca) */
-  const linksPg = document.querySelector(".foot .links-paginas");
-  if (PER && linksPg) linksPg.insertAdjacentHTML("beforeend", ` · em teste: <a href="${new URL("../estados/", AQUI).href}">Estados em números</a>`);
 
   /* ---------- abertura ---------- */
   ajustarCabecalho(); controls(); ficha();

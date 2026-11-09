@@ -1187,9 +1187,6 @@ function rewind(f) {
   }
   document.getElementById("tiers").innerHTML = Object.values(NIVEL)
     .map(([c, t, d]) => `<div><span><span class="pill ${c}">${t}</span></span><span>${d}</span></div>`).join("");
-  /* versão de teste: as páginas por estado, ainda em prévia (fora da busca) */
-  const linksPg = document.querySelector(".foot .links-paginas");
-  if (PER && linksPg) linksPg.insertAdjacentHTML("beforeend", ` · em teste: <a href="../estados/">Estados em números</a>`);
 
   /* ---------- abertura ---------- */
   layout(); render(); ficha();

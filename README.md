@@ -50,7 +50,7 @@ scripts/
                               sitemap.xml e põe o endereço completo no link canônico e na prévia de compartilhamento
                               (o endereço fica em dados/endereco_do_site.txt)
   gerar_paginas.py            as páginas "Dados para baixar" (uma por conjunto do acervo, com a ficha schema.org Dataset),
-                              "Metodologia e fontes", "Estados em números" (uma por estado; em prévia) e o llms.txt,
+                              "Metodologia e fontes", "Estados em números" (uma por estado) e o llms.txt,
                               feitas do fontes.json, dos arquivos de site/data/ e das fichas do acervo
   acervo/             robôs do acervo (lavouras_ibge.py, banda_larga_anatel.py, velocidade_celular_anatel.py), a parte comum
                       (comum.py) e o verificador que barra a publicação se um pacote já publicado mudar (verificar.py)
