@@ -226,13 +226,13 @@ def atualizar_pecuaria():
     return [ok_estados, ok_mun]
 
 
-# Lavouras: IBGE, Produção Agrícola Municipal (PAM), tabela 5457, pela API de agregados (v3), que responde bem mais enxuta
-# que a SIDRA quando são milhares de municípios. Valor da produção (variável 215, mil R$) e quantidade produzida (214, em
-# toneladas; os produtos marcados com * na tabela, como abacaxi e coco-da-baía, vêm em mil frutos). Café: só o "Total"
-# (Arábica e Canephora são partes dele e contariam em dobro). A API às vezes responde compactada (gzip) mesmo sem pedir.
-# Por município, a API não aceita vários produtos numa consulta só: vai um produto por vez (83 consultas, ~60 MB).
-# A PAM sai uma vez por ano; se o ano não mudou, a parte dos municípios não é baixada de novo.
-AGREGADOS = "https://servicodados.ibge.gov.br/api/v3/agregados/5457"
+# Lavouras: IBGE, Produção Agrícola Municipal (PAM), tabela 5457, pela SIDRA (apisidra.ibge.gov.br), como o robô do acervo.
+# Até 03/11/2026 era pela API de agregados (servicodados.ibge.gov.br/api/v3), que falhou no GitHub (a SIDRA, nos outros
+# passos, respondeu). Valor da produção (variável 215, mil R$) e quantidade produzida (214, em toneladas; os produtos
+# marcados com * na tabela, como abacaxi e coco-da-baía, vêm em mil frutos). Café: só o "Total" (Arábica e Canephora são
+# partes dele e contariam em dobro). Por município vai um produto por vez (cerca de 80 consultas de ~5.600 linhas, dentro
+# do limite da SIDRA). A PAM sai uma vez por ano; se o ano não mudou, a parte dos municípios não é baixada de novo.
+PAM = "https://apisidra.ibge.gov.br/values/t/5457"
 FONTE_PAM = "IBGE, Produção Agrícola Municipal (tabela 5457)"
 CAFE_PARTES = {"40140", "40141"}
 PINTURA_LAVOURA = {"40124": "soja", "40122": "milho", "40106": "cana", "40139": "cafe"}
@@ -254,16 +254,17 @@ def pedir_json(url, tentativas=4):
             time.sleep(5 * (i + 1))
 
 
-def agregado(variavel, localidades, categoria="all"):
-    """[(código do produto, nome do produto, código do lugar, ano, valor em texto)] do último ano da tabela 5457."""
-    d = pedir_json(f"{AGREGADOS}/periodos/-1/variaveis/{variavel}?localidades={localidades}&classificacao=782%5B{categoria}%5D")
-    saida = []
-    for r in d[0]["resultados"]:
-        (cid, nome), = r["classificacoes"][0]["categoria"].items()
-        for s in r["series"]:
-            (ano, v), = s["serie"].items()
-            saida.append((cid, nome, s["localidade"]["id"], ano, v))
-    return saida
+def agregado(variavel, nivel, categoria="all"):
+    """[(código do produto, nome do produto, código do lugar, ano, valor em texto)] do último ano da tabela 5457, pela SIDRA.
+    nivel: "n3" (estados) ou "n6" (municípios). As colunas são achadas pelo nome, na 1ª linha da resposta."""
+    linhas = pedir_json(f"{PAM}/{nivel}/all/v/{variavel}/p/last%201/c782/{categoria}")
+    cab, dados = linhas[0], linhas[1:]
+    col = lambda nome: next(k for k, v in cab.items() if v == nome)
+    c_lugar = next(k for k, v in cab.items() if v in ("Unidade da Federação (Código)", "Município (Código)"))
+    c_ano = col("Ano (Código)")
+    c_prod = col("Produto das lavouras temporárias e permanentes (Código)")
+    c_nome = col("Produto das lavouras temporárias e permanentes")
+    return [(l[c_prod], l[c_nome], l[c_lugar], l[c_ano], l["V"]) for l in dados]
 
 
 def nome_curto(n):
@@ -280,7 +281,7 @@ def atualizar_lavouras():
     ok_e = ok_m = False
     ano, produtos = None, {}
     try:
-        val, qtd = agregado(215, "N3%5Ball%5D"), agregado(214, "N3%5Ball%5D")
+        val, qtd = agregado(215, "n3"), agregado(214, "n3")
         ano = max(a for *_, a, _ in val)
         q = {(c, l): numero(v) for c, _, l, a, v in qtd if a == ano}
         por_uf = {}
@@ -306,8 +307,7 @@ def atualizar_lavouras():
         if sum(1 for v in valores.values() if v["valor"]) < 27:
             raise ValueError(f"só {len(valores)} estados com valor da produção")
         novo = {"titulo": "Lavouras", "unidade": "toneladas", "referencia": ano, "fonte": FONTE_PAM, "nivel": "api", "atualizado_em": hoje,
-                "consulta": [f"{AGREGADOS}/periodos/-1/variaveis/215?localidades=N3[all]&classificacao=782[all]",
-                             f"{AGREGADOS}/periodos/-1/variaveis/214?localidades=N3[all]&classificacao=782[all]"],
+                "consulta": [f"{PAM}/n3/all/v/215/p/last%201/c782/all", f"{PAM}/n3/all/v/214/p/last%201/c782/all"],
                 "campos": {"valor": "valor da produção das lavouras (mil R$)", "soja": "toneladas", "milho": "toneladas", "cana": "toneladas",
                            "cafe": "toneladas (café em grão, arábica e canephora)",
                            "principais": "[lavoura, valor (mil R$), quantidade, unidade] das 5 de maior valor"},
@@ -327,7 +327,7 @@ def atualizar_lavouras():
             return [ok_e, True]
         cats = ["0"] + [c for c in produtos if c != "0"]
         with ThreadPoolExecutor(4) as ex:
-            partes = list(ex.map(lambda c: agregado(215, "N6%5Ball%5D", c), cats))
+            partes = list(ex.map(lambda c: agregado(215, "n6", c), cats))
         total, por_mun = {}, {}
         for c, linhas in zip(cats, partes):
             for _, _, l, a, v in linhas:
@@ -354,7 +354,7 @@ def atualizar_lavouras():
             grupos[x[3]] = grupos.get(x[3], 0) + 1
         novo = {"meta": {"titulo": "Principal lavoura de cada município", "referencia": ano, "fonte": FONTE_PAM + ", valor da produção de cada lavoura",
                          "posicao": MUNICIPIOS["posicao"], "nivel": "api", "atualizado_em": hoje,
-                         "consulta": f"{AGREGADOS}/periodos/-1/variaveis/215?localidades=N6[all]&classificacao=782[<produto>]",
+                         "consulta": f"{PAM}/n6/all/v/215/p/last%201/c782/<produto>",
                          "regra": "a lavoura de maior valor da produção no município; o tamanho do ponto mostra o valor de todas as lavouras",
                          "municipios": len(m), "por_grupo": grupos},
                 "campos": ["lon", "lat", "valor_total_mil_rs", "grupo", "principal", "principal_mil_rs", "nome", "uf"], "municipios": m}
