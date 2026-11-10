@@ -40,6 +40,8 @@ LICENCA = {"name": "CC-BY-4.0", "title": "Creative Commons Atribuição 4.0 Inte
 EDITOR = {"title": "Brasil em Camadas", "role": "publisher"}
 
 NIVEIS = ("brasil", "uf", "municipio")
+# colunas que identificam a linha: o lugar e, quando o conjunto tem uma lista de itens, o item (lavoura, país)
+CHAVES = ("codigo_ibge", "lavoura", "pais")
 ARQUIVO = {"brasil": "brasil.csv", "uf": "uf.csv", "municipio": "municipio.csv"}
 MARCAS = ["", "X", ".."]   # vazio = sem dado; X = a fonte esconde o número; .. = não se aplica
 
@@ -257,7 +259,7 @@ def ficha_atual(cfg, p):
 
 
 def _chave(campos):
-    return [i for i, c in enumerate(campos) if c in ("codigo_ibge", "lavoura")] or [0]
+    return [i for i, c in enumerate(campos) if c in CHAVES] or [0]
 
 
 def rotulo(chave):
@@ -351,7 +353,7 @@ def gravar_pacote(cfg, p, tabelas, extra):
             "format": "csv", "mediatype": "text/csv", "encoding": "utf-8", "bytes": len(b), "hash": sha256(b),
             "dialect": {"delimiter": ",", "header": True},
             "schema": {"fields": [c.ficha() for c in campos], "missingValues": MARCAS,
-                       "primaryKey": [c.nome for c in campos if c.nome in ("codigo_ibge", "lavoura")]},
+                       "primaryKey": [c.nome for c in campos if c.nome in CHAVES]},
             "linhas": len(tabelas[n][1])})
     ficha = {
         "profile": "tabular-data-package",
@@ -445,8 +447,11 @@ def atualizar_conjunto(cfg, conferido_em=None, estado=None):
             for c in cab:
                 if c not in serie_campos:
                     serie_campos.append(c)
+            filtro = cfg.get("serie_filtro") or {}   # ex.: {"pais": "total"}: só as linhas de total na série
             for l in t[1:]:
                 d = dict(zip(cab, l))
+                if any(d.get(k) != v for k, v in filtro.items()):
+                    continue
                 if n == "brasil":
                     d["uf"] = "BR"
                 d["periodo"] = p
@@ -482,7 +487,7 @@ def atualizar_conjunto(cfg, conferido_em=None, estado=None):
                         ordem.append(c)
         campos = chave + [c for c in ordem + serie_campos if c not in chave]
         campos = list(dict.fromkeys(campos))
-        serie.sort(key=lambda d: (ordem_periodo(d["periodo"]), d["codigo_ibge"] != CODIGO_BRASIL, d["codigo_ibge"], d.get("lavoura", "")))
+        serie.sort(key=lambda d: (ordem_periodo(d["periodo"]), d["codigo_ibge"] != CODIGO_BRASIL, d["codigo_ibge"], d.get("lavoura", ""), d.get("pais", "")))
         b = io.StringIO()
         w = csv.writer(b, lineterminator="\n")
         w.writerow(campos)

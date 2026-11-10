@@ -76,6 +76,10 @@ function contornoBrasil(geo) {
 }
 const fmt = n => n.toLocaleString("pt-BR");
 const fmt1 = n => n.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
+/* dólares em palavras (comércio exterior): US$ 61,2 bilhões, US$ 850 milhões, US$ 12 mil */
+const fmtUSD = n => { if (n == null) return "—"; const a = Math.abs(n), s = n < 0 ? "−" : "";
+  const p = (x, um, v) => `${s}US$ ${fmt1(x)} ${x < 2 ? um : v}`;
+  return a >= 1e9 ? p(a / 1e9, "bilhão", "bilhões") : a >= 1e6 ? p(a / 1e6, "milhão", "milhões") : a >= 1e3 ? `${s}US$ ${fmt(Math.round(a / 1e3))} mil` : `${s}US$ ${fmt(Math.round(a))}`; };
 /* velocidade em Mbps: inteiro a partir de 100; abaixo de 1, "menos de 1" */
 const mbps = x => x == null ? "—" : x < 0.95 ? "menos de 1" : x >= 100 ? fmt(Math.round(x)) : fmt1(x);
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -115,7 +119,8 @@ function rewind(f) {
   const DATA = {}, UNICO = {};
   /* camadas "sob_demanda" (arquivos grandes que começam desligados) só são baixadas quando alguém liga a camada */
   /* camadas marcadas "teste" no fontes.json só existem na versão de teste */
-  F.camadas = F.camadas.filter(l => TESTE || !l.teste);
+  /* "so_globo": camadas que só existem no globo (ex.: comércio com o mundo, que pinta os países) */
+  F.camadas = F.camadas.filter(l => (TESTE || !l.teste) && !l.so_globo);
   F.pintura = F.pintura.filter(p => TESTE || !p.teste);
   await Promise.all([...F.pintura, ...F.camadas].filter(l => l.arquivo && !l.sob_demanda).map(async l => {
     DATA[l.id] = await (UNICO[l.arquivo] || (UNICO[l.arquivo] = getJSON("../data/" + l.arquivo)));
@@ -133,7 +138,7 @@ function rewind(f) {
     val: !DATA[p.id] ? null
       : p.por === "per_capita" ? s => (DATA[p.id].valores[s] && POP[s]) ? DATA[p.id].valores[s].valor / POP[s] * 1e5 : null
       : s => { const v = DATA[p.id].valores[s]; return v == null ? null : (typeof v === "object" ? (v[p.campo || "valor"] ?? null) : v); },
-    fmt: p.por === "per_capita" || p.por === "percentual" || p.por === "taxa" ? fmt1 : fmt,
+    fmt: p.formato === "dolar" ? fmtUSD : p.por === "per_capita" || p.por === "percentual" || p.por === "taxa" ? fmt1 : fmt,
     unidade: p.unidade || (DATA[p.id] && DATA[p.id].unidade) || ""
   }))];
   /* versão de teste: período e comparação nas pinturas que têm acervo (periodos.js); ao mudar, refaz o mapa e a ficha */
@@ -763,7 +768,8 @@ function rewind(f) {
 
   /* ---------- filtro por ministério ---------- */
   const mins = document.getElementById("mins");
-  mins.insertAdjacentHTML("beforeend", [["todos", "Todos"], ...Object.entries(F.ministerios)]
+  mins.insertAdjacentHTML("beforeend", [["todos", "Todos"], ...Object.entries(F.ministerios)
+    .filter(([k]) => [...F.pintura, ...F.camadas, ...(F.luzes || [])].some(x => x.ministerio === k))]
     .map(([k, v]) => `<button class="tab" data-m="${k}" aria-pressed="${k === "todos"}">${v}</button>`).join(""));
   mins.querySelectorAll(".tab").forEach(b => b.onclick = () => {
     minF = b.dataset.m;
@@ -1062,6 +1068,28 @@ function rewind(f) {
   }
 
   /* defesa do estado: empresas credenciadas pelo Ministério da Defesa (EED e ED) e, no Maranhão, o Centro de Alcântara */
+  /* comércio exterior (Comex Stat): exportações, importações, saldo e os maiores destinos e origens, do estado ou do
+     Brasil (s = null), nos 12 meses mais recentes */
+  function fichaComex(s) {
+    const X = DATA.exp;
+    if (!X) return "";
+    const v = s ? X.valores[s] : X.brasil;
+    if (!v) return "";
+    const nomeP = c => X.paises[c] ? X.paises[c][0] : c;
+    const lista = (ps, tot) => ps.map(([c, x]) => `${esc(nomeP(c))} (${fmtUSD(x)}${tot ? ", " + fmt1(x / tot * 100) + "%" : ""})`).join(", ");
+    const pos = s ? 1 + Object.values(X.valores).filter(o => o.valor > v.valor).length : 0;
+    const se = !s && v.sem_estado ? v.sem_estado : null;
+    return `<div class="sec"><h3>Comércio exterior</h3>
+      <div class="kv"><span>Exportações</span><span class="v">${fmtUSD(v.valor)}${s ? ` · ${pos}º` : ""}</span></div>
+      <div class="kv"><span>Importações</span><span class="v">${fmtUSD(v.imp)}</span></div>
+      <div class="kv"><span>Saldo (exportações menos importações)</span><span class="v">${fmtUSD(v.saldo)}</span></div>
+      ${v.destinos.length ? `<div class="list">Maiores destinos das exportações: ${lista(v.destinos, v.valor)}.${v.n_destinos ? ` Ao todo, ${fmt(v.n_destinos)} países e territórios compraram ${s ? "do estado" : "do Brasil"}.` : ""}</div>` : ""}
+      ${v.origens.length ? `<div class="list">Maiores origens das importações: ${lista(v.origens, v.imp)}.</div>` : ""}
+      ${s ? `<div class="list">Exportação pelo estado de origem da mercadoria e importação pelo estado de destino (não pelo endereço da empresa).</div>`
+        : se ? `<div class="list">Do total do Brasil, ${fmtUSD(se.exp)} das exportações e ${fmtUSD(se.imp)} das importações não têm estado na fonte (não declarado, consumo de bordo, café de estados diversos e outros).</div>` : ""}
+      ${pill(X.nivel)} <span class="note">${esc(X.fonte)}, valor FOB em dólares (só bens), ${esc(X.referencia)} · atualizado em ${X.atualizado_em}</span></div>`;
+  }
+
   function fichaDefesa(s) {
     const D = DATA.defesa, v = D && D.valores[s], cla = CLA && s === CLA.uf;
     if (!D && !cla) return "";
@@ -1126,6 +1154,7 @@ function rewind(f) {
           ${pill(DATA.defesa.nivel)} <span class="note">Ministério da Defesa, empresas credenciadas: ${fmt(DATA.defesa.eed)} estratégicas de defesa (EED) e ${fmt(DATA.defesa.ed)} de defesa (ED); ${esc(DATA.defesa.referencia)} · atualizado em ${DATA.defesa.atualizado_em}</span>` : ""}
         ${DATA.evpc && DATA.evpc.brasil ? `<div class="kv" style="margin-top:8px"><span>Eletropostos</span><span class="v">≈ ${fmt1(DATA.evpc.brasil.valor / 1000)} mil</span></div>
           ${pill(DATA.evpc.nivel)} <span class="note">${esc(DATA.evpc.fonte)}, pontos públicos e semipúblicos, ${esc(DATA.evpc.referencia)}; ${esc(DATA.evpc.brasil.nota)} · atualizado em ${DATA.evpc.atualizado_em}</span>` : ""}
+        ${fichaComex(null)}
         <p class="lede">Clique num estado para aproximar. Cada camada mostra de onde veio o dado e seu nível de confiança. Arraste para mover e role para aproximar.</p>`;
       fichaPeriodo();
       return;
@@ -1164,7 +1193,8 @@ function rewind(f) {
       ${fichaEnergia(s)}
       ${fichaCelular(s)}
       ${fichaDefesa(s)}
-      ${fichaEletropostos(s)}`;
+      ${fichaEletropostos(s)}
+      ${fichaComex(s)}`;
     fichaPeriodo();
   }
   /* versão de teste: o período escolhido (ou a comparação) da pintura, no alto da ficha; refeito a cada render() */

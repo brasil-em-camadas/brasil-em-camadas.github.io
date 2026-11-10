@@ -21,6 +21,10 @@ const FUNDO = fundoSite("");
 const AVIAO = "M2 13l9-2V4c0-1 2-1 2 0v7l9 2v2l-9-1v5l3 2v1l-4-1-4 1v-1l3-2v-5l-9 1z";
 const fmt = n => n.toLocaleString("pt-BR");
 const fmt1 = n => n.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
+/* dólares em palavras (comércio exterior): US$ 61,2 bilhões, US$ 850 milhões, US$ 12 mil */
+const fmtUSD = n => { if (n == null) return "—"; const a = Math.abs(n), s = n < 0 ? "−" : "";
+  const p = (x, um, v) => `${s}US$ ${fmt1(x)} ${x < 2 ? um : v}`;
+  return a >= 1e9 ? p(a / 1e9, "bilhão", "bilhões") : a >= 1e6 ? p(a / 1e6, "milhão", "milhões") : a >= 1e3 ? `${s}US$ ${fmt(Math.round(a / 1e3))} mil` : `${s}US$ ${fmt(Math.round(a))}`; };
 /* velocidade em Mbps: inteiro a partir de 100; abaixo de 1, "menos de 1" */
 const mbps = x => x == null ? "—" : x < 0.95 ? "menos de 1" : x >= 100 ? fmt(Math.round(x)) : fmt1(x);
 const kmTxt = a => a >= 1e6 ? `${(a / 1e6).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} milhão de km²` : `${fmt(Math.round(a / 1e3))} mil km²`;
@@ -166,7 +170,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     val: !DATA[p.id] ? null
       : p.por === "per_capita" ? s => (DATA[p.id].valores[s] && POP[s]) ? DATA[p.id].valores[s].valor / POP[s] * 1e5 : null
       : s => { const v = DATA[p.id].valores[s]; return v == null ? null : (typeof v === "object" ? (v[p.campo || "valor"] ?? null) : v); },
-    fmt: p.por === "per_capita" || p.por === "percentual" || p.por === "taxa" ? fmt1 : fmt,
+    fmt: p.formato === "dolar" ? fmtUSD : p.por === "per_capita" || p.por === "percentual" || p.por === "taxa" ? fmt1 : fmt,
     unidade: p.unidade || (DATA[p.id] && DATA[p.id].unidade) || ""
   }))];
   /* versão de teste: período e comparação nas pinturas que têm acervo (periodos.js); ao mudar, refaz o mapa e a ficha */
@@ -182,6 +186,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   const CLA = F.camadas.find(l => l.id === "cla");
   const LUZ = (F.luzes || []).map(l => ({ ...l }));
   let paint = "pop", sel = null, minF = "todos", modo3d = false, luz = "off", luzPop = null, guardadas = null;
+  let comexFluxo = 0;   /* comércio com o mundo: 0 = exportações (o que cada país compra), 1 = importações (o que vende) */
 
   /* ---------- dados no formato do mapa ---------- */
   const ROTULOS = ["Argentina", "Uruguai", "Paraguai", "Bolívia", "Peru", "Colômbia", "Venezuela", "Chile", "Equador"];
@@ -267,6 +272,8 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         portos: { type: "geojson", data: portos },
         aeros: { type: "geojson", data: aeros },
         paises: { type: "geojson", data: paises },
+        /* comércio com o mundo (Comex Stat): contorno dos países do Natural Earth 1:50 mi, baixado ao ligar a camada */
+        "comex-mundo": { type: "geojson", data: fc([]) },
         oceanos: { type: "geojson", data: oceanos },
         uf: { type: "geojson", data: ufPts },
         caps: { type: "geojson", data: capPts },
@@ -276,6 +283,10 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       layers: [
         { id: "fundo", type: "background", paint: { "background-color": "#0a1d2a" } },
         { id: "nasa", type: "raster", source: "nasa", paint: { "raster-brightness-max": 0.62, "raster-saturation": -0.15, "raster-contrast": 0.08, "raster-fade-duration": 200 } },
+        /* comércio com o mundo: cada país pintado pelo que compra do Brasil (ou do estado escolhido), ou pelo que vende;
+           cor e filtro vêm do render() (pintarComex) */
+        { id: "comex-fill", type: "fill", source: "comex-mundo", layout: { visibility: "none" }, paint: { "fill-color": "rgba(0,0,0,0)", "fill-opacity": 0.88 } },
+        { id: "comex-linha", type: "line", source: "comex-mundo", layout: { visibility: "none" }, paint: { "line-color": "rgba(4,12,18,.75)", "line-width": 0.5 } },
         /* a base mundial é simplificada: de perto, as divisas entre os vizinhos viram retas que não seguem os rios
            (ex.: Argentina e Uruguai); elas somem a partir do zoom 6 (desde 26/10/2026) */
         { id: "paises-borda", type: "line", source: "mundo", paint: { "line-color": "rgba(214,198,150,.35)", "line-width": 0.6,
@@ -722,7 +733,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     oil: ["pocos", "pocos-ico"], uep: ["plataformas"], campos: ["campos-fill", "campos-line"], presal: ["presal-line", "presal-rotulo"], boi: ["boi", "boi-geral"], lav: ["lav", "lav-geral"], usinas: ["usinas", "usinas-ico"], dutos: ["dutos"], refin: ["refin"], se: ["se"], lt: ["lt"], celm: ["celm", "celm-ico"], g5: ["g5", "g5-ico"], empdef: ["empdef"], pedagio: ["pedagio", "pedagio-ico"],
     velm: ["velm", "velm-ico"], g5c: ["g5c", "g5c-ico"], blm: ["blm", "blm-ico"],
     rail: ["ferrovias", "ferrovias-obra", "ferrovias-borda", "ferrovias-obra-borda"], ports: ["portos"], air: ["aeroportos"],
-    fronttipo: ["front-borda", "front-linha"], passa: ["passa-estrada-borda", "passa-estrada", "passa-ico"], vmda: ["vmda-borda", "vmda"], dup: ["dup-borda", "dup", "dup-obra", "dup-meio"] };
+    fronttipo: ["front-borda", "front-linha"], comex: ["comex-fill", "comex-linha"], passa: ["passa-estrada-borda", "passa-estrada", "passa-ico"], vmda: ["vmda-borda", "vmda"], dup: ["dup-borda", "dup", "dup-obra", "dup-meio"] };
 
   /* ---------- painel e enquadramento ---------- */
   const stage = document.getElementById("stage");
@@ -1092,6 +1103,22 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
         .setHTML(`${html}<br><span class="pop-fonte">IBGE, base cartográfica 1:250.000 (2025)</span>`).addTo(map);
       return;
     }
+    const cx = vis("comex-fill") && DATA.comex ? map.queryRenderedFeatures(e.point, { layers: ["comex-fill"] }) : [];
+    if (cx.length) {
+      const iso = cx[0].properties.i, C = DATA.comex, base = sel ? (C.por_uf[sel] || {}) : null;
+      let x = 0, im = 0, nome = cx[0].properties.n;
+      for (const [cod, p] of Object.entries(C.paises)) if (p[1] === iso) {
+        nome = p[0]; const r = base ? (base[cod] || [0, 0]) : [p[2], p[3]]; x += r[0]; im += r[1]; }
+      const tot = base ? Object.values(base).reduce((a, r) => a + r[0], 0) : Object.values(C.paises).reduce((a, p) => a + p[2], 0);
+      const quem = sel ? NAME[sel] : "Brasil";
+      new maplibregl.Popup({ closeButton: false, offset: 6, maxWidth: "300px" }).setLngLat(e.lngLat)
+        .setHTML(`<b>${esc(nome)}</b> e ${sel ? "o estado de " : "o "}${esc(quem)}, ${esc(C.referencia)}
+          <br>Comprou ${sel ? "do estado" : "do Brasil"}: <b>${fmtUSD(x)}</b>${x && tot ? ` (${fmt1(x / tot * 100)}% das exportações)` : ""}
+          <br>Vendeu ${sel ? "ao estado" : "ao Brasil"}: <b>${fmtUSD(im)}</b>
+          ${x || im ? `<br>Saldo ${sel ? "do estado" : "do Brasil"}: ${fmtUSD(x - im)}` : ""}
+          <br><span class="pop-fonte">MDIC/SECEX, Comex Stat · valor FOB, só bens</span>`).addTo(map);
+      return;
+    }
     const pc = map.queryRenderedFeatures(e.point, { layers: ["pce-fill-rec", "pce-fill-ana"].filter(l => map.getLayoutProperty(l, "visibility") !== "none") });
     if (pc.length) {
       const p = pc[0].properties;
@@ -1156,7 +1183,8 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   const quando = id => { const m = DATA[id] && DATA[id].meta; return m && m.atualizado_em ? ` · ${m.referencia ? "ref. " + esc(m.referencia) + ", " : ""}atualizado em ${m.atualizado_em}` : ""; };
   const icon = id => ICON[id] ? `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[id]}"/></svg>` : `<span class="ico"></span>`;
   const mins = document.getElementById("mins");
-  mins.insertAdjacentHTML("beforeend", [["todos", "Todos"], ...Object.entries(F.ministerios)]
+  mins.insertAdjacentHTML("beforeend", [["todos", "Todos"], ...Object.entries(F.ministerios)
+    .filter(([k]) => [...F.pintura, ...F.camadas, ...LUZ].some(x => x.ministerio === k))]
     .map(([k, v]) => `<button class="tab" data-m="${k}" aria-pressed="${k === "todos"}">${v}</button>`).join(""));
   mins.querySelectorAll(".tab").forEach(b => b.onclick = () => {
     minF = b.dataset.m; guardadas = null;
@@ -1271,7 +1299,9 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     blm: ["blm", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { d: m[2], n: m[9], u: m[10], c: m[11] })))],
     /* indústria de defesa: [lon, lat, município, UF, código do IBGE, [[empresa, EED ou ED], ...]]; a lista fica fora do mapa */
     empdef: ["empdef", d => fc(d.municipios.map(m => ponto([m[0], m[1]], { n: m[5].length, c: m[4] })))],
-    vmda: ["vmda", d => d] };
+    vmda: ["vmda", d => d],
+    /* comércio com o mundo: os números (comex/paises.json) e o contorno dos países (camada "geo"), juntos */
+    comex: ["comex-mundo", d => d.geo] };
   /* município (código do IBGE) → linha do arquivo, para a janelinha do celular juntar as duas camadas */
   const INDICE = {};
   const indice = id => { if (!DATA[id]) return {};
@@ -1316,7 +1346,8 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   function baixarSobDemanda() {
     LAYERS.filter(l => l.on && l.sob_demanda && !DATA[l.id] && !l.baixando).forEach(async l => {
       l.baixando = true; l.falhou = false;
-      const d = await getJSON(D + l.arquivo);
+      const d = l.geo ? await Promise.all([getJSON(D + l.arquivo), getJSON(D + l.geo)]).then(([a, g]) => a && g ? { ...a, geo: g } : null)
+        : await getJSON(D + l.arquivo);
       l.baixando = false;
       if (!d) { l.on = false; l.falhou = true; render(); return; }
       DATA[l.id] = d;
@@ -1335,6 +1366,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       const lc = LAYERS.find(l => l.id === "cla");
       if (mkCla) { if (lc && lc.on) mkCla.addTo(map); else mkCla.remove(); }
     }
+    pintarComex();
     /* ícones só no estado escolhido; sem estado escolhido, os círculos no Brasil todo */
     Object.values(ICO_ESTADO).forEach(([circ, ico, uf]) => {
       if (map.getLayer(ico)) map.setFilter(ico, ["==", ["get", uf], sel || ""]);
@@ -1376,7 +1408,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     visualModo(L, P);
     /* legenda completa (escala de cores + símbolos das camadas ligadas): sempre no rodapé, ao lado dos níveis de confiança;
        sobre o mapa só quando o botão "Legenda no mapa" está ligado (bom para tela cheia) */
-    const itens = LAYERS.filter(l => l.on && l.cor).map(l => `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
+    const itens = LAYERS.filter(l => l.on && l.cor).map(l => l.id === "comex" ? comexLegenda() : `<span class="item">${(l.legenda || [{ nome: l.nome }]).map(k => {
       /* as lavouras com o medalhão do mapa */
       /* as camadas de pontos com o medalhão do mapa (icones.js, ICO_LEG) */
       const ic = ICO_LEG[l.id] && ICO_LEG[l.id](k.cor || l.cor);
@@ -1389,10 +1421,51 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
     if (bl) bl.setAttribute("aria-pressed", legMapa);
     const lr = document.getElementById("legenda");
     if (lr) lr.innerHTML = (leg ? `<span class="item escala">${leg}</span>` : "") + (itens || `<span class="note">Nenhuma camada ligada. Escolha as camadas no painel.</span>`);
+    document.querySelectorAll("[data-cx]").forEach(b => b.onclick = () => { comexFluxo = +b.dataset.cx; render(); });
     document.getElementById("back").hidden = !sel;
     document.getElementById("where").textContent = sel ? `${NAME[sel]} · ${sel}` : "Brasil · 27 UFs";
     abas.querySelector('[data-aba="ficha"]').textContent = sel ? `Ficha · ${sel}` : "Ficha · Brasil";
     fichaPeriodo();
+  }
+  /* ---------- comércio com o mundo (Comex Stat) ----------
+     Cada país pintado pelo valor (US$ FOB, 12 meses) que compra do Brasil, ou do estado escolhido; com "Importações",
+     pelo que vende. Faixas de 10 em 10 vezes, a partir da potência de 10 logo abaixo do maior valor. */
+  const CX_COR = ["--cx1", "--cx2", "--cx3", "--cx4", "--cx5"];
+  function comexValores() {
+    const C = DATA.comex;
+    if (!C) return null;
+    const base = sel ? (C.por_uf[sel] || {}) : null, v = {};
+    for (const [cod, p] of Object.entries(C.paises)) {
+      const x = base ? (base[cod] ? base[cod][comexFluxo] : 0) : p[2 + comexFluxo];
+      if (p[1] && x > 0) v[p[1]] = (v[p[1]] || 0) + x;
+    }
+    return v;
+  }
+  function comexCortes(v) {
+    const mx = Math.max(0, ...Object.values(v));
+    if (!mx) return null;
+    const t = Math.pow(10, Math.floor(Math.log10(mx)));
+    return [t / 1000, t / 100, t / 10, t];
+  }
+  const comexClasse = (x, k) => k.filter(c => x >= c).length;
+  function pintarComex() {
+    const l = LAYERS.find(x => x.id === "comex");
+    if (!l || !l.on || !DATA.comex || !map.getLayer("comex-fill")) return;
+    const v = comexValores(), k = comexCortes(v);
+    const m = ["match", ["get", "i"]];
+    if (k) Object.entries(v).forEach(([iso, x]) => m.push(iso, cor(CX_COR[comexClasse(x, k)])));
+    map.setPaintProperty("comex-fill", "fill-color", m.length > 2 ? [...m, "rgba(0,0,0,0)"] : "rgba(0,0,0,0)");
+  }
+  function comexLegenda() {
+    const C = DATA.comex, v = C ? comexValores() : null, k = v ? comexCortes(v) : null;
+    const quem = sel ? NAME[sel] : "o Brasil";
+    const tit = comexFluxo ? `O que cada país vende para ${sel ? "o estado" : "o Brasil"}` : `O que cada país compra ${sel ? "do estado" : "do Brasil"}`;
+    const curto = x => fmtUSD(x).replace("US$ ", "");
+    const faixas = k ? [`menos de ${curto(k[0])}`, `${curto(k[0])} a ${curto(k[1])}`, `${curto(k[1])} a ${curto(k[2])}`, `${curto(k[2])} a ${curto(k[3])}`, `${curto(k[3])} ou mais`] : [];
+    return `<span class="item comex-leg"><span><b>${tit}</b>${sel ? `&nbsp;(${esc(quem)})` : ""}${C ? `&nbsp;· US$ FOB, ${esc(C.referencia)}` : ""}</span>
+      <span class="comex-fluxo"><button class="back" data-cx="0" aria-pressed="${!comexFluxo}">Exportações</button><button class="back" data-cx="1" aria-pressed="${!!comexFluxo}">Importações</button></span>
+      ${faixas.map((f, i) => `<span><i class="key sq" style="background:var(${CX_COR[i]})"></i>${f}</span>`).join("")}
+      ${C && !k ? `<span class="note">Nada registrado.</span>` : ""}</span>`;
   }
   /* ---------- luzes à noite ---------- */
   const FADE = ["boolean", ["feature-state", "fade"], false];
@@ -1676,6 +1749,28 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       ${cla ? `<div class="list" style="margin-top:8px">${CLA.nome}, base de lançamento de foguetes da Força Aérea.</div>${pill("calculado")} <span class="note">posição aproximada</span>` : ""}</div>`;
   }
 
+  /* comércio exterior (Comex Stat): exportações, importações, saldo e os maiores destinos e origens, do estado ou do
+     Brasil (s = null), nos 12 meses mais recentes */
+  function fichaComex(s) {
+    const X = DATA.exp;
+    if (!X) return "";
+    const v = s ? X.valores[s] : X.brasil;
+    if (!v) return "";
+    const nomeP = c => X.paises[c] ? X.paises[c][0] : c;
+    const lista = (ps, tot) => ps.map(([c, x]) => `${esc(nomeP(c))} (${fmtUSD(x)}${tot ? ", " + fmt1(x / tot * 100) + "%" : ""})`).join(", ");
+    const pos = s ? 1 + Object.values(X.valores).filter(o => o.valor > v.valor).length : 0;
+    const se = !s && v.sem_estado ? v.sem_estado : null;
+    return `<div class="sec"><h3>Comércio exterior</h3>
+      <div class="kv"><span>Exportações</span><span class="v">${fmtUSD(v.valor)}${s ? ` · ${pos}º` : ""}</span></div>
+      <div class="kv"><span>Importações</span><span class="v">${fmtUSD(v.imp)}</span></div>
+      <div class="kv"><span>Saldo (exportações menos importações)</span><span class="v">${fmtUSD(v.saldo)}</span></div>
+      ${v.destinos.length ? `<div class="list">Maiores destinos das exportações: ${lista(v.destinos, v.valor)}.${v.n_destinos ? ` Ao todo, ${fmt(v.n_destinos)} países e territórios compraram ${s ? "do estado" : "do Brasil"}.` : ""}</div>` : ""}
+      ${v.origens.length ? `<div class="list">Maiores origens das importações: ${lista(v.origens, v.imp)}.</div>` : ""}
+      ${s ? `<div class="list">Exportação pelo estado de origem da mercadoria e importação pelo estado de destino (não pelo endereço da empresa).</div>`
+        : se ? `<div class="list">Do total do Brasil, ${fmtUSD(se.exp)} das exportações e ${fmtUSD(se.imp)} das importações não têm estado na fonte (não declarado, consumo de bordo, café de estados diversos e outros).</div>` : ""}
+      ${pill(X.nivel)} <span class="note">${esc(X.fonte)}, valor FOB em dólares (só bens), ${esc(X.referencia)} · atualizado em ${X.atualizado_em}</span></div>`;
+  }
+
   /* pecuária e aquicultura do estado (IBGE, PPM) */
   function fichaPecuaria(s) {
     const R = DATA.reb;
@@ -1721,6 +1816,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
           ${pill(DATA.defesa.nivel)} <span class="note">Ministério da Defesa, empresas credenciadas: ${fmt(DATA.defesa.eed)} estratégicas de defesa (EED) e ${fmt(DATA.defesa.ed)} de defesa (ED); ${esc(DATA.defesa.referencia)} · atualizado em ${DATA.defesa.atualizado_em}</span>` : ""}
         ${DATA.evpc && DATA.evpc.brasil ? `<div class="kv" style="margin-top:8px"><span>Eletropostos</span><span class="v">≈ ${fmt1(DATA.evpc.brasil.valor / 1000)} mil</span></div>
           ${pill(DATA.evpc.nivel)} <span class="note">${esc(DATA.evpc.fonte)}, pontos públicos e semipúblicos, ${esc(DATA.evpc.referencia)}; ${esc(DATA.evpc.brasil.nota)} · atualizado em ${DATA.evpc.atualizado_em}</span>` : ""}
+        ${fichaComex(null)}
         <p class="lede">Clique num estado para aproximar. Arraste para girar o globo, role para aproximar e use o botão "Relevo 3D" para ver as montanhas em altura.</p>`;
       fichaPeriodo();
       return;
@@ -1759,7 +1855,8 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
       ${fichaEnergia(s)}
       ${fichaCelular(s)}
       ${fichaDefesa(s)}
-      ${fichaEletropostos(s)}`;
+      ${fichaEletropostos(s)}
+      ${fichaComex(s)}`;
     fichaPeriodo();
   }
   /* versão de teste: o período escolhido (ou a comparação) da pintura, no alto da ficha; refeito a cada render() */

@@ -1,5 +1,5 @@
 # Robô do Brasil em Camadas
-# - Todo dia 3 de cada mês (e quando você clicar em "Run workflow"): busca dados novos do IBGE, da ANP, da ANEEL, da EPE, da Anatel, da ANTT, da ANAC e do Ministério da Defesa e salva no repositório.
+# - Todo dia 3 de cada mês (e quando você clicar em "Run workflow"): busca dados novos do IBGE, da ANP, da ANEEL, da EPE, da Anatel, da ANTT, da ANAC, do Ministério da Defesa e do MDIC (comércio exterior) e salva no repositório.
 #   Depois, guarda os períodos novos no acervo (site/acervo/, ver o README de lá) e confere os preliminares.
 # - Depois de cada mudança: publica o site no GitHub Pages (antes, confere que nenhum pacote publicado do acervo foi mudado ou apagado).
 # Versões das ações conferidas em 21/10/2026 (todas em Node 24; o Node 20 foi descontinuado pelo GitHub).
@@ -66,6 +66,12 @@ jobs:
       - name: Buscar a lista da indústria de defesa (Ministério da Defesa)
         continue-on-error: true
         run: python scripts/atualizar_defesa.py
+      # Comércio exterior (Comex Stat, MDIC): exportações e importações dos 12 meses mais recentes, por estado e por país.
+      # A API limita os pedidos seguidos (o robô espera e tenta de novo); se falhar, ficam os arquivos antigos.
+      - name: Buscar o comércio exterior (Comex Stat, MDIC)
+        continue-on-error: true
+        timeout-minutes: 20
+        run: python scripts/atualizar_comex.py
       # Acervo de dados por período: cada robô guarda os períodos novos e confere os preliminares. Pacote publicado nunca é
       # apagado nem sobrescrito (se a fonte mudar um número, entra uma versão nova, e a antiga fica em versoes/).
       # A velocidade do celular usa o que o robô da Anatel acabou de calcular (site/data/celular/velocidade*.json).
@@ -93,8 +99,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add site/data site/acervo
-          git diff --cached --quiet || (git commit -m "Atualiza dados do IBGE, da ANP, da ANEEL, da EPE, da Anatel, da ANTT, da ANAC e da Defesa, e o acervo" && git push)
+          git add site/data site/acervo scripts/dados/comex_paises.csv
+          git diff --cached --quiet || (git commit -m "Atualiza dados do IBGE, da ANP, da ANEEL, da EPE, da Anatel, da ANTT, da ANAC, da Defesa e do MDIC, e o acervo" && git push)
 
   publicar:
     needs: atualizar

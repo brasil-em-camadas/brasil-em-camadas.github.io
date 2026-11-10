@@ -7,7 +7,8 @@
   "mme": "Minas e Energia",
   "com": "Comunicações",
   "agri": "Agricultura",
-  "setor": "Entidades do setor"
+  "setor": "Entidades do setor",
+  "mdic": "Indústria e Comércio"
  },
  "niveis": {
   "api": {
@@ -326,6 +327,23 @@
     "calculo"
    ],
    "conta": "empresas da lista contadas pelo estado do município da sede informado na lista; quando a lista traz um bairro, um distrito ou um dado que não combina, o município vem do cadastro do CNPJ"
+  },
+  {
+   "id": "exp",
+   "nome": "Exportações",
+   "arquivo": "comex/estados.json",
+   "ministerio": "mdic",
+   "por": "total",
+   "formato": "dolar",
+   "teste": true,
+   "camadas": [
+    "comex"
+   ],
+   "natureza": [
+    "medicao",
+    "calculo"
+   ],
+   "conta": "soma dos 12 meses mais recentes do Comex Stat, pelo estado de origem da mercadoria"
   }
  ],
  "luzes": [
@@ -1242,6 +1260,26 @@
    "natureza": [
     "mapa"
    ]
+  },
+  {
+   "id": "comex",
+   "nome": "Comércio com o mundo",
+   "tipo": "area",
+   "arquivo": "comex/paises.json",
+   "geo": "comex/mundo.json",
+   "sob_demanda": true,
+   "so_globo": true,
+   "teste": true,
+   "ministerio": "mdic",
+   "nivel": "api",
+   "fonte": "MDIC/SECEX, Comex Stat: cada país pintado pelo valor que comprou do Brasil (ou do estado escolhido) nos 12 meses mais recentes, em dólares FOB; com “Importações”, pelo que vendeu. Contorno dos países: Natural Earth (1:50 milhões). Clique num país para ver os números",
+   "ligada": false,
+   "cor": "--cx4",
+   "natureza": [
+    "medicao",
+    "calculo"
+   ],
+   "conta": "soma dos 12 meses mais recentes, por país; faixas de 10 em 10 vezes a partir da potência de 10 logo abaixo do maior valor"
   }
  ],
  "apoio": {

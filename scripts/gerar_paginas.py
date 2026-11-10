@@ -35,7 +35,7 @@ PREVIA = False
 # sem link no menu das outras páginas). Aprovadas pelo Edu em 09/11/2026: False.
 PREVIA_ESTADOS = False
 
-VERSAO_ESTILO = "54"     # style.css (o mesmo número do mapa)
+VERSAO_ESTILO = "55"     # style.css (o mesmo número do mapa)
 VERSAO_PAGINAS = "2"     # paginas/paginas.css e paginas/paginas.js
 MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
 MESES_LONGOS = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro",

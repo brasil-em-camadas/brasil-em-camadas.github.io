@@ -1,0 +1,282 @@
+codigo,nome,iso3
+000,Não Definido,
+013,Afeganistão,AFG
+015,"Aland, Ilhas",ALA
+017,Albânia,ALB
+020,"Alboran-Perejil, Ilhas",ESP
+023,Alemanha,DEU
+025,Alemanha Oriental,DEU
+031,Burkina Faso,BFA
+037,Andorra,AND
+040,Angola,AGO
+041,Anguilla,AIA
+042,Antártica,ATA
+043,Antígua e Barbuda,ATG
+047,Antilhas Holandesas,ANT
+053,Arábia Saudita,SAU
+059,Argélia,DZA
+063,Argentina,ARG
+064,Armênia,ARM
+065,Aruba,ABW
+069,Austrália,AUS
+072,Áustria,AUT
+073,Azerbaijão,AZE
+077,Bahamas,BHS
+080,Barein,BHR
+081,Bangladesh,BGD
+083,Barbados,BRB
+085,Belarus,BLR
+087,Bélgica,BEL
+088,Belize,BLZ
+090,Bermudas,BMU
+093,Mianmar,MMR
+097,Bolívia,BOL
+098,Bósnia-Herzegovina,BIH
+099,"Bonaire, Saint Eustatius e Saba",BES
+100,Internação na Zona Franca de Manaus,BRA
+101,Botsuana,BWA
+102,"Bouvet, Ilha",BVT
+105,Brasil,BRA
+108,Brunei,BRN
+111,Bulgária,BGR
+115,Burundi,BDI
+119,Butão,BTN
+127,Cabo Verde,CPV
+137,"Cayman, Ilhas",CYM
+141,Camboja,KHM
+145,Camarões,CMR
+149,Canadá,CAN
+150,"Canal, Ilhas do (Guernsey)",GGY
+151,"Canárias, Ilhas",ESP
+152,"Canal, Ilhas do (Jersey)",GBR
+153,Cazaquistão,KAZ
+154,Catar,QAT
+158,Chile,CHL
+160,China,CHN
+161,Taiwan (Formosa),TWN
+163,Chipre,CYP
+165,"Cocos (Keeling), Ilhas",CCK
+169,Colômbia,COL
+173,Comores,COM
+177,Congo,COG
+183,"Cook, Ilhas",COK
+187,Coreia do Norte,PRK
+190,Coreia do Sul,KOR
+193,Costa do Marfim,CIV
+195,Croácia,HRV
+196,Costa Rica,CRI
+198,Coveite (Kuweit),KWT
+199,Cuba,CUB
+200,Curaçao,CUW
+229,Benin,BEN
+232,Dinamarca,DNK
+235,Dominica,DMA
+237,Dubai,ARE
+239,Equador,ECU
+240,Egito,EGY
+243,Eritreia,ERI
+244,Emirados Árabes Unidos,ARE
+245,Espanha,ESP
+246,Eslovênia,SVN
+247,Eslováquia,SVK
+249,Estados Unidos,USA
+251,Estônia,EST
+253,Etiópia,ETH
+255,Falkland (Malvinas),FLK
+259,"Faroe, Ilhas",FRO
+267,Filipinas,PHL
+271,Finlândia,FIN
+275,França,FRA
+281,Gabão,GAB
+285,Gâmbia,GMB
+289,Gana,GHA
+291,Geórgia,GEO
+292,"Geórgia do Sul e Sandwich do Sul, Ilhas",SGS
+293,Gibraltar,GIB
+297,Granada,GRD
+301,Grécia,GRC
+305,Groenlândia,GRL
+309,Guadalupe,GLP
+313,Guam,GUM
+317,Guatemala,GTM
+321,Guernsey,GGY
+325,Guiana Francesa,GUF
+329,Guiné,GIN
+331,Guiné Equatorial,GNQ
+334,Guiné-Bissau,GNB
+337,Guiana,GUY
+341,Haiti,HTI
+343,"Heard e ilhas mcdonald, Ilha",HMD
+345,Honduras,HND
+351,Hong Kong,HKG
+355,Hungria,HUN
+357,Iêmen,YEM
+358,Iêmen Democrático,YMD
+359,Ilha de Man,IMN
+361,Índia,IND
+365,Indonésia,IDN
+367,Inglaterra,GBR
+369,Iraque,IRQ
+372,Irã,IRN
+375,Irlanda,IRL
+379,Islândia,ISL
+383,Israel,ISR
+386,Itália,ITA
+388,Iugoslávia,SCG
+391,Jamaica,JAM
+393,Jersey,
+396,"Johnston, Ilhas",USA
+399,Japão,JPN
+403,Jordânia,JOR
+411,Kiribati,KIR
+420,Laos,LAO
+423,"Lebuan, Ilhas",MYS
+426,Lesoto,LSO
+427,Letônia,LVA
+431,Líbano,LBN
+434,Libéria,LBR
+438,Líbia,LBY
+440,Liechtenstein,LIE
+442,Lituânia,LTU
+445,Luxemburgo,LUX
+447,Macau,MAC
+449,Macedônia,MKD
+450,Madagascar,MDG
+452,"Madeira, Ilha da",PRT
+455,Malásia,MYS
+458,Malavi,MWI
+461,Maldivas,MDV
+464,Mali,MLI
+467,Malta,MLT
+472,"Marianas do Norte, Ilhas",MNP
+474,Marrocos,MAR
+476,"Marshall, Ilhas",MHL
+477,Martinica,MTQ
+485,Maurício,MUS
+488,Mauritânia,MRT
+489,Mayotte,
+490,"Midway, Ilhas",UMI
+493,México,MEX
+494,Moldávia,MDA
+495,Mônaco,MCO
+497,Mongólia,MNG
+498,Montenegro,MNE
+499,Micronésia,FSM
+501,Montserrat,MSR
+505,Moçambique,MOZ
+507,Namíbia,NAM
+508,Nauru,NRU
+511,"Christmas (Navidad), Ilha",CXR
+517,Nepal,NPL
+521,Nicarágua,NIC
+525,Níger,NER
+528,Nigéria,NGA
+531,Niue,NIU
+535,"Norfolk, Ilha",NFK
+538,Noruega,NOR
+542,Nova Caledônia,NCL
+545,Papua Nova Guiné,PNG
+548,Nova Zelândia,NZL
+551,Vanuatu,VUT
+556,Omã,OMN
+563,"Pacífico, Ilhas do (Administração dos EUA)",UMI
+566,"Pacífico, Ilhas do (EUA)",UMI
+569,"Pacífico, Ilhas do (Território Fideicomisso EUA)",UMI
+573,Países Baixos (Holanda),NLD
+575,Palau,PLW
+576,Paquistão,PAK
+578,Palestina,PSE
+580,Panamá,PAN
+583,"Papua, Território de",PNG
+586,Paraguai,PRY
+589,Peru,PER
+593,Pitcairn,PCN
+599,Polinésia Francesa,PYF
+603,Polônia,POL
+607,Portugal,PRT
+611,Porto Rico,PRI
+623,Quênia,KEN
+625,Quirguistão,KGZ
+628,Reino Unido,GBR
+640,República Centro-Africana,CAF
+647,República Dominicana,DOM
+660,Reunião,REU
+665,Zimbábue,ZWE
+670,Romênia,ROU
+675,Ruanda,RWA
+676,Rússia,RUS
+677,"Salomão, Ilhas",SLB
+678,Saint Kitts e Nevis,KNA
+685,Saara Ocidental,ESH
+687,El Salvador,SLV
+690,Samoa,WSM
+691,Samoa Americana,ASM
+693,São Bartolomeu,BLM
+695,São Cristóvão e Névis,KNA
+697,San Marino,SMR
+698,"São Martinho, Ilha de (parte francesa)",
+699,Sint Maarten,SXM
+700,São Pedro e Miquelon,SPM
+705,São Vicente e Granadinas,VCT
+710,Santa Helena,SHN
+715,Santa Lúcia,LCA
+720,São Tomé e Príncipe,STP
+728,Senegal,SEN
+731,Seicheles,SYC
+735,Serra Leoa,SLE
+737,Sérvia,SRB
+741,Singapura,SGP
+744,Síria,SYR
+748,Somália,SOM
+750,Sri Lanka,LKA
+754,Suazilândia,SWZ
+755,Svalbard e Jan Mayen,SJM
+756,África do Sul,ZAF
+759,Sudão,SDN
+760,Sudão do Sul,SSD
+764,Suécia,SWE
+767,Suíça,CHE
+770,Suriname,SUR
+772,Tadjiquistão,TJK
+776,Tailândia,THA
+780,Tanzânia,TZA
+781,Terras Austrais Francesas,ATF
+782,Território Britânico do Oceano Índico,IOT
+783,Djibuti,DJI
+785,Território da Alta Comissão do Pacífico Ocidental,
+786,Território Antártico Britânico,GBR
+788,Chade,TCD
+790,Tchecoslováquia,CSK
+791,"Tcheca, República",CZE
+795,Timor Leste,TLS
+800,Togo,TGO
+805,Toquelau,TKL
+810,Tonga,TON
+815,Trinidad e Tobago,TTO
+820,Tunísia,TUN
+823,"Turcas e Caicos, Ilhas",TCA
+824,Turcomenistão,TKM
+827,Turquia,TUR
+828,Tuvalu,TUV
+831,Ucrânia,UKR
+833,Uganda,UGA
+840,União das Repúblicas Socialistas Soviéticas,
+845,Uruguai,URY
+847,Uzbequistão,UZB
+848,Vaticano,VAT
+850,Venezuela,VEN
+858,Vietnã,VNM
+863,"Virgens, Ilhas (Britânicas)",VGB
+866,"Virgens, Ilhas (Americanas)",VIR
+870,Fiji,FJI
+873,"Wake, Ilha",USA
+875,"Wallis e Futuna, Ilhas",WLF
+888,"Congo, República Democrática",COD
+890,Zâmbia,ZMB
+895,Zona do Canal do Panamá,PCZ
+990,Provisão de Navios e Aeronaves,
+994,A Designar,
+995,Bancos Centrais,
+997,Organizações Internacionais,
+998,Sem informação,
+999,Não Declarados,

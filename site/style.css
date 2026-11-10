@@ -461,3 +461,9 @@ canvas.fundo-vivo{position:fixed;inset:0;width:100%;height:100%;z-index:-1;point
 .ramp.cmp i:nth-child(3){box-shadow:1px 0 0 var(--night)}
 .ramp.cmp b{position:absolute;top:10px;transform:translateX(-50%);font:500 .64rem var(--f-mono);color:var(--ink);white-space:nowrap}
 .links-paginas{font-family:var(--f-mono);font-size:.82rem;letter-spacing:.02em}
+/* comércio com o mundo (Comex Stat; versão de teste desde 10/11/2026): países em verde-azulado, para não se confundirem
+   com o ouro dos estados nem com o azul da comparação de períodos */
+:root{--cx1:#183c3f;--cx2:#1d6a69;--cx3:#2c9c8f;--cx4:#68cdb1;--cx5:#c9f5e0}
+.comex-leg .comex-fluxo{display:inline-flex;gap:4px}
+.comex-fluxo .back{padding:2px 9px;font-size:.76rem}
+.comex-fluxo .back[aria-pressed="true"]{color:var(--night);background:var(--accent);border-color:var(--accent)}
