@@ -219,7 +219,7 @@ const FOGUETE = `<path class="chama" d="M10 27.2Q12 34 14 27.2z" fill="#ffc45a"/
   const map = new maplibregl.Map({
     container: "map",
     locale: { "AttributionControl.ToggleAttribution": "Mostrar ou ocultar os créditos do mapa" },
-    attributionControl: { compact: true, customAttribution: "NASA Blue Marble · Terrain Tiles (AWS) · Natural Earth · IBGE · Marine Regions · ANP · ANEEL · EPE · Anatel · ANTT · ANAC · Ministério da Defesa" },
+    attributionControl: { compact: true, customAttribution: "NASA Blue Marble · Terrain Tiles (AWS) · Natural Earth · IBGE · Marine Regions · ANP · ANEEL · EPE · Anatel · ANTT · ANAC · Ministério da Defesa · MDIC" },
     style: {
       version: 8,
       projection: { type: "globe" },

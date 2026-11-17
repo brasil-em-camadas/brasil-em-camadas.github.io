@@ -335,7 +335,6 @@
    "ministerio": "mdic",
    "por": "total",
    "formato": "dolar",
-   "teste": true,
    "camadas": [
     "comex"
    ],
@@ -1277,7 +1276,6 @@
    "geo": "comex/mundo.json",
    "sob_demanda": true,
    "so_globo": true,
-   "teste": true,
    "ministerio": "mdic",
    "nivel": "api",
    "fonte": "MDIC/SECEX, Comex Stat: cada país pintado pelo valor que comprou do Brasil (ou do estado escolhido) nos 12 meses mais recentes, em dólares FOB; com “Importações”, pelo que vendeu. Contorno dos países: Natural Earth (1:50 milhões). Clique num país para ver os números",

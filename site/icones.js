@@ -321,7 +321,7 @@ const MOEDAS = (() => {
    camada continua com a própria data no painel. A data é a do registro do robô (em UTC), a mesma que o painel mostra.
    Ao criar um robô novo, acrescentar o arquivo dele em ROBOS */
 const ROBOS = ["robo_ibge.json", "petroleo/robo.json", "energia/robo_aneel.json", "energia/robo.json", "celular/robo.json",
-  "trafego/robo.json", "aeroportos/robo.json", "defesa/robo.json"];
+  "trafego/robo.json", "aeroportos/robo.json", "defesa/robo.json", "comex/robo.json"];
 async function seloDados(base) {
   const ler = async a => { try { const r = await fetch(base + a); return r.ok ? await r.json() : null; } catch (e) { return null; } };
   const rs = await Promise.all(ROBOS.map(ler));

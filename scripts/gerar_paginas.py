@@ -558,6 +558,18 @@ def num(v, casas=1):
     return s
 
 
+def dolar(v):
+    """Valor em dólares escrito por extenso, como no mapa: US$ 74,9 bilhões; US$ 850 milhões; US$ 12 mil."""
+    if v is None:
+        return ""
+    s, a = ("−" if v < 0 else ""), abs(v)
+    if a >= 1e9:
+        return f"{s}US$ {num(round(a / 1e9, 1))} {'bilhão' if round(a / 1e9, 1) < 2 else 'bilhões'}"
+    if a >= 1e6:
+        return f"{s}US$ {num(round(a / 1e6, 1))} {'milhão' if round(a / 1e6, 1) < 2 else 'milhões'}"
+    return f"{s}US$ {num(round(a / 1e3))} mil" if a >= 1e3 else f"{s}US$ {num(round(a))}"
+
+
 def reais_mil(v):
     """Valor em mil reais (como o IBGE publica) escrito por extenso: R$ 28,3 bilhões; R$ 984,5 milhões; R$ 820 mil."""
     if v is None:
@@ -637,8 +649,11 @@ def linhas_estado(uf, F, pasta, pop):
             extra = ""
             pos = ""
         else:
-            texto = reais_mil(v) if un == "mil R$" else num(v if taxa or isinstance(v, int) else round(v, 1))
-            valor = e(com_unidade(texto, un))
+            if P.get("formato") == "dolar":
+                valor = e(dolar(v))
+            else:
+                texto = reais_mil(v) if un == "mil R$" else num(v if taxa or isinstance(v, int) else round(v, 1))
+                valor = e(com_unidade(texto, un))
             if taxa:
                 b = brasil_pintura(P, d, pop)
                 extra = f"Brasil: {e(num(round(b, 1)))}" if b is not None else ""
@@ -739,6 +754,22 @@ def detalhes_estado(uf, pasta):
             blocos.append(f"""<section aria-labelledby="t-def">
   <h2 id="t-def">Indústria de defesa</h2>
   <p><b>{e(num(v["valor"]))}</b> {"empresa credenciada" if v["valor"] == 1 else "empresas credenciadas"} pelo Ministério da Defesa: {e(num(v.get("eed", 0)))} como empresa estratégica de defesa (EED) e {e(num(v.get("ed", 0)))} como empresa de defesa (ED).{f" Sedes: {muns}." if muns else ""}</p>
+  {fonte_de(d)}
+</section>""")
+    if (dd / "comex" / "estados.json").exists():
+        d = ler_json(dd / "comex" / "estados.json")
+        v = (d.get("valores") or {}).get(uf)
+        if isinstance(v, dict) and (v.get("valor") or v.get("imp")):
+            nome = lambda c: (d.get("paises") or {}).get(c, [c])[0]
+            lista = lambda ps, tot: ", ".join(f"{e(nome(c))} ({e(dolar(x))}{', ' + e(num(round(x / tot * 100, 1))) + '%' if tot else ''})" for c, x in ps)
+            blocos.append(f"""<section aria-labelledby="t-comex">
+  <h2 id="t-comex">Comércio exterior</h2>
+  <ul><li>Exportações: <b>{e(dolar(v["valor"]))}</b></li>
+  <li>Importações: <b>{e(dolar(v["imp"]))}</b></li>
+  <li>Saldo (exportações menos importações): <b>{e(dolar(v["saldo"]))}</b></li></ul>
+  {f"<p>Maiores destinos das exportações: {lista(v['destinos'], v['valor'])}.</p>" if v.get("destinos") else ""}
+  {f"<p>Maiores origens das importações: {lista(v['origens'], v['imp'])}.</p>" if v.get("origens") else ""}
+  <p class="fino">Valor FOB em dólares, só bens. Exportação pelo estado de origem da mercadoria e importação pelo estado de destino (não pelo endereço da empresa).</p>
   {fonte_de(d)}
 </section>""")
     return "".join(blocos)
