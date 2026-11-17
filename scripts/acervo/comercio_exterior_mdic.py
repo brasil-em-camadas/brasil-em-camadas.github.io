@@ -5,6 +5,7 @@ Uso:
     python scripts/acervo/comercio_exterior_mdic.py           todo mês (GitHub): períodos novos e conferência dos preliminares
     python scripts/acervo/comercio_exterior_mdic.py --tudo    carga inicial: todos os anos desde 1997
     --bruto PASTA      guarda (e reaproveita) as respostas da API nessa pasta
+    --coletado DATA    a data em que as respostas de --bruto foram baixadas (vai para a ficha de cada pacote)
     --anos 2024,2025   só esses anos
 
 Fonte: API do Comex Stat (api-comexstat.mdic.gov.br), mês a mês desde jan/1997. A soma de meses é exata (conferido:
@@ -157,7 +158,9 @@ def avisos_do_periodo(tbr, tuf, especiais):
         if b and b != u:
             partes = sorted(((v[i], k) for k, v in especiais.items() if v[i]), reverse=True)
             det = "; ".join(f"{nomes.get(k, k)}: US$ {C.br(v)}" for v, k in partes[:5])
-            out.append(f"{txt.capitalize()}: os estados somam US$ {C.br(u)}, {f"{100 * u / b:.1f}".replace(".", ",")}% do total do Brasil "
+            pct = f"{100 * u / b:.1f}".replace(".", ",")
+            pct = "mais de 99,9" if pct == "100,0" else pct
+            out.append(f"{txt.capitalize()}: os estados somam US$ {C.br(u)}, {pct}% do total do Brasil "
                        f"(US$ {C.br(b)}); o resto não tem estado na fonte ({det}).")
     return out
 
@@ -167,8 +170,10 @@ def main():
     ap.add_argument("--tudo", action="store_true", help="todos os anos (carga inicial)")
     ap.add_argument("--anos", help="só estes anos, separados por vírgula")
     ap.add_argument("--bruto", help="pasta para guardar e reaproveitar as respostas da API")
+    ap.add_argument("--coletado", help="data (AAAA-MM-DD) em que as respostas de --bruto foram baixadas, quando não foi hoje")
     a = ap.parse_args()
-    dia = C.hoje().isoformat()
+    hoje = C.hoje().isoformat()
+    dia = a.coletado or hoje
     at = A.atualizado()
     ult_ano, ult_mes = int(at["year"]), int(at["monthNumber"])
     arq = C.pasta_conjunto(CFG) / "conjunto.json"
@@ -210,7 +215,7 @@ def main():
     cons = C.consolidar(CFG)
     if cons:
         resultados.update({p: "consolidado agora" for p in cons})
-    C.atualizar_conjunto(CFG, conferido_em=dia, estado=estado)
+    C.atualizar_conjunto(CFG, conferido_em=hoje, estado=estado)
     C.registrar(CFG, resultados)
 
 

@@ -343,7 +343,15 @@
     "medicao",
     "calculo"
    ],
-   "conta": "soma dos 12 meses mais recentes do Comex Stat, pelo estado de origem da mercadoria"
+   "conta": "soma dos 12 meses mais recentes do Comex Stat, pelo estado de origem da mercadoria",
+   "acervo": {
+    "conjunto": "comercio-exterior-mdic",
+    "coluna": "exportacao_us_fob",
+    "filtro": {
+     "pais": "total"
+    },
+    "hoje": "ano"
+   }
   }
  ],
  "luzes": [

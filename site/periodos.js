@@ -136,7 +136,9 @@ const PERIODOS = (() => {
       ufs.forEach(s => { const x = P.val(s); v[s] = x == null && P.vazio ? 0 : x; });
       const b = D && D.brasil ? (D.brasil[P.campo || "valor"] ?? D.brasil.valor) : null;
       return { ok: true, rotulo: String(D.referencia), chave: chave(D.referencia), mapa: true, v, marca: {},
-        br: typeof b === "number" ? b : null, situacao: null, tipo: null };
+        br: typeof b === "number" ? b : null, situacao: null,
+        /* "hoje" no vínculo com o acervo diz o que o mapa de hoje soma (ex.: "ano" = 12 meses, comparável com um ano) */
+        tipo: P.acervo.hoje || null };
     }
     const p = tok === "hoje" ? M : tok, k = pacote(C, p);
     const base = { rotulo: curto(C, p), longo: longo(C, p), periodo: p, chave: chave(p), situacao: k && k.situacao,
@@ -207,7 +209,7 @@ const PERIODOS = (() => {
     const qb = quebras(P, C.dados).find(q => antesDe(A.periodo || String(A.rotulo), q) !== antesDe(B.periodo || String(B.rotulo), q));
     if (qb) return { erro: qb.aviso };
     if (/^fluxo/i.test(C.dados.medida || "") && A.tipo && B.tipo && A.tipo !== B.tipo)
-      return { erro: "A produção é a soma do período: compare ano com ano, ou trimestre com trimestre." };
+      return { erro: `O número é a soma do período: compare ano com ano, ou trimestre com trimestre${[A, B].some(X => X.mapa) ? " (o mapa de hoje soma 12 meses, como um ano)" : ""}.` };
     const total = X => P.por === "total" ? ufs.reduce((t, s) => t + (X.v[s] > 0 ? X.v[s] : 0), 0) : 0;
     const tA = total(A), tB = total(B), x = {}, c = {};
     let forte = false, nada = false, pouco = false;
@@ -227,7 +229,7 @@ const PERIODOS = (() => {
     Object.entries(x).forEach(([s, v]) => { c[s] = v >= L2 ? 5 : v >= L1 ? 4 : v >= 0 ? 3 : v > -L1 ? 2 : v > -L2 ? 1 : 0; });
     const fraco = [nada ? `${P.vazio || "zero"} nos dois períodos` : "", pouco ? "menos de 0,1% do Brasil nos dois períodos" : ""]
       .filter(Boolean).join(" ou ");
-    return { ok: true, A, B, c, x, t1, t2, forte, fraco, dinheiro: /reais|R\$/i.test(P.unidade || "") };
+    return { ok: true, A, B, c, x, t1, t2, forte, fraco, dinheiro: /reais|R\$/i.test(P.unidade || ""), dolar: /US\$/.test(P.unidade || "") };
   }
 
   /* ---------- legenda da comparação ---------- */
@@ -240,7 +242,7 @@ const PERIODOS = (() => {
     for (let k = lo + 1; k <= hi; k++) marcas.push([cortes[k], (k - lo) * 100 / n]);
     if (lo === 3) marcas.unshift(["0", 0]);
     if (hi === 2) marcas.push(["0", 100]);
-    return `<span>${esc(P.nome)}${P.unidade ? " (" + esc(P.unidade) + ")" : ""}: variação de ${esc(K.A.rotulo)} para ${esc(K.B.rotulo)}${K.dinheiro ? ", sem descontar a inflação" : ""}</span>
+    return `<span>${esc(P.nome)}${P.unidade ? " (" + esc(P.unidade) + ")" : ""}: variação de ${esc(K.A.rotulo)} para ${esc(K.B.rotulo)}${K.dinheiro || K.dolar ? ", sem descontar a inflação" : ""}</span>
       <span class="faixa">${lo === 0 ? "<span>caiu</span>" : ""}<span class="ramp cmp">${CORES.slice(lo, hi + 1).map(c => `<i style="background:var(${c})"></i>`).join("")}${marcas.map(([m, x]) => `<b style="left:${x}%">${m}</b>`).join("")}</span>${hi === 5 ? "<span>subiu</span>" : ""}</span>
       ${K.forte ? `<span><i class="key sq" style="background:var(--sem-forte)"></i>sem número num dos períodos</span>` : ""}
       ${K.fraco ? `<span><i class="key sq" style="background:var(--sem-fraco)"></i>${esc(K.fraco)}</span>` : ""}`;
@@ -272,6 +274,7 @@ const PERIODOS = (() => {
           `${esc(Cd.fonte.titulo)}.`,
           Cd.medida ? esc(Cd.medida.charAt(0).toUpperCase() + Cd.medida.slice(1)) + "." : "",
           /reais|R\$/i.test(P.unidade || "") ? "Valores em reais de cada ano, sem descontar a inflação." : "",
+          /US\$/.test(P.unidade || "") ? "Valores em dólares de cada mês, como a fonte publica, sem descontar a inflação." : "",
           prel.length ? prel.map(k => `${curto(Cd, k.periodo)}: preliminar (a fonte ainda pode revisar; vira consolidado em ${data(k.consolida_em)})`).join("; ") + "." : "",
           lac.length ? `Sem este número no acervo: ${lac.join("; ")}.` : "",
           ...quebras(P, Cd).filter(q => [e.a, e.b].some(t => t != null && t !== "hoje" && antesDe(t, q))).map(q => esc(q.aviso)),
@@ -302,7 +305,7 @@ const PERIODOS = (() => {
     if (!C.ok) return "";
     const Cd = C.dados, colu = (Cd.colunas || []).find(c => c.name === P.acervo.coluna), rot = colu ? colu.title : P.nome;
     /* a unidade só quando o nome da coluna não a diz (ex.: "Densidade: acessos por 100 habitantes") */
-    const comUn = P.unidade && !rot.toLowerCase().includes(P.unidade.toLowerCase());
+    const comUn = P.unidade && P.formato !== "dolar" && !rot.toLowerCase().includes(P.unidade.toLowerCase());
     const un = (X, v) => v == null ? (X.marca && X.marca[s] === "X" ? "a fonte não mostra" : "sem número") : `${P.fmt(v)}${comUn ? " " + esc(P.unidade) : ""}`;
     const valor = X => s ? X.v[s] : X.br;
     const n = Object.values(NIVEL).find(x => x[1] === Cd.nivel_confianca);
@@ -332,6 +335,7 @@ const PERIODOS = (() => {
         <div class="kv"><span>${esc(K.B.rotulo)}${K.B.mapa ? " (mapa de hoje)" : ""}</span><span class="v">${un(K.B, b)}</span></div>
         <div class="kv"><span>Variação</span><span class="v">${vari}${pos}</span></div>
         ${K.dinheiro ? `<div class="list">Em reais de cada ano, sem descontar a inflação: parte da alta é só a inflação do período.</div>` : ""}
+        ${K.dolar ? `<div class="list">Em dólares de cada período, sem descontar a inflação: entre anos distantes, parte da alta é a perda de valor do próprio dólar e a mudança dos preços das mercadorias.</div>` : ""}
         ${fonte([K.A, K.B])}`);
     }
     const R = pintura(P, D, ufs);

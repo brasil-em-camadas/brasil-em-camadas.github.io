@@ -86,6 +86,10 @@ jobs:
       - name: "Acervo: velocidade do celular (Anatel)"
         continue-on-error: true
         run: python scripts/acervo/velocidade_celular_anatel.py
+      - name: "Acervo: comércio exterior (Comex Stat, MDIC)"
+        continue-on-error: true
+        timeout-minutes: 30
+        run: python scripts/acervo/comercio_exterior_mdic.py
       # Se o acervo não passar na conferência (ex.: um robô parou no meio), as mudanças dele ficam de fora desta vez;
       # os dados do mapa são salvos mesmo assim.
       - name: "Acervo: conferir"

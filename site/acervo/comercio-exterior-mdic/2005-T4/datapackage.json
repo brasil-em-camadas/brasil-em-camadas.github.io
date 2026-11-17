@@ -1,0 +1,1354 @@
+{
+ "profile": "tabular-data-package",
+ "name": "comercio-exterior-mdic-2005-t4",
+ "title": "Comércio exterior (Comex Stat, MDIC) · 4º trimestre de 2005",
+ "description": "Exportações e importações de bens do Brasil e de cada estado, por país de destino ou de origem: valor em dólares (US$ FOB) e peso líquido, por ano e por trimestre, desde 1997.",
+ "version": "1.0.0",
+ "periodo": "2005-T4",
+ "tipo_de_periodo": "trimestre",
+ "inicio": "2005-10-01",
+ "fim": "2005-12-31",
+ "situacao": "consolidado",
+ "consolida_em": "2007-01-31",
+ "versao": 1,
+ "coletado_em": "2026-11-10",
+ "fonte": {
+  "orgao": "MDIC",
+  "orgao_nome": "Ministério do Desenvolvimento, Indústria, Comércio e Serviços (MDIC), Secretaria de Comércio Exterior (SECEX)",
+  "orgao_site": "https://www.gov.br/mdic/",
+  "titulo": "MDIC/SECEX, Comex Stat (estatísticas do comércio exterior brasileiro de bens)",
+  "consulta": "https://api-comexstat.mdic.gov.br/general (fluxos export e import, de 2005-10 a 2005-12, detalhes country e state, métricas metricFOB e metricKG)",
+  "catalogo": "https://comexstat.mdic.gov.br/",
+  "licenca": "dados abertos publicados pelo MDIC; a licença não está escrita no Comex Stat (citar a fonte: MDIC/SECEX, Comex Stat)"
+ },
+ "nivel_confianca": "Oficial · API",
+ "medida": "fluxo: o que foi exportado ou importado no período",
+ "metodo": "Números do Comex Stat como o MDIC publica na API, mês a mês, somados por trimestre e por ano pelo projeto. Valor FOB em dólares americanos (o valor da mercadoria posta a bordo, sem frete e seguro internacionais), no valor de cada mês, sem converter para reais e sem descontar a inflação; peso líquido em quilos. O estado é a \"UF do produto\" do Comex Stat: na exportação, o estado de origem da mercadoria; na importação, o estado de destino (não é o endereço da empresa que fez a operação). O total do Brasil vem da própria API (consulta sem estado) e inclui o que não tem estado: não declarado, consumo de bordo, café de estados diversos, reexportação e outros. Uma linha por lugar e país, e a linha 'total' com todos os países.",
+ "avisos": [
+  "Só bens (mercadorias); serviços, turismo e investimentos não entram.",
+  "Um país que não aparece num lugar não teve nada registrado naquele período. Um país com exportação e sem importação (ou o contrário) tem 0 na outra coluna: zero registrado pela fonte.",
+  "País: o código do Comex Stat (coluna pais) e, quando existe, o código ISO 3166 de três letras (pais_iso3). A lista dos países do período, com os nomes, está na ficha (itens). Países que deixaram de existir (Alemanha Oriental, Antilhas Holandesas…) e destinos que não são países (provisão de navios e aeronaves, a designar…) ficam com o código do Comex Stat e sem ISO.",
+  "O Comex Stat traz também operações com \"Brasil\" como país de destino ou de origem (código 105) e com a \"Internação na Zona Franca de Manaus\" (código 100); elas ficam nas tabelas como a fonte publica.",
+  "Os números são os da base atual do Comex Stat, que a SECEX revisa: podem diferir dos divulgados na época.",
+  "Dólares de cada mês: para comparar anos distantes, o peso é mais firme que o valor, porque o dólar também perde valor com a inflação e os preços das mercadorias mudam.",
+  "Exportações: os estados somam US$ 31.080.034.318, 98,1% do total do Brasil (US$ 31.676.392.375); o resto não tem estado na fonte (não declarada: US$ 262.644.668; zona não declarada: US$ 150.804.589; mercadoria nacionalizada: US$ 117.199.838; reexportação: US$ 65.708.962).",
+  "Importações: os estados somam US$ 19.466.770.954, 98,3% do total do Brasil (US$ 19.794.422.897); o resto não tem estado na fonte (não declarada: US$ 327.595.078; exterior: US$ 56.865)."
+ ],
+ "marcas": {
+  "numero": "valor (0 é zero de verdade)",
+  "vazio": "sem dado",
+  "X": "a fonte esconde o número",
+  "..": "não se aplica"
+ },
+ "licenses": [
+  {
+   "name": "CC-BY-4.0",
+   "title": "Creative Commons Atribuição 4.0 Internacional",
+   "path": "https://creativecommons.org/licenses/by/4.0/deed.pt_BR"
+  }
+ ],
+ "licenca_da_fonte": "dados abertos publicados pelo MDIC; a licença não está escrita no Comex Stat (citar a fonte: MDIC/SECEX, Comex Stat)",
+ "sources": [
+  {
+   "title": "MDIC/SECEX, Comex Stat (estatísticas do comércio exterior brasileiro de bens)",
+   "path": "https://api-comexstat.mdic.gov.br/general (fluxos export e import, de 2005-10 a 2005-12, detalhes country e state, métricas metricFOB e metricKG)"
+  }
+ ],
+ "contributors": [
+  {
+   "title": "Brasil em Camadas",
+   "role": "publisher"
+  }
+ ],
+ "formato": "Brasil em Camadas · acervo de dados por período, formato 1 (ver README.md desta pasta)",
+ "itens": [
+  {
+   "pais": "013",
+   "nome": "Afeganistão",
+   "pais_iso3": "AFG"
+  },
+  {
+   "pais": "017",
+   "nome": "Albânia",
+   "pais_iso3": "ALB"
+  },
+  {
+   "pais": "023",
+   "nome": "Alemanha",
+   "pais_iso3": "DEU"
+  },
+  {
+   "pais": "031",
+   "nome": "Burkina Faso",
+   "pais_iso3": "BFA"
+  },
+  {
+   "pais": "037",
+   "nome": "Andorra",
+   "pais_iso3": "AND"
+  },
+  {
+   "pais": "040",
+   "nome": "Angola",
+   "pais_iso3": "AGO"
+  },
+  {
+   "pais": "041",
+   "nome": "Anguilla",
+   "pais_iso3": "AIA"
+  },
+  {
+   "pais": "043",
+   "nome": "Antígua e Barbuda",
+   "pais_iso3": "ATG"
+  },
+  {
+   "pais": "047",
+   "nome": "Antilhas Holandesas",
+   "pais_iso3": "ANT"
+  },
+  {
+   "pais": "053",
+   "nome": "Arábia Saudita",
+   "pais_iso3": "SAU"
+  },
+  {
+   "pais": "059",
+   "nome": "Argélia",
+   "pais_iso3": "DZA"
+  },
+  {
+   "pais": "063",
+   "nome": "Argentina",
+   "pais_iso3": "ARG"
+  },
+  {
+   "pais": "064",
+   "nome": "Armênia",
+   "pais_iso3": "ARM"
+  },
+  {
+   "pais": "065",
+   "nome": "Aruba",
+   "pais_iso3": "ABW"
+  },
+  {
+   "pais": "069",
+   "nome": "Austrália",
+   "pais_iso3": "AUS"
+  },
+  {
+   "pais": "072",
+   "nome": "Áustria",
+   "pais_iso3": "AUT"
+  },
+  {
+   "pais": "073",
+   "nome": "Azerbaijão",
+   "pais_iso3": "AZE"
+  },
+  {
+   "pais": "077",
+   "nome": "Bahamas",
+   "pais_iso3": "BHS"
+  },
+  {
+   "pais": "080",
+   "nome": "Barein",
+   "pais_iso3": "BHR"
+  },
+  {
+   "pais": "081",
+   "nome": "Bangladesh",
+   "pais_iso3": "BGD"
+  },
+  {
+   "pais": "083",
+   "nome": "Barbados",
+   "pais_iso3": "BRB"
+  },
+  {
+   "pais": "085",
+   "nome": "Belarus",
+   "pais_iso3": "BLR"
+  },
+  {
+   "pais": "087",
+   "nome": "Bélgica",
+   "pais_iso3": "BEL"
+  },
+  {
+   "pais": "088",
+   "nome": "Belize",
+   "pais_iso3": "BLZ"
+  },
+  {
+   "pais": "090",
+   "nome": "Bermudas",
+   "pais_iso3": "BMU"
+  },
+  {
+   "pais": "093",
+   "nome": "Mianmar",
+   "pais_iso3": "MMR"
+  },
+  {
+   "pais": "097",
+   "nome": "Bolívia",
+   "pais_iso3": "BOL"
+  },
+  {
+   "pais": "098",
+   "nome": "Bósnia-Herzegovina",
+   "pais_iso3": "BIH"
+  },
+  {
+   "pais": "101",
+   "nome": "Botsuana",
+   "pais_iso3": "BWA"
+  },
+  {
+   "pais": "105",
+   "nome": "Brasil",
+   "pais_iso3": "BRA"
+  },
+  {
+   "pais": "108",
+   "nome": "Brunei",
+   "pais_iso3": "BRN"
+  },
+  {
+   "pais": "111",
+   "nome": "Bulgária",
+   "pais_iso3": "BGR"
+  },
+  {
+   "pais": "115",
+   "nome": "Burundi",
+   "pais_iso3": "BDI"
+  },
+  {
+   "pais": "119",
+   "nome": "Butão",
+   "pais_iso3": "BTN"
+  },
+  {
+   "pais": "127",
+   "nome": "Cabo Verde",
+   "pais_iso3": "CPV"
+  },
+  {
+   "pais": "137",
+   "nome": "Cayman, Ilhas",
+   "pais_iso3": "CYM"
+  },
+  {
+   "pais": "141",
+   "nome": "Camboja",
+   "pais_iso3": "KHM"
+  },
+  {
+   "pais": "145",
+   "nome": "Camarões",
+   "pais_iso3": "CMR"
+  },
+  {
+   "pais": "149",
+   "nome": "Canadá",
+   "pais_iso3": "CAN"
+  },
+  {
+   "pais": "151",
+   "nome": "Canárias, Ilhas",
+   "pais_iso3": "ESP"
+  },
+  {
+   "pais": "153",
+   "nome": "Cazaquistão",
+   "pais_iso3": "KAZ"
+  },
+  {
+   "pais": "154",
+   "nome": "Catar",
+   "pais_iso3": "QAT"
+  },
+  {
+   "pais": "158",
+   "nome": "Chile",
+   "pais_iso3": "CHL"
+  },
+  {
+   "pais": "160",
+   "nome": "China",
+   "pais_iso3": "CHN"
+  },
+  {
+   "pais": "161",
+   "nome": "Taiwan (Formosa)",
+   "pais_iso3": "TWN"
+  },
+  {
+   "pais": "163",
+   "nome": "Chipre",
+   "pais_iso3": "CYP"
+  },
+  {
+   "pais": "165",
+   "nome": "Cocos (Keeling), Ilhas",
+   "pais_iso3": "CCK"
+  },
+  {
+   "pais": "169",
+   "nome": "Colômbia",
+   "pais_iso3": "COL"
+  },
+  {
+   "pais": "173",
+   "nome": "Comores",
+   "pais_iso3": "COM"
+  },
+  {
+   "pais": "177",
+   "nome": "Congo",
+   "pais_iso3": "COG"
+  },
+  {
+   "pais": "183",
+   "nome": "Cook, Ilhas",
+   "pais_iso3": "COK"
+  },
+  {
+   "pais": "187",
+   "nome": "Coreia do Norte",
+   "pais_iso3": "PRK"
+  },
+  {
+   "pais": "190",
+   "nome": "Coreia do Sul",
+   "pais_iso3": "KOR"
+  },
+  {
+   "pais": "193",
+   "nome": "Costa do Marfim",
+   "pais_iso3": "CIV"
+  },
+  {
+   "pais": "195",
+   "nome": "Croácia",
+   "pais_iso3": "HRV"
+  },
+  {
+   "pais": "196",
+   "nome": "Costa Rica",
+   "pais_iso3": "CRI"
+  },
+  {
+   "pais": "198",
+   "nome": "Coveite (Kuweit)",
+   "pais_iso3": "KWT"
+  },
+  {
+   "pais": "199",
+   "nome": "Cuba",
+   "pais_iso3": "CUB"
+  },
+  {
+   "pais": "229",
+   "nome": "Benin",
+   "pais_iso3": "BEN"
+  },
+  {
+   "pais": "232",
+   "nome": "Dinamarca",
+   "pais_iso3": "DNK"
+  },
+  {
+   "pais": "235",
+   "nome": "Dominica",
+   "pais_iso3": "DMA"
+  },
+  {
+   "pais": "239",
+   "nome": "Equador",
+   "pais_iso3": "ECU"
+  },
+  {
+   "pais": "240",
+   "nome": "Egito",
+   "pais_iso3": "EGY"
+  },
+  {
+   "pais": "243",
+   "nome": "Eritreia",
+   "pais_iso3": "ERI"
+  },
+  {
+   "pais": "244",
+   "nome": "Emirados Árabes Unidos",
+   "pais_iso3": "ARE"
+  },
+  {
+   "pais": "245",
+   "nome": "Espanha",
+   "pais_iso3": "ESP"
+  },
+  {
+   "pais": "246",
+   "nome": "Eslovênia",
+   "pais_iso3": "SVN"
+  },
+  {
+   "pais": "247",
+   "nome": "Eslováquia",
+   "pais_iso3": "SVK"
+  },
+  {
+   "pais": "249",
+   "nome": "Estados Unidos",
+   "pais_iso3": "USA"
+  },
+  {
+   "pais": "251",
+   "nome": "Estônia",
+   "pais_iso3": "EST"
+  },
+  {
+   "pais": "253",
+   "nome": "Etiópia",
+   "pais_iso3": "ETH"
+  },
+  {
+   "pais": "255",
+   "nome": "Falkland (Malvinas)",
+   "pais_iso3": "FLK"
+  },
+  {
+   "pais": "259",
+   "nome": "Faroe, Ilhas",
+   "pais_iso3": "FRO"
+  },
+  {
+   "pais": "267",
+   "nome": "Filipinas",
+   "pais_iso3": "PHL"
+  },
+  {
+   "pais": "271",
+   "nome": "Finlândia",
+   "pais_iso3": "FIN"
+  },
+  {
+   "pais": "275",
+   "nome": "França",
+   "pais_iso3": "FRA"
+  },
+  {
+   "pais": "281",
+   "nome": "Gabão",
+   "pais_iso3": "GAB"
+  },
+  {
+   "pais": "285",
+   "nome": "Gâmbia",
+   "pais_iso3": "GMB"
+  },
+  {
+   "pais": "289",
+   "nome": "Gana",
+   "pais_iso3": "GHA"
+  },
+  {
+   "pais": "291",
+   "nome": "Geórgia",
+   "pais_iso3": "GEO"
+  },
+  {
+   "pais": "293",
+   "nome": "Gibraltar",
+   "pais_iso3": "GIB"
+  },
+  {
+   "pais": "297",
+   "nome": "Granada",
+   "pais_iso3": "GRD"
+  },
+  {
+   "pais": "301",
+   "nome": "Grécia",
+   "pais_iso3": "GRC"
+  },
+  {
+   "pais": "309",
+   "nome": "Guadalupe",
+   "pais_iso3": "GLP"
+  },
+  {
+   "pais": "313",
+   "nome": "Guam",
+   "pais_iso3": "GUM"
+  },
+  {
+   "pais": "317",
+   "nome": "Guatemala",
+   "pais_iso3": "GTM"
+  },
+  {
+   "pais": "325",
+   "nome": "Guiana Francesa",
+   "pais_iso3": "GUF"
+  },
+  {
+   "pais": "329",
+   "nome": "Guiné",
+   "pais_iso3": "GIN"
+  },
+  {
+   "pais": "331",
+   "nome": "Guiné Equatorial",
+   "pais_iso3": "GNQ"
+  },
+  {
+   "pais": "334",
+   "nome": "Guiné-Bissau",
+   "pais_iso3": "GNB"
+  },
+  {
+   "pais": "337",
+   "nome": "Guiana",
+   "pais_iso3": "GUY"
+  },
+  {
+   "pais": "341",
+   "nome": "Haiti",
+   "pais_iso3": "HTI"
+  },
+  {
+   "pais": "345",
+   "nome": "Honduras",
+   "pais_iso3": "HND"
+  },
+  {
+   "pais": "351",
+   "nome": "Hong Kong",
+   "pais_iso3": "HKG"
+  },
+  {
+   "pais": "355",
+   "nome": "Hungria",
+   "pais_iso3": "HUN"
+  },
+  {
+   "pais": "357",
+   "nome": "Iêmen",
+   "pais_iso3": "YEM"
+  },
+  {
+   "pais": "359",
+   "nome": "Ilha de Man",
+   "pais_iso3": "IMN"
+  },
+  {
+   "pais": "361",
+   "nome": "Índia",
+   "pais_iso3": "IND"
+  },
+  {
+   "pais": "365",
+   "nome": "Indonésia",
+   "pais_iso3": "IDN"
+  },
+  {
+   "pais": "369",
+   "nome": "Iraque",
+   "pais_iso3": "IRQ"
+  },
+  {
+   "pais": "372",
+   "nome": "Irã",
+   "pais_iso3": "IRN"
+  },
+  {
+   "pais": "375",
+   "nome": "Irlanda",
+   "pais_iso3": "IRL"
+  },
+  {
+   "pais": "379",
+   "nome": "Islândia",
+   "pais_iso3": "ISL"
+  },
+  {
+   "pais": "383",
+   "nome": "Israel",
+   "pais_iso3": "ISR"
+  },
+  {
+   "pais": "386",
+   "nome": "Itália",
+   "pais_iso3": "ITA"
+  },
+  {
+   "pais": "388",
+   "nome": "Iugoslávia",
+   "pais_iso3": "SCG"
+  },
+  {
+   "pais": "391",
+   "nome": "Jamaica",
+   "pais_iso3": "JAM"
+  },
+  {
+   "pais": "396",
+   "nome": "Johnston, Ilhas",
+   "pais_iso3": "USA"
+  },
+  {
+   "pais": "399",
+   "nome": "Japão",
+   "pais_iso3": "JPN"
+  },
+  {
+   "pais": "403",
+   "nome": "Jordânia",
+   "pais_iso3": "JOR"
+  },
+  {
+   "pais": "420",
+   "nome": "Laos",
+   "pais_iso3": "LAO"
+  },
+  {
+   "pais": "426",
+   "nome": "Lesoto",
+   "pais_iso3": "LSO"
+  },
+  {
+   "pais": "427",
+   "nome": "Letônia",
+   "pais_iso3": "LVA"
+  },
+  {
+   "pais": "431",
+   "nome": "Líbano",
+   "pais_iso3": "LBN"
+  },
+  {
+   "pais": "434",
+   "nome": "Libéria",
+   "pais_iso3": "LBR"
+  },
+  {
+   "pais": "438",
+   "nome": "Líbia",
+   "pais_iso3": "LBY"
+  },
+  {
+   "pais": "440",
+   "nome": "Liechtenstein",
+   "pais_iso3": "LIE"
+  },
+  {
+   "pais": "442",
+   "nome": "Lituânia",
+   "pais_iso3": "LTU"
+  },
+  {
+   "pais": "445",
+   "nome": "Luxemburgo",
+   "pais_iso3": "LUX"
+  },
+  {
+   "pais": "447",
+   "nome": "Macau",
+   "pais_iso3": "MAC"
+  },
+  {
+   "pais": "449",
+   "nome": "Macedônia",
+   "pais_iso3": "MKD"
+  },
+  {
+   "pais": "450",
+   "nome": "Madagascar",
+   "pais_iso3": "MDG"
+  },
+  {
+   "pais": "455",
+   "nome": "Malásia",
+   "pais_iso3": "MYS"
+  },
+  {
+   "pais": "458",
+   "nome": "Malavi",
+   "pais_iso3": "MWI"
+  },
+  {
+   "pais": "461",
+   "nome": "Maldivas",
+   "pais_iso3": "MDV"
+  },
+  {
+   "pais": "464",
+   "nome": "Mali",
+   "pais_iso3": "MLI"
+  },
+  {
+   "pais": "467",
+   "nome": "Malta",
+   "pais_iso3": "MLT"
+  },
+  {
+   "pais": "472",
+   "nome": "Marianas do Norte, Ilhas",
+   "pais_iso3": "MNP"
+  },
+  {
+   "pais": "474",
+   "nome": "Marrocos",
+   "pais_iso3": "MAR"
+  },
+  {
+   "pais": "476",
+   "nome": "Marshall, Ilhas",
+   "pais_iso3": "MHL"
+  },
+  {
+   "pais": "477",
+   "nome": "Martinica",
+   "pais_iso3": "MTQ"
+  },
+  {
+   "pais": "485",
+   "nome": "Maurício",
+   "pais_iso3": "MUS"
+  },
+  {
+   "pais": "488",
+   "nome": "Mauritânia",
+   "pais_iso3": "MRT"
+  },
+  {
+   "pais": "493",
+   "nome": "México",
+   "pais_iso3": "MEX"
+  },
+  {
+   "pais": "494",
+   "nome": "Moldávia",
+   "pais_iso3": "MDA"
+  },
+  {
+   "pais": "495",
+   "nome": "Mônaco",
+   "pais_iso3": "MCO"
+  },
+  {
+   "pais": "497",
+   "nome": "Mongólia",
+   "pais_iso3": "MNG"
+  },
+  {
+   "pais": "499",
+   "nome": "Micronésia",
+   "pais_iso3": "FSM"
+  },
+  {
+   "pais": "501",
+   "nome": "Montserrat",
+   "pais_iso3": "MSR"
+  },
+  {
+   "pais": "505",
+   "nome": "Moçambique",
+   "pais_iso3": "MOZ"
+  },
+  {
+   "pais": "507",
+   "nome": "Namíbia",
+   "pais_iso3": "NAM"
+  },
+  {
+   "pais": "517",
+   "nome": "Nepal",
+   "pais_iso3": "NPL"
+  },
+  {
+   "pais": "521",
+   "nome": "Nicarágua",
+   "pais_iso3": "NIC"
+  },
+  {
+   "pais": "525",
+   "nome": "Níger",
+   "pais_iso3": "NER"
+  },
+  {
+   "pais": "528",
+   "nome": "Nigéria",
+   "pais_iso3": "NGA"
+  },
+  {
+   "pais": "535",
+   "nome": "Norfolk, Ilha",
+   "pais_iso3": "NFK"
+  },
+  {
+   "pais": "538",
+   "nome": "Noruega",
+   "pais_iso3": "NOR"
+  },
+  {
+   "pais": "542",
+   "nome": "Nova Caledônia",
+   "pais_iso3": "NCL"
+  },
+  {
+   "pais": "545",
+   "nome": "Papua Nova Guiné",
+   "pais_iso3": "PNG"
+  },
+  {
+   "pais": "548",
+   "nome": "Nova Zelândia",
+   "pais_iso3": "NZL"
+  },
+  {
+   "pais": "551",
+   "nome": "Vanuatu",
+   "pais_iso3": "VUT"
+  },
+  {
+   "pais": "556",
+   "nome": "Omã",
+   "pais_iso3": "OMN"
+  },
+  {
+   "pais": "566",
+   "nome": "Pacífico, Ilhas do (EUA)",
+   "pais_iso3": "UMI"
+  },
+  {
+   "pais": "573",
+   "nome": "Países Baixos (Holanda)",
+   "pais_iso3": "NLD"
+  },
+  {
+   "pais": "575",
+   "nome": "Palau",
+   "pais_iso3": "PLW"
+  },
+  {
+   "pais": "576",
+   "nome": "Paquistão",
+   "pais_iso3": "PAK"
+  },
+  {
+   "pais": "580",
+   "nome": "Panamá",
+   "pais_iso3": "PAN"
+  },
+  {
+   "pais": "586",
+   "nome": "Paraguai",
+   "pais_iso3": "PRY"
+  },
+  {
+   "pais": "589",
+   "nome": "Peru",
+   "pais_iso3": "PER"
+  },
+  {
+   "pais": "599",
+   "nome": "Polinésia Francesa",
+   "pais_iso3": "PYF"
+  },
+  {
+   "pais": "603",
+   "nome": "Polônia",
+   "pais_iso3": "POL"
+  },
+  {
+   "pais": "607",
+   "nome": "Portugal",
+   "pais_iso3": "PRT"
+  },
+  {
+   "pais": "611",
+   "nome": "Porto Rico",
+   "pais_iso3": "PRI"
+  },
+  {
+   "pais": "623",
+   "nome": "Quênia",
+   "pais_iso3": "KEN"
+  },
+  {
+   "pais": "625",
+   "nome": "Quirguistão",
+   "pais_iso3": "KGZ"
+  },
+  {
+   "pais": "628",
+   "nome": "Reino Unido",
+   "pais_iso3": "GBR"
+  },
+  {
+   "pais": "640",
+   "nome": "República Centro-Africana",
+   "pais_iso3": "CAF"
+  },
+  {
+   "pais": "647",
+   "nome": "República Dominicana",
+   "pais_iso3": "DOM"
+  },
+  {
+   "pais": "660",
+   "nome": "Reunião",
+   "pais_iso3": "REU"
+  },
+  {
+   "pais": "665",
+   "nome": "Zimbábue",
+   "pais_iso3": "ZWE"
+  },
+  {
+   "pais": "670",
+   "nome": "Romênia",
+   "pais_iso3": "ROU"
+  },
+  {
+   "pais": "675",
+   "nome": "Ruanda",
+   "pais_iso3": "RWA"
+  },
+  {
+   "pais": "676",
+   "nome": "Rússia",
+   "pais_iso3": "RUS"
+  },
+  {
+   "pais": "677",
+   "nome": "Salomão, Ilhas",
+   "pais_iso3": "SLB"
+  },
+  {
+   "pais": "685",
+   "nome": "Saara Ocidental",
+   "pais_iso3": "ESH"
+  },
+  {
+   "pais": "687",
+   "nome": "El Salvador",
+   "pais_iso3": "SLV"
+  },
+  {
+   "pais": "690",
+   "nome": "Samoa",
+   "pais_iso3": "WSM"
+  },
+  {
+   "pais": "691",
+   "nome": "Samoa Americana",
+   "pais_iso3": "ASM"
+  },
+  {
+   "pais": "695",
+   "nome": "São Cristóvão e Névis",
+   "pais_iso3": "KNA"
+  },
+  {
+   "pais": "697",
+   "nome": "San Marino",
+   "pais_iso3": "SMR"
+  },
+  {
+   "pais": "705",
+   "nome": "São Vicente e Granadinas",
+   "pais_iso3": "VCT"
+  },
+  {
+   "pais": "715",
+   "nome": "Santa Lúcia",
+   "pais_iso3": "LCA"
+  },
+  {
+   "pais": "720",
+   "nome": "São Tomé e Príncipe",
+   "pais_iso3": "STP"
+  },
+  {
+   "pais": "728",
+   "nome": "Senegal",
+   "pais_iso3": "SEN"
+  },
+  {
+   "pais": "731",
+   "nome": "Seicheles",
+   "pais_iso3": "SYC"
+  },
+  {
+   "pais": "735",
+   "nome": "Serra Leoa",
+   "pais_iso3": "SLE"
+  },
+  {
+   "pais": "741",
+   "nome": "Singapura",
+   "pais_iso3": "SGP"
+  },
+  {
+   "pais": "744",
+   "nome": "Síria",
+   "pais_iso3": "SYR"
+  },
+  {
+   "pais": "748",
+   "nome": "Somália",
+   "pais_iso3": "SOM"
+  },
+  {
+   "pais": "750",
+   "nome": "Sri Lanka",
+   "pais_iso3": "LKA"
+  },
+  {
+   "pais": "754",
+   "nome": "Suazilândia",
+   "pais_iso3": "SWZ"
+  },
+  {
+   "pais": "756",
+   "nome": "África do Sul",
+   "pais_iso3": "ZAF"
+  },
+  {
+   "pais": "759",
+   "nome": "Sudão",
+   "pais_iso3": "SDN"
+  },
+  {
+   "pais": "764",
+   "nome": "Suécia",
+   "pais_iso3": "SWE"
+  },
+  {
+   "pais": "767",
+   "nome": "Suíça",
+   "pais_iso3": "CHE"
+  },
+  {
+   "pais": "770",
+   "nome": "Suriname",
+   "pais_iso3": "SUR"
+  },
+  {
+   "pais": "772",
+   "nome": "Tadjiquistão",
+   "pais_iso3": "TJK"
+  },
+  {
+   "pais": "776",
+   "nome": "Tailândia",
+   "pais_iso3": "THA"
+  },
+  {
+   "pais": "780",
+   "nome": "Tanzânia",
+   "pais_iso3": "TZA"
+  },
+  {
+   "pais": "782",
+   "nome": "Território Britânico do Oceano Índico",
+   "pais_iso3": "IOT"
+  },
+  {
+   "pais": "783",
+   "nome": "Djibuti",
+   "pais_iso3": "DJI"
+  },
+  {
+   "pais": "788",
+   "nome": "Chade",
+   "pais_iso3": "TCD"
+  },
+  {
+   "pais": "791",
+   "nome": "Tcheca, República",
+   "pais_iso3": "CZE"
+  },
+  {
+   "pais": "795",
+   "nome": "Timor Leste",
+   "pais_iso3": "TLS"
+  },
+  {
+   "pais": "800",
+   "nome": "Togo",
+   "pais_iso3": "TGO"
+  },
+  {
+   "pais": "810",
+   "nome": "Tonga",
+   "pais_iso3": "TON"
+  },
+  {
+   "pais": "815",
+   "nome": "Trinidad e Tobago",
+   "pais_iso3": "TTO"
+  },
+  {
+   "pais": "820",
+   "nome": "Tunísia",
+   "pais_iso3": "TUN"
+  },
+  {
+   "pais": "823",
+   "nome": "Turcas e Caicos, Ilhas",
+   "pais_iso3": "TCA"
+  },
+  {
+   "pais": "824",
+   "nome": "Turcomenistão",
+   "pais_iso3": "TKM"
+  },
+  {
+   "pais": "827",
+   "nome": "Turquia",
+   "pais_iso3": "TUR"
+  },
+  {
+   "pais": "828",
+   "nome": "Tuvalu",
+   "pais_iso3": "TUV"
+  },
+  {
+   "pais": "831",
+   "nome": "Ucrânia",
+   "pais_iso3": "UKR"
+  },
+  {
+   "pais": "833",
+   "nome": "Uganda",
+   "pais_iso3": "UGA"
+  },
+  {
+   "pais": "845",
+   "nome": "Uruguai",
+   "pais_iso3": "URY"
+  },
+  {
+   "pais": "847",
+   "nome": "Uzbequistão",
+   "pais_iso3": "UZB"
+  },
+  {
+   "pais": "850",
+   "nome": "Venezuela",
+   "pais_iso3": "VEN"
+  },
+  {
+   "pais": "858",
+   "nome": "Vietnã",
+   "pais_iso3": "VNM"
+  },
+  {
+   "pais": "863",
+   "nome": "Virgens, Ilhas (Britânicas)",
+   "pais_iso3": "VGB"
+  },
+  {
+   "pais": "866",
+   "nome": "Virgens, Ilhas (Americanas)",
+   "pais_iso3": "VIR"
+  },
+  {
+   "pais": "870",
+   "nome": "Fiji",
+   "pais_iso3": "FJI"
+  },
+  {
+   "pais": "875",
+   "nome": "Wallis e Futuna, Ilhas",
+   "pais_iso3": "WLF"
+  },
+  {
+   "pais": "888",
+   "nome": "Congo, República Democrática",
+   "pais_iso3": "COD"
+  },
+  {
+   "pais": "890",
+   "nome": "Zâmbia",
+   "pais_iso3": "ZMB"
+  },
+  {
+   "pais": "895",
+   "nome": "Zona do Canal do Panamá",
+   "pais_iso3": "PCZ"
+  },
+  {
+   "pais": "990",
+   "nome": "Provisão de Navios e Aeronaves",
+   "pais_iso3": ""
+  },
+  {
+   "pais": "997",
+   "nome": "Organizações Internacionais",
+   "pais_iso3": ""
+  }
+ ],
+ "resources": [
+  {
+   "name": "brasil",
+   "path": "brasil.csv",
+   "profile": "tabular-data-resource",
+   "title": "Brasil",
+   "format": "csv",
+   "mediatype": "text/csv",
+   "encoding": "utf-8",
+   "bytes": 8781,
+   "hash": "sha256:39c356d075bd5bb169902dc803b07d661a081a2ce45c6af57972f282cf88c905",
+   "dialect": {
+    "delimiter": ",",
+    "header": true
+   },
+   "schema": {
+    "fields": [
+     {
+      "name": "codigo_ibge",
+      "type": "string",
+      "title": "Código do IBGE",
+      "description": "1 = Brasil; 2 dígitos = estado"
+     },
+     {
+      "name": "pais",
+      "type": "string",
+      "title": "País (código do Comex Stat)",
+      "description": "'total' = todos os países"
+     },
+     {
+      "name": "pais_iso3",
+      "type": "string",
+      "title": "País (ISO 3166, três letras)",
+      "description": "vazio quando não há código ISO"
+     },
+     {
+      "name": "exportacao_us_fob",
+      "type": "integer",
+      "title": "Exportação, valor",
+      "description": "dólares de cada mês, como a fonte publica",
+      "unidade": "US$ FOB"
+     },
+     {
+      "name": "exportacao_kg",
+      "type": "integer",
+      "title": "Exportação, peso líquido",
+      "unidade": "kg"
+     },
+     {
+      "name": "importacao_us_fob",
+      "type": "integer",
+      "title": "Importação, valor",
+      "description": "dólares de cada mês, como a fonte publica",
+      "unidade": "US$ FOB"
+     },
+     {
+      "name": "importacao_kg",
+      "type": "integer",
+      "title": "Importação, peso líquido",
+      "unidade": "kg"
+     }
+    ],
+    "missingValues": [
+     "",
+     "X",
+     ".."
+    ],
+    "primaryKey": [
+     "codigo_ibge",
+     "pais"
+    ]
+   },
+   "linhas": 228
+  },
+  {
+   "name": "uf",
+   "path": "uf.csv",
+   "profile": "tabular-data-resource",
+   "title": "estados (estado de origem do produto na exportação e de destino na importação)",
+   "format": "csv",
+   "mediatype": "text/csv",
+   "encoding": "utf-8",
+   "bytes": 97276,
+   "hash": "sha256:5604ba6ae1986c1d2e68944bacaeb4241f47ab48f531545b343cef146ef15a00",
+   "dialect": {
+    "delimiter": ",",
+    "header": true
+   },
+   "schema": {
+    "fields": [
+     {
+      "name": "codigo_ibge",
+      "type": "string",
+      "title": "Código do IBGE",
+      "description": "1 = Brasil; 2 dígitos = estado"
+     },
+     {
+      "name": "uf",
+      "type": "string",
+      "title": "Estado (sigla)"
+     },
+     {
+      "name": "pais",
+      "type": "string",
+      "title": "País (código do Comex Stat)",
+      "description": "'total' = todos os países"
+     },
+     {
+      "name": "pais_iso3",
+      "type": "string",
+      "title": "País (ISO 3166, três letras)",
+      "description": "vazio quando não há código ISO"
+     },
+     {
+      "name": "exportacao_us_fob",
+      "type": "integer",
+      "title": "Exportação, valor",
+      "description": "dólares de cada mês, como a fonte publica",
+      "unidade": "US$ FOB"
+     },
+     {
+      "name": "exportacao_kg",
+      "type": "integer",
+      "title": "Exportação, peso líquido",
+      "unidade": "kg"
+     },
+     {
+      "name": "importacao_us_fob",
+      "type": "integer",
+      "title": "Importação, valor",
+      "description": "dólares de cada mês, como a fonte publica",
+      "unidade": "US$ FOB"
+     },
+     {
+      "name": "importacao_kg",
+      "type": "integer",
+      "title": "Importação, peso líquido",
+      "unidade": "kg"
+     }
+    ],
+    "missingValues": [
+     "",
+     "X",
+     ".."
+    ],
+    "primaryKey": [
+     "codigo_ibge",
+     "pais"
+    ]
+   },
+   "linhas": 2646
+  }
+ ]
+}
