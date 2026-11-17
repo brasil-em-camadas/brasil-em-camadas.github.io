@@ -69,9 +69,14 @@ def linhas():
     if len(feats) != contar(9):
         raise ValueError(f"linhas: vieram {len(feats)} de {contar(9)}")
     saida, km, ultimo = [], 0.0, 0
+    fora = {"sem_desenho": [], "sem_tensao": []}   # linhas da base que não entram no mapa, com o nome (fica no meta)
     for f in feats:
         p, g = f.get("properties") or {}, f.get("geometry")
-        if not g or g.get("type") not in ("LineString", "MultiLineString") or not p.get("Tensao"):
+        if not g or g.get("type") not in ("LineString", "MultiLineString"):
+            fora["sem_desenho"].append(" ".join((p.get("Nome") or "(sem nome)").split()))
+            continue
+        if not p.get("Tensao"):
+            fora["sem_tensao"].append(" ".join((p.get("Nome") or "(sem nome)").split()))
             continue
         props = {"kv": int(p["Tensao"]), "n": " ".join((p.get("Nome") or "").split())}
         if p.get("Ano_Opera"):
@@ -83,19 +88,26 @@ def linhas():
     if len(saida) < 1000:
         raise ValueError(f"só {len(saida)} linhas")
     meta = {"titulo": "Linhas de transmissão", "referencia": f"linhas em operação até {ultimo}", "fonte": FONTE, "nivel": "api",
-            "atualizado_em": date.today().isoformat(), "consulta": BASE + "/9", "simplificacao": "~300 m (pedido ao próprio serviço da EPE)"}
+            "atualizado_em": date.today().isoformat(), "consulta": BASE + "/9", "simplificacao": "~300 m (pedido ao próprio serviço da EPE)",
+            "linhas": len(saida), "na_base": len(feats),
+            "fora_do_mapa": {"total": len(feats) - len(saida),
+                             "sem_desenho": {"quantas": len(fora["sem_desenho"]), "nomes": sorted(fora["sem_desenho"])},
+                             "sem_tensao": {"quantas": len(fora["sem_tensao"]), "nomes": sorted(fora["sem_tensao"])},
+                             "nota": "linhas que a base da EPE traz sem o traçado ou com a tensão zerada; não dá para desenhar"}}
     gravar("linhas.json", {"type": "FeatureCollection", "meta": meta, "features": saida})
-    print(f"[energia] {len(saida)} linhas de transmissão")
+    print(f"[energia] {len(saida)} linhas de transmissão; {len(feats) - len(saida)} da base ficaram de fora "
+          f"({len(fora['sem_desenho'])} sem desenho, {len(fora['sem_tensao'])} sem tensão)")
 
 
 def subestacoes():
     feats = consultar(8, "Nome,Ano_Opera,Tensao,Concession")
     if len(feats) != contar(8):
         raise ValueError(f"subestações: vieram {len(feats)} de {contar(8)}")
-    saida = []
+    saida, sem_ponto = [], 0
     for f in feats:
         p, g = f.get("properties") or {}, f.get("geometry") or {}
         if g.get("type") != "Point":
+            sem_ponto += 1
             continue
         tensoes = " ".join((p.get("Tensao") or "").split())
         kvs = [int(x) for x in tensoes.replace(",", "/").split("/") if x.strip().isdigit()]
@@ -112,7 +124,8 @@ def subestacoes():
         raise ValueError(f"só {len(saida)} subestações")
     saida.sort(key=lambda f: f["properties"]["kv"])   # as de tensão mais alta por último: ficam por cima
     meta = {"titulo": "Subestações", "fonte": FONTE, "nivel": "api", "atualizado_em": date.today().isoformat(), "consulta": BASE + "/8",
-            "nota": "subestações do sistema existente na base da EPE; tensão em kV (várias = os níveis de tensão da subestação)", "subestacoes": len(saida)}
+            "nota": "subestações do sistema existente na base da EPE; tensão em kV (várias = os níveis de tensão da subestação)", "subestacoes": len(saida),
+            "na_base": len(feats), "fora_do_mapa": {"total": sem_ponto, "nota": "subestações que a base traz sem posição"}}
     gravar("subestacoes.json", {"type": "FeatureCollection", "meta": meta, "features": saida})
     print(f"[energia] {len(saida)} subestações")
 
