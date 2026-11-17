@@ -72,6 +72,11 @@ jobs:
         continue-on-error: true
         timeout-minutes: 20
         run: python scripts/atualizar_comex.py
+      # Conferência dos dados do mapa: contas de consistência entre os arquivos (municípios somam o estado, totais batem…).
+      # É só aviso: se achar diferença, o passo fica vermelho, o resultado vai para site/data/conferencia.json e o resto segue.
+      - name: Conferir os dados do mapa (aviso)
+        continue-on-error: true
+        run: python scripts/conferir_dados.py --registro
       # Acervo de dados por período: cada robô guarda os períodos novos e confere os preliminares. Pacote publicado nunca é
       # apagado nem sobrescrito (se a fonte mudar um número, entra uma versão nova, e a antiga fica em versoes/).
       # A velocidade do celular usa o que o robô da Anatel acabou de calcular (site/data/celular/velocidade*.json).

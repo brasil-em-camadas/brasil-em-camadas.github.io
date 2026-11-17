@@ -2,7 +2,8 @@
 
 Confere se os municípios somam o estado, se os totais batem, se as partes somam o todo e se os pontos caem dentro
 do Brasil. Não substitui a conferência com a fonte; serve para pegar erro de conta ou arquivo pela metade.
-Uso: python scripts/conferir_dados.py   (sai com erro se achar alguma diferença)
+Uso: python scripts/conferir_dados.py [--registro]   (sai com erro se achar alguma diferença; com --registro, grava o
+resultado em site/data/conferencia.json; no robô mensal roda depois dos robôs do mapa, só como aviso)
 Criado na conferência de 16/11/2026. Só usa a biblioteca padrão.
 """
 import json, collections, sys
@@ -10,9 +11,13 @@ from pathlib import Path
 D=str(Path(__file__).resolve().parents[1]/'site'/'data')+'/'
 J=lambda f: json.load(open(D+f))
 ach=[]
+feitas=[]
 def chk(nome, cond, det=''):
     print(('ok   ' if cond else 'ERRO ')+nome+(' | '+det if (det and not cond) else ''))
-    if not cond: ach.append(nome)
+    feitas.append(nome)
+    if not cond:
+        ach.append(nome)
+        print(f'::warning title=Conferência dos dados::{nome}: {det[:300]}')   # aviso no resumo da execução do GitHub
 def por_uf(L, iuf, ival=None, f=None):
     c=collections.defaultdict(float)
     for r in L:
@@ -113,4 +118,8 @@ for f,k,iu in [('luzes/municipios.json','municipios',4),('energia/usinas.json','
     L=J(f)[k]; fora=[r[:2]+[r[iu]] for r in L if not(-74.5<=r[0]<=-28 and -34.5<=r[1]<=5.6)]
     chk(f'{f}: pontos dentro da caixa do Brasil', not fora, str(fora[:5]))
 print('ACHADOS:', ach or 'nenhum')
+if '--registro' in sys.argv:   # no robô mensal: grava o resultado, para conferir depois sem abrir o GitHub
+    from datetime import datetime, timezone
+    Path(D + 'conferencia.json').write_text(json.dumps({"rodou_em": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "contas": len(feitas), "certas": len(feitas) - len(ach), "diferencas": ach}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 sys.exit(1 if ach else 0)
