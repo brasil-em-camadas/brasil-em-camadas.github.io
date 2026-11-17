@@ -1234,7 +1234,7 @@
    "sob_demanda": true,
    "ministerio": "mme",
    "nivel": "api",
-   "fonte": "EPE, Webmap (sistema elétrico existente): linhas do sistema interligado, de 230 a 800 kV; quanto mais grossa, maior a tensão. Clique numa linha, de perto, para ver o nome",
+   "fonte": "EPE, Webmap (sistema elétrico existente): linhas do sistema interligado, quase todas de 230 a 800 kV; quanto mais grossa, maior a tensão. Clique numa linha, de perto, para ver o nome",
    "ligada": false,
    "cor": "--lt",
    "legenda": [
@@ -1254,7 +1254,7 @@
    "sob_demanda": true,
    "ministerio": "mme",
    "nivel": "api",
-   "fonte": "EPE, Webmap (sistema elétrico existente): 926 subestações, onde a tensão das linhas de transmissão muda; maior = tensão mais alta (de 230 a 800 kV). Clique numa, de perto, para ver o nome",
+   "fonte": "EPE, Webmap (sistema elétrico existente): subestações, onde a tensão das linhas de transmissão muda; maior = tensão mais alta (de 230 a 800 kV). Clique numa, de perto, para ver o nome",
    "ligada": false,
    "cor": "--lt",
    "legenda": [
