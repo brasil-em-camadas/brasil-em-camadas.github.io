@@ -369,7 +369,7 @@ def pagina_conjunto(C, base, F):
         "isAccessibleForFree": True,
         "license": LICENCA_CANONICA,
         "creditText": f"Brasil em Camadas, com dados do {fonte.get('orgao')} ({fonte['titulo']})",
-        "creator": {"@type": "Organization", "name": org, **({"url": fonte["orgao_site"]} if fonte.get("orgao_site") else {})},
+        "creator": criador(C),
         "publisher": {"@type": "Organization", "name": "Brasil em Camadas", "url": base},
         "isBasedOn": fonte.get("catalogo") or fonte.get("consulta"),
         "measurementTechnique": C.get("metodo"),
@@ -396,6 +396,13 @@ def pill(F, rotulo_nivel):
 
 
 # ---------- página "Dados para baixar" ----------
+
+def criador(C):
+    """Autor dos dados na ficha schema.org: o órgão de origem (o mesmo na página do conjunto e no catálogo)."""
+    fonte = C.get("fonte") or {}
+    org = fonte.get("orgao_nome") or fonte.get("orgao")
+    return {"@type": "Organization", "name": org, **({"url": fonte["orgao_site"]} if fonte.get("orgao_site") else {})}
+
 
 def pagina_dados(conjuntos, base, F, indice):
     cartoes = "".join(
@@ -425,7 +432,8 @@ def pagina_dados(conjuntos, base, F, indice):
           "publisher": {"@type": "Organization", "name": "Brasil em Camadas", "url": base},
           "license": LICENCA_CANONICA,
           "dataset": [{"@type": "Dataset", "@id": f"{base}dados/{C['id']}/#conjunto", "name": C["titulo"],
-                       "description": descricao_conjunto(C), "url": f"{base}dados/{C['id']}/"} for C in conjuntos]}
+                       "description": descricao_conjunto(C), "url": f"{base}dados/{C['id']}/",
+                       "license": LICENCA_CANONICA, "creator": criador(C)} for C in conjuntos]}
     return moldura(1, "Dados para baixar",
                    "Os números do mapa Brasil em Camadas por período (ano ou trimestre), em CSV, com ficha técnica, fonte e "
                    "situação de cada período. Uso livre, citando a fonte.", corpo, "dados", F, ld)

@@ -387,7 +387,7 @@
    "arquivo": "geo/zee.json",
    "ministerio": "def",
    "nivel": "base",
-   "fonte": "Marine Regions (VLIZ), versão 12 de 2023: faixa das 12 às 200 milhas, ≈ 3,42 milhões de km²; com o mar territorial, ≈ 3,57 milhões",
+   "fonte": "Marine Regions (VLIZ), versão 12 de 2023: faixa das 12 às 200 milhas, ≈ 3,42 milhões de km²; com o mar territorial, ≈ 3,57 milhões. Uso só científico, educativo e de pesquisa, como pede o Marine Regions: não serve para fins legais, de exploração de recursos naturais ou de navegação",
    "ligada": true,
    "cor": "--sea-line",
    "natureza": [
@@ -403,7 +403,7 @@
    "arquivo": "geo/mar_territorial.json",
    "ministerio": "def",
    "nivel": "base",
-   "fonte": "Marine Regions (VLIZ), versão 4 de 2023: 12 milhas a partir das linhas de base, pontilhadas onde são retas (Decreto 8.400/2015); entre elas e a costa ficam as águas interiores, sem cor. ≈ 155 mil km²",
+   "fonte": "Marine Regions (VLIZ), versão 4 de 2023: 12 milhas a partir das linhas de base, pontilhadas onde são retas (Decreto 8.400/2015); entre elas e a costa ficam as águas interiores, sem cor. ≈ 155 mil km². Uso só científico, educativo e de pesquisa, como pede o Marine Regions: não serve para fins legais, de exploração de recursos naturais ou de navegação",
    "ligada": true,
    "cor": "--mt",
    "natureza": [
@@ -420,7 +420,7 @@
    "sob_demanda": true,
    "ministerio": "def",
    "nivel": "base",
-   "fonte": "Marine Regions (VLIZ), versão 4 de 2023: das 12 às 24 milhas, faixa em que o Brasil fiscaliza alfândega, impostos, imigração e saúde (Lei 8.617/1993), ≈ 167 mil km²",
+   "fonte": "Marine Regions (VLIZ), versão 4 de 2023: das 12 às 24 milhas, faixa em que o Brasil fiscaliza alfândega, impostos, imigração e saúde (Lei 8.617/1993), ≈ 167 mil km². Uso só científico, educativo e de pesquisa, como pede o Marine Regions: não serve para fins legais, de exploração de recursos naturais ou de navegação",
    "ligada": true,
    "cor": "--zc",
    "natureza": [
@@ -437,7 +437,7 @@
    "sob_demanda": true,
    "ministerio": "def",
    "nivel": "base",
-   "fonte": "Marine Regions (VLIZ), versão 2 de 2024, e ONU: Região Sul (2019) e Margem Equatorial (2025, com os pontos do documento da ONU) reconhecidas; Margens Oriental e Meridional em análise, hachuradas. Clique numa área para ver os detalhes",
+   "fonte": "Marine Regions (VLIZ), versão 2 de 2024, e ONU: Região Sul (2019) e Margem Equatorial (2025, com os pontos do documento da ONU) reconhecidas; Margens Oriental e Meridional em análise, hachuradas. Uso só científico, educativo e de pesquisa, como pede o Marine Regions: não serve para fins legais, de exploração de recursos naturais ou de navegação. Clique numa área para ver os detalhes.",
    "ligada": false,
    "cor": "--pce",
    "legenda": [
